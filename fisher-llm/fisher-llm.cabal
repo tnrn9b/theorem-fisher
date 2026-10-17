@@ -1,0 +1,135 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.39.1.
+--
+-- see: https://github.com/sol/hpack
+
+name:           fisher-llm
+version:        0.2.0.0
+synopsis:       LLM clients (chat completions, Anthropic messages, Codex responses), providers and credentials
+author:         Tom Reynolds
+maintainer:     Tom Reynolds
+license:        BSD-3-Clause
+build-type:     Simple
+extra-source-files:
+    data/agent-identity.txt
+
+library
+  exposed-modules:
+      Fisher.LLM.Anthropic
+      Fisher.LLM.Auth.Anthropic
+      Fisher.LLM.Auth.Codex
+      Fisher.LLM.Auth.Config
+      Fisher.LLM.Auth.Env
+      Fisher.LLM.Auth.Error
+      Fisher.LLM.Auth.Logout
+      Fisher.LLM.Auth.Nous
+      Fisher.LLM.Auth.PyYaml
+      Fisher.LLM.Auth.Registry
+      Fisher.LLM.Auth.Resolve
+      Fisher.LLM.Auth.Sha256
+      Fisher.LLM.Auth.Store
+      Fisher.LLM.Auth.Util
+      Fisher.LLM.Chat
+      Fisher.LLM.Client
+      Fisher.LLM.Codex
+      Fisher.LLM.Errors
+      Fisher.LLM.Http
+      Fisher.LLM.Identity
+      Fisher.LLM.Normalize
+      Fisher.LLM.Prepare
+      Fisher.LLM.Replay
+      Fisher.LLM.Request
+      Fisher.LLM.Sse
+      Fisher.LLM.Sys
+      Fisher.LLM.SysIO
+      Fisher.LLM.Types
+  other-modules:
+      Paths_fisher_llm
+  autogen-modules:
+      Paths_fisher_llm
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat
+  build-depends:
+      aeson
+    , attoparsec
+    , base >=4.14 && <5
+    , base16-bytestring
+    , bytestring
+    , case-insensitive
+    , conduit
+    , containers
+    , cryptohash-sha1
+    , directory
+    , file-embed
+    , filepath
+    , fisher-core
+    , http-client
+    , http-client-tls
+    , http-types
+    , libyaml
+    , process
+    , random
+    , scientific
+    , stm
+    , temporary
+    , text
+    , time
+    , unix
+    , vector
+    , yaml
+  default-language: GHC2021
+
+test-suite fisher-llm-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Fisher.LLM.AuthResolveSpec
+      Fisher.LLM.GoldenSpec
+      Fisher.LLM.LiveSpec
+      Paths_fisher_llm
+  autogen-modules:
+      Paths_fisher_llm
+  hs-source-dirs:
+      test
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat -threaded
+  build-tool-depends:
+      hspec-discover:hspec-discover
+  build-depends:
+      aeson
+    , attoparsec
+    , base >=4.14 && <5
+    , base16-bytestring
+    , bytestring
+    , case-insensitive
+    , conduit
+    , containers
+    , cryptohash-sha1
+    , directory
+    , file-embed
+    , filepath
+    , fisher-core
+    , fisher-llm
+    , hspec
+    , http-client
+    , http-client-tls
+    , http-types
+    , libyaml
+    , process
+    , random
+    , scientific
+    , stm
+    , temporary
+    , text
+    , time
+    , unix
+    , vector
+    , yaml
+  default-language: GHC2021

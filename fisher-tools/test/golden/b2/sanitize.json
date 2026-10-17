@@ -1,0 +1,246 @@
+{
+ "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+ "python": "3.11.15",
+ "cases": [
+  {
+   "text": "",
+   "sanitized": ""
+  },
+  {
+   "text": "a",
+   "sanitized": "a"
+  },
+  {
+   "text": "sk-abcdefghijklmnop",
+   "sanitized": "[REDACTED]"
+  },
+  {
+   "text": "xsk-abcdefghijklmnop",
+   "sanitized": "x[REDACTED]"
+  },
+  {
+   "text": "sk-abc",
+   "sanitized": "[REDACTED]"
+  },
+  {
+   "text": "key sk-ant-api03-ABCDEFGHIJKLMNOPQRSTUVWX_yz end",
+   "sanitized": "key [REDACTED]-api03-ABCDEFGHIJKLMNOPQRSTUVWX_yz end"
+  },
+  {
+   "text": "OPENAI_API_KEY=sk-1234567890abcdef",
+   "sanitized": "OPENAI_[REDACTED]"
+  },
+  {
+   "text": "my_token = 'abc def'",
+   "sanitized": "my_token = 'abc def'"
+  },
+  {
+   "text": "export SECRET=\"s3cr3t-value\"",
+   "sanitized": "export SECRET=\"s3cr3t-value\""
+  },
+  {
+   "text": "password=hunter2",
+   "sanitized": "[REDACTED]"
+  },
+  {
+   "text": "{\"apiKey\": \"abcdefghijklmnopqrstuvwxyz\", \"token\":\"x\"}",
+   "sanitized": "{\"apiKey\": \"abcdefghijklmnopqrstuvwxyz\", \"token\":\"x\"}"
+  },
+  {
+   "text": "Authorization: Bearer abc.def.ghi",
+   "sanitized": "Authorization: [REDACTED]"
+  },
+  {
+   "text": "authorization:bearer   tok",
+   "sanitized": "authorization:[REDACTED]"
+  },
+  {
+   "text": "bot123456789:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+   "sanitized": "bot123456789:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  },
+  {
+   "text": "12345678:abcdefghijklmnopqrstuvwxyz0123456789",
+   "sanitized": "12345678:abcdefghijklmnopqrstuvwxyz0123456789"
+  },
+  {
+   "text": "-----BEGIN RSA PRIVATE KEY-----\nMIIE\n-----END RSA PRIVATE KEY-----",
+   "sanitized": "-----BEGIN RSA PRIVATE KEY-----\nMIIE\n-----END RSA PRIVATE KEY-----"
+  },
+  {
+   "text": "postgres://user:pass@host/db",
+   "sanitized": "postgres://user:pass@host/db"
+  },
+  {
+   "text": "MongoDB+srv://u:p:q@h",
+   "sanitized": "MongoDB+srv://u:p:q@h"
+  },
+  {
+   "text": "call +14155552671 now",
+   "sanitized": "call +14155552671 now"
+  },
+  {
+   "text": "+1234567x",
+   "sanitized": "+1234567x"
+  },
+  {
+   "text": "+123456789012345678",
+   "sanitized": "+123456789012345678"
+  },
+  {
+   "text": "ghp_abcdefghijklmnopqrst",
+   "sanitized": "[REDACTED]"
+  },
+  {
+   "text": "AKIA0123456789ABCDEF",
+   "sanitized": "AKIA0123456789ABCDEF"
+  },
+  {
+   "text": "xoxb-1234567890-abc",
+   "sanitized": "xoxb-1234567890-abc"
+  },
+  {
+   "text": "AIzaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "sanitized": "AIzaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+   "text": "*** Update File: src/a.py",
+   "sanitized": "*** Update File: src/a.py"
+  },
+  {
+   "text": "***Update  File:x",
+   "sanitized": "***Update  File:x"
+  },
+  {
+   "text": "*** Add File: new.txt ",
+   "sanitized": "*** Add File: new.txt "
+  },
+  {
+   "text": "*** Delete File: old.py",
+   "sanitized": "*** Delete File: old.py"
+  },
+  {
+   "text": "*** Move File: a.py -> b/c.py",
+   "sanitized": "*** Move File: a.py -> b/c.py"
+  },
+  {
+   "text": "*** Move File: a -> b -> c",
+   "sanitized": "*** Move File: a -> b -> c"
+  },
+  {
+   "text": "@@ def f(): @@",
+   "sanitized": "@@ def f(): @@"
+  },
+  {
+   "text": "@@@@",
+   "sanitized": "@@@@"
+  },
+  {
+   "text": "@@ x",
+   "sanitized": "@@ x"
+  },
+  {
+   "text": "   12|content",
+   "sanitized": "   12|content"
+  },
+  {
+   "text": "12|",
+   "sanitized": "12|"
+  },
+  {
+   "text": "x12|",
+   "sanitized": "x12|"
+  },
+  {
+   "text": "src/a.py:12:hello: world",
+   "sanitized": "src/a.py:12:hello: world"
+  },
+  {
+   "text": "C:\\x\\y.py:3:z",
+   "sanitized": "C:\\x\\y.py:3:z"
+  },
+  {
+   "text": "a-b-c.py-12-ctx line",
+   "sanitized": "a-b-c.py-12-ctx line"
+  },
+  {
+   "text": "f.py-3-",
+   "sanitized": "f.py-3-"
+  },
+  {
+   "text": "a:b:c",
+   "sanitized": "a:b:c"
+  },
+  {
+   "text": "  \t  x \t y",
+   "sanitized": "  \t  x \t y"
+  },
+  {
+   "text": "user.name-1",
+   "sanitized": "user.name-1"
+  },
+  {
+   "text": "~bad;rm",
+   "sanitized": "~bad;rm"
+  },
+  {
+   "text": "sudo apt",
+   "sanitized": "sudo apt"
+  },
+  {
+   "text": "visudo",
+   "sanitized": "visudo"
+  },
+  {
+   "text": "x.sudo y",
+   "sanitized": "x.sudo y"
+  },
+  {
+   "text": "sudo-rs",
+   "sanitized": "sudo-rs"
+  },
+  {
+   "text": "echo sudo",
+   "sanitized": "echo sudo"
+  },
+  {
+   "text": "[Errno 2] No such file or directory: 'npx'",
+   "sanitized": "[Errno 2] No such file or directory: 'npx'"
+  },
+  {
+   "text": "token=abc&key=def;secret=x,API_KEY=1 password='q'",
+   "sanitized": "[REDACTED]&[REDACTED];[REDACTED],[REDACTED] password='q'"
+  },
+  {
+   "text": "Bearer   xyz123 more",
+   "sanitized": "[REDACTED] more"
+  },
+  {
+   "text": "MONKEY=banana apikey=zz",
+   "sanitized": "MON[REDACTED] api[REDACTED]"
+  },
+  {
+   "text": "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+   "sanitized": "[REDACTED]AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  },
+  {
+   "text": "sk-bbbbbbbbbbbbbbbbbbbb-ccccc",
+   "sanitized": "[REDACTED]-ccccc"
+  },
+  {
+   "text": "ÄÖÜ sk-ünicode123456 ß",
+   "sanitized": "ÄÖÜ sk-ünicode123456 ß"
+  },
+  {
+   "text": "line1\nline2\n",
+   "sanitized": "line1\nline2\n"
+  },
+  {
+   "text": "a\n",
+   "sanitized": "a\n"
+  },
+  {
+   "text": "x\ny\nz",
+   "sanitized": "x\ny\nz"
+  }
+ ]
+}

@@ -1,0 +1,6789 @@
+{
+ "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+ "mcp": "1.26.0",
+ "cases": [
+  {
+   "name": "basic",
+   "config": {
+    "my-srv.x": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:my-srv.x>",
+      "<LOG:my-srv.x>"
+     ],
+     "timeout": 5,
+     "sampling": {
+      "enabled": false
+     }
+    }
+   },
+   "scenarios": {
+    "my-srv.x": {
+     "tools": [
+      {
+       "name": "echo-it.now",
+       "inputSchema": {
+        "type": "object",
+        "properties": {
+         "x": {
+          "type": "string"
+         }
+        }
+       },
+       "description": "Echo things"
+      },
+      {
+       "name": "nodesc",
+       "inputSchema": {}
+      },
+      {
+       "name": "typed",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "err",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "errempty",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "rpcerr",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "multi",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "unicode",
+       "inputSchema": {
+        "type": "object"
+       }
+      }
+     ],
+     "next_cursor": "page2",
+     "capabilities": {
+      "tools": {}
+     },
+     "handlers": {
+      "tools/call:echo-it.now": [
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "echo"
+          }
+         ]
+        }
+       }
+      ],
+      "tools/call:multi": [
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "a"
+          },
+          {
+           "type": "image",
+           "data": "QUJD",
+           "mimeType": "image/png"
+          },
+          {
+           "type": "resource",
+           "resource": {
+            "uri": "file:///x",
+            "text": "embedded"
+           }
+          },
+          {
+           "type": "text",
+           "text": "b"
+          }
+         ],
+         "isError": false
+        }
+       }
+      ],
+      "tools/call:err": [
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "bad token=abc123 ghp_XYZ"
+          },
+          {
+           "type": "text",
+           "text": " more"
+          }
+         ],
+         "isError": true
+        }
+       }
+      ],
+      "tools/call:errempty": [
+       {
+        "result": {
+         "content": [],
+         "isError": true
+        }
+       }
+      ],
+      "tools/call:rpcerr": [
+       {
+        "error": {
+         "code": -32602,
+         "message": "Bad args Bearer xyz"
+        }
+       }
+      ],
+      "tools/call:unicode": [
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "café ☃ 😀"
+          },
+          {
+           "type": "text",
+           "text": "sk-abcdefghijklmnop"
+          }
+         ]
+        }
+       }
+      ],
+      "tools/call:unlisted": [
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "from an unlisted tool"
+          }
+         ]
+        }
+       }
+      ],
+      "resources/list": [
+       {
+        "result": {
+         "resources": [
+          {
+           "uri": "file:///a",
+           "name": "a",
+           "mimeType": "text/plain"
+          },
+          {
+           "uri": "http://h",
+           "name": "h",
+           "description": "home"
+          }
+         ]
+        }
+       }
+      ],
+      "resources/read": [
+       {
+        "result": {
+         "contents": [
+          {
+           "uri": "file:///a",
+           "text": "hello"
+          },
+          {
+           "uri": "file:///b",
+           "blob": "QUJDRA=="
+          }
+         ]
+        }
+       }
+      ],
+      "prompts/list": [
+       {
+        "result": {
+         "prompts": [
+          {
+           "name": "p",
+           "arguments": [
+            {
+             "name": "q"
+            },
+            {
+             "name": "r",
+             "description": "R",
+             "required": true
+            }
+           ]
+          },
+          {
+           "name": "plain",
+           "description": "no args"
+          }
+         ]
+        }
+       }
+      ],
+      "prompts/get": [
+       {
+        "result": {
+         "description": "a prompt",
+         "messages": [
+          {
+           "role": "user",
+           "content": {
+            "type": "text",
+            "text": "T"
+           }
+          },
+          {
+           "role": "assistant",
+           "content": {
+            "type": "image",
+            "data": "QQ==",
+            "mimeType": "image/png"
+           }
+          },
+          {
+           "role": "user",
+           "content": {
+            "type": "resource",
+            "resource": {
+             "uri": "file:///r",
+             "text": "rt",
+             "mimeType": "text/plain"
+            }
+           }
+          }
+         ]
+        }
+       }
+      ]
+     }
+    }
+   },
+   "llm_replies": [],
+   "steps": [
+    [
+     "mcp_my_srv_x_echo_it_now",
+     {
+      "x": "1"
+     }
+    ],
+    [
+     "mcp_my_srv_x_nodesc",
+     {}
+    ],
+    [
+     "mcp_my_srv_x_multi",
+     {}
+    ],
+    [
+     "mcp_my_srv_x_err",
+     {}
+    ],
+    [
+     "mcp_my_srv_x_errempty",
+     {}
+    ],
+    [
+     "mcp_my_srv_x_rpcerr",
+     {}
+    ],
+    [
+     "mcp_my_srv_x_unicode",
+     {}
+    ],
+    [
+     "mcp_my_srv_x_list_resources",
+     {}
+    ],
+    [
+     "mcp_my_srv_x_read_resource",
+     {
+      "uri": "file:///a"
+     }
+    ],
+    [
+     "mcp_my_srv_x_read_resource",
+     {}
+    ],
+    [
+     "mcp_my_srv_x_read_resource",
+     {
+      "uri": "not a uri"
+     }
+    ],
+    [
+     "mcp_my_srv_x_list_prompts",
+     {}
+    ],
+    [
+     "mcp_my_srv_x_get_prompt",
+     {
+      "name": "p"
+     }
+    ],
+    [
+     "mcp_my_srv_x_get_prompt",
+     {
+      "name": "p",
+      "arguments": {
+       "q": "v"
+      }
+     }
+    ],
+    [
+     "mcp_my_srv_x_get_prompt",
+     {}
+    ],
+    [
+     "mcp_my_srv_x_get_prompt",
+     {
+      "name": "p",
+      "arguments": {
+       "a": 1
+      }
+     }
+    ],
+    [
+     "mcp_nope_x",
+     {}
+    ]
+   ],
+   "names": [
+    "mcp_my_srv_x_echo_it_now",
+    "mcp_my_srv_x_nodesc",
+    "mcp_my_srv_x_typed",
+    "mcp_my_srv_x_err",
+    "mcp_my_srv_x_errempty",
+    "mcp_my_srv_x_rpcerr",
+    "mcp_my_srv_x_multi",
+    "mcp_my_srv_x_unicode",
+    "mcp_my_srv_x_list_resources",
+    "mcp_my_srv_x_read_resource",
+    "mcp_my_srv_x_list_prompts",
+    "mcp_my_srv_x_get_prompt"
+   ],
+   "schemas": {
+    "mcp_my_srv_x_echo_it_now": {
+     "schema": {
+      "name": "mcp_my_srv_x_echo_it_now",
+      "description": "Echo things",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "x": {
+         "type": "string"
+        }
+       }
+      }
+     },
+     "toolset": "mcp-my-srv.x"
+    },
+    "mcp_my_srv_x_nodesc": {
+     "schema": {
+      "name": "mcp_my_srv_x_nodesc",
+      "description": "MCP tool nodesc from my-srv.x",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-my-srv.x"
+    },
+    "mcp_my_srv_x_typed": {
+     "schema": {
+      "name": "mcp_my_srv_x_typed",
+      "description": "MCP tool typed from my-srv.x",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-my-srv.x"
+    },
+    "mcp_my_srv_x_err": {
+     "schema": {
+      "name": "mcp_my_srv_x_err",
+      "description": "MCP tool err from my-srv.x",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-my-srv.x"
+    },
+    "mcp_my_srv_x_errempty": {
+     "schema": {
+      "name": "mcp_my_srv_x_errempty",
+      "description": "MCP tool errempty from my-srv.x",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-my-srv.x"
+    },
+    "mcp_my_srv_x_rpcerr": {
+     "schema": {
+      "name": "mcp_my_srv_x_rpcerr",
+      "description": "MCP tool rpcerr from my-srv.x",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-my-srv.x"
+    },
+    "mcp_my_srv_x_multi": {
+     "schema": {
+      "name": "mcp_my_srv_x_multi",
+      "description": "MCP tool multi from my-srv.x",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-my-srv.x"
+    },
+    "mcp_my_srv_x_unicode": {
+     "schema": {
+      "name": "mcp_my_srv_x_unicode",
+      "description": "MCP tool unicode from my-srv.x",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-my-srv.x"
+    },
+    "mcp_my_srv_x_list_resources": {
+     "schema": {
+      "name": "mcp_my_srv_x_list_resources",
+      "description": "List available resources from MCP server 'my-srv.x'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-my-srv.x"
+    },
+    "mcp_my_srv_x_read_resource": {
+     "schema": {
+      "name": "mcp_my_srv_x_read_resource",
+      "description": "Read a resource by URI from MCP server 'my-srv.x'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string",
+         "description": "URI of the resource to read"
+        }
+       },
+       "required": [
+        "uri"
+       ]
+      }
+     },
+     "toolset": "mcp-my-srv.x"
+    },
+    "mcp_my_srv_x_list_prompts": {
+     "schema": {
+      "name": "mcp_my_srv_x_list_prompts",
+      "description": "List available prompts from MCP server 'my-srv.x'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-my-srv.x"
+    },
+    "mcp_my_srv_x_get_prompt": {
+     "schema": {
+      "name": "mcp_my_srv_x_get_prompt",
+      "description": "Get a prompt by name from MCP server 'my-srv.x'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "name": {
+         "type": "string",
+         "description": "Name of the prompt to retrieve"
+        },
+        "arguments": {
+         "type": "object",
+         "description": "Optional arguments to pass to the prompt"
+        }
+       },
+       "required": [
+        "name"
+       ]
+      }
+     },
+     "toolset": "mcp-my-srv.x"
+    }
+   },
+   "toolsets": {
+    "mcp-my-srv.x": {
+     "description": "MCP tools from my-srv.x server",
+     "tools": [
+      "mcp_my_srv_x_echo_it_now",
+      "mcp_my_srv_x_nodesc",
+      "mcp_my_srv_x_typed",
+      "mcp_my_srv_x_err",
+      "mcp_my_srv_x_errempty",
+      "mcp_my_srv_x_rpcerr",
+      "mcp_my_srv_x_multi",
+      "mcp_my_srv_x_unicode",
+      "mcp_my_srv_x_list_resources",
+      "mcp_my_srv_x_read_resource",
+      "mcp_my_srv_x_list_prompts",
+      "mcp_my_srv_x_get_prompt"
+     ],
+     "includes": []
+    }
+   },
+   "gauss_cli_extra": [
+    "mcp_my_srv_x_echo_it_now",
+    "mcp_my_srv_x_nodesc",
+    "mcp_my_srv_x_typed",
+    "mcp_my_srv_x_err",
+    "mcp_my_srv_x_errempty",
+    "mcp_my_srv_x_rpcerr",
+    "mcp_my_srv_x_multi",
+    "mcp_my_srv_x_unicode",
+    "mcp_my_srv_x_list_resources",
+    "mcp_my_srv_x_read_resource",
+    "mcp_my_srv_x_list_prompts",
+    "mcp_my_srv_x_get_prompt"
+   ],
+   "calls": [
+    {
+     "tool": "mcp_my_srv_x_echo_it_now",
+     "args": {
+      "x": "1"
+     },
+     "visible": true,
+     "result": "{\"result\": \"echo\"}"
+    },
+    {
+     "tool": "mcp_my_srv_x_nodesc",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"MCP call failed: McpError: Method not found\"}"
+    },
+    {
+     "tool": "mcp_my_srv_x_multi",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"a\\nb\"}"
+    },
+    {
+     "tool": "mcp_my_srv_x_err",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"bad [REDACTED] [REDACTED] more\"}"
+    },
+    {
+     "tool": "mcp_my_srv_x_errempty",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"MCP tool returned an error\"}"
+    },
+    {
+     "tool": "mcp_my_srv_x_rpcerr",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"MCP call failed: McpError: Bad args [REDACTED]\"}"
+    },
+    {
+     "tool": "mcp_my_srv_x_unicode",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"caf\\u00e9 \\u2603 \\ud83d\\ude00\\nsk-abcdefghijklmnop\"}"
+    },
+    {
+     "tool": "mcp_my_srv_x_list_resources",
+     "args": {},
+     "visible": true,
+     "result": "{\"resources\": [{\"uri\": \"file:///a\", \"name\": \"a\", \"mimeType\": \"text/plain\"}, {\"uri\": \"http://h/\", \"name\": \"h\", \"description\": \"home\"}]}"
+    },
+    {
+     "tool": "mcp_my_srv_x_read_resource",
+     "args": {
+      "uri": "file:///a"
+     },
+     "visible": true,
+     "result": "{\"result\": \"hello\\n[binary data, 8 bytes]\"}"
+    },
+    {
+     "tool": "mcp_my_srv_x_read_resource",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"Missing required parameter 'uri'\"}"
+    },
+    {
+     "tool": "mcp_my_srv_x_read_resource",
+     "args": {
+      "uri": "not a uri"
+     },
+     "visible": true,
+     "result": "{\"error\": \"MCP call failed: ValidationError: 1 validation error for ReadResourceRequestParams\\nuri\\n  Input should be a valid URL, relative URL without a base [type=url_parsing, input_value='not a uri', input_type=str]\\n    For further information visit https://errors.pydantic.dev/2.13/v/url_parsing\"}",
+     "match": "prefix",
+     "prefix": "{\"error\": \"MCP call failed: ValidationError: "
+    },
+    {
+     "tool": "mcp_my_srv_x_list_prompts",
+     "args": {},
+     "visible": true,
+     "result": "{\"prompts\": [{\"name\": \"p\", \"arguments\": [{\"name\": \"q\", \"required\": null}, {\"name\": \"r\", \"description\": \"R\", \"required\": true}]}, {\"name\": \"plain\", \"description\": \"no args\"}]}"
+    },
+    {
+     "tool": "mcp_my_srv_x_get_prompt",
+     "args": {
+      "name": "p"
+     },
+     "visible": true,
+     "result": "{\"messages\": [{\"role\": \"user\", \"content\": \"T\"}, {\"role\": \"assistant\", \"content\": \"type='image' data='QQ==' mimeType='image/png' annotations=None meta=None\"}, {\"role\": \"user\", \"content\": \"type='resource' resource=TextResourceContents(uri=AnyUrl('file:///r'), mimeType='text/plain', meta=None, text='rt') annotations=None meta=None\"}], \"description\": \"a prompt\"}"
+    },
+    {
+     "tool": "mcp_my_srv_x_get_prompt",
+     "args": {
+      "name": "p",
+      "arguments": {
+       "q": "v"
+      }
+     },
+     "visible": true,
+     "result": "{\"messages\": [{\"role\": \"user\", \"content\": \"T\"}, {\"role\": \"assistant\", \"content\": \"type='image' data='QQ==' mimeType='image/png' annotations=None meta=None\"}, {\"role\": \"user\", \"content\": \"type='resource' resource=TextResourceContents(uri=AnyUrl('file:///r'), mimeType='text/plain', meta=None, text='rt') annotations=None meta=None\"}], \"description\": \"a prompt\"}"
+    },
+    {
+     "tool": "mcp_my_srv_x_get_prompt",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"Missing required parameter 'name'\"}"
+    },
+    {
+     "tool": "mcp_my_srv_x_get_prompt",
+     "args": {
+      "name": "p",
+      "arguments": {
+       "a": 1
+      }
+     },
+     "visible": true,
+     "result": "{\"error\": \"MCP call failed: ValidationError: 1 validation error for GetPromptRequestParams\\narguments.a\\n  Input should be a valid string [type=string_type, input_value=1, input_type=int]\\n    For further information visit https://errors.pydantic.dev/2.13/v/string_type\"}",
+     "match": "prefix",
+     "prefix": "{\"error\": \"MCP call failed: ValidationError: "
+    },
+    {
+     "tool": "mcp_nope_x",
+     "args": {},
+     "visible": false,
+     "result": "{\"error\": \"Unknown tool: mcp_nope_x\"}"
+    }
+   ],
+   "logs": [
+    [
+     "INFO",
+     "MCP server 'my-srv.x' (stdio): registered 12 tool(s): mcp_my_srv_x_echo_it_now, mcp_my_srv_x_nodesc, mcp_my_srv_x_typed, mcp_my_srv_x_err, mcp_my_srv_x_errempty, mcp_my_srv_x_rpcerr, mcp_my_srv_x_multi, mcp_my_srv_x_unicode, mcp_my_srv_x_list_resources, mcp_my_srv_x_read_resource, mcp_my_srv_x_list_prompts, mcp_my_srv_x_get_prompt"
+    ],
+    [
+     "INFO",
+     "  MCP: 12 tool(s) from 1 server(s)"
+    ],
+    [
+     "ERROR",
+     "MCP tool my-srv.x/nodesc call failed: Method not found"
+    ],
+    [
+     "ERROR",
+     "MCP tool my-srv.x/rpcerr call failed: Bad args Bearer xyz"
+    ],
+    [
+     "ERROR",
+     "MCP my-srv.x/read_resource failed: 1 validation error for ReadResourceRequestParams\nuri\n  Input should be a valid URL, relative URL without a base [type=url_parsing, input_value='not a uri', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/url_parsing"
+    ],
+    [
+     "ERROR",
+     "MCP my-srv.x/get_prompt failed: 1 validation error for GetPromptRequestParams\narguments.a\n  Input should be a valid string [type=string_type, input_value=1, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.13/v/string_type"
+    ]
+   ],
+   "llm": [],
+   "wire": {
+    "my-srv.x": [
+     {
+      "env": [
+       "HOME",
+       "PATH",
+       "SHELL",
+       "TERM"
+      ]
+     },
+     {
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {},
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      }
+     },
+     {
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      }
+     },
+     {
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      }
+     },
+     {
+      "in": {
+       "id": 2,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {
+         "x": "1"
+        },
+        "name": "echo-it.now"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 3,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "nodesc"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 4,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "multi"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 5,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "err"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 6,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "errempty"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 7,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "rpcerr"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 8,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "unicode"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 9,
+       "jsonrpc": "2.0",
+       "method": "resources/list"
+      }
+     },
+     {
+      "in": {
+       "id": 10,
+       "jsonrpc": "2.0",
+       "method": "resources/read",
+       "params": {
+        "uri": "file:///a"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 11,
+       "jsonrpc": "2.0",
+       "method": "prompts/list"
+      }
+     },
+     {
+      "in": {
+       "id": 12,
+       "jsonrpc": "2.0",
+       "method": "prompts/get",
+       "params": {
+        "arguments": {},
+        "name": "p"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 13,
+       "jsonrpc": "2.0",
+       "method": "prompts/get",
+       "params": {
+        "arguments": {
+         "q": "v"
+        },
+        "name": "p"
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "filters",
+   "config": {
+    "inc": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:inc>",
+      "<LOG:inc>"
+     ],
+     "sampling": {
+      "enabled": false
+     },
+     "tools": {
+      "include": [
+       "typed",
+       "nodesc"
+      ],
+      "exclude": [
+       "typed"
+      ],
+      "resources": "off"
+     }
+    },
+    "exc": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:exc>",
+      "<LOG:exc>"
+     ],
+     "sampling": {
+      "enabled": false
+     },
+     "tools": {
+      "exclude": "typed",
+      "prompts": false
+     }
+    },
+    "bad": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:bad>",
+      "<LOG:bad>"
+     ],
+     "sampling": {
+      "enabled": false
+     },
+     "tools": {
+      "include": 5,
+      "resources": "maybe"
+     }
+    },
+    "off": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:off>",
+      "<LOG:off>"
+     ],
+     "enabled": "no"
+    },
+    "off2": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:off2>",
+      "<LOG:off2>"
+     ],
+     "enabled": false
+    },
+    "on": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:on>",
+      "<LOG:on>"
+     ],
+     "enabled": "YES",
+     "sampling": {
+      "enabled": false
+     },
+     "tools": {
+      "include": [
+       "a-b",
+       "a.b"
+      ]
+     }
+    }
+   },
+   "scenarios": {
+    "inc": {
+     "tools": [
+      {
+       "name": "typed",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "nodesc",
+       "inputSchema": {}
+      },
+      {
+       "name": "a-b",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "first"
+      },
+      {
+       "name": "a.b",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "second"
+      },
+      {
+       "name": "list_resources",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "shadowed"
+      }
+     ]
+    },
+    "exc": {
+     "tools": [
+      {
+       "name": "typed",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "nodesc",
+       "inputSchema": {}
+      },
+      {
+       "name": "a-b",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "first"
+      },
+      {
+       "name": "a.b",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "second"
+      },
+      {
+       "name": "list_resources",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "shadowed"
+      }
+     ]
+    },
+    "bad": {
+     "tools": [
+      {
+       "name": "typed",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "nodesc",
+       "inputSchema": {}
+      },
+      {
+       "name": "a-b",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "first"
+      },
+      {
+       "name": "a.b",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "second"
+      },
+      {
+       "name": "list_resources",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "shadowed"
+      }
+     ]
+    },
+    "off": {
+     "tools": [
+      {
+       "name": "typed",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "nodesc",
+       "inputSchema": {}
+      },
+      {
+       "name": "a-b",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "first"
+      },
+      {
+       "name": "a.b",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "second"
+      },
+      {
+       "name": "list_resources",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "shadowed"
+      }
+     ]
+    },
+    "off2": {
+     "tools": [
+      {
+       "name": "typed",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "nodesc",
+       "inputSchema": {}
+      },
+      {
+       "name": "a-b",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "first"
+      },
+      {
+       "name": "a.b",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "second"
+      },
+      {
+       "name": "list_resources",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "shadowed"
+      }
+     ]
+    },
+    "on": {
+     "tools": [
+      {
+       "name": "typed",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "nodesc",
+       "inputSchema": {}
+      },
+      {
+       "name": "a-b",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "first"
+      },
+      {
+       "name": "a.b",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "second"
+      },
+      {
+       "name": "list_resources",
+       "inputSchema": {
+        "type": "object"
+       },
+       "description": "shadowed"
+      }
+     ]
+    }
+   },
+   "llm_replies": [],
+   "steps": [
+    [
+     "mcp_on_a_b",
+     {}
+    ]
+   ],
+   "names": [
+    "mcp_exc_nodesc",
+    "mcp_exc_a_b",
+    "mcp_exc_a_b",
+    "mcp_exc_list_resources",
+    "mcp_exc_list_resources",
+    "mcp_exc_read_resource",
+    "mcp_inc_typed",
+    "mcp_inc_nodesc",
+    "mcp_inc_list_prompts",
+    "mcp_inc_get_prompt",
+    "mcp_on_a_b",
+    "mcp_on_a_b",
+    "mcp_on_list_resources",
+    "mcp_on_read_resource",
+    "mcp_on_list_prompts",
+    "mcp_on_get_prompt",
+    "mcp_bad_typed",
+    "mcp_bad_nodesc",
+    "mcp_bad_a_b",
+    "mcp_bad_a_b",
+    "mcp_bad_list_resources",
+    "mcp_bad_list_resources",
+    "mcp_bad_read_resource",
+    "mcp_bad_list_prompts",
+    "mcp_bad_get_prompt"
+   ],
+   "schemas": {
+    "mcp_exc_nodesc": {
+     "schema": {
+      "name": "mcp_exc_nodesc",
+      "description": "MCP tool nodesc from exc",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-exc"
+    },
+    "mcp_exc_a_b": {
+     "schema": {
+      "name": "mcp_exc_a_b",
+      "description": "second",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-exc"
+    },
+    "mcp_exc_list_resources": {
+     "schema": {
+      "name": "mcp_exc_list_resources",
+      "description": "List available resources from MCP server 'exc'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-exc"
+    },
+    "mcp_exc_read_resource": {
+     "schema": {
+      "name": "mcp_exc_read_resource",
+      "description": "Read a resource by URI from MCP server 'exc'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string",
+         "description": "URI of the resource to read"
+        }
+       },
+       "required": [
+        "uri"
+       ]
+      }
+     },
+     "toolset": "mcp-exc"
+    },
+    "mcp_inc_typed": {
+     "schema": {
+      "name": "mcp_inc_typed",
+      "description": "MCP tool typed from inc",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-inc"
+    },
+    "mcp_inc_nodesc": {
+     "schema": {
+      "name": "mcp_inc_nodesc",
+      "description": "MCP tool nodesc from inc",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-inc"
+    },
+    "mcp_inc_list_prompts": {
+     "schema": {
+      "name": "mcp_inc_list_prompts",
+      "description": "List available prompts from MCP server 'inc'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-inc"
+    },
+    "mcp_inc_get_prompt": {
+     "schema": {
+      "name": "mcp_inc_get_prompt",
+      "description": "Get a prompt by name from MCP server 'inc'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "name": {
+         "type": "string",
+         "description": "Name of the prompt to retrieve"
+        },
+        "arguments": {
+         "type": "object",
+         "description": "Optional arguments to pass to the prompt"
+        }
+       },
+       "required": [
+        "name"
+       ]
+      }
+     },
+     "toolset": "mcp-inc"
+    },
+    "mcp_on_a_b": {
+     "schema": {
+      "name": "mcp_on_a_b",
+      "description": "second",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-on"
+    },
+    "mcp_on_list_resources": {
+     "schema": {
+      "name": "mcp_on_list_resources",
+      "description": "List available resources from MCP server 'on'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-on"
+    },
+    "mcp_on_read_resource": {
+     "schema": {
+      "name": "mcp_on_read_resource",
+      "description": "Read a resource by URI from MCP server 'on'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string",
+         "description": "URI of the resource to read"
+        }
+       },
+       "required": [
+        "uri"
+       ]
+      }
+     },
+     "toolset": "mcp-on"
+    },
+    "mcp_on_list_prompts": {
+     "schema": {
+      "name": "mcp_on_list_prompts",
+      "description": "List available prompts from MCP server 'on'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-on"
+    },
+    "mcp_on_get_prompt": {
+     "schema": {
+      "name": "mcp_on_get_prompt",
+      "description": "Get a prompt by name from MCP server 'on'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "name": {
+         "type": "string",
+         "description": "Name of the prompt to retrieve"
+        },
+        "arguments": {
+         "type": "object",
+         "description": "Optional arguments to pass to the prompt"
+        }
+       },
+       "required": [
+        "name"
+       ]
+      }
+     },
+     "toolset": "mcp-on"
+    },
+    "mcp_bad_typed": {
+     "schema": {
+      "name": "mcp_bad_typed",
+      "description": "MCP tool typed from bad",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-bad"
+    },
+    "mcp_bad_nodesc": {
+     "schema": {
+      "name": "mcp_bad_nodesc",
+      "description": "MCP tool nodesc from bad",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-bad"
+    },
+    "mcp_bad_a_b": {
+     "schema": {
+      "name": "mcp_bad_a_b",
+      "description": "second",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-bad"
+    },
+    "mcp_bad_list_resources": {
+     "schema": {
+      "name": "mcp_bad_list_resources",
+      "description": "List available resources from MCP server 'bad'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-bad"
+    },
+    "mcp_bad_read_resource": {
+     "schema": {
+      "name": "mcp_bad_read_resource",
+      "description": "Read a resource by URI from MCP server 'bad'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string",
+         "description": "URI of the resource to read"
+        }
+       },
+       "required": [
+        "uri"
+       ]
+      }
+     },
+     "toolset": "mcp-bad"
+    },
+    "mcp_bad_list_prompts": {
+     "schema": {
+      "name": "mcp_bad_list_prompts",
+      "description": "List available prompts from MCP server 'bad'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-bad"
+    },
+    "mcp_bad_get_prompt": {
+     "schema": {
+      "name": "mcp_bad_get_prompt",
+      "description": "Get a prompt by name from MCP server 'bad'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "name": {
+         "type": "string",
+         "description": "Name of the prompt to retrieve"
+        },
+        "arguments": {
+         "type": "object",
+         "description": "Optional arguments to pass to the prompt"
+        }
+       },
+       "required": [
+        "name"
+       ]
+      }
+     },
+     "toolset": "mcp-bad"
+    }
+   },
+   "toolsets": {
+    "mcp-exc": {
+     "description": "MCP tools from exc server",
+     "tools": [
+      "mcp_exc_nodesc",
+      "mcp_exc_a_b",
+      "mcp_exc_a_b",
+      "mcp_exc_list_resources",
+      "mcp_exc_list_resources",
+      "mcp_exc_read_resource"
+     ],
+     "includes": []
+    },
+    "mcp-inc": {
+     "description": "MCP tools from inc server",
+     "tools": [
+      "mcp_inc_typed",
+      "mcp_inc_nodesc",
+      "mcp_inc_list_prompts",
+      "mcp_inc_get_prompt"
+     ],
+     "includes": []
+    },
+    "mcp-on": {
+     "description": "MCP tools from on server",
+     "tools": [
+      "mcp_on_a_b",
+      "mcp_on_a_b",
+      "mcp_on_list_resources",
+      "mcp_on_read_resource",
+      "mcp_on_list_prompts",
+      "mcp_on_get_prompt"
+     ],
+     "includes": []
+    },
+    "mcp-bad": {
+     "description": "MCP tools from bad server",
+     "tools": [
+      "mcp_bad_typed",
+      "mcp_bad_nodesc",
+      "mcp_bad_a_b",
+      "mcp_bad_a_b",
+      "mcp_bad_list_resources",
+      "mcp_bad_list_resources",
+      "mcp_bad_read_resource",
+      "mcp_bad_list_prompts",
+      "mcp_bad_get_prompt"
+     ],
+     "includes": []
+    }
+   },
+   "gauss_cli_extra": [
+    "mcp_inc_typed",
+    "mcp_inc_nodesc",
+    "mcp_inc_list_prompts",
+    "mcp_inc_get_prompt",
+    "mcp_exc_nodesc",
+    "mcp_exc_a_b",
+    "mcp_exc_list_resources",
+    "mcp_exc_read_resource",
+    "mcp_bad_typed",
+    "mcp_bad_nodesc",
+    "mcp_bad_a_b",
+    "mcp_bad_list_resources",
+    "mcp_bad_read_resource",
+    "mcp_bad_list_prompts",
+    "mcp_bad_get_prompt",
+    "mcp_on_a_b",
+    "mcp_on_list_resources",
+    "mcp_on_read_resource",
+    "mcp_on_list_prompts",
+    "mcp_on_get_prompt"
+   ],
+   "calls": [
+    {
+     "tool": "mcp_on_a_b",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"MCP call failed: McpError: Method not found\"}"
+    }
+   ],
+   "logs": [
+    [
+     "INFO",
+     "MCP server 'exc' (stdio): registered 6 tool(s): mcp_exc_nodesc, mcp_exc_a_b, mcp_exc_a_b, mcp_exc_list_resources, mcp_exc_list_resources, mcp_exc_read_resource"
+    ],
+    [
+     "INFO",
+     "MCP server 'inc' (stdio): registered 4 tool(s): mcp_inc_typed, mcp_inc_nodesc, mcp_inc_list_prompts, mcp_inc_get_prompt"
+    ],
+    [
+     "INFO",
+     "MCP server 'on' (stdio): registered 6 tool(s): mcp_on_a_b, mcp_on_a_b, mcp_on_list_resources, mcp_on_read_resource, mcp_on_list_prompts, mcp_on_get_prompt"
+    ],
+    [
+     "WARNING",
+     "MCP config mcp_servers.bad.tools.include must be a string or list of strings; ignoring 5"
+    ],
+    [
+     "WARNING",
+     "MCP config expected a boolean-ish value, got 'maybe'; using default=True"
+    ],
+    [
+     "INFO",
+     "MCP server 'bad' (stdio): registered 9 tool(s): mcp_bad_typed, mcp_bad_nodesc, mcp_bad_a_b, mcp_bad_a_b, mcp_bad_list_resources, mcp_bad_list_resources, mcp_bad_read_resource, mcp_bad_list_prompts, mcp_bad_get_prompt"
+    ],
+    [
+     "INFO",
+     "  MCP: 25 tool(s) from 4 server(s)"
+    ],
+    [
+     "ERROR",
+     "MCP tool on/a.b call failed: Method not found"
+    ]
+   ],
+   "llm": [],
+   "wire": {
+    "inc": [
+     {
+      "env": [
+       "HOME",
+       "PATH",
+       "SHELL",
+       "TERM"
+      ]
+     },
+     {
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {},
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      }
+     },
+     {
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      }
+     },
+     {
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      }
+     }
+    ],
+    "exc": [
+     {
+      "env": [
+       "HOME",
+       "PATH",
+       "SHELL",
+       "TERM"
+      ]
+     },
+     {
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {},
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      }
+     },
+     {
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      }
+     },
+     {
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      }
+     }
+    ],
+    "bad": [
+     {
+      "env": [
+       "HOME",
+       "PATH",
+       "SHELL",
+       "TERM"
+      ]
+     },
+     {
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {},
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      }
+     },
+     {
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      }
+     },
+     {
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      }
+     }
+    ],
+    "off": [],
+    "off2": [],
+    "on": [
+     {
+      "env": [
+       "HOME",
+       "PATH",
+       "SHELL",
+       "TERM"
+      ]
+     },
+     {
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {},
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      }
+     },
+     {
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      }
+     },
+     {
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      }
+     },
+     {
+      "in": {
+       "id": 2,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "a.b"
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "timeout",
+   "config": {
+    "slow": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:slow>",
+      "<LOG:slow>"
+     ],
+     "timeout": 1,
+     "sampling": {
+      "enabled": false
+     }
+    }
+   },
+   "scenarios": {
+    "slow": {
+     "tools": [
+      {
+       "name": "slow",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "fast",
+       "inputSchema": {
+        "type": "object"
+       }
+      }
+     ],
+     "handlers": {
+      "tools/call:slow": [
+       {
+        "sleep": 3
+       },
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "late"
+          }
+         ]
+        }
+       }
+      ],
+      "tools/call:fast": [
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "fast"
+          }
+         ]
+        }
+       }
+      ]
+     }
+    }
+   },
+   "llm_replies": [],
+   "steps": [
+    [
+     "mcp_slow_slow",
+     {}
+    ],
+    [
+     "mcp_slow_fast",
+     {}
+    ],
+    [
+     "sleep",
+     3
+    ],
+    [
+     "mcp_slow_fast",
+     {}
+    ]
+   ],
+   "names": [
+    "mcp_slow_slow",
+    "mcp_slow_fast",
+    "mcp_slow_list_resources",
+    "mcp_slow_read_resource",
+    "mcp_slow_list_prompts",
+    "mcp_slow_get_prompt"
+   ],
+   "schemas": {
+    "mcp_slow_slow": {
+     "schema": {
+      "name": "mcp_slow_slow",
+      "description": "MCP tool slow from slow",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-slow"
+    },
+    "mcp_slow_fast": {
+     "schema": {
+      "name": "mcp_slow_fast",
+      "description": "MCP tool fast from slow",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-slow"
+    },
+    "mcp_slow_list_resources": {
+     "schema": {
+      "name": "mcp_slow_list_resources",
+      "description": "List available resources from MCP server 'slow'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-slow"
+    },
+    "mcp_slow_read_resource": {
+     "schema": {
+      "name": "mcp_slow_read_resource",
+      "description": "Read a resource by URI from MCP server 'slow'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string",
+         "description": "URI of the resource to read"
+        }
+       },
+       "required": [
+        "uri"
+       ]
+      }
+     },
+     "toolset": "mcp-slow"
+    },
+    "mcp_slow_list_prompts": {
+     "schema": {
+      "name": "mcp_slow_list_prompts",
+      "description": "List available prompts from MCP server 'slow'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-slow"
+    },
+    "mcp_slow_get_prompt": {
+     "schema": {
+      "name": "mcp_slow_get_prompt",
+      "description": "Get a prompt by name from MCP server 'slow'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "name": {
+         "type": "string",
+         "description": "Name of the prompt to retrieve"
+        },
+        "arguments": {
+         "type": "object",
+         "description": "Optional arguments to pass to the prompt"
+        }
+       },
+       "required": [
+        "name"
+       ]
+      }
+     },
+     "toolset": "mcp-slow"
+    }
+   },
+   "toolsets": {
+    "mcp-slow": {
+     "description": "MCP tools from slow server",
+     "tools": [
+      "mcp_slow_slow",
+      "mcp_slow_fast",
+      "mcp_slow_list_resources",
+      "mcp_slow_read_resource",
+      "mcp_slow_list_prompts",
+      "mcp_slow_get_prompt"
+     ],
+     "includes": []
+    }
+   },
+   "gauss_cli_extra": [
+    "mcp_slow_slow",
+    "mcp_slow_fast",
+    "mcp_slow_list_resources",
+    "mcp_slow_read_resource",
+    "mcp_slow_list_prompts",
+    "mcp_slow_get_prompt"
+   ],
+   "calls": [
+    {
+     "tool": "mcp_slow_slow",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"MCP call failed: TimeoutError: \"}"
+    },
+    {
+     "tool": "mcp_slow_fast",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"MCP call failed: TimeoutError: \"}"
+    },
+    {
+     "tool": "mcp_slow_fast",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"fast\"}"
+    }
+   ],
+   "logs": [
+    [
+     "INFO",
+     "MCP server 'slow' (stdio): registered 6 tool(s): mcp_slow_slow, mcp_slow_fast, mcp_slow_list_resources, mcp_slow_read_resource, mcp_slow_list_prompts, mcp_slow_get_prompt"
+    ],
+    [
+     "INFO",
+     "  MCP: 6 tool(s) from 1 server(s)"
+    ],
+    [
+     "ERROR",
+     "MCP tool slow/slow call failed: "
+    ],
+    [
+     "ERROR",
+     "MCP tool slow/fast call failed: "
+    ]
+   ],
+   "llm": [],
+   "wire": {
+    "slow": [
+     {
+      "env": [
+       "HOME",
+       "PATH",
+       "SHELL",
+       "TERM"
+      ]
+     },
+     {
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {},
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      }
+     },
+     {
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      }
+     },
+     {
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      }
+     },
+     {
+      "in": {
+       "id": 2,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "slow"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 3,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "fast"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 4,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "fast"
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "death",
+   "config": {
+    "d": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:d>",
+      "<LOG:d>"
+     ],
+     "timeout": 3,
+     "sampling": {
+      "enabled": false
+     }
+    }
+   },
+   "scenarios": {
+    "d": {
+     "tools": [
+      {
+       "name": "die",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "ok",
+       "inputSchema": {
+        "type": "object"
+       }
+      }
+     ],
+     "handlers": {
+      "tools/call:die": [
+       {
+        "exit": 0
+       }
+      ],
+      "tools/call:ok": [
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "ok"
+          }
+         ]
+        }
+       }
+      ]
+     }
+    }
+   },
+   "llm_replies": [],
+   "steps": [
+    [
+     "mcp_d_ok",
+     {}
+    ],
+    [
+     "mcp_d_die",
+     {}
+    ],
+    [
+     "sleep",
+     1
+    ],
+    [
+     "mcp_d_ok",
+     {}
+    ],
+    [
+     "status",
+     null
+    ]
+   ],
+   "names": [
+    "mcp_d_die",
+    "mcp_d_ok",
+    "mcp_d_list_resources",
+    "mcp_d_read_resource",
+    "mcp_d_list_prompts",
+    "mcp_d_get_prompt"
+   ],
+   "schemas": {
+    "mcp_d_die": {
+     "schema": {
+      "name": "mcp_d_die",
+      "description": "MCP tool die from d",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-d"
+    },
+    "mcp_d_ok": {
+     "schema": {
+      "name": "mcp_d_ok",
+      "description": "MCP tool ok from d",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-d"
+    },
+    "mcp_d_list_resources": {
+     "schema": {
+      "name": "mcp_d_list_resources",
+      "description": "List available resources from MCP server 'd'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-d"
+    },
+    "mcp_d_read_resource": {
+     "schema": {
+      "name": "mcp_d_read_resource",
+      "description": "Read a resource by URI from MCP server 'd'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string",
+         "description": "URI of the resource to read"
+        }
+       },
+       "required": [
+        "uri"
+       ]
+      }
+     },
+     "toolset": "mcp-d"
+    },
+    "mcp_d_list_prompts": {
+     "schema": {
+      "name": "mcp_d_list_prompts",
+      "description": "List available prompts from MCP server 'd'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-d"
+    },
+    "mcp_d_get_prompt": {
+     "schema": {
+      "name": "mcp_d_get_prompt",
+      "description": "Get a prompt by name from MCP server 'd'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "name": {
+         "type": "string",
+         "description": "Name of the prompt to retrieve"
+        },
+        "arguments": {
+         "type": "object",
+         "description": "Optional arguments to pass to the prompt"
+        }
+       },
+       "required": [
+        "name"
+       ]
+      }
+     },
+     "toolset": "mcp-d"
+    }
+   },
+   "toolsets": {
+    "mcp-d": {
+     "description": "MCP tools from d server",
+     "tools": [
+      "mcp_d_die",
+      "mcp_d_ok",
+      "mcp_d_list_resources",
+      "mcp_d_read_resource",
+      "mcp_d_list_prompts",
+      "mcp_d_get_prompt"
+     ],
+     "includes": []
+    }
+   },
+   "gauss_cli_extra": [
+    "mcp_d_die",
+    "mcp_d_ok",
+    "mcp_d_list_resources",
+    "mcp_d_read_resource",
+    "mcp_d_list_prompts",
+    "mcp_d_get_prompt"
+   ],
+   "calls": [
+    {
+     "tool": "mcp_d_ok",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"ok\"}"
+    },
+    {
+     "tool": "mcp_d_die",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"MCP call failed: McpError: Connection closed\"}"
+    },
+    {
+     "tool": "mcp_d_ok",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"MCP call failed: ClosedResourceError: \"}"
+    },
+    {
+     "status": [
+      {
+       "name": "d",
+       "transport": "stdio",
+       "tools": 6,
+       "connected": true
+      }
+     ]
+    }
+   ],
+   "logs": [
+    [
+     "INFO",
+     "MCP server 'd' (stdio): registered 6 tool(s): mcp_d_die, mcp_d_ok, mcp_d_list_resources, mcp_d_read_resource, mcp_d_list_prompts, mcp_d_get_prompt"
+    ],
+    [
+     "INFO",
+     "  MCP: 6 tool(s) from 1 server(s)"
+    ],
+    [
+     "ERROR",
+     "MCP tool d/die call failed: Connection closed"
+    ],
+    [
+     "ERROR",
+     "MCP tool d/ok call failed: "
+    ]
+   ],
+   "llm": [],
+   "wire": {
+    "d": [
+     {
+      "env": [
+       "HOME",
+       "PATH",
+       "SHELL",
+       "TERM"
+      ]
+     },
+     {
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {},
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      }
+     },
+     {
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      }
+     },
+     {
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      }
+     },
+     {
+      "in": {
+       "id": 2,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "ok"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 3,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "die"
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "connect",
+   "config": {
+    "missing": {
+     "command": "definitely-not-a-cmd"
+    },
+    "missing-npx": {
+     "command": "npx",
+     "args": [
+      "x"
+     ],
+     "env": {
+      "PATH": "/nonexistent"
+     }
+    },
+    "nocmd": {
+     "args": [
+      "x"
+     ]
+    },
+    "emptycmd": {
+     "command": ""
+    },
+    "oldproto": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:oldproto>",
+      "<LOG:oldproto>"
+     ],
+     "sampling": {
+      "enabled": false
+     }
+    },
+    "hang": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:hang>",
+      "<LOG:hang>"
+     ],
+     "connect_timeout": 1,
+     "sampling": {
+      "enabled": false
+     }
+    },
+    "nullsamp": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:nullsamp>",
+      "<LOG:nullsamp>"
+     ],
+     "connect_timeout": 1,
+     "sampling": null
+    },
+    "good": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:good>",
+      "<LOG:good>"
+     ],
+     "sampling": {
+      "enabled": false
+     }
+    },
+    "badtools": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:badtools>",
+      "<LOG:badtools>"
+     ],
+     "sampling": {
+      "enabled": false
+     }
+    }
+   },
+   "scenarios": {
+    "oldproto": {
+     "protocol": "1999-01-01"
+    },
+    "hang": {
+     "handlers": {
+      "initialize": [
+       {
+        "sleep": 3
+       }
+      ]
+     }
+    },
+    "nullsamp": {},
+    "good": {
+     "tools": [
+      {
+       "name": "t",
+       "inputSchema": {
+        "type": "object"
+       }
+      }
+     ]
+    },
+    "badtools": {
+     "tools": [
+      {
+       "name": "noschema"
+      }
+     ]
+    }
+   },
+   "llm_replies": [],
+   "steps": [
+    [
+     "mcp_good_t",
+     {}
+    ],
+    [
+     "mcp_hang_t",
+     {}
+    ],
+    [
+     "status",
+     null
+    ]
+   ],
+   "names": [
+    "mcp_good_t",
+    "mcp_good_list_resources",
+    "mcp_good_read_resource",
+    "mcp_good_list_prompts",
+    "mcp_good_get_prompt"
+   ],
+   "schemas": {
+    "mcp_good_t": {
+     "schema": {
+      "name": "mcp_good_t",
+      "description": "MCP tool t from good",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-good"
+    },
+    "mcp_good_list_resources": {
+     "schema": {
+      "name": "mcp_good_list_resources",
+      "description": "List available resources from MCP server 'good'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-good"
+    },
+    "mcp_good_read_resource": {
+     "schema": {
+      "name": "mcp_good_read_resource",
+      "description": "Read a resource by URI from MCP server 'good'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string",
+         "description": "URI of the resource to read"
+        }
+       },
+       "required": [
+        "uri"
+       ]
+      }
+     },
+     "toolset": "mcp-good"
+    },
+    "mcp_good_list_prompts": {
+     "schema": {
+      "name": "mcp_good_list_prompts",
+      "description": "List available prompts from MCP server 'good'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-good"
+    },
+    "mcp_good_get_prompt": {
+     "schema": {
+      "name": "mcp_good_get_prompt",
+      "description": "Get a prompt by name from MCP server 'good'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "name": {
+         "type": "string",
+         "description": "Name of the prompt to retrieve"
+        },
+        "arguments": {
+         "type": "object",
+         "description": "Optional arguments to pass to the prompt"
+        }
+       },
+       "required": [
+        "name"
+       ]
+      }
+     },
+     "toolset": "mcp-good"
+    }
+   },
+   "toolsets": {
+    "mcp-good": {
+     "description": "MCP tools from good server",
+     "tools": [
+      "mcp_good_t",
+      "mcp_good_list_resources",
+      "mcp_good_read_resource",
+      "mcp_good_list_prompts",
+      "mcp_good_get_prompt"
+     ],
+     "includes": []
+    }
+   },
+   "gauss_cli_extra": [
+    "mcp_good_t",
+    "mcp_good_list_resources",
+    "mcp_good_read_resource",
+    "mcp_good_list_prompts",
+    "mcp_good_get_prompt"
+   ],
+   "calls": [
+    {
+     "tool": "mcp_good_t",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"MCP call failed: McpError: Method not found\"}"
+    },
+    {
+     "tool": "mcp_hang_t",
+     "args": {},
+     "visible": false,
+     "result": "{\"error\": \"Unknown tool: mcp_hang_t\"}"
+    },
+    {
+     "status": [
+      {
+       "name": "missing",
+       "transport": "stdio",
+       "tools": 0,
+       "connected": false
+      },
+      {
+       "name": "missing-npx",
+       "transport": "stdio",
+       "tools": 0,
+       "connected": false
+      },
+      {
+       "name": "nocmd",
+       "transport": "stdio",
+       "tools": 0,
+       "connected": false
+      },
+      {
+       "name": "emptycmd",
+       "transport": "stdio",
+       "tools": 0,
+       "connected": false
+      },
+      {
+       "name": "oldproto",
+       "transport": "stdio",
+       "tools": 0,
+       "connected": false
+      },
+      {
+       "name": "hang",
+       "transport": "stdio",
+       "tools": 0,
+       "connected": false
+      },
+      {
+       "name": "nullsamp",
+       "transport": "stdio",
+       "tools": 0,
+       "connected": false
+      },
+      {
+       "name": "good",
+       "transport": "stdio",
+       "tools": 5,
+       "connected": true
+      },
+      {
+       "name": "badtools",
+       "transport": "stdio",
+       "tools": 0,
+       "connected": false
+      }
+     ]
+    }
+   ],
+   "logs": [
+    [
+     "INFO",
+     "MCP server 'good' (stdio): registered 5 tool(s): mcp_good_t, mcp_good_list_resources, mcp_good_read_resource, mcp_good_list_prompts, mcp_good_get_prompt"
+    ],
+    [
+     "WARNING",
+     "Failed to connect to MCP server 'missing' (command=definitely-not-a-cmd): missing executable 'definitely-not-a-cmd'"
+    ],
+    [
+     "WARNING",
+     "Failed to connect to MCP server 'missing-npx' (command=npx): missing executable 'npx' (ensure Node.js is installed and PATH includes its bin directory, or set mcp_servers.<name>.command to an absolute path and include that directory in mcp_servers.<name>.env.PATH)"
+    ],
+    [
+     "WARNING",
+     "Failed to connect to MCP server 'nocmd': MCP server 'nocmd' has no 'command' in config"
+    ],
+    [
+     "WARNING",
+     "Failed to connect to MCP server 'emptycmd': MCP server 'emptycmd' has no 'command' in config"
+    ],
+    [
+     "WARNING",
+     "Failed to connect to MCP server 'oldproto' (command=python3): Unsupported protocol version from the server: 1999-01-01"
+    ],
+    [
+     "WARNING",
+     "Failed to connect to MCP server 'hang' (command=python3): CancelledError"
+    ],
+    [
+     "WARNING",
+     "Failed to connect to MCP server 'nullsamp' (command=python3): CancelledError"
+    ],
+    [
+     "WARNING",
+     "Failed to connect to MCP server 'badtools' (command=python3): 1 validation error for ListToolsResult\ntools.0.inputSchema\n  Field required [type=missing, input_value={'name': 'noschema'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing"
+    ],
+    [
+     "INFO",
+     "  MCP: 5 tool(s) from 1 server(s) (8 failed)"
+    ],
+    [
+     "ERROR",
+     "MCP tool good/t call failed: Method not found"
+    ]
+   ],
+   "llm": [],
+   "wire": {
+    "oldproto": [
+     {
+      "env": [
+       "HOME",
+       "PATH",
+       "SHELL",
+       "TERM"
+      ]
+     },
+     {
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {},
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      }
+     }
+    ],
+    "hang": [
+     {
+      "env": [
+       "HOME",
+       "PATH",
+       "SHELL",
+       "TERM"
+      ]
+     },
+     {
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {},
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      }
+     }
+    ],
+    "nullsamp": [],
+    "good": [
+     {
+      "env": [
+       "HOME",
+       "PATH",
+       "SHELL",
+       "TERM"
+      ]
+     },
+     {
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {},
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      }
+     },
+     {
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      }
+     },
+     {
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      }
+     },
+     {
+      "in": {
+       "id": 2,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "t"
+       }
+      }
+     }
+    ],
+    "badtools": [
+     {
+      "env": [
+       "HOME",
+       "PATH",
+       "SHELL",
+       "TERM"
+      ]
+     },
+     {
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {},
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      }
+     },
+     {
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      }
+     },
+     {
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "structured",
+   "config": {
+    "s": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:s>",
+      "<LOG:s>"
+     ],
+     "sampling": {
+      "enabled": false
+     }
+    }
+   },
+   "scenarios": {
+    "s": {
+     "tools": [
+      {
+       "name": "good",
+       "inputSchema": {
+        "type": "object"
+       },
+       "outputSchema": {
+        "type": "object",
+        "properties": {
+         "n": {
+          "type": "integer"
+         }
+        },
+        "required": [
+         "n"
+        ]
+       }
+      },
+      {
+       "name": "badtype",
+       "inputSchema": {
+        "type": "object"
+       },
+       "outputSchema": {
+        "type": "object",
+        "properties": {
+         "n": {
+          "type": "integer"
+         }
+        },
+        "required": [
+         "n"
+        ]
+       }
+      },
+      {
+       "name": "missingfield",
+       "inputSchema": {
+        "type": "object"
+       },
+       "outputSchema": {
+        "type": "object",
+        "properties": {
+         "n": {
+          "type": "integer"
+         }
+        },
+        "required": [
+         "n"
+        ]
+       }
+      },
+      {
+       "name": "nostructured",
+       "inputSchema": {
+        "type": "object"
+       },
+       "outputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "noschema",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "errwithschema",
+       "inputSchema": {
+        "type": "object"
+       },
+       "outputSchema": {
+        "type": "object",
+        "required": [
+         "n"
+        ]
+       }
+      }
+     ],
+     "handlers": {
+      "tools/call:good": [
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "{\"n\": 1}"
+          }
+         ],
+         "structuredContent": {
+          "n": 1
+         }
+        }
+       }
+      ],
+      "tools/call:badtype": [
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "x"
+          }
+         ],
+         "structuredContent": {
+          "n": "bad"
+         }
+        }
+       }
+      ],
+      "tools/call:missingfield": [
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "x"
+          }
+         ],
+         "structuredContent": {
+          "m": 1
+         }
+        }
+       }
+      ],
+      "tools/call:nostructured": [
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "plain"
+          }
+         ]
+        }
+       }
+      ],
+      "tools/call:noschema": [
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "y"
+          }
+         ],
+         "structuredContent": {
+          "any": true
+         }
+        }
+       }
+      ],
+      "tools/call:errwithschema": [
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "e"
+          }
+         ],
+         "isError": true
+        }
+       }
+      ]
+     }
+    }
+   },
+   "llm_replies": [],
+   "steps": [
+    [
+     "mcp_s_good",
+     {}
+    ],
+    [
+     "mcp_s_badtype",
+     {}
+    ],
+    [
+     "mcp_s_missingfield",
+     {}
+    ],
+    [
+     "mcp_s_nostructured",
+     {}
+    ],
+    [
+     "mcp_s_noschema",
+     {}
+    ],
+    [
+     "mcp_s_errwithschema",
+     {}
+    ]
+   ],
+   "names": [
+    "mcp_s_good",
+    "mcp_s_badtype",
+    "mcp_s_missingfield",
+    "mcp_s_nostructured",
+    "mcp_s_noschema",
+    "mcp_s_errwithschema",
+    "mcp_s_list_resources",
+    "mcp_s_read_resource",
+    "mcp_s_list_prompts",
+    "mcp_s_get_prompt"
+   ],
+   "schemas": {
+    "mcp_s_good": {
+     "schema": {
+      "name": "mcp_s_good",
+      "description": "MCP tool good from s",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-s"
+    },
+    "mcp_s_badtype": {
+     "schema": {
+      "name": "mcp_s_badtype",
+      "description": "MCP tool badtype from s",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-s"
+    },
+    "mcp_s_missingfield": {
+     "schema": {
+      "name": "mcp_s_missingfield",
+      "description": "MCP tool missingfield from s",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-s"
+    },
+    "mcp_s_nostructured": {
+     "schema": {
+      "name": "mcp_s_nostructured",
+      "description": "MCP tool nostructured from s",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-s"
+    },
+    "mcp_s_noschema": {
+     "schema": {
+      "name": "mcp_s_noschema",
+      "description": "MCP tool noschema from s",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-s"
+    },
+    "mcp_s_errwithschema": {
+     "schema": {
+      "name": "mcp_s_errwithschema",
+      "description": "MCP tool errwithschema from s",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-s"
+    },
+    "mcp_s_list_resources": {
+     "schema": {
+      "name": "mcp_s_list_resources",
+      "description": "List available resources from MCP server 's'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-s"
+    },
+    "mcp_s_read_resource": {
+     "schema": {
+      "name": "mcp_s_read_resource",
+      "description": "Read a resource by URI from MCP server 's'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string",
+         "description": "URI of the resource to read"
+        }
+       },
+       "required": [
+        "uri"
+       ]
+      }
+     },
+     "toolset": "mcp-s"
+    },
+    "mcp_s_list_prompts": {
+     "schema": {
+      "name": "mcp_s_list_prompts",
+      "description": "List available prompts from MCP server 's'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-s"
+    },
+    "mcp_s_get_prompt": {
+     "schema": {
+      "name": "mcp_s_get_prompt",
+      "description": "Get a prompt by name from MCP server 's'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "name": {
+         "type": "string",
+         "description": "Name of the prompt to retrieve"
+        },
+        "arguments": {
+         "type": "object",
+         "description": "Optional arguments to pass to the prompt"
+        }
+       },
+       "required": [
+        "name"
+       ]
+      }
+     },
+     "toolset": "mcp-s"
+    }
+   },
+   "toolsets": {
+    "mcp-s": {
+     "description": "MCP tools from s server",
+     "tools": [
+      "mcp_s_good",
+      "mcp_s_badtype",
+      "mcp_s_missingfield",
+      "mcp_s_nostructured",
+      "mcp_s_noschema",
+      "mcp_s_errwithschema",
+      "mcp_s_list_resources",
+      "mcp_s_read_resource",
+      "mcp_s_list_prompts",
+      "mcp_s_get_prompt"
+     ],
+     "includes": []
+    }
+   },
+   "gauss_cli_extra": [
+    "mcp_s_good",
+    "mcp_s_badtype",
+    "mcp_s_missingfield",
+    "mcp_s_nostructured",
+    "mcp_s_noschema",
+    "mcp_s_errwithschema",
+    "mcp_s_list_resources",
+    "mcp_s_read_resource",
+    "mcp_s_list_prompts",
+    "mcp_s_get_prompt"
+   ],
+   "calls": [
+    {
+     "tool": "mcp_s_good",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"{\\\"n\\\": 1}\"}"
+    },
+    {
+     "tool": "mcp_s_badtype",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"MCP call failed: RuntimeError: Invalid structured content returned by tool badtype: 'bad' is not of type 'integer'\\n\\nFailed validating 'type' in schema['properties']['n']:\\n    {'type': 'integer'}\\n\\nOn instance['n']:\\n    'bad'\"}"
+    },
+    {
+     "tool": "mcp_s_missingfield",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"MCP call failed: RuntimeError: Invalid structured content returned by tool missingfield: 'n' is a required property\\n\\nFailed validating 'required' in schema:\\n    {'type': 'object',\\n     'properties': {'n': {'type': 'integer'}},\\n     'required': ['n']}\\n\\nOn instance:\\n    {'m': 1}\"}"
+    },
+    {
+     "tool": "mcp_s_nostructured",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"MCP call failed: RuntimeError: Tool nostructured has an output schema but did not return structured content\"}"
+    },
+    {
+     "tool": "mcp_s_noschema",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"y\"}"
+    },
+    {
+     "tool": "mcp_s_errwithschema",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"e\"}"
+    }
+   ],
+   "logs": [
+    [
+     "INFO",
+     "MCP server 's' (stdio): registered 10 tool(s): mcp_s_good, mcp_s_badtype, mcp_s_missingfield, mcp_s_nostructured, mcp_s_noschema, mcp_s_errwithschema, mcp_s_list_resources, mcp_s_read_resource, mcp_s_list_prompts, mcp_s_get_prompt"
+    ],
+    [
+     "INFO",
+     "  MCP: 10 tool(s) from 1 server(s)"
+    ],
+    [
+     "ERROR",
+     "MCP tool s/badtype call failed: Invalid structured content returned by tool badtype: 'bad' is not of type 'integer'\n\nFailed validating 'type' in schema['properties']['n']:\n    {'type': 'integer'}\n\nOn instance['n']:\n    'bad'"
+    ],
+    [
+     "ERROR",
+     "MCP tool s/missingfield call failed: Invalid structured content returned by tool missingfield: 'n' is a required property\n\nFailed validating 'required' in schema:\n    {'type': 'object',\n     'properties': {'n': {'type': 'integer'}},\n     'required': ['n']}\n\nOn instance:\n    {'m': 1}"
+    ],
+    [
+     "ERROR",
+     "MCP tool s/nostructured call failed: Tool nostructured has an output schema but did not return structured content"
+    ]
+   ],
+   "llm": [],
+   "wire": {
+    "s": [
+     {
+      "env": [
+       "HOME",
+       "PATH",
+       "SHELL",
+       "TERM"
+      ]
+     },
+     {
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {},
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      }
+     },
+     {
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      }
+     },
+     {
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      }
+     },
+     {
+      "in": {
+       "id": 2,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "good"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 3,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "badtype"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 4,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "missingfield"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 5,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "nostructured"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 6,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "noschema"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 7,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "errwithschema"
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "sampling",
+   "config": {
+    "smp": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:smp>",
+      "<LOG:smp>"
+     ],
+     "timeout": 10,
+     "sampling": {
+      "max_rpm": 10,
+      "allowed_models": [
+       "ok-model"
+      ],
+      "max_tokens_cap": 50,
+      "timeout": 5
+     }
+    },
+    "smp0": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:smp0>",
+      "<LOG:smp0>"
+     ],
+     "timeout": 10,
+     "sampling": {
+      "max_tool_rounds": 0,
+      "model": "forced"
+     }
+    }
+   },
+   "scenarios": {
+    "smp": {
+     "tools": [
+      {
+       "name": "text",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "tool",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "bad_model",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "rich",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "fail",
+       "inputSchema": {
+        "type": "object"
+       }
+      }
+     ],
+     "handlers": {
+      "tools/call:text": [
+       {
+        "request": {
+         "id": "s1",
+         "method": "sampling/createMessage",
+         "params": {
+          "messages": [
+           {
+            "role": "user",
+            "content": {
+             "type": "text",
+             "text": "hi"
+            }
+           }
+          ],
+          "maxTokens": 100,
+          "systemPrompt": "be brief",
+          "temperature": 0.5,
+          "modelPreferences": {
+           "hints": [
+            {
+             "name": ""
+            },
+            {
+             "name": "ok-model"
+            }
+           ]
+          }
+         }
+        }
+       }
+      ],
+      "tools/call:tool": [
+       {
+        "request": {
+         "id": 7,
+         "method": "sampling/createMessage",
+         "params": {
+          "messages": [
+           {
+            "role": "user",
+            "content": [
+             {
+              "type": "text",
+              "text": "use it"
+             }
+            ]
+           },
+           {
+            "role": "assistant",
+            "content": [
+             {
+              "type": "text",
+              "text": "calling"
+             },
+             {
+              "type": "tool_use",
+              "id": "c0",
+              "name": "f",
+              "input": {
+               "a": 1
+              }
+             }
+            ]
+           },
+           {
+            "role": "user",
+            "content": [
+             {
+              "type": "tool_result",
+              "toolUseId": "c0",
+              "content": [
+               {
+                "type": "text",
+                "text": "r1"
+               },
+               {
+                "type": "text",
+                "text": "r2"
+               }
+              ]
+             }
+            ]
+           }
+          ],
+          "maxTokens": 10,
+          "tools": [
+           {
+            "name": "f",
+            "description": "F",
+            "inputSchema": {
+             "type": "object"
+            }
+           },
+           {
+            "name": "g",
+            "inputSchema": {
+             "type": "object"
+            }
+           }
+          ]
+         }
+        }
+       }
+      ],
+      "tools/call:bad_model": [
+       {
+        "request": {
+         "id": "s3",
+         "method": "sampling/createMessage",
+         "params": {
+          "messages": [
+           {
+            "role": "user",
+            "content": {
+             "type": "text",
+             "text": "x"
+            }
+           }
+          ],
+          "maxTokens": 5,
+          "modelPreferences": {
+           "hints": [
+            {
+             "name": "evil-model"
+            }
+           ]
+          }
+         }
+        }
+       }
+      ],
+      "tools/call:rich": [
+       {
+        "request": {
+         "id": "s4",
+         "method": "sampling/createMessage",
+         "params": {
+          "messages": [
+           {
+            "role": "user",
+            "content": [
+             {
+              "type": "text",
+              "text": "look"
+             },
+             {
+              "type": "image",
+              "data": "QUJD",
+              "mimeType": "image/png"
+             },
+             {
+              "type": "audio",
+              "data": "QkNE",
+              "mimeType": "audio/wav"
+             }
+            ]
+           }
+          ],
+          "maxTokens": 5
+         }
+        }
+       }
+      ],
+      "tools/call:fail": [
+       {
+        "request": {
+         "id": "s5",
+         "method": "sampling/createMessage",
+         "params": {
+          "messages": [
+           {
+            "role": "user",
+            "content": {
+             "type": "text",
+             "text": "boom"
+            }
+           }
+          ],
+          "maxTokens": 5
+         }
+        }
+       }
+      ]
+     }
+    },
+    "smp0": {
+     "tools": [
+      {
+       "name": "tool",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "ping",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "roots",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "elicit",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "unknown",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "nomax",
+       "inputSchema": {
+        "type": "object"
+       }
+      }
+     ],
+     "handlers": {
+      "tools/call:tool": [
+       {
+        "request": {
+         "id": "z1",
+         "method": "sampling/createMessage",
+         "params": {
+          "messages": [
+           {
+            "role": "user",
+            "content": {
+             "type": "text",
+             "text": "x"
+            }
+           }
+          ],
+          "maxTokens": 5
+         }
+        }
+       }
+      ],
+      "tools/call:ping": [
+       {
+        "request": {
+         "id": "p1",
+         "method": "ping"
+        }
+       }
+      ],
+      "tools/call:roots": [
+       {
+        "request": {
+         "id": "p2",
+         "method": "roots/list"
+        }
+       }
+      ],
+      "tools/call:elicit": [
+       {
+        "request": {
+         "id": "p3",
+         "method": "elicitation/create",
+         "params": {
+          "message": "m",
+          "requestedSchema": {
+           "type": "object",
+           "properties": {}
+          }
+         }
+        }
+       }
+      ],
+      "tools/call:unknown": [
+       {
+        "request": {
+         "id": "p4",
+         "method": "no/such"
+        }
+       }
+      ],
+      "tools/call:nomax": [
+       {
+        "request": {
+         "id": "p5",
+         "method": "sampling/createMessage",
+         "params": {
+          "messages": []
+         }
+        }
+       }
+      ]
+     }
+    }
+   },
+   "llm_replies": [
+    {
+     "choices": [
+      {
+       "message": {
+        "content": "hello sk-abcdefghijklmnopqrstu",
+        "tool_calls": null
+       },
+       "finish_reason": "length"
+      }
+     ],
+     "model": "resp-model",
+     "usage": {
+      "total_tokens": 12
+     }
+    },
+    {
+     "choices": [
+      {
+       "message": {
+        "content": null,
+        "tool_calls": [
+         {
+          "id": "c1",
+          "function": {
+           "name": "f",
+           "arguments": "{\"a\": 2}"
+          }
+         },
+         {
+          "id": "c2",
+          "function": {
+           "name": "g",
+           "arguments": "{bad"
+          }
+         }
+        ]
+       },
+       "finish_reason": "tool_calls"
+      }
+     ],
+     "model": "resp-model"
+    },
+    {
+     "choices": [
+      {
+       "message": {
+        "content": "seen",
+        "tool_calls": null
+       },
+       "finish_reason": "stop"
+      }
+     ],
+     "model": "m2",
+     "usage": {
+      "total_tokens": "n/a"
+     }
+    },
+    {
+     "raise": "provider exploded token=abc123"
+    },
+    {
+     "choices": [
+      {
+       "message": {
+        "content": "unused",
+        "tool_calls": [
+         {
+          "id": "c9",
+          "function": {
+           "name": "f",
+           "arguments": "{}"
+          }
+         }
+        ]
+       },
+       "finish_reason": "tool_calls"
+      }
+     ],
+     "model": "m0"
+    }
+   ],
+   "steps": [
+    [
+     "mcp_smp_text",
+     {}
+    ],
+    [
+     "mcp_smp_tool",
+     {}
+    ],
+    [
+     "mcp_smp_bad_model",
+     {}
+    ],
+    [
+     "mcp_smp_rich",
+     {}
+    ],
+    [
+     "mcp_smp_fail",
+     {}
+    ],
+    [
+     "mcp_smp0_tool",
+     {}
+    ],
+    [
+     "mcp_smp0_ping",
+     {}
+    ],
+    [
+     "mcp_smp0_roots",
+     {}
+    ],
+    [
+     "mcp_smp0_elicit",
+     {}
+    ],
+    [
+     "mcp_smp0_unknown",
+     {}
+    ],
+    [
+     "mcp_smp0_nomax",
+     {}
+    ],
+    [
+     "status",
+     null
+    ]
+   ],
+   "names": [
+    "mcp_smp_text",
+    "mcp_smp_tool",
+    "mcp_smp_bad_model",
+    "mcp_smp_rich",
+    "mcp_smp_fail",
+    "mcp_smp_list_resources",
+    "mcp_smp_read_resource",
+    "mcp_smp_list_prompts",
+    "mcp_smp_get_prompt",
+    "mcp_smp0_tool",
+    "mcp_smp0_ping",
+    "mcp_smp0_roots",
+    "mcp_smp0_elicit",
+    "mcp_smp0_unknown",
+    "mcp_smp0_nomax",
+    "mcp_smp0_list_resources",
+    "mcp_smp0_read_resource",
+    "mcp_smp0_list_prompts",
+    "mcp_smp0_get_prompt"
+   ],
+   "schemas": {
+    "mcp_smp_text": {
+     "schema": {
+      "name": "mcp_smp_text",
+      "description": "MCP tool text from smp",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-smp"
+    },
+    "mcp_smp_tool": {
+     "schema": {
+      "name": "mcp_smp_tool",
+      "description": "MCP tool tool from smp",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-smp"
+    },
+    "mcp_smp_bad_model": {
+     "schema": {
+      "name": "mcp_smp_bad_model",
+      "description": "MCP tool bad_model from smp",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-smp"
+    },
+    "mcp_smp_rich": {
+     "schema": {
+      "name": "mcp_smp_rich",
+      "description": "MCP tool rich from smp",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-smp"
+    },
+    "mcp_smp_fail": {
+     "schema": {
+      "name": "mcp_smp_fail",
+      "description": "MCP tool fail from smp",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-smp"
+    },
+    "mcp_smp_list_resources": {
+     "schema": {
+      "name": "mcp_smp_list_resources",
+      "description": "List available resources from MCP server 'smp'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-smp"
+    },
+    "mcp_smp_read_resource": {
+     "schema": {
+      "name": "mcp_smp_read_resource",
+      "description": "Read a resource by URI from MCP server 'smp'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string",
+         "description": "URI of the resource to read"
+        }
+       },
+       "required": [
+        "uri"
+       ]
+      }
+     },
+     "toolset": "mcp-smp"
+    },
+    "mcp_smp_list_prompts": {
+     "schema": {
+      "name": "mcp_smp_list_prompts",
+      "description": "List available prompts from MCP server 'smp'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-smp"
+    },
+    "mcp_smp_get_prompt": {
+     "schema": {
+      "name": "mcp_smp_get_prompt",
+      "description": "Get a prompt by name from MCP server 'smp'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "name": {
+         "type": "string",
+         "description": "Name of the prompt to retrieve"
+        },
+        "arguments": {
+         "type": "object",
+         "description": "Optional arguments to pass to the prompt"
+        }
+       },
+       "required": [
+        "name"
+       ]
+      }
+     },
+     "toolset": "mcp-smp"
+    },
+    "mcp_smp0_tool": {
+     "schema": {
+      "name": "mcp_smp0_tool",
+      "description": "MCP tool tool from smp0",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-smp0"
+    },
+    "mcp_smp0_ping": {
+     "schema": {
+      "name": "mcp_smp0_ping",
+      "description": "MCP tool ping from smp0",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-smp0"
+    },
+    "mcp_smp0_roots": {
+     "schema": {
+      "name": "mcp_smp0_roots",
+      "description": "MCP tool roots from smp0",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-smp0"
+    },
+    "mcp_smp0_elicit": {
+     "schema": {
+      "name": "mcp_smp0_elicit",
+      "description": "MCP tool elicit from smp0",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-smp0"
+    },
+    "mcp_smp0_unknown": {
+     "schema": {
+      "name": "mcp_smp0_unknown",
+      "description": "MCP tool unknown from smp0",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-smp0"
+    },
+    "mcp_smp0_nomax": {
+     "schema": {
+      "name": "mcp_smp0_nomax",
+      "description": "MCP tool nomax from smp0",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-smp0"
+    },
+    "mcp_smp0_list_resources": {
+     "schema": {
+      "name": "mcp_smp0_list_resources",
+      "description": "List available resources from MCP server 'smp0'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-smp0"
+    },
+    "mcp_smp0_read_resource": {
+     "schema": {
+      "name": "mcp_smp0_read_resource",
+      "description": "Read a resource by URI from MCP server 'smp0'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string",
+         "description": "URI of the resource to read"
+        }
+       },
+       "required": [
+        "uri"
+       ]
+      }
+     },
+     "toolset": "mcp-smp0"
+    },
+    "mcp_smp0_list_prompts": {
+     "schema": {
+      "name": "mcp_smp0_list_prompts",
+      "description": "List available prompts from MCP server 'smp0'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-smp0"
+    },
+    "mcp_smp0_get_prompt": {
+     "schema": {
+      "name": "mcp_smp0_get_prompt",
+      "description": "Get a prompt by name from MCP server 'smp0'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "name": {
+         "type": "string",
+         "description": "Name of the prompt to retrieve"
+        },
+        "arguments": {
+         "type": "object",
+         "description": "Optional arguments to pass to the prompt"
+        }
+       },
+       "required": [
+        "name"
+       ]
+      }
+     },
+     "toolset": "mcp-smp0"
+    }
+   },
+   "toolsets": {
+    "mcp-smp": {
+     "description": "MCP tools from smp server",
+     "tools": [
+      "mcp_smp_text",
+      "mcp_smp_tool",
+      "mcp_smp_bad_model",
+      "mcp_smp_rich",
+      "mcp_smp_fail",
+      "mcp_smp_list_resources",
+      "mcp_smp_read_resource",
+      "mcp_smp_list_prompts",
+      "mcp_smp_get_prompt"
+     ],
+     "includes": []
+    },
+    "mcp-smp0": {
+     "description": "MCP tools from smp0 server",
+     "tools": [
+      "mcp_smp0_tool",
+      "mcp_smp0_ping",
+      "mcp_smp0_roots",
+      "mcp_smp0_elicit",
+      "mcp_smp0_unknown",
+      "mcp_smp0_nomax",
+      "mcp_smp0_list_resources",
+      "mcp_smp0_read_resource",
+      "mcp_smp0_list_prompts",
+      "mcp_smp0_get_prompt"
+     ],
+     "includes": []
+    }
+   },
+   "gauss_cli_extra": [
+    "mcp_smp_text",
+    "mcp_smp_tool",
+    "mcp_smp_bad_model",
+    "mcp_smp_rich",
+    "mcp_smp_fail",
+    "mcp_smp_list_resources",
+    "mcp_smp_read_resource",
+    "mcp_smp_list_prompts",
+    "mcp_smp_get_prompt",
+    "mcp_smp0_tool",
+    "mcp_smp0_ping",
+    "mcp_smp0_roots",
+    "mcp_smp0_elicit",
+    "mcp_smp0_unknown",
+    "mcp_smp0_nomax",
+    "mcp_smp0_list_resources",
+    "mcp_smp0_read_resource",
+    "mcp_smp0_list_prompts",
+    "mcp_smp0_get_prompt"
+   ],
+   "calls": [
+    {
+     "tool": "mcp_smp_text",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"{\\\"id\\\": \\\"s1\\\", \\\"jsonrpc\\\": \\\"2.0\\\", \\\"result\\\": {\\\"content\\\": {\\\"text\\\": \\\"hello [REDACTED]\\\", \\\"type\\\": \\\"text\\\"}, \\\"model\\\": \\\"resp-model\\\", \\\"role\\\": \\\"assistant\\\", \\\"stopReason\\\": \\\"maxTokens\\\"}}\"}"
+    },
+    {
+     "tool": "mcp_smp_tool",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"{\\\"id\\\": 7, \\\"jsonrpc\\\": \\\"2.0\\\", \\\"result\\\": {\\\"content\\\": [{\\\"id\\\": \\\"c1\\\", \\\"input\\\": {\\\"a\\\": 2}, \\\"name\\\": \\\"f\\\", \\\"type\\\": \\\"tool_use\\\"}, {\\\"id\\\": \\\"c2\\\", \\\"input\\\": {\\\"_raw\\\": \\\"{bad\\\"}, \\\"name\\\": \\\"g\\\", \\\"type\\\": \\\"tool_use\\\"}], \\\"model\\\": \\\"resp-model\\\", \\\"role\\\": \\\"assistant\\\", \\\"stopReason\\\": \\\"toolUse\\\"}}\"}"
+    },
+    {
+     "tool": "mcp_smp_bad_model",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"{\\\"error\\\": {\\\"code\\\": -1, \\\"message\\\": \\\"Model 'evil-model' not allowed for server 'smp'. Allowed: ok-model\\\"}, \\\"id\\\": \\\"s3\\\", \\\"jsonrpc\\\": \\\"2.0\\\"}\"}"
+    },
+    {
+     "tool": "mcp_smp_rich",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"{\\\"id\\\": \\\"s4\\\", \\\"jsonrpc\\\": \\\"2.0\\\", \\\"result\\\": {\\\"content\\\": {\\\"text\\\": \\\"seen\\\", \\\"type\\\": \\\"text\\\"}, \\\"model\\\": \\\"m2\\\", \\\"role\\\": \\\"assistant\\\", \\\"stopReason\\\": \\\"endTurn\\\"}}\"}"
+    },
+    {
+     "tool": "mcp_smp_fail",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"{\\\"error\\\": {\\\"code\\\": -1, \\\"message\\\": \\\"Sampling LLM call failed: provider exploded [REDACTED]\\\"}, \\\"id\\\": \\\"s5\\\", \\\"jsonrpc\\\": \\\"2.0\\\"}\"}"
+    },
+    {
+     "tool": "mcp_smp0_tool",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"{\\\"error\\\": {\\\"code\\\": -1, \\\"message\\\": \\\"Tool loops disabled for server 'smp0' (max_tool_rounds=0)\\\"}, \\\"id\\\": \\\"z1\\\", \\\"jsonrpc\\\": \\\"2.0\\\"}\"}"
+    },
+    {
+     "tool": "mcp_smp0_ping",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"{\\\"id\\\": \\\"p1\\\", \\\"jsonrpc\\\": \\\"2.0\\\", \\\"result\\\": {}}\"}"
+    },
+    {
+     "tool": "mcp_smp0_roots",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"{\\\"error\\\": {\\\"code\\\": -32600, \\\"message\\\": \\\"List roots not supported\\\"}, \\\"id\\\": \\\"p2\\\", \\\"jsonrpc\\\": \\\"2.0\\\"}\"}"
+    },
+    {
+     "tool": "mcp_smp0_elicit",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"{\\\"error\\\": {\\\"code\\\": -32600, \\\"message\\\": \\\"Elicitation not supported\\\"}, \\\"id\\\": \\\"p3\\\", \\\"jsonrpc\\\": \\\"2.0\\\"}\"}"
+    },
+    {
+     "tool": "mcp_smp0_unknown",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"{\\\"error\\\": {\\\"code\\\": -32602, \\\"data\\\": \\\"\\\", \\\"message\\\": \\\"Invalid request parameters\\\"}, \\\"id\\\": \\\"p4\\\", \\\"jsonrpc\\\": \\\"2.0\\\"}\"}"
+    },
+    {
+     "tool": "mcp_smp0_nomax",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"{\\\"error\\\": {\\\"code\\\": -32602, \\\"data\\\": \\\"\\\", \\\"message\\\": \\\"Invalid request parameters\\\"}, \\\"id\\\": \\\"p5\\\", \\\"jsonrpc\\\": \\\"2.0\\\"}\"}"
+    },
+    {
+     "status": [
+      {
+       "name": "smp",
+       "transport": "stdio",
+       "tools": 9,
+       "connected": true,
+       "sampling": {
+        "requests": 3,
+        "errors": 2,
+        "tokens_used": 12,
+        "tool_use_count": 1
+       }
+      },
+      {
+       "name": "smp0",
+       "transport": "stdio",
+       "tools": 10,
+       "connected": true,
+       "sampling": {
+        "requests": 1,
+        "errors": 0,
+        "tokens_used": 0,
+        "tool_use_count": 1
+       }
+      }
+     ]
+    }
+   ],
+   "logs": [
+    [
+     "INFO",
+     "MCP server 'smp' (stdio): registered 9 tool(s): mcp_smp_text, mcp_smp_tool, mcp_smp_bad_model, mcp_smp_rich, mcp_smp_fail, mcp_smp_list_resources, mcp_smp_read_resource, mcp_smp_list_prompts, mcp_smp_get_prompt"
+    ],
+    [
+     "INFO",
+     "MCP server 'smp0' (stdio): registered 10 tool(s): mcp_smp0_tool, mcp_smp0_ping, mcp_smp0_roots, mcp_smp0_elicit, mcp_smp0_unknown, mcp_smp0_nomax, mcp_smp0_list_resources, mcp_smp0_read_resource, mcp_smp0_list_prompts, mcp_smp0_get_prompt"
+    ],
+    [
+     "INFO",
+     "  MCP: 19 tool(s) from 2 server(s)"
+    ],
+    [
+     "INFO",
+     "MCP server 'smp' sampling request: model=ok-model, max_tokens=50, messages=2"
+    ],
+    [
+     "INFO",
+     "MCP server 'smp' sampling response: model=resp-model, tokens=12"
+    ],
+    [
+     "INFO",
+     "MCP server 'smp' sampling request: model=, max_tokens=10, messages=3"
+    ],
+    [
+     "WARNING",
+     "MCP server 'smp': malformed tool_calls arguments from LLM (wrapping as raw): {bad"
+    ],
+    [
+     "INFO",
+     "MCP server 'smp' sampling response: model=resp-model, tokens=?, tool_calls=2"
+    ],
+    [
+     "WARNING",
+     "MCP server 'smp' requested model 'evil-model' not in allowed_models"
+    ],
+    [
+     "INFO",
+     "MCP server 'smp' sampling request: model=, max_tokens=5, messages=1"
+    ],
+    [
+     "INFO",
+     "MCP server 'smp' sampling response: model=m2, tokens=n/a"
+    ],
+    [
+     "INFO",
+     "MCP server 'smp' sampling request: model=, max_tokens=5, messages=1"
+    ],
+    [
+     "INFO",
+     "MCP server 'smp0' sampling request: model=forced, max_tokens=5, messages=1"
+    ]
+   ],
+   "llm": [
+    {
+     "task": "mcp",
+     "model": "ok-model",
+     "messages": [
+      {
+       "role": "system",
+       "content": "be brief"
+      },
+      {
+       "role": "user",
+       "content": "hi"
+      }
+     ],
+     "temperature": 0.5,
+     "max_tokens": 50,
+     "tools": null,
+     "timeout": 5.0
+    },
+    {
+     "task": "mcp",
+     "model": null,
+     "messages": [
+      {
+       "role": "user",
+       "content": "use it"
+      },
+      {
+       "role": "assistant",
+       "tool_calls": [
+        {
+         "id": "c0",
+         "type": "function",
+         "function": {
+          "name": "f",
+          "arguments": "{\"a\": 1}"
+         }
+        }
+       ],
+       "content": "calling"
+      },
+      {
+       "role": "tool",
+       "tool_call_id": "c0",
+       "content": "r1\nr2"
+      }
+     ],
+     "temperature": null,
+     "max_tokens": 10,
+     "tools": [
+      {
+       "type": "function",
+       "function": {
+        "name": "f",
+        "description": "F",
+        "parameters": {
+         "type": "object"
+        }
+       }
+      },
+      {
+       "type": "function",
+       "function": {
+        "name": "g",
+        "description": "",
+        "parameters": {
+         "type": "object"
+        }
+       }
+      }
+     ],
+     "timeout": 5.0
+    },
+    {
+     "task": "mcp",
+     "model": null,
+     "messages": [
+      {
+       "role": "user",
+       "content": [
+        {
+         "type": "text",
+         "text": "look"
+        },
+        {
+         "type": "image_url",
+         "image_url": {
+          "url": "data:image/png;base64,QUJD"
+         }
+        },
+        {
+         "type": "image_url",
+         "image_url": {
+          "url": "data:audio/wav;base64,QkNE"
+         }
+        }
+       ]
+      }
+     ],
+     "temperature": null,
+     "max_tokens": 5,
+     "tools": null,
+     "timeout": 5.0
+    },
+    {
+     "task": "mcp",
+     "model": null,
+     "messages": [
+      {
+       "role": "user",
+       "content": "boom"
+      }
+     ],
+     "temperature": null,
+     "max_tokens": 5,
+     "tools": null,
+     "timeout": 5.0
+    },
+    {
+     "task": "mcp",
+     "model": "forced",
+     "messages": [
+      {
+       "role": "user",
+       "content": "x"
+      }
+     ],
+     "temperature": null,
+     "max_tokens": 5,
+     "tools": null,
+     "timeout": 30.0
+    }
+   ],
+   "wire": {
+    "smp": [
+     {
+      "env": [
+       "HOME",
+       "PATH",
+       "SHELL",
+       "TERM"
+      ]
+     },
+     {
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {
+         "sampling": {
+          "tools": {}
+         }
+        },
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      }
+     },
+     {
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      }
+     },
+     {
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      }
+     },
+     {
+      "in": {
+       "id": 2,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "text"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": "s1",
+       "jsonrpc": "2.0",
+       "result": {
+        "content": {
+         "text": "hello [REDACTED]",
+         "type": "text"
+        },
+        "model": "resp-model",
+        "role": "assistant",
+        "stopReason": "maxTokens"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 3,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "tool"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 7,
+       "jsonrpc": "2.0",
+       "result": {
+        "content": [
+         {
+          "id": "c1",
+          "input": {
+           "a": 2
+          },
+          "name": "f",
+          "type": "tool_use"
+         },
+         {
+          "id": "c2",
+          "input": {
+           "_raw": "{bad"
+          },
+          "name": "g",
+          "type": "tool_use"
+         }
+        ],
+        "model": "resp-model",
+        "role": "assistant",
+        "stopReason": "toolUse"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 4,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "bad_model"
+       }
+      }
+     },
+     {
+      "in": {
+       "error": {
+        "code": -1,
+        "message": "Model 'evil-model' not allowed for server 'smp'. Allowed: ok-model"
+       },
+       "id": "s3",
+       "jsonrpc": "2.0"
+      }
+     },
+     {
+      "in": {
+       "id": 5,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "rich"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": "s4",
+       "jsonrpc": "2.0",
+       "result": {
+        "content": {
+         "text": "seen",
+         "type": "text"
+        },
+        "model": "m2",
+        "role": "assistant",
+        "stopReason": "endTurn"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 6,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "fail"
+       }
+      }
+     },
+     {
+      "in": {
+       "error": {
+        "code": -1,
+        "message": "Sampling LLM call failed: provider exploded [REDACTED]"
+       },
+       "id": "s5",
+       "jsonrpc": "2.0"
+      }
+     }
+    ],
+    "smp0": [
+     {
+      "env": [
+       "HOME",
+       "PATH",
+       "SHELL",
+       "TERM"
+      ]
+     },
+     {
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {
+         "sampling": {
+          "tools": {}
+         }
+        },
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      }
+     },
+     {
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      }
+     },
+     {
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      }
+     },
+     {
+      "in": {
+       "id": 2,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "tool"
+       }
+      }
+     },
+     {
+      "in": {
+       "error": {
+        "code": -1,
+        "message": "Tool loops disabled for server 'smp0' (max_tool_rounds=0)"
+       },
+       "id": "z1",
+       "jsonrpc": "2.0"
+      }
+     },
+     {
+      "in": {
+       "id": 3,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "ping"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": "p1",
+       "jsonrpc": "2.0",
+       "result": {}
+      }
+     },
+     {
+      "in": {
+       "id": 4,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "roots"
+       }
+      }
+     },
+     {
+      "in": {
+       "error": {
+        "code": -32600,
+        "message": "List roots not supported"
+       },
+       "id": "p2",
+       "jsonrpc": "2.0"
+      }
+     },
+     {
+      "in": {
+       "id": 5,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "elicit"
+       }
+      }
+     },
+     {
+      "in": {
+       "error": {
+        "code": -32600,
+        "message": "Elicitation not supported"
+       },
+       "id": "p3",
+       "jsonrpc": "2.0"
+      }
+     },
+     {
+      "in": {
+       "id": 6,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "unknown"
+       }
+      }
+     },
+     {
+      "in": {
+       "error": {
+        "code": -32602,
+        "data": "",
+        "message": "Invalid request parameters"
+       },
+       "id": "p4",
+       "jsonrpc": "2.0"
+      }
+     },
+     {
+      "in": {
+       "id": 7,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "nomax"
+       }
+      }
+     },
+     {
+      "in": {
+       "error": {
+        "code": -32602,
+        "data": "",
+        "message": "Invalid request parameters"
+       },
+       "id": "p5",
+       "jsonrpc": "2.0"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "ratelimit",
+   "config": {
+    "rl": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:rl>",
+      "<LOG:rl>"
+     ],
+     "timeout": 10,
+     "sampling": {
+      "max_rpm": 1
+     }
+    }
+   },
+   "scenarios": {
+    "rl": {
+     "tools": [
+      {
+       "name": "s",
+       "inputSchema": {
+        "type": "object"
+       }
+      }
+     ],
+     "handlers": {
+      "tools/call:s": [
+       {
+        "request": {
+         "id": "r",
+         "method": "sampling/createMessage",
+         "params": {
+          "messages": [
+           {
+            "role": "user",
+            "content": {
+             "type": "text",
+             "text": "x"
+            }
+           }
+          ],
+          "maxTokens": 5
+         }
+        }
+       }
+      ]
+     }
+    }
+   },
+   "llm_replies": [
+    {
+     "choices": [
+      {
+       "message": {
+        "content": "one",
+        "tool_calls": null
+       },
+       "finish_reason": "stop"
+      }
+     ],
+     "model": "m"
+    }
+   ],
+   "steps": [
+    [
+     "mcp_rl_s",
+     {}
+    ],
+    [
+     "mcp_rl_s",
+     {}
+    ]
+   ],
+   "names": [
+    "mcp_rl_s",
+    "mcp_rl_list_resources",
+    "mcp_rl_read_resource",
+    "mcp_rl_list_prompts",
+    "mcp_rl_get_prompt"
+   ],
+   "schemas": {
+    "mcp_rl_s": {
+     "schema": {
+      "name": "mcp_rl_s",
+      "description": "MCP tool s from rl",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-rl"
+    },
+    "mcp_rl_list_resources": {
+     "schema": {
+      "name": "mcp_rl_list_resources",
+      "description": "List available resources from MCP server 'rl'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-rl"
+    },
+    "mcp_rl_read_resource": {
+     "schema": {
+      "name": "mcp_rl_read_resource",
+      "description": "Read a resource by URI from MCP server 'rl'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string",
+         "description": "URI of the resource to read"
+        }
+       },
+       "required": [
+        "uri"
+       ]
+      }
+     },
+     "toolset": "mcp-rl"
+    },
+    "mcp_rl_list_prompts": {
+     "schema": {
+      "name": "mcp_rl_list_prompts",
+      "description": "List available prompts from MCP server 'rl'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-rl"
+    },
+    "mcp_rl_get_prompt": {
+     "schema": {
+      "name": "mcp_rl_get_prompt",
+      "description": "Get a prompt by name from MCP server 'rl'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "name": {
+         "type": "string",
+         "description": "Name of the prompt to retrieve"
+        },
+        "arguments": {
+         "type": "object",
+         "description": "Optional arguments to pass to the prompt"
+        }
+       },
+       "required": [
+        "name"
+       ]
+      }
+     },
+     "toolset": "mcp-rl"
+    }
+   },
+   "toolsets": {
+    "mcp-rl": {
+     "description": "MCP tools from rl server",
+     "tools": [
+      "mcp_rl_s",
+      "mcp_rl_list_resources",
+      "mcp_rl_read_resource",
+      "mcp_rl_list_prompts",
+      "mcp_rl_get_prompt"
+     ],
+     "includes": []
+    }
+   },
+   "gauss_cli_extra": [
+    "mcp_rl_s",
+    "mcp_rl_list_resources",
+    "mcp_rl_read_resource",
+    "mcp_rl_list_prompts",
+    "mcp_rl_get_prompt"
+   ],
+   "calls": [
+    {
+     "tool": "mcp_rl_s",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"{\\\"id\\\": \\\"r\\\", \\\"jsonrpc\\\": \\\"2.0\\\", \\\"result\\\": {\\\"content\\\": {\\\"text\\\": \\\"one\\\", \\\"type\\\": \\\"text\\\"}, \\\"model\\\": \\\"m\\\", \\\"role\\\": \\\"assistant\\\", \\\"stopReason\\\": \\\"endTurn\\\"}}\"}"
+    },
+    {
+     "tool": "mcp_rl_s",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"{\\\"error\\\": {\\\"code\\\": -1, \\\"message\\\": \\\"Sampling rate limit exceeded for server 'rl' (1 requests/minute)\\\"}, \\\"id\\\": \\\"r\\\", \\\"jsonrpc\\\": \\\"2.0\\\"}\"}"
+    }
+   ],
+   "logs": [
+    [
+     "INFO",
+     "MCP server 'rl' (stdio): registered 5 tool(s): mcp_rl_s, mcp_rl_list_resources, mcp_rl_read_resource, mcp_rl_list_prompts, mcp_rl_get_prompt"
+    ],
+    [
+     "INFO",
+     "  MCP: 5 tool(s) from 1 server(s)"
+    ],
+    [
+     "INFO",
+     "MCP server 'rl' sampling request: model=, max_tokens=5, messages=1"
+    ],
+    [
+     "INFO",
+     "MCP server 'rl' sampling response: model=m, tokens=?"
+    ],
+    [
+     "WARNING",
+     "MCP server 'rl' sampling rate limit exceeded (1/min)"
+    ]
+   ],
+   "llm": [
+    {
+     "task": "mcp",
+     "model": null,
+     "messages": [
+      {
+       "role": "user",
+       "content": "x"
+      }
+     ],
+     "temperature": null,
+     "max_tokens": 5,
+     "tools": null,
+     "timeout": 30.0
+    }
+   ],
+   "wire": {
+    "rl": [
+     {
+      "env": [
+       "HOME",
+       "PATH",
+       "SHELL",
+       "TERM"
+      ]
+     },
+     {
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {
+         "sampling": {
+          "tools": {}
+         }
+        },
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      }
+     },
+     {
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      }
+     },
+     {
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      }
+     },
+     {
+      "in": {
+       "id": 2,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "s"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": "r",
+       "jsonrpc": "2.0",
+       "result": {
+        "content": {
+         "text": "one",
+         "type": "text"
+        },
+        "model": "m",
+        "role": "assistant",
+        "stopReason": "endTurn"
+       }
+      }
+     },
+     {
+      "in": {
+       "id": 3,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "s"
+       }
+      }
+     },
+     {
+      "in": {
+       "error": {
+        "code": -1,
+        "message": "Sampling rate limit exceeded for server 'rl' (1 requests/minute)"
+       },
+       "id": "r",
+       "jsonrpc": "2.0"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "env",
+   "config": {
+    "e": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:e>",
+      "<LOG:e>"
+     ],
+     "env": {
+      "FOO": "1",
+      "PATH": "/usr/bin:/bin:/usr/local/bin:/opt/homebrew/bin"
+     },
+     "sampling": {
+      "enabled": false
+     }
+    }
+   },
+   "scenarios": {
+    "e": {
+     "tools": [
+      {
+       "name": "t",
+       "inputSchema": {
+        "type": "object"
+       }
+      }
+     ]
+    }
+   },
+   "llm_replies": [],
+   "steps": [],
+   "names": [
+    "mcp_e_t",
+    "mcp_e_list_resources",
+    "mcp_e_read_resource",
+    "mcp_e_list_prompts",
+    "mcp_e_get_prompt"
+   ],
+   "schemas": {
+    "mcp_e_t": {
+     "schema": {
+      "name": "mcp_e_t",
+      "description": "MCP tool t from e",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-e"
+    },
+    "mcp_e_list_resources": {
+     "schema": {
+      "name": "mcp_e_list_resources",
+      "description": "List available resources from MCP server 'e'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-e"
+    },
+    "mcp_e_read_resource": {
+     "schema": {
+      "name": "mcp_e_read_resource",
+      "description": "Read a resource by URI from MCP server 'e'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string",
+         "description": "URI of the resource to read"
+        }
+       },
+       "required": [
+        "uri"
+       ]
+      }
+     },
+     "toolset": "mcp-e"
+    },
+    "mcp_e_list_prompts": {
+     "schema": {
+      "name": "mcp_e_list_prompts",
+      "description": "List available prompts from MCP server 'e'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-e"
+    },
+    "mcp_e_get_prompt": {
+     "schema": {
+      "name": "mcp_e_get_prompt",
+      "description": "Get a prompt by name from MCP server 'e'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "name": {
+         "type": "string",
+         "description": "Name of the prompt to retrieve"
+        },
+        "arguments": {
+         "type": "object",
+         "description": "Optional arguments to pass to the prompt"
+        }
+       },
+       "required": [
+        "name"
+       ]
+      }
+     },
+     "toolset": "mcp-e"
+    }
+   },
+   "toolsets": {
+    "mcp-e": {
+     "description": "MCP tools from e server",
+     "tools": [
+      "mcp_e_t",
+      "mcp_e_list_resources",
+      "mcp_e_read_resource",
+      "mcp_e_list_prompts",
+      "mcp_e_get_prompt"
+     ],
+     "includes": []
+    }
+   },
+   "gauss_cli_extra": [
+    "mcp_e_t",
+    "mcp_e_list_resources",
+    "mcp_e_read_resource",
+    "mcp_e_list_prompts",
+    "mcp_e_get_prompt"
+   ],
+   "calls": [],
+   "logs": [
+    [
+     "INFO",
+     "MCP server 'e' (stdio): registered 5 tool(s): mcp_e_t, mcp_e_list_resources, mcp_e_read_resource, mcp_e_list_prompts, mcp_e_get_prompt"
+    ],
+    [
+     "INFO",
+     "  MCP: 5 tool(s) from 1 server(s)"
+    ]
+   ],
+   "llm": [],
+   "wire": {
+    "e": [
+     {
+      "env": [
+       "FOO",
+       "HOME",
+       "PATH",
+       "SHELL",
+       "TERM"
+      ]
+     },
+     {
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {},
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      }
+     },
+     {
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      }
+     },
+     {
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "garbage",
+   "config": {
+    "g": {
+     "command": "python3",
+     "args": [
+      "<SERVER>",
+      "<SCENARIO:g>",
+      "<LOG:g>"
+     ],
+     "sampling": {
+      "enabled": false
+     }
+    }
+   },
+   "scenarios": {
+    "g": {
+     "tools": [
+      {
+       "name": "t",
+       "inputSchema": {
+        "type": "object"
+       }
+      }
+     ],
+     "handlers": {
+      "tools/call:t": [
+       {
+        "raw": "this is not json"
+       },
+       {
+        "raw": "{\"jsonrpc\":\"2.0\",\"id\":999,\"result\":{}}"
+       },
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "after garbage"
+          }
+         ]
+        }
+       }
+      ]
+     }
+    }
+   },
+   "llm_replies": [],
+   "steps": [
+    [
+     "mcp_g_t",
+     {}
+    ]
+   ],
+   "names": [
+    "mcp_g_t",
+    "mcp_g_list_resources",
+    "mcp_g_read_resource",
+    "mcp_g_list_prompts",
+    "mcp_g_get_prompt"
+   ],
+   "schemas": {
+    "mcp_g_t": {
+     "schema": {
+      "name": "mcp_g_t",
+      "description": "MCP tool t from g",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-g"
+    },
+    "mcp_g_list_resources": {
+     "schema": {
+      "name": "mcp_g_list_resources",
+      "description": "List available resources from MCP server 'g'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-g"
+    },
+    "mcp_g_read_resource": {
+     "schema": {
+      "name": "mcp_g_read_resource",
+      "description": "Read a resource by URI from MCP server 'g'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string",
+         "description": "URI of the resource to read"
+        }
+       },
+       "required": [
+        "uri"
+       ]
+      }
+     },
+     "toolset": "mcp-g"
+    },
+    "mcp_g_list_prompts": {
+     "schema": {
+      "name": "mcp_g_list_prompts",
+      "description": "List available prompts from MCP server 'g'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-g"
+    },
+    "mcp_g_get_prompt": {
+     "schema": {
+      "name": "mcp_g_get_prompt",
+      "description": "Get a prompt by name from MCP server 'g'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "name": {
+         "type": "string",
+         "description": "Name of the prompt to retrieve"
+        },
+        "arguments": {
+         "type": "object",
+         "description": "Optional arguments to pass to the prompt"
+        }
+       },
+       "required": [
+        "name"
+       ]
+      }
+     },
+     "toolset": "mcp-g"
+    }
+   },
+   "toolsets": {
+    "mcp-g": {
+     "description": "MCP tools from g server",
+     "tools": [
+      "mcp_g_t",
+      "mcp_g_list_resources",
+      "mcp_g_read_resource",
+      "mcp_g_list_prompts",
+      "mcp_g_get_prompt"
+     ],
+     "includes": []
+    }
+   },
+   "gauss_cli_extra": [
+    "mcp_g_t",
+    "mcp_g_list_resources",
+    "mcp_g_read_resource",
+    "mcp_g_list_prompts",
+    "mcp_g_get_prompt"
+   ],
+   "calls": [
+    {
+     "tool": "mcp_g_t",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"after garbage\"}"
+    }
+   ],
+   "logs": [
+    [
+     "INFO",
+     "MCP server 'g' (stdio): registered 5 tool(s): mcp_g_t, mcp_g_list_resources, mcp_g_read_resource, mcp_g_list_prompts, mcp_g_get_prompt"
+    ],
+    [
+     "INFO",
+     "  MCP: 5 tool(s) from 1 server(s)"
+    ]
+   ],
+   "llm": [],
+   "wire": {
+    "g": [
+     {
+      "env": [
+       "HOME",
+       "PATH",
+       "SHELL",
+       "TERM"
+      ]
+     },
+     {
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {},
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      }
+     },
+     {
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      }
+     },
+     {
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      }
+     },
+     {
+      "in": {
+       "id": 2,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "t"
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "http",
+   "config": {
+    "web": {
+     "url": "<URL:web>",
+     "headers": {
+      "Authorization": "Bearer secret-token",
+      "X-Custom": "1"
+     },
+     "timeout": 2,
+     "sampling": {
+      "enabled": false
+     },
+     "command": "ignored"
+    }
+   },
+   "scenarios": {
+    "web": {
+     "tools": [
+      {
+       "name": "t",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "json",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "gone",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "rpcerr",
+       "inputSchema": {
+        "type": "object"
+       }
+      }
+     ],
+     "protocol": "2025-06-18",
+     "handlers": {
+      "tools/call:t": [
+       {
+        "sse": true
+       },
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "sse-ok"
+          }
+         ]
+        }
+       }
+      ],
+      "tools/call:json": [
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "json-ok"
+          }
+         ]
+        }
+       }
+      ],
+      "tools/call:gone": [
+       {
+        "status": 404
+       }
+      ],
+      "tools/call:rpcerr": [
+       {
+        "error": {
+         "code": 5,
+         "message": "server said no"
+        }
+       }
+      ]
+     }
+    }
+   },
+   "llm_replies": [],
+   "steps": [
+    [
+     "mcp_web_t",
+     {}
+    ],
+    [
+     "mcp_web_json",
+     {
+      "q": "é"
+     }
+    ],
+    [
+     "mcp_web_gone",
+     {}
+    ],
+    [
+     "mcp_web_rpcerr",
+     {}
+    ],
+    [
+     "mcp_web_list_resources",
+     {}
+    ],
+    [
+     "status",
+     null
+    ]
+   ],
+   "names": [
+    "mcp_web_t",
+    "mcp_web_json",
+    "mcp_web_gone",
+    "mcp_web_rpcerr",
+    "mcp_web_list_resources",
+    "mcp_web_read_resource",
+    "mcp_web_list_prompts",
+    "mcp_web_get_prompt"
+   ],
+   "schemas": {
+    "mcp_web_t": {
+     "schema": {
+      "name": "mcp_web_t",
+      "description": "MCP tool t from web",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-web"
+    },
+    "mcp_web_json": {
+     "schema": {
+      "name": "mcp_web_json",
+      "description": "MCP tool json from web",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-web"
+    },
+    "mcp_web_gone": {
+     "schema": {
+      "name": "mcp_web_gone",
+      "description": "MCP tool gone from web",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-web"
+    },
+    "mcp_web_rpcerr": {
+     "schema": {
+      "name": "mcp_web_rpcerr",
+      "description": "MCP tool rpcerr from web",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-web"
+    },
+    "mcp_web_list_resources": {
+     "schema": {
+      "name": "mcp_web_list_resources",
+      "description": "List available resources from MCP server 'web'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-web"
+    },
+    "mcp_web_read_resource": {
+     "schema": {
+      "name": "mcp_web_read_resource",
+      "description": "Read a resource by URI from MCP server 'web'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string",
+         "description": "URI of the resource to read"
+        }
+       },
+       "required": [
+        "uri"
+       ]
+      }
+     },
+     "toolset": "mcp-web"
+    },
+    "mcp_web_list_prompts": {
+     "schema": {
+      "name": "mcp_web_list_prompts",
+      "description": "List available prompts from MCP server 'web'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-web"
+    },
+    "mcp_web_get_prompt": {
+     "schema": {
+      "name": "mcp_web_get_prompt",
+      "description": "Get a prompt by name from MCP server 'web'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "name": {
+         "type": "string",
+         "description": "Name of the prompt to retrieve"
+        },
+        "arguments": {
+         "type": "object",
+         "description": "Optional arguments to pass to the prompt"
+        }
+       },
+       "required": [
+        "name"
+       ]
+      }
+     },
+     "toolset": "mcp-web"
+    }
+   },
+   "toolsets": {
+    "mcp-web": {
+     "description": "MCP tools from web server",
+     "tools": [
+      "mcp_web_t",
+      "mcp_web_json",
+      "mcp_web_gone",
+      "mcp_web_rpcerr",
+      "mcp_web_list_resources",
+      "mcp_web_read_resource",
+      "mcp_web_list_prompts",
+      "mcp_web_get_prompt"
+     ],
+     "includes": []
+    }
+   },
+   "gauss_cli_extra": [
+    "mcp_web_t",
+    "mcp_web_json",
+    "mcp_web_gone",
+    "mcp_web_rpcerr",
+    "mcp_web_list_resources",
+    "mcp_web_read_resource",
+    "mcp_web_list_prompts",
+    "mcp_web_get_prompt"
+   ],
+   "calls": [
+    {
+     "tool": "mcp_web_t",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"sse-ok\"}"
+    },
+    {
+     "tool": "mcp_web_json",
+     "args": {
+      "q": "é"
+     },
+     "visible": true,
+     "result": "{\"result\": \"json-ok\"}"
+    },
+    {
+     "tool": "mcp_web_gone",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"MCP call failed: McpError: Session terminated\"}"
+    },
+    {
+     "tool": "mcp_web_rpcerr",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"MCP call failed: McpError: server said no\"}"
+    },
+    {
+     "tool": "mcp_web_list_resources",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"MCP call failed: McpError: Method not found\"}"
+    },
+    {
+     "status": [
+      {
+       "name": "web",
+       "transport": "http",
+       "tools": 8,
+       "connected": true
+      }
+     ]
+    }
+   ],
+   "logs": [
+    [
+     "WARNING",
+     "MCP server 'web' has both 'url' and 'command' in config. Using HTTP transport ('url'). Remove 'command' to silence this warning."
+    ],
+    [
+     "INFO",
+     "MCP server 'web' (HTTP): registered 8 tool(s): mcp_web_t, mcp_web_json, mcp_web_gone, mcp_web_rpcerr, mcp_web_list_resources, mcp_web_read_resource, mcp_web_list_prompts, mcp_web_get_prompt"
+    ],
+    [
+     "INFO",
+     "  MCP: 8 tool(s) from 1 server(s)"
+    ],
+    [
+     "ERROR",
+     "MCP tool web/gone call failed: Session terminated"
+    ],
+    [
+     "ERROR",
+     "MCP tool web/rpcerr call failed: server said no"
+    ],
+    [
+     "ERROR",
+     "MCP web/list_resources failed: Method not found"
+    ]
+   ],
+   "llm": [],
+   "wire": {
+    "web": [
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "authorization": [
+        "Bearer secret-token"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "x-custom": [
+        "1"
+       ]
+      },
+      "http": "POST",
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {},
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      },
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "authorization": [
+        "Bearer secret-token"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-06-18"
+       ],
+       "mcp-session-id": [
+        "sess-1"
+       ],
+       "x-custom": [
+        "1"
+       ]
+      },
+      "http": "POST",
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      },
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream",
+        "text/event-stream"
+       ],
+       "authorization": [
+        "Bearer secret-token"
+       ],
+       "cache-control": [
+        "no-store"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-06-18"
+       ],
+       "mcp-session-id": [
+        "sess-1"
+       ],
+       "x-custom": [
+        "1"
+       ]
+      },
+      "http": "GET",
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "authorization": [
+        "Bearer secret-token"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-06-18"
+       ],
+       "mcp-session-id": [
+        "sess-1"
+       ],
+       "x-custom": [
+        "1"
+       ]
+      },
+      "http": "POST",
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      },
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "authorization": [
+        "Bearer secret-token"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-06-18"
+       ],
+       "mcp-session-id": [
+        "sess-1"
+       ],
+       "x-custom": [
+        "1"
+       ]
+      },
+      "http": "POST",
+      "in": {
+       "id": 2,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "t"
+       }
+      },
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "authorization": [
+        "Bearer secret-token"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-06-18"
+       ],
+       "mcp-session-id": [
+        "sess-1"
+       ],
+       "x-custom": [
+        "1"
+       ]
+      },
+      "http": "POST",
+      "in": {
+       "id": 3,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {
+         "q": "é"
+        },
+        "name": "json"
+       }
+      },
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "authorization": [
+        "Bearer secret-token"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-06-18"
+       ],
+       "mcp-session-id": [
+        "sess-1"
+       ],
+       "x-custom": [
+        "1"
+       ]
+      },
+      "http": "POST",
+      "in": {
+       "id": 4,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "gone"
+       }
+      },
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "authorization": [
+        "Bearer secret-token"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-06-18"
+       ],
+       "mcp-session-id": [
+        "sess-1"
+       ],
+       "x-custom": [
+        "1"
+       ]
+      },
+      "http": "POST",
+      "in": {
+       "id": 5,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "rpcerr"
+       }
+      },
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "authorization": [
+        "Bearer secret-token"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-06-18"
+       ],
+       "mcp-session-id": [
+        "sess-1"
+       ],
+       "x-custom": [
+        "1"
+       ]
+      },
+      "http": "POST",
+      "in": {
+       "id": 6,
+       "jsonrpc": "2.0",
+       "method": "resources/list"
+      },
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "authorization": [
+        "Bearer secret-token"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-06-18"
+       ],
+       "mcp-session-id": [
+        "sess-1"
+       ],
+       "x-custom": [
+        "1"
+       ]
+      },
+      "http": "DELETE",
+      "path": "/mcp"
+     }
+    ]
+   }
+  },
+  {
+   "name": "http-reconnect",
+   "config": {
+    "web": {
+     "url": "<URL:web>",
+     "timeout": 2,
+     "sampling": {
+      "enabled": false
+     }
+    }
+   },
+   "scenarios": {
+    "web": {
+     "tools": [
+      {
+       "name": "boom",
+       "inputSchema": {
+        "type": "object"
+       }
+      },
+      {
+       "name": "ok",
+       "inputSchema": {
+        "type": "object"
+       }
+      }
+     ],
+     "handlers": {
+      "tools/call:boom": [
+       {
+        "status": 500
+       }
+      ],
+      "tools/call:ok": [
+       {
+        "result": {
+         "content": [
+          {
+           "type": "text",
+           "text": "ok"
+          }
+         ]
+        }
+       }
+      ]
+     }
+    }
+   },
+   "llm_replies": [],
+   "steps": [
+    [
+     "mcp_web_boom",
+     {}
+    ],
+    [
+     "sleep",
+     2
+    ],
+    [
+     "mcp_web_ok",
+     {}
+    ]
+   ],
+   "names": [
+    "mcp_web_boom",
+    "mcp_web_ok",
+    "mcp_web_list_resources",
+    "mcp_web_read_resource",
+    "mcp_web_list_prompts",
+    "mcp_web_get_prompt"
+   ],
+   "schemas": {
+    "mcp_web_boom": {
+     "schema": {
+      "name": "mcp_web_boom",
+      "description": "MCP tool boom from web",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-web"
+    },
+    "mcp_web_ok": {
+     "schema": {
+      "name": "mcp_web_ok",
+      "description": "MCP tool ok from web",
+      "parameters": {
+       "type": "object"
+      }
+     },
+     "toolset": "mcp-web"
+    },
+    "mcp_web_list_resources": {
+     "schema": {
+      "name": "mcp_web_list_resources",
+      "description": "List available resources from MCP server 'web'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-web"
+    },
+    "mcp_web_read_resource": {
+     "schema": {
+      "name": "mcp_web_read_resource",
+      "description": "Read a resource by URI from MCP server 'web'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string",
+         "description": "URI of the resource to read"
+        }
+       },
+       "required": [
+        "uri"
+       ]
+      }
+     },
+     "toolset": "mcp-web"
+    },
+    "mcp_web_list_prompts": {
+     "schema": {
+      "name": "mcp_web_list_prompts",
+      "description": "List available prompts from MCP server 'web'",
+      "parameters": {
+       "type": "object",
+       "properties": {}
+      }
+     },
+     "toolset": "mcp-web"
+    },
+    "mcp_web_get_prompt": {
+     "schema": {
+      "name": "mcp_web_get_prompt",
+      "description": "Get a prompt by name from MCP server 'web'",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "name": {
+         "type": "string",
+         "description": "Name of the prompt to retrieve"
+        },
+        "arguments": {
+         "type": "object",
+         "description": "Optional arguments to pass to the prompt"
+        }
+       },
+       "required": [
+        "name"
+       ]
+      }
+     },
+     "toolset": "mcp-web"
+    }
+   },
+   "toolsets": {
+    "mcp-web": {
+     "description": "MCP tools from web server",
+     "tools": [
+      "mcp_web_boom",
+      "mcp_web_ok",
+      "mcp_web_list_resources",
+      "mcp_web_read_resource",
+      "mcp_web_list_prompts",
+      "mcp_web_get_prompt"
+     ],
+     "includes": []
+    }
+   },
+   "gauss_cli_extra": [
+    "mcp_web_boom",
+    "mcp_web_ok",
+    "mcp_web_list_resources",
+    "mcp_web_read_resource",
+    "mcp_web_list_prompts",
+    "mcp_web_get_prompt"
+   ],
+   "calls": [
+    {
+     "tool": "mcp_web_boom",
+     "args": {},
+     "visible": true,
+     "result": "{\"error\": \"MCP call failed: TimeoutError: \"}"
+    },
+    {
+     "tool": "mcp_web_ok",
+     "args": {},
+     "visible": true,
+     "result": "{\"result\": \"ok\"}"
+    }
+   ],
+   "logs": [
+    [
+     "INFO",
+     "MCP server 'web' (HTTP): registered 6 tool(s): mcp_web_boom, mcp_web_ok, mcp_web_list_resources, mcp_web_read_resource, mcp_web_list_prompts, mcp_web_get_prompt"
+    ],
+    [
+     "INFO",
+     "  MCP: 6 tool(s) from 1 server(s)"
+    ],
+    [
+     "WARNING",
+     "MCP server 'web' connection lost (attempt 1/5), reconnecting in 1s: unhandled errors in a TaskGroup (1 sub-exception)"
+    ],
+    [
+     "ERROR",
+     "MCP tool web/boom call failed: "
+    ]
+   ],
+   "llm": [],
+   "wire": {
+    "web": [
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "content-type": [
+        "application/json"
+       ]
+      },
+      "http": "POST",
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {},
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      },
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-11-25"
+       ],
+       "mcp-session-id": [
+        "sess-1"
+       ]
+      },
+      "http": "POST",
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      },
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream",
+        "text/event-stream"
+       ],
+       "cache-control": [
+        "no-store"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-11-25"
+       ],
+       "mcp-session-id": [
+        "sess-1"
+       ]
+      },
+      "http": "GET",
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-11-25"
+       ],
+       "mcp-session-id": [
+        "sess-1"
+       ]
+      },
+      "http": "POST",
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      },
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-11-25"
+       ],
+       "mcp-session-id": [
+        "sess-1"
+       ]
+      },
+      "http": "POST",
+      "in": {
+       "id": 2,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "boom"
+       }
+      },
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "content-type": [
+        "application/json"
+       ]
+      },
+      "http": "POST",
+      "in": {
+       "id": 0,
+       "jsonrpc": "2.0",
+       "method": "initialize",
+       "params": {
+        "capabilities": {},
+        "clientInfo": {
+         "name": "mcp",
+         "version": "0.1.0"
+        },
+        "protocolVersion": "2025-11-25"
+       }
+      },
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-11-25"
+       ],
+       "mcp-session-id": [
+        "sess-2"
+       ]
+      },
+      "http": "POST",
+      "in": {
+       "jsonrpc": "2.0",
+       "method": "notifications/initialized"
+      },
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream",
+        "text/event-stream"
+       ],
+       "cache-control": [
+        "no-store"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-11-25"
+       ],
+       "mcp-session-id": [
+        "sess-2"
+       ]
+      },
+      "http": "GET",
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-11-25"
+       ],
+       "mcp-session-id": [
+        "sess-2"
+       ]
+      },
+      "http": "POST",
+      "in": {
+       "id": 1,
+       "jsonrpc": "2.0",
+       "method": "tools/list"
+      },
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream",
+        "text/event-stream"
+       ],
+       "cache-control": [
+        "no-store"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-11-25"
+       ],
+       "mcp-session-id": [
+        "sess-2"
+       ]
+      },
+      "http": "GET",
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-11-25"
+       ],
+       "mcp-session-id": [
+        "sess-2"
+       ]
+      },
+      "http": "POST",
+      "in": {
+       "id": 2,
+       "jsonrpc": "2.0",
+       "method": "tools/call",
+       "params": {
+        "arguments": {},
+        "name": "ok"
+       }
+      },
+      "path": "/mcp"
+     },
+     {
+      "headers": {
+       "accept": [
+        "application/json, text/event-stream"
+       ],
+       "content-type": [
+        "application/json"
+       ],
+       "mcp-protocol-version": [
+        "2025-11-25"
+       ],
+       "mcp-session-id": [
+        "sess-2"
+       ]
+      },
+      "http": "DELETE",
+      "path": "/mcp"
+     }
+    ]
+   }
+  },
+  {
+   "name": "http-down",
+   "config": {
+    "web": {
+     "url": "http://127.0.0.1:1/mcp",
+     "connect_timeout": 5
+    }
+   },
+   "scenarios": {},
+   "llm_replies": [],
+   "steps": [],
+   "names": [],
+   "schemas": {},
+   "toolsets": {},
+   "gauss_cli_extra": [],
+   "calls": [],
+   "logs": [
+    [
+     "WARNING",
+     "Failed to connect to MCP server 'web': All connection attempts failed; [Errno 111] Connect call failed ('127.0.0.1', 1)"
+    ],
+    [
+     "INFO",
+     "  MCP: 0 tool(s) from 0 server(s) (1 failed)"
+    ]
+   ],
+   "llm": [],
+   "wire": {}
+  }
+ ]
+}

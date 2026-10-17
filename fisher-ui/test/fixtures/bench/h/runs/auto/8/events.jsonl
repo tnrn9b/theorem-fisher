@@ -1,0 +1,4 @@
+{"event":"auto missed","goal":"Step.Frame.runBody_split","seconds":10.8,"t":10.8}
+{"attempt":1,"backend":"gauss","event":"launched","goal":"Step.Frame.runBody_split","t":10.8}
+{"attempt":1,"backend":"gauss","event":"finished","goal":"Step.Frame.runBody_split","outcome":"closed (helpers: Touches.of_single)","stats":{"cost_usd":0.4222138,"exit":0,"input_tokens":921642,"output_tokens":13184,"tools":{"mcp_lean_lsp_lean_diagnostic_messages":7,"mcp_lean_lsp_lean_verify":1,"patch":7,"read_file":5,"terminal":4},"turns":15,"wall_s":174},"t":212.1}
+{"attempt":1,"event":"closed","goal":"Step.Frame.runBody_split","t":212.1}

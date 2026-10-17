@@ -1,0 +1,835 @@
+{
+  "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+  "columns": 80,
+  "cases": [
+    {
+      "name": "no-project",
+      "cwd": "outside",
+      "env": {},
+      "config": null,
+      "files": {},
+      "steps": [
+        {
+          "input": "/help",
+          "dispatched": "/help",
+          "continue": true,
+          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|               (^_^)? Available Commands               |\n+-------------------------------------------------------+\n\n  No active project — use /chat for inline onboarding, or /project init, /project convert, /project create <path>, or /project use <path>.\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
+        },
+        {
+          "input": "/prove Main.lean",
+          "dispatched": "/prove Main.lean",
+          "continue": true,
+          "output": "\n⚙️  /prove Main.lean\nGauss needs an active project before `/prove`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n"
+        },
+        {
+          "input": "hello there",
+          "plain": "blocked",
+          "output": "Gauss needs an active project before `/chat`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n"
+        },
+        {
+          "input": "/chat status",
+          "dispatched": "/chat status",
+          "continue": true,
+          "output": "\n⚙️  /chat status\n`/chat` is off. When it is on, plain text goes to the main interactive provider\nin the current Gauss session. Use `/chat off` to return to top-level command\nmode, or `/managed-chat` if you want the configured managed backend child\nsession.\n"
+        },
+        {
+          "input": "/chat",
+          "dispatched": "/chat",
+          "continue": true,
+          "output": "\n⚙️  /chat\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Gauss project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
+        },
+        {
+          "input": "/chat status",
+          "dispatched": "/chat status",
+          "continue": true,
+          "output": "\n⚙️  /chat status\n`/chat` is on. When it is on, plain text goes to the main interactive provider\nin the current Gauss session. Use `/chat off` to return to top-level command\nmode, or `/managed-chat` if you want the configured managed backend child\nsession.\n"
+        },
+        {
+          "input": "hello there",
+          "plain": "agent",
+          "output": ""
+        },
+        {
+          "input": "/chat off",
+          "dispatched": "/chat off",
+          "continue": true,
+          "output": "\n⚙️  /chat off\n`/chat` is off. Plain text stays at the top-level Open Gauss prompt until you\nrun `/chat` again.\n"
+        },
+        {
+          "input": "/start",
+          "dispatched": "/start",
+          "continue": true,
+          "output": "\n⚙️  /start\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Gauss project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
+        },
+        {
+          "input": "/chat on",
+          "dispatched": "/chat on",
+          "continue": true,
+          "output": "\n⚙️  /chat on\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Gauss project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
+        },
+        {
+          "input": "/chat make it so",
+          "dispatched": "/chat make it so",
+          "continue": true,
+          "output": "\n⚙️  /chat make it so\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Gauss project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n`/chat` is sending your message to the main interactive provider.\n"
+        },
+        {
+          "input": "get started",
+          "dispatched": "/chat",
+          "continue": true,
+          "output": "\n⚙️  /chat\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Gauss project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
+        },
+        {
+          "input": "chta",
+          "dispatched": "/chat",
+          "continue": true,
+          "output": "\n⚙️  /chat\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Gauss project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
+        },
+        {
+          "input": "help",
+          "dispatched": "/help",
+          "continue": true,
+          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|               (^_^)? Available Commands               |\n+-------------------------------------------------------+\n\n  No active project — use /chat for inline onboarding, or /project init, /project convert, /project create <path>, or /project use <path>.\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
+        },
+        {
+          "input": "begin now",
+          "dispatched": "/chat now",
+          "continue": true,
+          "output": "\n⚙️  /chat now\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Gauss project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n`/chat` is sending your message to the main interactive provider.\n"
+        },
+        {
+          "input": "/projetc",
+          "dispatched": "/projetc",
+          "continue": true,
+          "output": "\n⚙️  /projetc\n  Assuming /project from your input.\n⏳ Updating Gauss project state...\n\n  Project Status\n  CWD: <TMP>/outside\n  Session override: (none)\n  Active project: (none)\n  Detail: No active Gauss project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Next: /project init, /project convert, /project create <path>, or /project use <path>\n"
+        },
+        {
+          "input": "/strat",
+          "dispatched": "/strat",
+          "continue": true,
+          "output": "\n⚙️  /strat\n  Assuming /chat from your input.\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Gauss project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
+        },
+        {
+          "input": "/managed-chat status",
+          "dispatched": "/managed-chat status",
+          "continue": true,
+          "output": "\n⚙️  /managed-chat status\n`/managed-chat` opens the configured managed backend child session\n(`claude-code`). Use `/autoformalize-backend` to switch backends, or `/chat` for\ninline onboarding in the current Gauss session.\n"
+        },
+        {
+          "input": "/managed-chat off",
+          "dispatched": "/managed-chat off",
+          "continue": true,
+          "output": "\n⚙️  /managed-chat off\n`/managed-chat` is not a persistent mode. Run `/chat` if you want inline\nonboarding in the current Gauss session.\n"
+        },
+        {
+          "input": "/managed-chat on",
+          "dispatched": "/managed-chat on",
+          "continue": true,
+          "output": "\n⚙️  /managed-chat on\n⏳ Processing command...\nSpawned managed chat session af-001 (claude-code): managed chat\nUse `/swarm attach af-001` to connect. `/swarm` for status. Ctrl-] to detach.\n",
+          "spawned": [
+            {
+              "task_id": "af-001",
+              "theorem": "managed chat",
+              "description": "managed chat",
+              "argv0": "claude",
+              "cwd": "<TMP>/outside",
+              "workflow_kind": "chat",
+              "workflow_command": "/managed-chat",
+              "project_name": "",
+              "backend_name": "claude-code"
+            }
+          ]
+        },
+        {
+          "input": "/autoformalize-backend",
+          "dispatched": "/autoformalize-backend",
+          "continue": true,
+          "output": "\n⚙️  /autoformalize-backend\n  Autoformalize backend: claude-code\n  Config backend:        claude-code\n  Available:            claude-code, codex\n  Usage: /autoformalize-backend <backend>\n"
+        },
+        {
+          "input": "/autoformalize-backend codex",
+          "dispatched": "/autoformalize-backend codex",
+          "continue": true,
+          "output": "\n⚙️  /autoformalize-backend codex\n(^_^)b Autoformalize backend set to: codex (saved to config; active now)\n  The next managed Lean workflow run will use this backend.\n",
+          "config_after": "gauss:\n  autoformalize:\n    backend: codex\n",
+          "env_backend": "codex"
+        },
+        {
+          "input": "/autoformalize-backend",
+          "dispatched": "/autoformalize-backend",
+          "continue": true,
+          "output": "\n⚙️  /autoformalize-backend\n  Autoformalize backend: codex\n  Config backend:        codex\n  Session override:     GAUSS_AUTOFORMALIZE_BACKEND is set for this running CLI\n  Available:            claude-code, codex\n  Usage: /autoformalize-backend <backend>\n",
+          "env_backend": "codex"
+        },
+        {
+          "input": "/autoformalize-backend Claude",
+          "dispatched": "/autoformalize-backend Claude",
+          "continue": true,
+          "output": "\n⚙️  /autoformalize-backend Claude\n(^_^)b Autoformalize backend set to: claude-code (saved to config; active now)\n  The next managed Lean workflow run will use this backend.\n",
+          "config_after": "gauss:\n  autoformalize:\n    backend: claude-code\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/autoformalize-backend bogus",
+          "dispatched": "/autoformalize-backend bogus",
+          "continue": true,
+          "output": "\n⚙️  /autoformalize-backend bogus\n(>_<) `gauss.autoformalize.backend` must be one of: claude-code, codex.\n  Available: claude-code, codex\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/swarm",
+          "dispatched": "/swarm",
+          "continue": true,
+          "output": "\n⚙️  /swarm\n                            Gauss Workflow Swarm\n┏━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━━━━━┓\n┃ ID     ┃ Workflow           ┃ Project ┃ Status   ┃ Time ┃ Lean ┃ Progress ┃\n┡━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━╇━━━━━━╇━━━━━━━━━━┩\n│ af-001 │ chat: managed chat │ —       │ ● active │   0s │ —    │ Waiting  │\n└────────┴────────────────────┴─────────┴──────────┴──────┴──────┴──────────┘\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/swarm attach",
+          "dispatched": "/swarm attach",
+          "continue": true,
+          "output": "\n⚙️  /swarm attach\nNo running interactive swarm task to attach to.\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/swarm attach af-009",
+          "dispatched": "/swarm attach af-009",
+          "continue": true,
+          "output": "\n⚙️  /swarm attach af-009\nTask af-009 not found.\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/swarm cancel af-009",
+          "dispatched": "/swarm cancel af-009",
+          "continue": true,
+          "output": "\n⚙️  /swarm cancel af-009\nCannot cancel af-009 (not found or already finished).\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/swarm cancel",
+          "dispatched": "/swarm cancel",
+          "continue": true,
+          "output": "\n⚙️  /swarm cancel\nUsage: /swarm  | /swarm attach  | /swarm cancel <task-id>\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/swarm bogus",
+          "dispatched": "/swarm bogus",
+          "continue": true,
+          "output": "\n⚙️  /swarm bogus\nUsage: /swarm  | /swarm attach  | /swarm cancel <task-id>\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/config",
+          "dispatched": "/config",
+          "continue": true,
+          "output": "\n⚙️  /config\n\n+--------------------------------------------------+\n|               (^_^) Configuration                |\n+--------------------------------------------------+\n\n  -- Model --\n  Model:     anthropic/claude-opus-4.6\n  Base URL:  https://openrouter.ai/api/v1\n  API Key:   Not set!\n\n  -- Terminal --\n  Environment:  local\n  Working Dir:  <TMP>/outside\n  Timeout:      60s\n  Handoff:      auto\n\n  -- Agent --\n  Max Turns:  90\n  Toolsets:   all\n  Verbose:    False\n\n  -- Session --\n  Started:     <DATETIME>\n  Config File: <GAUSS_HOME>/config.yaml (loaded)\n\n  -- Project --\n  Active:     (none)\n  Detail:     No active Gauss project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/plan x",
+          "dispatched": "/plan x",
+          "continue": true,
+          "output": "\n⚙️  /plan x\nGauss needs an active project before `/plan`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/cron list",
+          "dispatched": "/cron list",
+          "continue": true,
+          "output": "\n⚙️  /cron list\nGauss needs an active project before `/cron`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/skills",
+          "dispatched": "/skills",
+          "continue": true,
+          "output": "\n⚙️  /skills\nGauss needs an active project before `/skills`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/reload-mcp",
+          "dispatched": "/reload-mcp",
+          "continue": true,
+          "output": "\n⚙️  /reload-mcp\nGauss needs an active project before `/reload-mcp`. Use `/project init`,\n`/project convert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/background x",
+          "dispatched": "/background x",
+          "continue": true,
+          "output": "\n⚙️  /background x\nGauss needs an active project before `/background`. Use `/project init`,\n`/project convert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/zzz",
+          "dispatched": "/zzz",
+          "continue": true,
+          "output": "\n⚙️  /zzz\nGauss needs an active project before `/zzz`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/he",
+          "dispatched": "/he",
+          "continue": true,
+          "output": "\n⚙️  /he\nGauss needs an active project before `/he`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/re",
+          "dispatched": "/re",
+          "continue": true,
+          "output": "\n⚙️  /re\nGauss needs an active project before `/re`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/ch",
+          "dispatched": "/ch",
+          "continue": true,
+          "output": "\n⚙️  /ch\nGauss needs an active project before `/ch`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/HELP",
+          "dispatched": "/HELP",
+          "continue": true,
+          "output": "\n⚙️  /HELP\n\n+-------------------------------------------------------+\n|               (^_^)? Available Commands               |\n+-------------------------------------------------------+\n\n  No active project — use /chat for inline onboarding, or /project init, /project convert, /project create <path>, or /project use <path>.\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/au",
+          "dispatched": "/au",
+          "continue": true,
+          "output": "\n⚙️  /au\nGauss needs an active project before `/au`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/autoformalize-b",
+          "dispatched": "/autoformalize-b",
+          "continue": true,
+          "output": "\n⚙️  /autoformalize-b\nGauss needs an active project before `/autoformalize-b`. Use `/project init`,\n`/project convert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/review",
+          "dispatched": "/review",
+          "continue": true,
+          "output": "\n⚙️  /review\nGauss needs an active project before `/review`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/exit",
+          "dispatched": "/exit",
+          "continue": false,
+          "output": "\n⚙️  /exit\n",
+          "env_backend": "claude-code"
+        }
+      ],
+      "goodbye": "\nGoodbye! @\n"
+    },
+    {
+      "name": "project",
+      "cwd": "project",
+      "env": {},
+      "config": null,
+      "files": {},
+      "steps": [
+        {
+          "input": "/help",
+          "dispatched": "/help",
+          "continue": true,
+          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|               (^_^)? Available Commands               |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · blueprint\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
+        },
+        {
+          "input": "/config",
+          "dispatched": "/config",
+          "continue": true,
+          "output": "\n⚙️  /config\n\n+--------------------------------------------------+\n|               (^_^) Configuration                |\n+--------------------------------------------------+\n\n  -- Model --\n  Model:     anthropic/claude-opus-4.6\n  Base URL:  https://openrouter.ai/api/v1\n  API Key:   Not set!\n\n  -- Terminal --\n  Environment:  local\n  Working Dir:  <TMP>/project\n  Timeout:      60s\n  Handoff:      auto\n\n  -- Agent --\n  Max Turns:  90\n  Toolsets:   all\n  Verbose:    False\n\n  -- Session --\n  Started:     <DATETIME>\n  Config File: <GAUSS_HOME>/config.yaml (loaded)\n\n  -- Project --\n  Active:     Demo Project [ambient]\n  Root:       <TMP>/project\n  Lean Root:  <TMP>/project\n\n"
+        },
+        {
+          "input": "/skin",
+          "dispatched": "/skin",
+          "continue": true,
+          "output": "\n⚙️  /skin\n\n  Current skin: default\n  Available skins:\n    ● default — Classic Gauss — gold and kawaii\n      ares — War-god theme — crimson and bronze\n      mono — Monochrome — clean grayscale\n      slate — Cool blue — developer-focused\n      poseidon — Ocean-god theme — deep blue and seafoam\n      sisyphus — Sisyphean theme — austere grayscale with persistence\n      charizard — Volcanic theme — burnt orange and ember\n\n  Usage: /skin <name>\n  Custom skins: drop a YAML file in <GAUSS_HOME>/skins/\n\n"
+        },
+        {
+          "input": "/skin ares",
+          "dispatched": "/skin ares",
+          "continue": true,
+          "output": "\n⚙️  /skin ares\n  Skin set to: ares (saved)\n  Note: banner colors will update on next session start.\n",
+          "config_after": "display:\n  skin: ares\n"
+        },
+        {
+          "input": "/help",
+          "dispatched": "/help",
+          "continue": true,
+          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|                (⚔) Available Commands                 |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · blueprint\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
+        },
+        {
+          "input": "/skin nope",
+          "dispatched": "/skin nope",
+          "continue": true,
+          "output": "\n⚙️  /skin nope\n  Unknown skin: nope\n  Available: ares, charizard, default, mono, poseidon, sisyphus, slate\n"
+        },
+        {
+          "input": "/skin default",
+          "dispatched": "/skin default",
+          "continue": true,
+          "output": "\n⚙️  /skin default\n  Skin set to: default (saved)\n  Note: banner colors will update on next session start.\n",
+          "config_after": "display:\n  skin: default\n"
+        },
+        {
+          "input": "/clear",
+          "dispatched": "/clear",
+          "continue": true,
+          "output": "\n⚙️  /clear\n<ERASE-SCREEN>\n\n                         GAUSS · Lean Autoformalization\n\n╭────────────────────────── Gauss v0.2.2 (2026.4.5) ───────────────────────────╮\n│  claude-opus-4.6 · Math Inc.                                                 │\n│  <TMP:73>…  │\n│  Project: Demo Project · blueprint                                           │\n│  Session: <SESSION>                                             │\n│                                                                              │\n│  Start Here                                                                  │\n│  `/chat` — turn on onboarding mode and show the first steps                  │\n│  `/project` — create, convert, inspect, or switch the active project         │\n│  `/prove` — spawn a guided managed proving agent                             │\n│  `/review` — review, checkpoint, refactor, or golf Lean proofs               │\n│  `/draft` — draft Lean declaration skeletons                                 │\n│  `/autoprove` — spawn an autonomous managed proving agent                    │\n│  `/formalize` — spawn an interactive managed formalization agent             │\n│  `/autoformalize` — spawn an autonomous managed formalization agent          │\n│  `/swarm` — track, attach, or cancel workflow agents                         │\n│  `/help` — session and diagnostics commands                                  │\n│  You can ignore MCP and plugin internals at first; Open Gauss stages the     │\n│  default Lean workflow setup for you.                                        │\n│                                                                              │\n│  /chat · /project · /prove · /review · /draft · /autoprove · /formalize ·    │\n│  /autoformalize · /swarm · /help · /help for commands                        │\n╰──────────────────────────────────────────────────────────────────────────────╯\n  ✨ (◕‿◕)✨ Fresh start! Screen cleared and conversation reset.\n\n"
+        },
+        {
+          "input": "/prove Main.lean",
+          "dispatched": "/prove Main.lean",
+          "continue": true,
+          "output": "\n⚙️  /prove Main.lean\n⏳ Preparing managed Lean workflow session...\nSpawned prove agent af-001: Main.lean\nUse `/swarm attach af-001` to connect. `/swarm` for status. Ctrl-] to detach.\n",
+          "spawned": [
+            {
+              "task_id": "af-001",
+              "theorem": "Main.lean",
+              "description": "Main.lean",
+              "argv0": "claude",
+              "cwd": "<TMP>/project",
+              "workflow_kind": "prove",
+              "workflow_command": "/lean4:prove Main.lean",
+              "project_name": "Demo Project",
+              "backend_name": "claude-code"
+            }
+          ]
+        },
+        {
+          "input": "/autoprove all of it",
+          "dispatched": "/autoprove all of it",
+          "continue": true,
+          "output": "\n⚙️  /autoprove all of it\n⏳ Preparing managed Lean workflow session...\nSpawned autoprove agent af-002 for Demo Project: all of it\nUse `/swarm attach af-002` to connect. `/swarm` for status. Ctrl-] to detach.\n",
+          "spawned": [
+            {
+              "task_id": "af-002",
+              "theorem": "all of it",
+              "description": "all of it",
+              "argv0": "claude",
+              "cwd": "<TMP>/project",
+              "workflow_kind": "autoprove",
+              "workflow_command": "/lean4:autoprove all of it",
+              "project_name": "Demo Project",
+              "backend_name": "claude-code"
+            }
+          ]
+        },
+        {
+          "input": "/swarm",
+          "dispatched": "/swarm",
+          "continue": true,
+          "output": "\n⚙️  /swarm\n                              Gauss Workflow Swarm\n┏━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━━━━━┓\n┃ ID     ┃ Workflow         ┃ Project      ┃ Status   ┃ Time ┃ Lean ┃ Progress ┃\n┡━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━╇━━━━━━╇━━━━━━━━━━┩\n│ af-001 │ prove: Main.lean │ Demo Project │ ● active │   0s │ —    │ Waiting  │\n│ af-002 │ autoprove: all   │ Demo Project │ ● active │   0s │ —    │ Waiting  │\n│        │ of it            │              │          │      │      │          │\n└────────┴──────────────────┴──────────────┴──────────┴──────┴──────┴──────────┘\n"
+        },
+        {
+          "input": "/swarm af-002",
+          "dispatched": "/swarm af-002",
+          "continue": true,
+          "output": "\n⚙️  /swarm af-002\n                                  Task af-002\n┌──────────────┬───────────────────────────────────────────────────────────────┐\n│ ID           │ af-002                                                        │\n│ Description  │ all of it                                                     │\n│ Theorem      │ all of it                                                     │\n│ Workflow     │ autoprove                                                     │\n│ Command      │ /lean4:autoprove all of it                                    │\n│ Backend      │ claude-code                                                   │\n│ Project      │ Demo Project                                                  │\n│ Project Root │ <TMP:60>… │\n│ Working Dir  │ <TMP:60>… │\n│ Status       │ ● active                                                      │\n│ Elapsed      │ 0s                                                            │\n│ Lean         │ —                                                             │\n│ Progress     │ Waiting                                                       │\n└──────────────┴───────────────────────────────────────────────────────────────┘\n"
+        },
+        {
+          "input": "/swarm detail",
+          "dispatched": "/swarm detail",
+          "continue": true,
+          "output": "\n⚙️  /swarm detail\nUsage: /swarm  | /swarm attach  | /swarm cancel <task-id>\n"
+        },
+        {
+          "input": "/swarm attach af-002",
+          "dispatched": "/swarm attach af-002",
+          "continue": true,
+          "output": "\n⚙️  /swarm attach af-002\nTask af-002 has no interactive session to attach to.\n"
+        },
+        {
+          "input": "/swarm attach",
+          "dispatched": "/swarm attach",
+          "continue": true,
+          "output": "\n⚙️  /swarm attach\nNo running interactive swarm task to attach to.\n"
+        },
+        {
+          "input": "/swarm cancel af-002",
+          "dispatched": "/swarm cancel af-002",
+          "continue": true,
+          "output": "\n⚙️  /swarm cancel af-002\nCancelled task af-002.\n"
+        },
+        {
+          "input": "/swarm cancel af-002",
+          "dispatched": "/swarm cancel af-002",
+          "continue": true,
+          "output": "\n⚙️  /swarm cancel af-002\nCannot cancel af-002 (not found or already finished).\n"
+        },
+        {
+          "input": "/swarm",
+          "dispatched": "/swarm",
+          "continue": true,
+          "output": "\n⚙️  /swarm\n                              Gauss Workflow Swarm\n┏━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━━━━━┓\n┃ ID     ┃ Workflow         ┃ Project      ┃ Status   ┃ Time ┃ Lean ┃ Progress ┃\n┡━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━╇━━━━━━╇━━━━━━━━━━┩\n│ af-001 │ prove: Main.lean │ Demo Project │ ● active │   0s │ —    │ Waiting  │\n│ af-002 │ autoprove: all   │ Demo Project │ ● cancel │   0s │ —    │ Waiting  │\n│        │ of it            │              │          │      │      │          │\n└────────┴──────────────────┴──────────────┴──────────┴──────┴──────┴──────────┘\n"
+        },
+        {
+          "input": "/managed-chat hi there",
+          "dispatched": "/managed-chat hi there",
+          "continue": true,
+          "output": "\n⚙️  /managed-chat hi there\n⏳ Processing command...\nSpawned managed chat session af-003 (claude-code): hi there\nUse `/swarm attach af-003` to connect. `/swarm` for status. Ctrl-] to detach.\n",
+          "spawned": [
+            {
+              "task_id": "af-003",
+              "theorem": "hi there",
+              "description": "hi there",
+              "argv0": "claude",
+              "cwd": "<TMP>/project",
+              "workflow_kind": "chat",
+              "workflow_command": "/managed-chat",
+              "project_name": "",
+              "backend_name": "claude-code"
+            }
+          ]
+        },
+        {
+          "input": "/managed-chat",
+          "dispatched": "/managed-chat",
+          "continue": true,
+          "output": "\n⚙️  /managed-chat\n⏳ Processing command...\nSpawned managed chat session af-004 (claude-code): managed chat\nUse `/swarm attach af-004` to connect. `/swarm` for status. Ctrl-] to detach.\n",
+          "spawned": [
+            {
+              "task_id": "af-004",
+              "theorem": "managed chat",
+              "description": "managed chat",
+              "argv0": "claude",
+              "cwd": "<TMP>/project",
+              "workflow_kind": "chat",
+              "workflow_command": "/managed-chat",
+              "project_name": "",
+              "backend_name": "claude-code"
+            }
+          ]
+        },
+        {
+          "input": "prove Main.lean",
+          "dispatched": "/prove Main.lean",
+          "continue": true,
+          "output": "\n⚙️  /prove Main.lean\n⏳ Preparing managed Lean workflow session...\nSpawned prove agent af-005: Main.lean\nUse `/swarm attach af-005` to connect. `/swarm` for status. Ctrl-] to detach.\n",
+          "spawned": [
+            {
+              "task_id": "af-005",
+              "theorem": "Main.lean",
+              "description": "Main.lean",
+              "argv0": "claude",
+              "cwd": "<TMP>/project",
+              "workflow_kind": "prove",
+              "workflow_command": "/lean4:prove Main.lean",
+              "project_name": "Demo Project",
+              "backend_name": "claude-code"
+            }
+          ]
+        },
+        {
+          "input": "autoprove",
+          "dispatched": "/autoprove",
+          "continue": true,
+          "output": "\n⚙️  /autoprove\n⏳ Preparing managed Lean workflow session...\nSpawned autoprove agent af-006 for Demo Project: autoprove\nUse `/swarm attach af-006` to connect. `/swarm` for status. Ctrl-] to detach.\n",
+          "spawned": [
+            {
+              "task_id": "af-006",
+              "theorem": "/lean4:autoprove",
+              "description": "autoprove",
+              "argv0": "claude",
+              "cwd": "<TMP>/project",
+              "workflow_kind": "autoprove",
+              "workflow_command": "/lean4:autoprove",
+              "project_name": "Demo Project",
+              "backend_name": "claude-code"
+            }
+          ]
+        },
+        {
+          "input": "hello there",
+          "plain": "agent",
+          "output": ""
+        },
+        {
+          "input": "/handoff do it",
+          "dispatched": "/handoff do it",
+          "continue": true,
+          "output": "\n⚙️  /handoff do it\n`/handoff` now forwards to `/autoformalize`.\n⏳ Preparing managed Lean workflow session...\nSpawned autoformalize agent af-007 for Demo Project: do it\nUse `/swarm attach af-007` to connect. `/swarm` for status. Ctrl-] to detach.\n",
+          "spawned": [
+            {
+              "task_id": "af-007",
+              "theorem": "do it",
+              "description": "do it",
+              "argv0": "claude",
+              "cwd": "<TMP>/project",
+              "workflow_kind": "autoformalize",
+              "workflow_command": "/lean4:autoformalize do it",
+              "project_name": "Demo Project",
+              "backend_name": "claude-code"
+            }
+          ]
+        },
+        {
+          "input": "/swarm",
+          "dispatched": "/swarm",
+          "continue": true,
+          "output": "\n⚙️  /swarm\n                              Gauss Workflow Swarm\n┏━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━━━━━┓\n┃ ID     ┃ Workflow         ┃ Project      ┃ Status   ┃ Time ┃ Lean ┃ Progress ┃\n┡━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━╇━━━━━━╇━━━━━━━━━━┩\n│ af-001 │ prove: Main.lean │ Demo Project │ ● active │   0s │ —    │ Waiting  │\n│ af-002 │ autoprove: all   │ Demo Project │ ● cancel │   0s │ —    │ Waiting  │\n│        │ of it            │              │          │      │      │          │\n│ af-003 │ chat: hi there   │ —            │ ● active │   0s │ —    │ Waiting  │\n│ af-004 │ chat: managed    │ —            │ ● active │   0s │ —    │ Waiting  │\n│        │ chat             │              │          │      │      │          │\n│ af-005 │ prove: Main.lean │ Demo Project │ ● active │   0s │ —    │ Waiting  │\n│ af-006 │ autoprove:       │ Demo Project │ ● active │   0s │ —    │ Waiting  │\n│        │ autoprove        │              │          │      │      │          │\n│ af-007 │ autoformalize:   │ Demo Project │ ● active │   0s │ —    │ Waiting  │\n│        │ do it            │              │          │      │      │          │\n└────────┴──────────────────┴──────────────┴──────────┴──────┴──────┴──────────┘\n"
+        },
+        {
+          "input": "/draft  spaced  out ",
+          "dispatched": "/draft  spaced  out ",
+          "continue": true,
+          "output": "\n⚙️  /draft  spaced  out\n⏳ Preparing managed Lean workflow session...\nSpawned draft agent af-008: spaced  out\nUse `/swarm attach af-008` to connect. `/swarm` for status. Ctrl-] to detach.\n",
+          "spawned": [
+            {
+              "task_id": "af-008",
+              "theorem": "spaced  out",
+              "description": "spaced  out",
+              "argv0": "claude",
+              "cwd": "<TMP>/project",
+              "workflow_kind": "draft",
+              "workflow_command": "/lean4:draft spaced  out",
+              "project_name": "Demo Project",
+              "backend_name": "claude-code"
+            }
+          ]
+        },
+        {
+          "input": "/q",
+          "dispatched": "/q",
+          "continue": false,
+          "output": "\n⚙️  /q\n"
+        }
+      ],
+      "goodbye": "\nGoodbye! @\n"
+    },
+    {
+      "name": "project-subdir",
+      "cwd": "project/Math",
+      "env": {},
+      "config": null,
+      "files": {},
+      "steps": [
+        {
+          "input": "/help",
+          "dispatched": "/help",
+          "continue": true,
+          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|               (^_^)? Available Commands               |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · cwd:Math · blueprint\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
+        },
+        {
+          "input": "/config",
+          "dispatched": "/config",
+          "continue": true,
+          "output": "\n⚙️  /config\n\n+--------------------------------------------------+\n|               (^_^) Configuration                |\n+--------------------------------------------------+\n\n  -- Model --\n  Model:     anthropic/claude-opus-4.6\n  Base URL:  https://openrouter.ai/api/v1\n  API Key:   Not set!\n\n  -- Terminal --\n  Environment:  local\n  Working Dir:  <TMP>/project/Math\n  Timeout:      60s\n  Handoff:      auto\n\n  -- Agent --\n  Max Turns:  90\n  Toolsets:   all\n  Verbose:    False\n\n  -- Session --\n  Started:     <DATETIME>\n  Config File: <GAUSS_HOME>/config.yaml (loaded)\n\n  -- Project --\n  Active:     Demo Project [ambient]\n  Root:       <TMP>/project\n  Lean Root:  <TMP>/project\n\n"
+        },
+        {
+          "input": "/review",
+          "dispatched": "/review",
+          "continue": true,
+          "output": "\n⚙️  /review\n⏳ Preparing managed Lean workflow session...\nSpawned review agent af-001: review\nUse `/swarm attach af-001` to connect. `/swarm` for status. Ctrl-] to detach.\n",
+          "spawned": [
+            {
+              "task_id": "af-001",
+              "theorem": "/lean4:review",
+              "description": "review",
+              "argv0": "claude",
+              "cwd": "<TMP>/project",
+              "workflow_kind": "review",
+              "workflow_command": "/lean4:review",
+              "project_name": "Demo Project",
+              "backend_name": "claude-code"
+            }
+          ]
+        }
+      ],
+      "goodbye": "\nGoodbye! @\n"
+    },
+    {
+      "name": "env-backend",
+      "cwd": "outside",
+      "env": {
+        "GAUSS_AUTOFORMALIZE_BACKEND": "codex"
+      },
+      "config": null,
+      "files": {},
+      "steps": [
+        {
+          "input": "/autoformalize-backend",
+          "dispatched": "/autoformalize-backend",
+          "continue": true,
+          "output": "\n⚙️  /autoformalize-backend\n  Autoformalize backend: codex\n  Config backend:        claude-code\n  Session override:     GAUSS_AUTOFORMALIZE_BACKEND is set for this running CLI\n  Available:            claude-code, codex\n  Usage: /autoformalize-backend <backend>\n"
+        },
+        {
+          "input": "/managed-chat status",
+          "dispatched": "/managed-chat status",
+          "continue": true,
+          "output": "\n⚙️  /managed-chat status\n`/managed-chat` opens the configured managed backend child session (`codex`).\nUse `/autoformalize-backend` to switch backends, or `/chat` for inline\nonboarding in the current Gauss session.\n"
+        },
+        {
+          "input": "/autoformalize-backend claude-code",
+          "dispatched": "/autoformalize-backend claude-code",
+          "continue": true,
+          "output": "\n⚙️  /autoformalize-backend claude-code\n(^_^)b Autoformalize backend set to: claude-code (saved to config; active now)\n  The next managed Lean workflow run will use this backend.\n",
+          "config_after": "gauss:\n  autoformalize:\n    backend: claude-code\n",
+          "env_backend": "claude-code"
+        },
+        {
+          "input": "/autoformalize-backend",
+          "dispatched": "/autoformalize-backend",
+          "continue": true,
+          "output": "\n⚙️  /autoformalize-backend\n  Autoformalize backend: claude-code\n  Config backend:        claude-code\n  Session override:     GAUSS_AUTOFORMALIZE_BACKEND is set for this running CLI\n  Available:            claude-code, codex\n  Usage: /autoformalize-backend <backend>\n",
+          "env_backend": "claude-code"
+        }
+      ],
+      "goodbye": "\nGoodbye! @\n"
+    },
+    {
+      "name": "config-skin",
+      "cwd": "project",
+      "env": {},
+      "config": {
+        "display": {
+          "skin": "ares"
+        }
+      },
+      "files": {},
+      "steps": [
+        {
+          "input": "/help",
+          "dispatched": "/help",
+          "continue": true,
+          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|                (⚔) Available Commands                 |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · blueprint\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
+        },
+        {
+          "input": "/skin",
+          "dispatched": "/skin",
+          "continue": true,
+          "output": "\n⚙️  /skin\n\n  Current skin: ares\n  Available skins:\n      default — Classic Gauss — gold and kawaii\n    ● ares — War-god theme — crimson and bronze\n      mono — Monochrome — clean grayscale\n      slate — Cool blue — developer-focused\n      poseidon — Ocean-god theme — deep blue and seafoam\n      sisyphus — Sisyphean theme — austere grayscale with persistence\n      charizard — Volcanic theme — burnt orange and ember\n\n  Usage: /skin <name>\n  Custom skins: drop a YAML file in <GAUSS_HOME>/skins/\n\n"
+        },
+        {
+          "input": "/swarm",
+          "dispatched": "/swarm",
+          "continue": true,
+          "output": "\n⚙️  /swarm\nNo managed workflow tasks. Use `/prove`, `/review`, `/checkpoint`, `/refactor`,\n`/golf`, `/draft`, `/autoprove`, `/formalize`, or `/autoformalize` to spawn one.\n"
+        }
+      ],
+      "goodbye": "\nFarewell, warrior! ⚔\n"
+    },
+    {
+      "name": "user-skin",
+      "cwd": "outside",
+      "env": {},
+      "config": {
+        "display": {
+          "skin": "mine"
+        }
+      },
+      "files": {
+        "skins/mine.yaml": "name: mine\ndescription: Mine\nbranding:\n  help_header: \"(o_o) Mine\"\n  goodbye: \"Bye from mine\"\n",
+        "skins/broken.yaml": "name: [unclosed\n"
+      },
+      "steps": [
+        {
+          "input": "/project use ../project",
+          "dispatched": "/project use ../project",
+          "continue": true,
+          "output": "\n⚙️  /project use ../project\n⏳ Updating Gauss project state...\n(^_^)b Active project set to: Demo Project\n  Root: <TMP>/project\n"
+        },
+        {
+          "input": "/help",
+          "dispatched": "/help",
+          "continue": true,
+          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|                      (o_o) Mine                       |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · blueprint [override]\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
+        },
+        {
+          "input": "/skin",
+          "dispatched": "/skin",
+          "continue": true,
+          "output": "\n⚙️  /skin\n\n  Current skin: mine\n  Available skins:\n      default — Classic Gauss — gold and kawaii\n      ares — War-god theme — crimson and bronze\n      mono — Monochrome — clean grayscale\n      slate — Cool blue — developer-focused\n      poseidon — Ocean-god theme — deep blue and seafoam\n      sisyphus — Sisyphean theme — austere grayscale with persistence\n      charizard — Volcanic theme — burnt orange and ember\n    ● mine (user) — Mine\n\n  Usage: /skin <name>\n  Custom skins: drop a YAML file in <GAUSS_HOME>/skins/\n\n"
+        },
+        {
+          "input": "/skin broken",
+          "dispatched": "/skin broken",
+          "continue": true,
+          "output": "\n⚙️  /skin broken\n  Unknown skin: broken\n  Available: ares, charizard, default, mine, mono, poseidon, sisyphus, slate\n"
+        },
+        {
+          "input": "/skin mine",
+          "dispatched": "/skin mine",
+          "continue": true,
+          "output": "\n⚙️  /skin mine\n  Skin set to: mine (saved)\n  Note: banner colors will update on next session start.\n"
+        },
+        {
+          "input": "/skin poseidon",
+          "dispatched": "/skin poseidon",
+          "continue": true,
+          "output": "\n⚙️  /skin poseidon\n  Skin set to: poseidon (saved)\n  Note: banner colors will update on next session start.\n",
+          "config_after": "display:\n  skin: poseidon\n"
+        },
+        {
+          "input": "/help",
+          "dispatched": "/help",
+          "continue": true,
+          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|                (Ψ) Available Commands                 |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · blueprint [override]\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
+        }
+      ],
+      "goodbye": "\nFair winds! Ψ\n"
+    },
+    {
+      "name": "config-backend",
+      "cwd": "outside",
+      "env": {},
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "codex"
+          }
+        }
+      },
+      "files": {},
+      "steps": [
+        {
+          "input": "/autoformalize-backend",
+          "dispatched": "/autoformalize-backend",
+          "continue": true,
+          "output": "\n⚙️  /autoformalize-backend\n  Autoformalize backend: codex\n  Config backend:        codex\n  Available:            claude-code, codex\n  Usage: /autoformalize-backend <backend>\n"
+        },
+        {
+          "input": "/managed-chat status",
+          "dispatched": "/managed-chat status",
+          "continue": true,
+          "output": "\n⚙️  /managed-chat status\n`/managed-chat` opens the configured managed backend child session (`codex`).\nUse `/autoformalize-backend` to switch backends, or `/chat` for inline\nonboarding in the current Gauss session.\n"
+        }
+      ],
+      "goodbye": "\nGoodbye! @\n"
+    },
+    {
+      "name": "bad-config-backend",
+      "cwd": "outside",
+      "env": {},
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "nonsense"
+          }
+        }
+      },
+      "files": {},
+      "steps": [
+        {
+          "input": "/autoformalize-backend",
+          "dispatched": "/autoformalize-backend",
+          "continue": true,
+          "output": "\n⚙️  /autoformalize-backend\n  Autoformalize backend: nonsense\n  Config backend:        nonsense\n  Available:            claude-code, codex\n  Usage: /autoformalize-backend <backend>\n"
+        },
+        {
+          "input": "/managed-chat status",
+          "dispatched": "/managed-chat status",
+          "continue": true,
+          "output": "\n⚙️  /managed-chat status\n`/managed-chat` opens the configured managed backend child session (`nonsense`).\nUse `/autoformalize-backend` to switch backends, or `/chat` for inline\nonboarding in the current Gauss session.\n"
+        }
+      ],
+      "goodbye": "\nGoodbye! @\n"
+    }
+  ]
+}

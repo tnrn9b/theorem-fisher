@@ -1,0 +1,80 @@
+{
+    "nodes": [
+        {
+            "attempts": 1,
+            "depth": 0,
+            "id": 1,
+            "key": "1 + 1 = 2",
+            "name": "Demo.main_thm",
+            "root": 1,
+            "splits": [
+                1,
+                2
+            ],
+            "status": "open"
+        },
+        {
+            "attempts": 1,
+            "depth": 0,
+            "id": 2,
+            "key": "2 + 2 = 4",
+            "name": "Demo.side_thm",
+            "root": 2,
+            "splits": [],
+            "status": "proved"
+        },
+        {
+            "attempts": 0,
+            "depth": 1,
+            "id": 3,
+            "key": "1 = 1",
+            "name": "Demo.main_thm_l1",
+            "root": 1,
+            "splits": [],
+            "status": "proved"
+        },
+        {
+            "attempts": 0,
+            "depth": 1,
+            "id": 4,
+            "key": "0 = 1",
+            "name": "Demo.main_thm_l2",
+            "reason": "disproved by decide",
+            "root": 1,
+            "splits": [],
+            "status": "failed"
+        }
+    ],
+    "roots": [
+        1,
+        2
+    ],
+    "splits": [
+        {
+            "id": 1,
+            "lemmas": [
+                3,
+                4
+            ],
+            "parent": 1,
+            "status": "accepted"
+        },
+        {
+            "id": 2,
+            "lemmas": [],
+            "parent": 1,
+            "reason": "the lemmas do not imply the goal",
+            "status": "rejected"
+        }
+    ],
+    "whiteboards": [
+        {
+            "root": 1,
+            "text": "# Plan for Demo.main_thm\n- Demo.main_thm (open)\n  - split 1 (accepted)\n    - Demo.main_thm_l1 (proved)\n    - Demo.main_thm_l2 (failed: disproved by decide)\n  - split 2 (rejected: the lemmas do not imply the goal)"
+        },
+        {
+            "root": 2,
+            "text": "# Plan for Demo.side_thm\n- Demo.side_thm (proved)"
+        }
+    ]
+}

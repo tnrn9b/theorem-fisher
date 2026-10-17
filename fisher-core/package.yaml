@@ -1,0 +1,57 @@
+name:        fisher-core
+version:     0.2.0.0
+synopsis:    Config, project model and paths shared by every Fisher package
+license:     BSD-3-Clause
+author:      Tom Reynolds
+
+extra-source-files:
+- data/*
+
+language: GHC2021
+
+default-extensions:
+- OverloadedStrings
+- LambdaCase
+
+ghc-options:
+- -Wall
+- -Wcompat
+
+dependencies:
+- base >= 4.14 && < 5
+- aeson
+- attoparsec
+- bytestring
+- containers
+- scientific
+- directory
+- file-embed
+- filepath
+- text
+- time
+- typed-process
+- unicode-transforms
+- unix
+- vector
+- yaml
+- sqlite-simple
+- conduit
+- resourcet
+- libyaml
+
+library:
+  source-dirs: src
+
+tests:
+  fisher-core-test:
+    main:        Spec.hs
+    source-dirs: test
+    build-tools: hspec-discover
+    dependencies:
+    - fisher-core
+    - hspec
+    - temporary
+    - QuickCheck
+    - vector
+    - aeson
+    - scientific

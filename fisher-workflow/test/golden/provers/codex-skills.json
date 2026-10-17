@@ -1,0 +1,12 @@
+{
+  "isabelle": [
+    "SKILL.md",
+    "commands/draft.md",
+    "commands/prove.md"
+  ],
+  "rocq": [
+    "SKILL.md",
+    "commands/draft.md",
+    "commands/prove.md"
+  ]
+}

@@ -1,0 +1,68 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 347.6,
+            "goal": "Step.Cone.rel_kept",
+            "outcome": "closed (helpers: RecvSliced.entry, keptCell_buf_live, fireCand_change, fireCand_frame_step)",
+            "started_s": 25.8,
+            "stats": {
+                "cost_usd": 0.9525895999999999,
+                "exit": 0,
+                "input_tokens": 2413450,
+                "output_tokens": 32211,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 4,
+                    "mcp_lean_lsp_lean_verify": 1,
+                    "patch": 2,
+                    "read_file": 10,
+                    "search_files": 3,
+                    "terminal": 8,
+                    "write_file": 3
+                },
+                "turns": 22,
+                "wall_s": 296.9
+            }
+        }
+    ],
+    "auto_closed": 0,
+    "auto_off": null,
+    "auto_ran": true,
+    "auto_requested": true,
+    "auto_warmup_s": 74.7,
+    "backends": {
+        "gauss": [
+            1,
+            1
+        ]
+    },
+    "budget_s": 7200,
+    "budget_spent": false,
+    "closed_per_hour": 10.4,
+    "disproved": 0,
+    "elapsed_s": 347.6,
+    "file": "Step/Cone.lean",
+    "goals": [
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": 1,
+            "by_backend": "gauss",
+            "closedBy": "model",
+            "closed_at_s": 347.6,
+            "goal": "Step.Cone.rel_kept",
+            "status": "closed"
+        }
+    ],
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/h/6/lean",
+    "repaired_then_closed": 0,
+    "repairs_kept": 0,
+    "slots": 4
+}

@@ -1,0 +1,2 @@
+Axioms:
+A.adm : 2 + 2 = 4

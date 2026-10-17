@@ -1,0 +1,49 @@
+name:        fisher-mcp
+version:     0.2.0.0
+synopsis:    The MCP client (stdio and streamable HTTP servers, their tools in the registry, sampling)
+license:     BSD-3-Clause
+author:      Tom Reynolds
+
+language: GHC2021
+
+default-extensions:
+- OverloadedStrings
+- LambdaCase
+
+ghc-options:
+- -Wall
+- -Wcompat
+
+dependencies:
+- base >= 4.14 && < 5
+- fisher-core
+- fisher-tools
+- fisher-llm
+- async
+- bytestring
+- case-insensitive
+- containers
+- directory
+- filepath
+- http-client
+- http-client-tls
+- http-types
+- process
+- stm
+- text
+- time
+- unix
+
+library:
+  source-dirs: src
+
+tests:
+  fisher-mcp-test:
+    main:        Spec.hs
+    source-dirs: test
+    build-tools: hspec-discover
+    ghc-options: -threaded
+    dependencies:
+    - fisher-mcp
+    - hspec
+    - temporary

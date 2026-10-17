@@ -1,0 +1,7 @@
+Cleaned Chk
+Running Chk ...
+Chk FAILED (see also "isabelle build_log -H Error Chk")
+*** FISHER_ORACLES bad: Pure.skip_proof
+*** 
+*** At command "ML" (line 9 of "~/IdeaProjects/Fisher/.build/probe/isa2/Chk.thy")
+Unfinished session(s): Chk

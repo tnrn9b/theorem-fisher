@@ -1,0 +1,58 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 251.9,
+            "goal": "Step.Relay.fireCand_third",
+            "outcome": "closed",
+            "started_s": 0,
+            "stats": {
+                "cost_usd": 0.6584398999999999,
+                "exit": 0,
+                "input_tokens": 2153805,
+                "output_tokens": 11038,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 7,
+                    "mcp_lean_lsp_lean_goal": 2,
+                    "mcp_lean_lsp_lean_verify": 1,
+                    "patch": 8,
+                    "read_file": 7,
+                    "search_files": 5
+                },
+                "turns": 22,
+                "wall_s": 227.9
+            }
+        }
+    ],
+    "backends": {
+        "gauss": [
+            1,
+            1
+        ]
+    },
+    "budget_s": 3600,
+    "budget_spent": false,
+    "closed_per_hour": 14.3,
+    "elapsed_s": 251.9,
+    "file": "Step/Relay.lean",
+    "goals": [
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": 1,
+            "by_backend": "gauss",
+            "closed_at_s": 251.9,
+            "goal": "Step.Relay.fireCand_third",
+            "status": "closed"
+        }
+    ],
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/g/5/lean",
+    "slots": 4
+}

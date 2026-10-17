@@ -1,0 +1,56 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 395.6,
+            "goal": "Step.Summary.machineClose_of_bodyClose",
+            "outcome": "closed",
+            "started_s": 0,
+            "stats": {
+                "cost_usd": 0.5779282,
+                "exit": 0,
+                "input_tokens": 1980228,
+                "output_tokens": 16026,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 2,
+                    "read_file": 3,
+                    "terminal": 23,
+                    "write_file": 2
+                },
+                "turns": 28,
+                "wall_s": 366.9
+            }
+        }
+    ],
+    "backends": {
+        "gauss": [
+            1,
+            1
+        ]
+    },
+    "budget_s": 3600,
+    "budget_spent": false,
+    "closed_per_hour": 9.1,
+    "elapsed_s": 395.6,
+    "file": "Step/Summary.lean",
+    "goals": [
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": 1,
+            "by_backend": "gauss",
+            "closed_at_s": 395.6,
+            "goal": "Step.Summary.machineClose_of_bodyClose",
+            "status": "closed"
+        }
+    ],
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/g/1/lean",
+    "slots": 4
+}

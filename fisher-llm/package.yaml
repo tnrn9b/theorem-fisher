@@ -1,0 +1,61 @@
+name:        fisher-llm
+version:     0.2.0.0
+synopsis:    LLM clients (chat completions, Anthropic messages, Codex responses), providers and credentials
+license:     BSD-3-Clause
+author:      Tom Reynolds
+
+extra-source-files:
+- data/*
+
+language: GHC2021
+
+default-extensions:
+- OverloadedStrings
+- LambdaCase
+
+ghc-options:
+- -Wall
+- -Wcompat
+
+dependencies:
+- base >= 4.14 && < 5
+- fisher-core
+- aeson
+- attoparsec
+- bytestring
+- case-insensitive
+- containers
+- directory
+- filepath
+- http-client
+- http-client-tls
+- http-types
+- process
+- random
+- scientific
+- stm
+- text
+- time
+- unix
+- vector
+- yaml
+- conduit
+- temporary
+- libyaml
+- cryptohash-sha1
+- base16-bytestring
+- file-embed
+
+library:
+  source-dirs: src
+
+tests:
+  fisher-llm-test:
+    main:        Spec.hs
+    source-dirs: test
+    build-tools: hspec-discover
+    ghc-options: -threaded
+    dependencies:
+    - fisher-llm
+    - hspec
+    - temporary

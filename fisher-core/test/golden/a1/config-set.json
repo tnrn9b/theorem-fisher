@@ -1,0 +1,208 @@
+{
+  "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+  "cases": [
+    {
+      "name": "simple",
+      "input": null,
+      "key": "model",
+      "value": "anthropic/claude-sonnet-4",
+      "stdout": "✓ Set model = anthropic/claude-sonnet-4 in <TMP>/gauss-home/config.yaml\n",
+      "saved": {
+        "model": "anthropic/claude-sonnet-4"
+      },
+      "env": null
+    },
+    {
+      "name": "nested",
+      "input": null,
+      "key": "tts.provider",
+      "value": "edge",
+      "stdout": "✓ Set tts.provider = edge in <TMP>/gauss-home/config.yaml\n",
+      "saved": {
+        "tts": {
+          "provider": "edge"
+        }
+      },
+      "env": null
+    },
+    {
+      "name": "into-existing",
+      "input": "model: a\nterminal:\n  timeout: 5\n",
+      "key": "terminal.backend",
+      "value": "docker",
+      "stdout": "✓ Set terminal.backend = docker in <TMP>/gauss-home/config.yaml\n",
+      "saved": {
+        "model": "a",
+        "terminal": {
+          "timeout": 5,
+          "backend": "docker"
+        }
+      },
+      "env": "TERMINAL_ENV=docker\n"
+    },
+    {
+      "name": "replace-scalar-parent",
+      "input": "tts: 3\n",
+      "key": "tts.provider",
+      "value": "x",
+      "stdout": "✓ Set tts.provider = x in <TMP>/gauss-home/config.yaml\n",
+      "saved": {
+        "tts": {
+          "provider": "x"
+        }
+      },
+      "env": null
+    },
+    {
+      "name": "bool-true",
+      "input": null,
+      "key": "display.compact",
+      "value": "Yes",
+      "stdout": "✓ Set display.compact = True in <TMP>/gauss-home/config.yaml\n",
+      "saved": {
+        "display": {
+          "compact": true
+        }
+      },
+      "env": null
+    },
+    {
+      "name": "bool-false",
+      "input": null,
+      "key": "display.compact",
+      "value": "off",
+      "stdout": "✓ Set display.compact = False in <TMP>/gauss-home/config.yaml\n",
+      "saved": {
+        "display": {
+          "compact": false
+        }
+      },
+      "env": null
+    },
+    {
+      "name": "int",
+      "input": null,
+      "key": "agent.max_turns",
+      "value": "42",
+      "stdout": "✓ Set agent.max_turns = 42 in <TMP>/gauss-home/config.yaml\n",
+      "saved": {
+        "agent": {
+          "max_turns": 42
+        }
+      },
+      "env": null
+    },
+    {
+      "name": "float",
+      "input": null,
+      "key": "x.ratio",
+      "value": "1.5",
+      "stdout": "✓ Set x.ratio = 1.5 in <TMP>/gauss-home/config.yaml\n",
+      "saved": {
+        "x": {
+          "ratio": 1.5
+        }
+      },
+      "env": null
+    },
+    {
+      "name": "float-trailing-dot",
+      "input": null,
+      "key": "x.ratio",
+      "value": "1.",
+      "stdout": "✓ Set x.ratio = 1.0 in <TMP>/gauss-home/config.yaml\n",
+      "saved": {
+        "x": {
+          "ratio": 1.0
+        }
+      },
+      "env": null
+    },
+    {
+      "name": "negative-stays-text",
+      "input": null,
+      "key": "x.n",
+      "value": "-1",
+      "stdout": "✓ Set x.n = -1 in <TMP>/gauss-home/config.yaml\n",
+      "saved": {
+        "x": {
+          "n": "-1"
+        }
+      },
+      "env": null
+    },
+    {
+      "name": "api-key-suffix",
+      "input": null,
+      "key": "deepseek_api_key",
+      "value": "sk-1",
+      "stdout": "✓ Set deepseek_api_key in <TMP>/gauss-home/.env\n",
+      "saved": null,
+      "env": "DEEPSEEK_API_KEY=sk-1\n"
+    },
+    {
+      "name": "token-suffix",
+      "input": null,
+      "key": "MY_TOKEN",
+      "value": "t",
+      "stdout": "✓ Set MY_TOKEN in <TMP>/gauss-home/.env\n",
+      "saved": null,
+      "env": "MY_TOKEN=t\n"
+    },
+    {
+      "name": "listed-key",
+      "input": null,
+      "key": "fal_key",
+      "value": "f",
+      "stdout": "✓ Set fal_key in <TMP>/gauss-home/.env\n",
+      "saved": null,
+      "env": "FAL_KEY=f\n"
+    },
+    {
+      "name": "ssh-prefix",
+      "input": null,
+      "key": "terminal_ssh_port",
+      "value": "22",
+      "stdout": "✓ Set terminal_ssh_port in <TMP>/gauss-home/.env\n",
+      "saved": null,
+      "env": "TERMINAL_SSH_PORT=22\n"
+    },
+    {
+      "name": "env-sync-mount",
+      "input": null,
+      "key": "terminal.docker_mount_cwd_to_workspace",
+      "value": "true",
+      "stdout": "✓ Set terminal.docker_mount_cwd_to_workspace = True in <TMP>/gauss-home/config.yaml\n",
+      "saved": {
+        "terminal": {
+          "docker_mount_cwd_to_workspace": true
+        }
+      },
+      "env": "TERMINAL_DOCKER_MOUNT_CWD_TO_WORKSPACE=True\n"
+    },
+    {
+      "name": "env-sync-timeout",
+      "input": null,
+      "key": "terminal.timeout",
+      "value": "300",
+      "stdout": "✓ Set terminal.timeout = 300 in <TMP>/gauss-home/config.yaml\n",
+      "saved": {
+        "terminal": {
+          "timeout": 300
+        }
+      },
+      "env": "TERMINAL_TIMEOUT=300\n"
+    },
+    {
+      "name": "list-file",
+      "input": "- a\n",
+      "key": "model",
+      "value": "m",
+      "raised": "TypeError",
+      "saved": [
+        "a"
+      ],
+      "env": null
+    }
+  ]
+}

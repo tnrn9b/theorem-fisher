@@ -1,0 +1,68 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 452.7,
+            "goal": "Step.Graft.spliced_run",
+            "outcome": "closed",
+            "started_s": 26.5,
+            "stats": {
+                "cost_usd": 1.061965,
+                "exit": 0,
+                "input_tokens": 2967302,
+                "output_tokens": 32290,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 10,
+                    "mcp_lean_lsp_lean_goal": 2,
+                    "mcp_lean_lsp_lean_verify": 1,
+                    "patch": 18,
+                    "read_file": 9,
+                    "search_files": 1,
+                    "terminal": 4
+                },
+                "turns": 25,
+                "wall_s": 399.6
+            }
+        }
+    ],
+    "auto_closed": 0,
+    "auto_off": null,
+    "auto_ran": true,
+    "auto_requested": true,
+    "auto_warmup_s": 50.1,
+    "backends": {
+        "gauss": [
+            1,
+            1
+        ]
+    },
+    "budget_s": 7200,
+    "budget_spent": false,
+    "closed_per_hour": 8,
+    "disproved": 0,
+    "elapsed_s": 452.7,
+    "file": "Step/Graft.lean",
+    "goals": [
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": 1,
+            "by_backend": "gauss",
+            "closedBy": "model",
+            "closed_at_s": 452.7,
+            "goal": "Step.Graft.spliced_run",
+            "status": "closed"
+        }
+    ],
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/h/2/lean",
+    "repaired_then_closed": 0,
+    "repairs_kept": 0,
+    "slots": 4
+}

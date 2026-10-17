@@ -1,0 +1,450 @@
+{
+ "required": [],
+ "optional": [
+  [
+   "NOUS_BASE_URL",
+   {
+    "description": "Nous Portal base URL override",
+    "prompt": "Nous Portal base URL (leave empty for default)",
+    "url": null,
+    "password": false,
+    "category": "provider",
+    "advanced": true
+   }
+  ],
+  [
+   "OPENROUTER_API_KEY",
+   {
+    "description": "OpenRouter API key (for vision, web scraping helpers, and MoA)",
+    "prompt": "OpenRouter API key",
+    "url": "https://openrouter.ai/keys",
+    "password": true,
+    "tools": [
+     "vision_analyze",
+     "mixture_of_agents"
+    ],
+    "category": "provider",
+    "advanced": true
+   }
+  ],
+  [
+   "GLM_API_KEY",
+   {
+    "description": "Z.AI / GLM API key (also recognized as ZAI_API_KEY / Z_AI_API_KEY)",
+    "prompt": "Z.AI / GLM API key",
+    "url": "https://z.ai/",
+    "password": true,
+    "category": "provider",
+    "advanced": true
+   }
+  ],
+  [
+   "ZAI_API_KEY",
+   {
+    "description": "Z.AI API key (alias for GLM_API_KEY)",
+    "prompt": "Z.AI API key",
+    "url": "https://z.ai/",
+    "password": true,
+    "category": "provider",
+    "advanced": true
+   }
+  ],
+  [
+   "Z_AI_API_KEY",
+   {
+    "description": "Z.AI API key (alias for GLM_API_KEY)",
+    "prompt": "Z.AI API key",
+    "url": "https://z.ai/",
+    "password": true,
+    "category": "provider",
+    "advanced": true
+   }
+  ],
+  [
+   "GLM_BASE_URL",
+   {
+    "description": "Z.AI / GLM base URL override",
+    "prompt": "Z.AI / GLM base URL (leave empty for default)",
+    "url": null,
+    "password": false,
+    "category": "provider",
+    "advanced": true
+   }
+  ],
+  [
+   "KIMI_API_KEY",
+   {
+    "description": "Kimi / Moonshot API key",
+    "prompt": "Kimi API key",
+    "url": "https://platform.moonshot.cn/",
+    "password": true,
+    "category": "provider",
+    "advanced": true
+   }
+  ],
+  [
+   "KIMI_BASE_URL",
+   {
+    "description": "Kimi / Moonshot base URL override",
+    "prompt": "Kimi base URL (leave empty for default)",
+    "url": null,
+    "password": false,
+    "category": "provider",
+    "advanced": true
+   }
+  ],
+  [
+   "MINIMAX_API_KEY",
+   {
+    "description": "MiniMax API key (international)",
+    "prompt": "MiniMax API key",
+    "url": "https://www.minimax.io/",
+    "password": true,
+    "category": "provider",
+    "advanced": true
+   }
+  ],
+  [
+   "MINIMAX_BASE_URL",
+   {
+    "description": "MiniMax base URL override",
+    "prompt": "MiniMax base URL (leave empty for default)",
+    "url": null,
+    "password": false,
+    "category": "provider",
+    "advanced": true
+   }
+  ],
+  [
+   "MINIMAX_CN_API_KEY",
+   {
+    "description": "MiniMax API key (China endpoint)",
+    "prompt": "MiniMax (China) API key",
+    "url": "https://www.minimaxi.com/",
+    "password": true,
+    "category": "provider",
+    "advanced": true
+   }
+  ],
+  [
+   "MINIMAX_CN_BASE_URL",
+   {
+    "description": "MiniMax (China) base URL override",
+    "prompt": "MiniMax (China) base URL (leave empty for default)",
+    "url": null,
+    "password": false,
+    "category": "provider",
+    "advanced": true
+   }
+  ],
+  [
+   "DEEPSEEK_API_KEY",
+   {
+    "description": "DeepSeek API key for direct DeepSeek access",
+    "prompt": "DeepSeek API Key",
+    "url": "https://platform.deepseek.com/api_keys",
+    "password": true,
+    "category": "provider"
+   }
+  ],
+  [
+   "DEEPSEEK_BASE_URL",
+   {
+    "description": "Custom DeepSeek API base URL (advanced)",
+    "prompt": "DeepSeek Base URL",
+    "url": "",
+    "password": false,
+    "category": "provider"
+   }
+  ],
+  [
+   "FIRECRAWL_API_KEY",
+   {
+    "description": "Firecrawl API key for web search",
+    "prompt": "Firecrawl API key",
+    "url": "https://firecrawl.dev/",
+    "tools": [
+     "web_search"
+    ],
+    "password": true,
+    "category": "tool"
+   }
+  ],
+  [
+   "FIRECRAWL_API_URL",
+   {
+    "description": "Firecrawl API URL for self-hosted instances (optional)",
+    "prompt": "Firecrawl API URL (leave empty for cloud)",
+    "url": null,
+    "password": false,
+    "category": "tool",
+    "advanced": true
+   }
+  ],
+  [
+   "BROWSERBASE_API_KEY",
+   {
+    "description": "Browserbase API key for cloud browser (optional \u2014 local browser works without this)",
+    "prompt": "Browserbase API key",
+    "url": "https://browserbase.com/",
+    "tools": [
+     "browser_navigate",
+     "browser_click"
+    ],
+    "password": true,
+    "category": "tool"
+   }
+  ],
+  [
+   "BROWSERBASE_PROJECT_ID",
+   {
+    "description": "Browserbase project ID (optional \u2014 only needed for cloud browser)",
+    "prompt": "Browserbase project ID",
+    "url": "https://browserbase.com/",
+    "tools": [
+     "browser_navigate",
+     "browser_click"
+    ],
+    "password": false,
+    "category": "tool"
+   }
+  ],
+  [
+   "FAL_KEY",
+   {
+    "description": "FAL API key for image generation",
+    "prompt": "FAL API key",
+    "url": "https://fal.ai/",
+    "tools": [
+     "image_generate"
+    ],
+    "password": true,
+    "category": "tool"
+   }
+  ],
+  [
+   "TINKER_API_KEY",
+   {
+    "description": "Tinker API key for RL training",
+    "prompt": "Tinker API key",
+    "url": "https://tinker-console.thinkingmachines.ai/keys",
+    "tools": [
+     "rl_start_training",
+     "rl_check_status",
+     "rl_stop_training"
+    ],
+    "password": true,
+    "category": "tool"
+   }
+  ],
+  [
+   "WANDB_API_KEY",
+   {
+    "description": "Weights & Biases API key for experiment tracking",
+    "prompt": "WandB API key",
+    "url": "https://wandb.ai/authorize",
+    "tools": [
+     "rl_get_results",
+     "rl_check_status"
+    ],
+    "password": true,
+    "category": "tool"
+   }
+  ],
+  [
+   "VOICE_TOOLS_OPENAI_KEY",
+   {
+    "description": "OpenAI API key for voice transcription (Whisper) and OpenAI TTS",
+    "prompt": "OpenAI API Key (for Whisper STT + TTS)",
+    "url": "https://platform.openai.com/api-keys",
+    "tools": [
+     "voice_transcription",
+     "openai_tts"
+    ],
+    "password": true,
+    "category": "tool"
+   }
+  ],
+  [
+   "ELEVENLABS_API_KEY",
+   {
+    "description": "ElevenLabs API key for premium text-to-speech voices",
+    "prompt": "ElevenLabs API key",
+    "url": "https://elevenlabs.io/",
+    "password": true,
+    "category": "tool"
+   }
+  ],
+  [
+   "GITHUB_TOKEN",
+   {
+    "description": "GitHub token for Skills Hub (higher API rate limits, skill publish)",
+    "prompt": "GitHub Token",
+    "url": "https://github.com/settings/tokens",
+    "password": true,
+    "category": "tool"
+   }
+  ],
+  [
+   "TELEGRAM_BOT_TOKEN",
+   {
+    "description": "Telegram bot token from @BotFather",
+    "prompt": "Telegram bot token",
+    "url": "https://t.me/BotFather",
+    "password": true,
+    "category": "messaging"
+   }
+  ],
+  [
+   "TELEGRAM_ALLOWED_USERS",
+   {
+    "description": "Comma-separated Telegram user IDs allowed to use the bot (get ID from @userinfobot)",
+    "prompt": "Allowed Telegram user IDs (comma-separated)",
+    "url": "https://t.me/userinfobot",
+    "password": false,
+    "category": "messaging"
+   }
+  ],
+  [
+   "DISCORD_BOT_TOKEN",
+   {
+    "description": "Discord bot token from Developer Portal",
+    "prompt": "Discord bot token",
+    "url": "https://discord.com/developers/applications",
+    "password": true,
+    "category": "messaging"
+   }
+  ],
+  [
+   "DISCORD_ALLOWED_USERS",
+   {
+    "description": "Comma-separated Discord user IDs allowed to use the bot",
+    "prompt": "Allowed Discord user IDs (comma-separated)",
+    "url": null,
+    "password": false,
+    "category": "messaging"
+   }
+  ],
+  [
+   "SLACK_BOT_TOKEN",
+   {
+    "description": "Slack bot token (xoxb-). Get from OAuth & Permissions after installing your app. Required scopes: chat:write, app_mentions:read, channels:history, groups:history, im:history, im:read, im:write, users:read, files:write",
+    "prompt": "Slack Bot Token (xoxb-...)",
+    "url": "https://api.slack.com/apps",
+    "password": true,
+    "category": "messaging"
+   }
+  ],
+  [
+   "SLACK_APP_TOKEN",
+   {
+    "description": "Slack app-level token (xapp-) for Socket Mode. Get from Basic Information \u2192 App-Level Tokens. Also ensure Event Subscriptions include: message.im, message.channels, message.groups, app_mention",
+    "prompt": "Slack App Token (xapp-...)",
+    "url": "https://api.slack.com/apps",
+    "password": true,
+    "category": "messaging"
+   }
+  ],
+  [
+   "GATEWAY_ALLOW_ALL_USERS",
+   {
+    "description": "Allow all users to interact with messaging bots (true/false). Default: false.",
+    "prompt": "Allow all users (true/false)",
+    "url": null,
+    "password": false,
+    "category": "messaging",
+    "advanced": true
+   }
+  ],
+  [
+   "MESSAGING_CWD",
+   {
+    "description": "Working directory for terminal commands via messaging",
+    "prompt": "Messaging working directory (default: home)",
+    "url": null,
+    "password": false,
+    "category": "setting"
+   }
+  ],
+  [
+   "SUDO_PASSWORD",
+   {
+    "description": "Sudo password for terminal commands requiring root access",
+    "prompt": "Sudo password",
+    "url": null,
+    "password": true,
+    "category": "setting"
+   }
+  ],
+  [
+   "GAUSS_MAX_ITERATIONS",
+   {
+    "description": "Maximum tool-calling iterations per conversation (default: 90)",
+    "prompt": "Max iterations",
+    "url": null,
+    "password": false,
+    "category": "setting"
+   }
+  ],
+  [
+   "GAUSS_TOOL_PROGRESS",
+   {
+    "description": "(deprecated) Use display.tool_progress in config.yaml instead",
+    "prompt": "Tool progress (deprecated \u2014 use config.yaml)",
+    "url": null,
+    "password": false,
+    "category": "setting"
+   }
+  ],
+  [
+   "GAUSS_TOOL_PROGRESS_MODE",
+   {
+    "description": "(deprecated) Use display.tool_progress in config.yaml instead",
+    "prompt": "Progress mode (deprecated \u2014 use config.yaml)",
+    "url": null,
+    "password": false,
+    "category": "setting"
+   }
+  ],
+  [
+   "GAUSS_PREFILL_MESSAGES_FILE",
+   {
+    "description": "Path to JSON file with ephemeral prefill messages for few-shot priming",
+    "prompt": "Prefill messages file path",
+    "url": null,
+    "password": false,
+    "category": "setting"
+   }
+  ],
+  [
+   "GAUSS_EPHEMERAL_SYSTEM_PROMPT",
+   {
+    "description": "Ephemeral system prompt injected at API-call time (never persisted to sessions)",
+    "prompt": "Ephemeral system prompt",
+    "url": null,
+    "password": false,
+    "category": "setting"
+   }
+  ]
+ ],
+ "by_version": {
+  "3": [
+   "FIRECRAWL_API_KEY",
+   "BROWSERBASE_API_KEY",
+   "BROWSERBASE_PROJECT_ID",
+   "FAL_KEY"
+  ],
+  "4": [
+   "VOICE_TOOLS_OPENAI_KEY",
+   "ELEVENLABS_API_KEY"
+  ],
+  "5": [
+   "WHATSAPP_ENABLED",
+   "WHATSAPP_MODE",
+   "WHATSAPP_ALLOWED_USERS",
+   "SLACK_BOT_TOKEN",
+   "SLACK_APP_TOKEN",
+   "SLACK_ALLOWED_USERS"
+  ]
+ }
+}

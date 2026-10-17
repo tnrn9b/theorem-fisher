@@ -1,0 +1,182 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.39.1.
+--
+-- see: https://github.com/sol/hpack
+
+name:           fisher-ui
+version:        0.2.0.0
+synopsis:       fisher ui - a local web app over Fisher's sessions, runs and benchmarks
+author:         Tom Reynolds
+maintainer:     Tom Reynolds
+license:        BSD-3-Clause
+build-type:     Simple
+
+library
+  exposed-modules:
+      Fisher.UI.Access
+      Fisher.UI.Api.Context
+      Fisher.UI.Api.Live
+      Fisher.UI.Api.Runs
+      Fisher.UI.Api.Search
+      Fisher.UI.Api.Sessions
+      Fisher.UI.Api.Settings
+      Fisher.UI.Api.Steps
+      Fisher.UI.Children
+      Fisher.UI.Db
+      Fisher.UI.Diff
+      Fisher.UI.Files
+      Fisher.UI.Prune
+      Fisher.UI.Response
+      Fisher.UI.Server
+      Fisher.UI.Static
+  other-modules:
+      Paths_fisher_ui
+  autogen-modules:
+      Paths_fisher_ui
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat
+  build-depends:
+      aeson
+    , array
+    , base >=4.14 && <5
+    , bytestring
+    , containers
+    , deepseq
+    , directory
+    , file-embed
+    , filepath
+    , fisher-agent
+    , fisher-core
+    , fisher-search
+    , http-types
+    , mime-types
+    , network
+    , process
+    , scientific
+    , sqlite-simple
+    , streaming-commons
+    , template-haskell
+    , text
+    , time
+    , unix
+    , vector
+    , wai
+    , warp
+    , yaml
+  default-language: GHC2021
+
+test-suite fisher-ui-fixture-server
+  type: exitcode-stdio-1.0
+  main-is: FixtureServer.hs
+  other-modules:
+      Fisher.UI.FakeFisher
+      Fisher.UI.Fixture
+      Fisher.UI.TestDirs
+  hs-source-dirs:
+      test-server
+      test
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat -threaded
+  build-depends:
+      aeson
+    , array
+    , base >=4.14 && <5
+    , bytestring
+    , containers
+    , deepseq
+    , directory
+    , file-embed
+    , filepath
+    , fisher-agent
+    , fisher-core
+    , fisher-search
+    , fisher-ui
+    , http-types
+    , mime-types
+    , network
+    , process
+    , scientific
+    , sqlite-simple
+    , streaming-commons
+    , template-haskell
+    , temporary
+    , text
+    , time
+    , unix
+    , vector
+    , wai
+    , wai-extra
+    , warp
+    , yaml
+  default-language: GHC2021
+
+test-suite fisher-ui-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Fisher.UI.AccessSpec
+      Fisher.UI.ChildrenSpec
+      Fisher.UI.ContextSpec
+      Fisher.UI.DiffSpec
+      Fisher.UI.FakeFisher
+      Fisher.UI.Fixture
+      Fisher.UI.LedgerReadSpec
+      Fisher.UI.LiveSpec
+      Fisher.UI.PruneSpec
+      Fisher.UI.RunsSpec
+      Fisher.UI.SearchSpec
+      Fisher.UI.SessionsSpec
+      Fisher.UI.SettingsSpec
+      Fisher.UI.StepsSpec
+      Fisher.UI.TestDirs
+      Paths_fisher_ui
+  autogen-modules:
+      Paths_fisher_ui
+  hs-source-dirs:
+      test
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat -threaded -rtsopts -with-rtsopts=-T
+  build-tool-depends:
+      hspec-discover:hspec-discover
+  build-depends:
+      aeson
+    , array
+    , base >=4.14 && <5
+    , bytestring
+    , containers
+    , deepseq
+    , directory
+    , file-embed
+    , filepath
+    , fisher-agent
+    , fisher-core
+    , fisher-search
+    , fisher-ui
+    , hspec
+    , http-types
+    , mime-types
+    , network
+    , process
+    , scientific
+    , sqlite-simple
+    , streaming-commons
+    , template-haskell
+    , temporary
+    , text
+    , time
+    , unix
+    , vector
+    , wai
+    , wai-extra
+    , warp
+    , yaml
+  default-language: GHC2021

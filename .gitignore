@@ -1,3 +1,18 @@
+dist-newstyle/
+.direnv/
+*.o
+*.hi
+*.dyn_o
+*.dyn_hi
+.hls/
+.bsp/
+.stack-work/
+.build/
+_to_delete/
+.idea/
+_docs/
+.DS_Store
+
 dist
 dist-*
 cabal-dev
@@ -21,3 +36,5 @@ cabal.project.local
 cabal.project.local~
 .HTF/
 .ghc.environment.*
+
+

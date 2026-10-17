@@ -1,0 +1,5 @@
+name = "GraphProj"
+defaultTargets = ["GraphProj"]
+
+[[lean_lib]]
+name = "GraphProj"

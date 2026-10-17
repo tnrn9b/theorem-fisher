@@ -1,0 +1,113 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 50.5,
+            "goal": "Demo.b",
+            "outcome": "closed",
+            "started_s": 14,
+            "stats": {
+                "cost_usd": 0.25,
+                "exit": 0,
+                "input_tokens": 1000,
+                "output_tokens": 100,
+                "tools": {
+                    "patch": 2
+                },
+                "turns": 10,
+                "wall_s": 36
+            }
+        },
+        {
+            "attempt": 2,
+            "backend": "gauss",
+            "ended_s": 70,
+            "goal": "Demo.d",
+            "outcome": "exit 0",
+            "started_s": 14,
+            "stats": {
+                "cost_usd": 0.4,
+                "exit": 0,
+                "input_tokens": 1000,
+                "output_tokens": 100,
+                "tools": {
+                    "patch": 2
+                },
+                "turns": 20,
+                "wall_s": 56
+            }
+        }
+    ],
+    "auto_closed": 1,
+    "auto_off": null,
+    "auto_ran": true,
+    "auto_requested": true,
+    "backends": {
+        "gauss": [
+            2,
+            1
+        ]
+    },
+    "budget_s": 7200,
+    "budget_spent": false,
+    "closed_per_hour": 102.9,
+    "disproved": 1,
+    "elapsed_s": 70,
+    "file": "Demo/Flat.lean",
+    "goals": [
+        {
+            "attempts": [],
+            "by_attempt": null,
+            "by_backend": null,
+            "closedBy": "auto",
+            "closed_at_s": 3.2,
+            "goal": "Demo.a",
+            "status": "closed"
+        },
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": 1,
+            "by_backend": "gauss",
+            "closedBy": "model+repair",
+            "closed_at_s": 50.5,
+            "goal": "Demo.b",
+            "status": "closed"
+        },
+        {
+            "attempts": [],
+            "by_attempt": null,
+            "by_backend": null,
+            "closedBy": null,
+            "closed_at_s": null,
+            "disproof": {
+                "tactic": "decide",
+                "verdict": "false"
+            },
+            "goal": "Demo.c",
+            "status": "disproved"
+        },
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": null,
+            "by_backend": null,
+            "closedBy": null,
+            "closed_at_s": null,
+            "goal": "Demo.d",
+            "status": "gave up"
+        }
+    ],
+    "goals_closed": 2,
+    "goals_total": 4,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/fixture/lean",
+    "repaired_then_closed": 1,
+    "repairs_kept": 1,
+    "slots": 4
+}

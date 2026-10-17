@@ -1,0 +1,1397 @@
+{
+  "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+  "columns": 80,
+  "cases": [
+    {
+      "name": "list",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "list"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Title                  Preview                                  Last Active   ID\n────────────────────────────────────────────────────────────────────────────────────────────────────\n—                      hi                                       just now      20261001_115900_eeee\nLean prover            Prove the main theorem by induction      1h ago        20260930_100000_aaaa\n—                      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   yesterday     20260929_090000_bbbb\n—                      tabbed  line                             2026-08-22    20260601_070000_ffff\n—                                                               2026-05-24    20260101_080000_cccc\nOld                    old question                             2025-08-17    20250101_080000_dddd\n"
+    },
+    {
+      "name": "list-untitled",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "list"
+      ],
+      "inputs": [],
+      "fixture": false,
+      "exit": 0,
+      "output": "Preview                                            Last Active   Src    ID\n──────────────────────────────────────────────────────────────────────────────────────────\nhi                                                 just now      cli    20261001_115900_eeee\nProve the main theorem by induction                1h ago        cli    20260930_100000_aaaa\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   yesterday     telegram 20260929_090000_bbbb\ntabbed  line                                       2026-08-22    slack  20260601_070000_ffff\n                                                   2026-05-24    cli    20260101_080000_cccc\nold question                                       2025-08-17    discord 20250101_080000_dddd\n"
+    },
+    {
+      "name": "list-source",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "list",
+        "--source",
+        "cli"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Title                  Preview                                  Last Active   ID\n────────────────────────────────────────────────────────────────────────────────────────────────────\n—                      hi                                       just now      20261001_115900_eeee\nLean prover            Prove the main theorem by induction      1h ago        20260930_100000_aaaa\n—                                                               2026-05-24    20260101_080000_cccc\n"
+    },
+    {
+      "name": "list-limit",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "list",
+        "--limit",
+        "2"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Title                  Preview                                  Last Active   ID\n────────────────────────────────────────────────────────────────────────────────────────────────────\n—                      hi                                       just now      20261001_115900_eeee\nLean prover            Prove the main theorem by induction      1h ago        20260930_100000_aaaa\n"
+    },
+    {
+      "name": "list-empty-source",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "list",
+        "--source",
+        "whatsapp"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "No sessions found.\n"
+    },
+    {
+      "name": "stats",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "stats"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Total sessions: 6\nTotal messages: 7\n  cli: 3 sessions\n  telegram: 1 sessions\n  discord: 1 sessions\n  slack: 1 sessions\nDatabase size: 0.1 MB\n"
+    },
+    {
+      "name": "export-all",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "export",
+        "<TMP>/all.jsonl"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Exported 6 sessions to <TMP>/all.jsonl\n",
+      "exports": {
+        "all.jsonl": "{\"id\": \"20261001_115900_eeeeee\", \"source\": \"cli\", \"user_id\": null, \"model\": \"anthropic/claude-opus-4.6\", \"model_config\": null, \"system_prompt\": null, \"parent_session_id\": null, \"started_at\": 1789999970.0, \"ended_at\": null, \"end_reason\": null, \"message_count\": 1, \"tool_call_count\": 0, \"input_tokens\": 0, \"output_tokens\": 0, \"title\": null, \"messages\": [{\"id\": 6, \"session_id\": \"20261001_115900_eeeeee\", \"role\": \"user\", \"content\": \"hi\", \"tool_call_id\": null, \"tool_calls\": null, \"tool_name\": null, \"timestamp\": 1789999990.0, \"token_count\": null, \"finish_reason\": null}]}\n{\"id\": \"20260930_100000_aaaaaa\", \"source\": \"cli\", \"user_id\": null, \"model\": \"anthropic/claude-opus-4.6\", \"model_config\": null, \"system_prompt\": null, \"parent_session_id\": null, \"started_at\": 1789982000.0, \"ended_at\": null, \"end_reason\": null, \"message_count\": 2, \"tool_call_count\": 0, \"input_tokens\": 0, \"output_tokens\": 0, \"title\": \"Lean prover\", \"messages\": [{\"id\": 1, \"session_id\": \"20260930_100000_aaaaaa\", \"role\": \"user\", \"content\": \"Prove the main theorem\\nby induction\", \"tool_call_id\": null, \"tool_calls\": null, \"tool_name\": null, \"timestamp\": 1789992800.0, \"token_count\": null, \"finish_reason\": null}, {\"id\": 2, \"session_id\": \"20260930_100000_aaaaaa\", \"role\": \"assistant\", \"content\": \"Done.\", \"tool_call_id\": null, \"tool_calls\": null, \"tool_name\": null, \"timestamp\": 1789992805.0, \"token_count\": null, \"finish_reason\": null}]}\n{\"id\": \"20260929_090000_bbbbbb\", \"source\": \"telegram\", \"user_id\": null, \"model\": \"anthropic/claude-opus-4.6\", \"model_config\": null, \"system_prompt\": null, \"parent_session_id\": null, \"started_at\": 1789870400.0, \"ended_at\": null, \"end_reason\": null, \"message_count\": 1, \"tool_call_count\": 0, \"input_tokens\": 0, \"output_tokens\": 0, \"title\": null, \"messages\": [{\"id\": 3, \"session_id\": \"20260929_090000_bbbbbb\", \"role\": \"user\", \"content\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\", \"tool_call_id\": null, \"tool_calls\": null, \"tool_name\": null, \"timestamp\": 1789870460.0, \"token_count\": null, \"finish_reason\": null}]}\n{\"id\": \"20260601_070000_ffffff\", \"source\": \"slack\", \"user_id\": null, \"model\": \"anthropic/claude-opus-4.6\", \"model_config\": null, \"system_prompt\": null, \"parent_session_id\": null, \"started_at\": 1787408000.0, \"ended_at\": 1787494400.0, \"end_reason\": \"user_exit\", \"message_count\": 1, \"tool_call_count\": 0, \"input_tokens\": 0, \"output_tokens\": 0, \"title\": null, \"messages\": [{\"id\": 7, \"session_id\": \"20260601_070000_ffffff\", \"role\": \"user\", \"content\": \"\\n\\ttabbed\\r\\nline\", \"tool_call_id\": null, \"tool_calls\": null, \"tool_name\": null, \"timestamp\": 1787408000.0, \"token_count\": null, \"finish_reason\": null}]}\n{\"id\": \"20260101_080000_cccccc\", \"source\": \"cli\", \"user_id\": null, \"model\": \"anthropic/claude-opus-4.6\", \"model_config\": null, \"system_prompt\": null, \"parent_session_id\": null, \"started_at\": 1779632000.0, \"ended_at\": 1779718400.0, \"end_reason\": \"user_exit\", \"message_count\": 0, \"tool_call_count\": 0, \"input_tokens\": 0, \"output_tokens\": 0, \"title\": null, \"messages\": []}\n{\"id\": \"20250101_080000_dddddd\", \"source\": \"discord\", \"user_id\": null, \"model\": \"anthropic/claude-opus-4.6\", \"model_config\": null, \"system_prompt\": null, \"parent_session_id\": null, \"started_at\": 1755440000.0, \"ended_at\": 1755526400.0, \"end_reason\": \"user_exit\", \"message_count\": 2, \"tool_call_count\": 0, \"input_tokens\": 0, \"output_tokens\": 0, \"title\": \"Old\", \"messages\": [{\"id\": 4, \"session_id\": \"20250101_080000_dddddd\", \"role\": \"user\", \"content\": \"  old question  \", \"tool_call_id\": null, \"tool_calls\": null, \"tool_name\": null, \"timestamp\": 1755440010.0, \"token_count\": null, \"finish_reason\": null}, {\"id\": 5, \"session_id\": \"20250101_080000_dddddd\", \"role\": \"tool\", \"content\": \"out\", \"tool_call_id\": null, \"tool_calls\": null, \"tool_name\": null, \"timestamp\": 1755440020.0, \"token_count\": null, \"finish_reason\": null}]}\n"
+      }
+    },
+    {
+      "name": "export-source",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "export",
+        "<TMP>/cli.jsonl",
+        "--source",
+        "cli"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Exported 3 sessions to <TMP>/cli.jsonl\n",
+      "exports": {
+        "cli.jsonl": "{\"id\": \"20261001_115900_eeeeee\", \"source\": \"cli\", \"user_id\": null, \"model\": \"anthropic/claude-opus-4.6\", \"model_config\": null, \"system_prompt\": null, \"parent_session_id\": null, \"started_at\": 1789999970.0, \"ended_at\": null, \"end_reason\": null, \"message_count\": 1, \"tool_call_count\": 0, \"input_tokens\": 0, \"output_tokens\": 0, \"title\": null, \"messages\": [{\"id\": 6, \"session_id\": \"20261001_115900_eeeeee\", \"role\": \"user\", \"content\": \"hi\", \"tool_call_id\": null, \"tool_calls\": null, \"tool_name\": null, \"timestamp\": 1789999990.0, \"token_count\": null, \"finish_reason\": null}]}\n{\"id\": \"20260930_100000_aaaaaa\", \"source\": \"cli\", \"user_id\": null, \"model\": \"anthropic/claude-opus-4.6\", \"model_config\": null, \"system_prompt\": null, \"parent_session_id\": null, \"started_at\": 1789982000.0, \"ended_at\": null, \"end_reason\": null, \"message_count\": 2, \"tool_call_count\": 0, \"input_tokens\": 0, \"output_tokens\": 0, \"title\": \"Lean prover\", \"messages\": [{\"id\": 1, \"session_id\": \"20260930_100000_aaaaaa\", \"role\": \"user\", \"content\": \"Prove the main theorem\\nby induction\", \"tool_call_id\": null, \"tool_calls\": null, \"tool_name\": null, \"timestamp\": 1789992800.0, \"token_count\": null, \"finish_reason\": null}, {\"id\": 2, \"session_id\": \"20260930_100000_aaaaaa\", \"role\": \"assistant\", \"content\": \"Done.\", \"tool_call_id\": null, \"tool_calls\": null, \"tool_name\": null, \"timestamp\": 1789992805.0, \"token_count\": null, \"finish_reason\": null}]}\n{\"id\": \"20260101_080000_cccccc\", \"source\": \"cli\", \"user_id\": null, \"model\": \"anthropic/claude-opus-4.6\", \"model_config\": null, \"system_prompt\": null, \"parent_session_id\": null, \"started_at\": 1779632000.0, \"ended_at\": 1779718400.0, \"end_reason\": \"user_exit\", \"message_count\": 0, \"tool_call_count\": 0, \"input_tokens\": 0, \"output_tokens\": 0, \"title\": null, \"messages\": []}\n"
+      }
+    },
+    {
+      "name": "export-one-prefix",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "export",
+        "<TMP>/one.jsonl",
+        "--session-id",
+        "20260930"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Exported 1 session to <TMP>/one.jsonl\n",
+      "exports": {
+        "one.jsonl": "{\"id\": \"20260930_100000_aaaaaa\", \"source\": \"cli\", \"user_id\": null, \"model\": \"anthropic/claude-opus-4.6\", \"model_config\": null, \"system_prompt\": null, \"parent_session_id\": null, \"started_at\": 1789982000.0, \"ended_at\": null, \"end_reason\": null, \"message_count\": 2, \"tool_call_count\": 0, \"input_tokens\": 0, \"output_tokens\": 0, \"title\": \"Lean prover\", \"messages\": [{\"id\": 1, \"session_id\": \"20260930_100000_aaaaaa\", \"role\": \"user\", \"content\": \"Prove the main theorem\\nby induction\", \"tool_call_id\": null, \"tool_calls\": null, \"tool_name\": null, \"timestamp\": 1789992800.0, \"token_count\": null, \"finish_reason\": null}, {\"id\": 2, \"session_id\": \"20260930_100000_aaaaaa\", \"role\": \"assistant\", \"content\": \"Done.\", \"tool_call_id\": null, \"tool_calls\": null, \"tool_name\": null, \"timestamp\": 1789992805.0, \"token_count\": null, \"finish_reason\": null}]}\n"
+      }
+    },
+    {
+      "name": "export-missing",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "export",
+        "<TMP>/none.jsonl",
+        "--session-id",
+        "nope"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Session 'nope' not found.\n"
+    },
+    {
+      "name": "export-ambiguous",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "export",
+        "<TMP>/amb.jsonl",
+        "--session-id",
+        "2026"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Session '2026' not found.\n"
+    },
+    {
+      "name": "delete-yes",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "delete",
+        "20250101_080000_dddddd",
+        "--yes"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Deleted session '20250101_080000_dddddd'.\n",
+      "db_after": {
+        "sessions": [
+          {
+            "id": "20260101_080000_cccccc",
+            "source": "cli",
+            "title": null,
+            "started_at": 1779632000.0,
+            "ended_at": 1779718400.0,
+            "message_count": 0
+          },
+          {
+            "id": "20260601_070000_ffffff",
+            "source": "slack",
+            "title": null,
+            "started_at": 1787408000.0,
+            "ended_at": 1787494400.0,
+            "message_count": 1
+          },
+          {
+            "id": "20260929_090000_bbbbbb",
+            "source": "telegram",
+            "title": null,
+            "started_at": 1789870400.0,
+            "ended_at": null,
+            "message_count": 1
+          },
+          {
+            "id": "20260930_100000_aaaaaa",
+            "source": "cli",
+            "title": "Lean prover",
+            "started_at": 1789982000.0,
+            "ended_at": null,
+            "message_count": 2
+          },
+          {
+            "id": "20261001_115900_eeeeee",
+            "source": "cli",
+            "title": null,
+            "started_at": 1789999970.0,
+            "ended_at": null,
+            "message_count": 1
+          }
+        ],
+        "messages": [
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "user",
+            "content": "Prove the main theorem\nby induction",
+            "timestamp": 1789992800.0
+          },
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "assistant",
+            "content": "Done.",
+            "timestamp": 1789992805.0
+          },
+          {
+            "session_id": "20260929_090000_bbbbbb",
+            "role": "user",
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "timestamp": 1789870460.0
+          },
+          {
+            "session_id": "20261001_115900_eeeeee",
+            "role": "user",
+            "content": "hi",
+            "timestamp": 1789999990.0
+          },
+          {
+            "session_id": "20260601_070000_ffffff",
+            "role": "user",
+            "content": "\n\ttabbed\r\nline",
+            "timestamp": 1787408000.0
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-confirm",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "delete",
+        "20250101"
+      ],
+      "inputs": [
+        "y"
+      ],
+      "fixture": true,
+      "exit": 0,
+      "output": "Delete session '20250101_080000_dddddd' and all its messages? [y/N] y\nDeleted session '20250101_080000_dddddd'.\n",
+      "db_after": {
+        "sessions": [
+          {
+            "id": "20260101_080000_cccccc",
+            "source": "cli",
+            "title": null,
+            "started_at": 1779632000.0,
+            "ended_at": 1779718400.0,
+            "message_count": 0
+          },
+          {
+            "id": "20260601_070000_ffffff",
+            "source": "slack",
+            "title": null,
+            "started_at": 1787408000.0,
+            "ended_at": 1787494400.0,
+            "message_count": 1
+          },
+          {
+            "id": "20260929_090000_bbbbbb",
+            "source": "telegram",
+            "title": null,
+            "started_at": 1789870400.0,
+            "ended_at": null,
+            "message_count": 1
+          },
+          {
+            "id": "20260930_100000_aaaaaa",
+            "source": "cli",
+            "title": "Lean prover",
+            "started_at": 1789982000.0,
+            "ended_at": null,
+            "message_count": 2
+          },
+          {
+            "id": "20261001_115900_eeeeee",
+            "source": "cli",
+            "title": null,
+            "started_at": 1789999970.0,
+            "ended_at": null,
+            "message_count": 1
+          }
+        ],
+        "messages": [
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "user",
+            "content": "Prove the main theorem\nby induction",
+            "timestamp": 1789992800.0
+          },
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "assistant",
+            "content": "Done.",
+            "timestamp": 1789992805.0
+          },
+          {
+            "session_id": "20260929_090000_bbbbbb",
+            "role": "user",
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "timestamp": 1789870460.0
+          },
+          {
+            "session_id": "20261001_115900_eeeeee",
+            "role": "user",
+            "content": "hi",
+            "timestamp": 1789999990.0
+          },
+          {
+            "session_id": "20260601_070000_ffffff",
+            "role": "user",
+            "content": "\n\ttabbed\r\nline",
+            "timestamp": 1787408000.0
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-decline",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "delete",
+        "20250101"
+      ],
+      "inputs": [
+        "n"
+      ],
+      "fixture": true,
+      "exit": 0,
+      "output": "Delete session '20250101_080000_dddddd' and all its messages? [y/N] n\nCancelled.\n"
+    },
+    {
+      "name": "delete-missing",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "delete",
+        "zzz",
+        "-y"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Session 'zzz' not found.\n"
+    },
+    {
+      "name": "prune-yes",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "prune",
+        "--yes"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Pruned 2 session(s).\n",
+      "db_after": {
+        "sessions": [
+          {
+            "id": "20260601_070000_ffffff",
+            "source": "slack",
+            "title": null,
+            "started_at": 1787408000.0,
+            "ended_at": 1787494400.0,
+            "message_count": 1
+          },
+          {
+            "id": "20260929_090000_bbbbbb",
+            "source": "telegram",
+            "title": null,
+            "started_at": 1789870400.0,
+            "ended_at": null,
+            "message_count": 1
+          },
+          {
+            "id": "20260930_100000_aaaaaa",
+            "source": "cli",
+            "title": "Lean prover",
+            "started_at": 1789982000.0,
+            "ended_at": null,
+            "message_count": 2
+          },
+          {
+            "id": "20261001_115900_eeeeee",
+            "source": "cli",
+            "title": null,
+            "started_at": 1789999970.0,
+            "ended_at": null,
+            "message_count": 1
+          }
+        ],
+        "messages": [
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "user",
+            "content": "Prove the main theorem\nby induction",
+            "timestamp": 1789992800.0
+          },
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "assistant",
+            "content": "Done.",
+            "timestamp": 1789992805.0
+          },
+          {
+            "session_id": "20260929_090000_bbbbbb",
+            "role": "user",
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "timestamp": 1789870460.0
+          },
+          {
+            "session_id": "20261001_115900_eeeeee",
+            "role": "user",
+            "content": "hi",
+            "timestamp": 1789999990.0
+          },
+          {
+            "session_id": "20260601_070000_ffffff",
+            "role": "user",
+            "content": "\n\ttabbed\r\nline",
+            "timestamp": 1787408000.0
+          }
+        ]
+      }
+    },
+    {
+      "name": "prune-days",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "prune",
+        "--older-than",
+        "10",
+        "-y"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Pruned 3 session(s).\n",
+      "db_after": {
+        "sessions": [
+          {
+            "id": "20260929_090000_bbbbbb",
+            "source": "telegram",
+            "title": null,
+            "started_at": 1789870400.0,
+            "ended_at": null,
+            "message_count": 1
+          },
+          {
+            "id": "20260930_100000_aaaaaa",
+            "source": "cli",
+            "title": "Lean prover",
+            "started_at": 1789982000.0,
+            "ended_at": null,
+            "message_count": 2
+          },
+          {
+            "id": "20261001_115900_eeeeee",
+            "source": "cli",
+            "title": null,
+            "started_at": 1789999970.0,
+            "ended_at": null,
+            "message_count": 1
+          }
+        ],
+        "messages": [
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "user",
+            "content": "Prove the main theorem\nby induction",
+            "timestamp": 1789992800.0
+          },
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "assistant",
+            "content": "Done.",
+            "timestamp": 1789992805.0
+          },
+          {
+            "session_id": "20260929_090000_bbbbbb",
+            "role": "user",
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "timestamp": 1789870460.0
+          },
+          {
+            "session_id": "20261001_115900_eeeeee",
+            "role": "user",
+            "content": "hi",
+            "timestamp": 1789999990.0
+          }
+        ]
+      }
+    },
+    {
+      "name": "prune-source",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "prune",
+        "--older-than",
+        "1",
+        "--source",
+        "slack",
+        "--yes"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Pruned 1 session(s).\n",
+      "db_after": {
+        "sessions": [
+          {
+            "id": "20250101_080000_dddddd",
+            "source": "discord",
+            "title": "Old",
+            "started_at": 1755440000.0,
+            "ended_at": 1755526400.0,
+            "message_count": 2
+          },
+          {
+            "id": "20260101_080000_cccccc",
+            "source": "cli",
+            "title": null,
+            "started_at": 1779632000.0,
+            "ended_at": 1779718400.0,
+            "message_count": 0
+          },
+          {
+            "id": "20260929_090000_bbbbbb",
+            "source": "telegram",
+            "title": null,
+            "started_at": 1789870400.0,
+            "ended_at": null,
+            "message_count": 1
+          },
+          {
+            "id": "20260930_100000_aaaaaa",
+            "source": "cli",
+            "title": "Lean prover",
+            "started_at": 1789982000.0,
+            "ended_at": null,
+            "message_count": 2
+          },
+          {
+            "id": "20261001_115900_eeeeee",
+            "source": "cli",
+            "title": null,
+            "started_at": 1789999970.0,
+            "ended_at": null,
+            "message_count": 1
+          }
+        ],
+        "messages": [
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "user",
+            "content": "Prove the main theorem\nby induction",
+            "timestamp": 1789992800.0
+          },
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "assistant",
+            "content": "Done.",
+            "timestamp": 1789992805.0
+          },
+          {
+            "session_id": "20260929_090000_bbbbbb",
+            "role": "user",
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "timestamp": 1789870460.0
+          },
+          {
+            "session_id": "20250101_080000_dddddd",
+            "role": "user",
+            "content": "  old question  ",
+            "timestamp": 1755440010.0
+          },
+          {
+            "session_id": "20250101_080000_dddddd",
+            "role": "tool",
+            "content": "out",
+            "timestamp": 1755440020.0
+          },
+          {
+            "session_id": "20261001_115900_eeeeee",
+            "role": "user",
+            "content": "hi",
+            "timestamp": 1789999990.0
+          }
+        ]
+      }
+    },
+    {
+      "name": "prune-decline",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "prune"
+      ],
+      "inputs": [
+        "no"
+      ],
+      "fixture": true,
+      "exit": 0,
+      "output": "Delete all ended sessions older than 90 days? [y/N] no\nCancelled.\n"
+    },
+    {
+      "name": "prune-confirm-source",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "prune",
+        "--source",
+        "discord"
+      ],
+      "inputs": [
+        "YES"
+      ],
+      "fixture": true,
+      "exit": 0,
+      "output": "Delete all ended sessions older than 90 days from 'discord'? [y/N] YES\nPruned 1 session(s).\n",
+      "db_after": {
+        "sessions": [
+          {
+            "id": "20260101_080000_cccccc",
+            "source": "cli",
+            "title": null,
+            "started_at": 1779632000.0,
+            "ended_at": 1779718400.0,
+            "message_count": 0
+          },
+          {
+            "id": "20260601_070000_ffffff",
+            "source": "slack",
+            "title": null,
+            "started_at": 1787408000.0,
+            "ended_at": 1787494400.0,
+            "message_count": 1
+          },
+          {
+            "id": "20260929_090000_bbbbbb",
+            "source": "telegram",
+            "title": null,
+            "started_at": 1789870400.0,
+            "ended_at": null,
+            "message_count": 1
+          },
+          {
+            "id": "20260930_100000_aaaaaa",
+            "source": "cli",
+            "title": "Lean prover",
+            "started_at": 1789982000.0,
+            "ended_at": null,
+            "message_count": 2
+          },
+          {
+            "id": "20261001_115900_eeeeee",
+            "source": "cli",
+            "title": null,
+            "started_at": 1789999970.0,
+            "ended_at": null,
+            "message_count": 1
+          }
+        ],
+        "messages": [
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "user",
+            "content": "Prove the main theorem\nby induction",
+            "timestamp": 1789992800.0
+          },
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "assistant",
+            "content": "Done.",
+            "timestamp": 1789992805.0
+          },
+          {
+            "session_id": "20260929_090000_bbbbbb",
+            "role": "user",
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "timestamp": 1789870460.0
+          },
+          {
+            "session_id": "20261001_115900_eeeeee",
+            "role": "user",
+            "content": "hi",
+            "timestamp": 1789999990.0
+          },
+          {
+            "session_id": "20260601_070000_ffffff",
+            "role": "user",
+            "content": "\n\ttabbed\r\nline",
+            "timestamp": 1787408000.0
+          }
+        ]
+      }
+    },
+    {
+      "name": "rename",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "rename",
+        "20261001",
+        "Fresh",
+        "start"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Session '20261001_115900_eeeeee' renamed to: Fresh start\n",
+      "db_after": {
+        "sessions": [
+          {
+            "id": "20250101_080000_dddddd",
+            "source": "discord",
+            "title": "Old",
+            "started_at": 1755440000.0,
+            "ended_at": 1755526400.0,
+            "message_count": 2
+          },
+          {
+            "id": "20260101_080000_cccccc",
+            "source": "cli",
+            "title": null,
+            "started_at": 1779632000.0,
+            "ended_at": 1779718400.0,
+            "message_count": 0
+          },
+          {
+            "id": "20260601_070000_ffffff",
+            "source": "slack",
+            "title": null,
+            "started_at": 1787408000.0,
+            "ended_at": 1787494400.0,
+            "message_count": 1
+          },
+          {
+            "id": "20260929_090000_bbbbbb",
+            "source": "telegram",
+            "title": null,
+            "started_at": 1789870400.0,
+            "ended_at": null,
+            "message_count": 1
+          },
+          {
+            "id": "20260930_100000_aaaaaa",
+            "source": "cli",
+            "title": "Lean prover",
+            "started_at": 1789982000.0,
+            "ended_at": null,
+            "message_count": 2
+          },
+          {
+            "id": "20261001_115900_eeeeee",
+            "source": "cli",
+            "title": "Fresh start",
+            "started_at": 1789999970.0,
+            "ended_at": null,
+            "message_count": 1
+          }
+        ],
+        "messages": [
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "user",
+            "content": "Prove the main theorem\nby induction",
+            "timestamp": 1789992800.0
+          },
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "assistant",
+            "content": "Done.",
+            "timestamp": 1789992805.0
+          },
+          {
+            "session_id": "20260929_090000_bbbbbb",
+            "role": "user",
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "timestamp": 1789870460.0
+          },
+          {
+            "session_id": "20250101_080000_dddddd",
+            "role": "user",
+            "content": "  old question  ",
+            "timestamp": 1755440010.0
+          },
+          {
+            "session_id": "20250101_080000_dddddd",
+            "role": "tool",
+            "content": "out",
+            "timestamp": 1755440020.0
+          },
+          {
+            "session_id": "20261001_115900_eeeeee",
+            "role": "user",
+            "content": "hi",
+            "timestamp": 1789999990.0
+          },
+          {
+            "session_id": "20260601_070000_ffffff",
+            "role": "user",
+            "content": "\n\ttabbed\r\nline",
+            "timestamp": 1787408000.0
+          }
+        ]
+      }
+    },
+    {
+      "name": "rename-conflict",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "rename",
+        "20261001_115900_eeeeee",
+        "Lean",
+        "prover"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Error: Title 'Lean prover' is already in use by session 20260930_100000_aaaaaa\n"
+    },
+    {
+      "name": "rename-clear",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "rename",
+        "20260930_100000_aaaaaa",
+        "   "
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Session '20260930_100000_aaaaaa' renamed to:\n",
+      "db_after": {
+        "sessions": [
+          {
+            "id": "20250101_080000_dddddd",
+            "source": "discord",
+            "title": "Old",
+            "started_at": 1755440000.0,
+            "ended_at": 1755526400.0,
+            "message_count": 2
+          },
+          {
+            "id": "20260101_080000_cccccc",
+            "source": "cli",
+            "title": null,
+            "started_at": 1779632000.0,
+            "ended_at": 1779718400.0,
+            "message_count": 0
+          },
+          {
+            "id": "20260601_070000_ffffff",
+            "source": "slack",
+            "title": null,
+            "started_at": 1787408000.0,
+            "ended_at": 1787494400.0,
+            "message_count": 1
+          },
+          {
+            "id": "20260929_090000_bbbbbb",
+            "source": "telegram",
+            "title": null,
+            "started_at": 1789870400.0,
+            "ended_at": null,
+            "message_count": 1
+          },
+          {
+            "id": "20260930_100000_aaaaaa",
+            "source": "cli",
+            "title": null,
+            "started_at": 1789982000.0,
+            "ended_at": null,
+            "message_count": 2
+          },
+          {
+            "id": "20261001_115900_eeeeee",
+            "source": "cli",
+            "title": null,
+            "started_at": 1789999970.0,
+            "ended_at": null,
+            "message_count": 1
+          }
+        ],
+        "messages": [
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "user",
+            "content": "Prove the main theorem\nby induction",
+            "timestamp": 1789992800.0
+          },
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "assistant",
+            "content": "Done.",
+            "timestamp": 1789992805.0
+          },
+          {
+            "session_id": "20260929_090000_bbbbbb",
+            "role": "user",
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "timestamp": 1789870460.0
+          },
+          {
+            "session_id": "20250101_080000_dddddd",
+            "role": "user",
+            "content": "  old question  ",
+            "timestamp": 1755440010.0
+          },
+          {
+            "session_id": "20250101_080000_dddddd",
+            "role": "tool",
+            "content": "out",
+            "timestamp": 1755440020.0
+          },
+          {
+            "session_id": "20261001_115900_eeeeee",
+            "role": "user",
+            "content": "hi",
+            "timestamp": 1789999990.0
+          },
+          {
+            "session_id": "20260601_070000_ffffff",
+            "role": "user",
+            "content": "\n\ttabbed\r\nline",
+            "timestamp": 1787408000.0
+          }
+        ]
+      }
+    },
+    {
+      "name": "rename-long",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "rename",
+        "20260930_100000_aaaaaa",
+        "ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Error: Title too long (101 chars, max 100)\n"
+    },
+    {
+      "name": "rename-messy",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "rename",
+        "20260929",
+        "a​  b\tc"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Session '20260929_090000_bbbbbb' renamed to: a​  b\tc\n",
+      "db_after": {
+        "sessions": [
+          {
+            "id": "20250101_080000_dddddd",
+            "source": "discord",
+            "title": "Old",
+            "started_at": 1755440000.0,
+            "ended_at": 1755526400.0,
+            "message_count": 2
+          },
+          {
+            "id": "20260101_080000_cccccc",
+            "source": "cli",
+            "title": null,
+            "started_at": 1779632000.0,
+            "ended_at": 1779718400.0,
+            "message_count": 0
+          },
+          {
+            "id": "20260601_070000_ffffff",
+            "source": "slack",
+            "title": null,
+            "started_at": 1787408000.0,
+            "ended_at": 1787494400.0,
+            "message_count": 1
+          },
+          {
+            "id": "20260929_090000_bbbbbb",
+            "source": "telegram",
+            "title": "a b c",
+            "started_at": 1789870400.0,
+            "ended_at": null,
+            "message_count": 1
+          },
+          {
+            "id": "20260930_100000_aaaaaa",
+            "source": "cli",
+            "title": "Lean prover",
+            "started_at": 1789982000.0,
+            "ended_at": null,
+            "message_count": 2
+          },
+          {
+            "id": "20261001_115900_eeeeee",
+            "source": "cli",
+            "title": null,
+            "started_at": 1789999970.0,
+            "ended_at": null,
+            "message_count": 1
+          }
+        ],
+        "messages": [
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "user",
+            "content": "Prove the main theorem\nby induction",
+            "timestamp": 1789992800.0
+          },
+          {
+            "session_id": "20260930_100000_aaaaaa",
+            "role": "assistant",
+            "content": "Done.",
+            "timestamp": 1789992805.0
+          },
+          {
+            "session_id": "20260929_090000_bbbbbb",
+            "role": "user",
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "timestamp": 1789870460.0
+          },
+          {
+            "session_id": "20250101_080000_dddddd",
+            "role": "user",
+            "content": "  old question  ",
+            "timestamp": 1755440010.0
+          },
+          {
+            "session_id": "20250101_080000_dddddd",
+            "role": "tool",
+            "content": "out",
+            "timestamp": 1755440020.0
+          },
+          {
+            "session_id": "20261001_115900_eeeeee",
+            "role": "user",
+            "content": "hi",
+            "timestamp": 1789999990.0
+          },
+          {
+            "session_id": "20260601_070000_ffffff",
+            "role": "user",
+            "content": "\n\ttabbed\r\nline",
+            "timestamp": 1787408000.0
+          }
+        ]
+      }
+    },
+    {
+      "name": "rename-missing",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "rename",
+        "nope",
+        "x"
+      ],
+      "inputs": [],
+      "fixture": true,
+      "exit": 0,
+      "output": "Session 'nope' not found.\n"
+    },
+    {
+      "name": "no-db",
+      "kind": "sessions",
+      "argv": [
+        "sessions",
+        "list"
+      ],
+      "inputs": [],
+      "fixture": null,
+      "exit": 0,
+      "output": "No sessions found.\n",
+      "db_after": {
+        "sessions": [],
+        "messages": []
+      }
+    },
+    {
+      "name": "show-default",
+      "kind": "config-show",
+      "config": null,
+      "env_file": {},
+      "env": {},
+      "exit": 0,
+      "output": "\n┌─────────────────────────────────────────────────────────┐\n│              ⚕ Gauss Configuration                    │\n└─────────────────────────────────────────────────────────┘\n\n◆ Paths\n  Config:       <GAUSS_HOME>/config.yaml\n  Secrets:      <GAUSS_HOME>/.env\n  Install:      <SRC>\n\n◆ API Keys\n  OpenRouter     (not set)\n  OpenAI (STT/TTS) (not set)\n  Firecrawl      (not set)\n  Browserbase    (not set)\n  FAL            (not set)\n  Anthropic      (not set)\n\n◆ Model\n  Model:        anthropic/claude-opus-4.6\n  Max turns:    90\n  Toolsets:     gauss-cli\n\n◆ Display\n  Personality:  kawaii\n  Reasoning:    off\n  Bell:         off\n\n◆ Terminal\n  Backend:      local\n  Working dir:  .\n  Timeout:      180s\n  Handoff:      auto\n\n◆ Timezone\n  Timezone:     (server-local)\n\n◆ Context Compression\n  Enabled:      yes\n  Threshold:    50%\n  Model:        google/gemini-3-flash-preview\n\n◆ Messaging Platforms\n  Telegram:     not configured\n  Discord:      not configured\n\n────────────────────────────────────────────────────────────\n  gauss config edit     # Edit config file\n  gauss config set <key> <value>\n  gauss setup           # Run setup wizard\n\n"
+    },
+    {
+      "name": "show-empty-config",
+      "kind": "config-show",
+      "config": {},
+      "env_file": {},
+      "env": {},
+      "exit": 0,
+      "output": "\n┌─────────────────────────────────────────────────────────┐\n│              ⚕ Gauss Configuration                    │\n└─────────────────────────────────────────────────────────┘\n\n◆ Paths\n  Config:       <GAUSS_HOME>/config.yaml\n  Secrets:      <GAUSS_HOME>/.env\n  Install:      <SRC>\n\n◆ API Keys\n  OpenRouter     (not set)\n  OpenAI (STT/TTS) (not set)\n  Firecrawl      (not set)\n  Browserbase    (not set)\n  FAL            (not set)\n  Anthropic      (not set)\n\n◆ Model\n  Model:        anthropic/claude-opus-4.6\n  Max turns:    90\n  Toolsets:     gauss-cli\n\n◆ Display\n  Personality:  kawaii\n  Reasoning:    off\n  Bell:         off\n\n◆ Terminal\n  Backend:      local\n  Working dir:  .\n  Timeout:      180s\n  Handoff:      auto\n\n◆ Timezone\n  Timezone:     (server-local)\n\n◆ Context Compression\n  Enabled:      yes\n  Threshold:    50%\n  Model:        google/gemini-3-flash-preview\n\n◆ Messaging Platforms\n  Telegram:     not configured\n  Discord:      not configured\n\n────────────────────────────────────────────────────────────\n  gauss config edit     # Edit config file\n  gauss config set <key> <value>\n  gauss setup           # Run setup wizard\n\n"
+    },
+    {
+      "name": "show-model-string",
+      "kind": "config-show",
+      "config": {
+        "model": "openai/gpt-5",
+        "agent": {
+          "max_turns": 12
+        },
+        "toolsets": [
+          "file",
+          "web"
+        ]
+      },
+      "env_file": {},
+      "env": {},
+      "exit": 0,
+      "output": "\n┌─────────────────────────────────────────────────────────┐\n│              ⚕ Gauss Configuration                    │\n└─────────────────────────────────────────────────────────┘\n\n◆ Paths\n  Config:       <GAUSS_HOME>/config.yaml\n  Secrets:      <GAUSS_HOME>/.env\n  Install:      <SRC>\n\n◆ API Keys\n  OpenRouter     (not set)\n  OpenAI (STT/TTS) (not set)\n  Firecrawl      (not set)\n  Browserbase    (not set)\n  FAL            (not set)\n  Anthropic      (not set)\n\n◆ Model\n  Model:        openai/gpt-5\n  Max turns:    12\n  Toolsets:     file, web\n\n◆ Display\n  Personality:  kawaii\n  Reasoning:    off\n  Bell:         off\n\n◆ Terminal\n  Backend:      local\n  Working dir:  .\n  Timeout:      180s\n  Handoff:      auto\n\n◆ Timezone\n  Timezone:     (server-local)\n\n◆ Context Compression\n  Enabled:      yes\n  Threshold:    50%\n  Model:        google/gemini-3-flash-preview\n\n◆ Messaging Platforms\n  Telegram:     not configured\n  Discord:      not configured\n\n────────────────────────────────────────────────────────────\n  gauss config edit     # Edit config file\n  gauss config set <key> <value>\n  gauss setup           # Run setup wizard\n\n"
+    },
+    {
+      "name": "show-display",
+      "kind": "config-show",
+      "config": {
+        "display": {
+          "personality": "noir",
+          "show_reasoning": true,
+          "bell_on_complete": true
+        }
+      },
+      "env_file": {},
+      "env": {},
+      "exit": 0,
+      "output": "\n┌─────────────────────────────────────────────────────────┐\n│              ⚕ Gauss Configuration                    │\n└─────────────────────────────────────────────────────────┘\n\n◆ Paths\n  Config:       <GAUSS_HOME>/config.yaml\n  Secrets:      <GAUSS_HOME>/.env\n  Install:      <SRC>\n\n◆ API Keys\n  OpenRouter     (not set)\n  OpenAI (STT/TTS) (not set)\n  Firecrawl      (not set)\n  Browserbase    (not set)\n  FAL            (not set)\n  Anthropic      (not set)\n\n◆ Model\n  Model:        anthropic/claude-opus-4.6\n  Max turns:    90\n  Toolsets:     gauss-cli\n\n◆ Display\n  Personality:  noir\n  Reasoning:    on\n  Bell:         on\n\n◆ Terminal\n  Backend:      local\n  Working dir:  .\n  Timeout:      180s\n  Handoff:      auto\n\n◆ Timezone\n  Timezone:     (server-local)\n\n◆ Context Compression\n  Enabled:      yes\n  Threshold:    50%\n  Model:        google/gemini-3-flash-preview\n\n◆ Messaging Platforms\n  Telegram:     not configured\n  Discord:      not configured\n\n────────────────────────────────────────────────────────────\n  gauss config edit     # Edit config file\n  gauss config set <key> <value>\n  gauss setup           # Run setup wizard\n\n"
+    },
+    {
+      "name": "show-docker",
+      "kind": "config-show",
+      "config": {
+        "terminal": {
+          "backend": "docker",
+          "cwd": "/w",
+          "timeout": 5,
+          "docker_image": "lean:4"
+        }
+      },
+      "env_file": {},
+      "env": {},
+      "exit": 0,
+      "output": "\n┌─────────────────────────────────────────────────────────┐\n│              ⚕ Gauss Configuration                    │\n└─────────────────────────────────────────────────────────┘\n\n◆ Paths\n  Config:       <GAUSS_HOME>/config.yaml\n  Secrets:      <GAUSS_HOME>/.env\n  Install:      <SRC>\n\n◆ API Keys\n  OpenRouter     (not set)\n  OpenAI (STT/TTS) (not set)\n  Firecrawl      (not set)\n  Browserbase    (not set)\n  FAL            (not set)\n  Anthropic      (not set)\n\n◆ Model\n  Model:        anthropic/claude-opus-4.6\n  Max turns:    90\n  Toolsets:     gauss-cli\n\n◆ Display\n  Personality:  kawaii\n  Reasoning:    off\n  Bell:         off\n\n◆ Terminal\n  Backend:      docker\n  Working dir:  /w\n  Timeout:      5s\n  Handoff:      auto\n  Docker image: lean:4\n\n◆ Timezone\n  Timezone:     (server-local)\n\n◆ Context Compression\n  Enabled:      yes\n  Threshold:    50%\n  Model:        google/gemini-3-flash-preview\n\n◆ Messaging Platforms\n  Telegram:     not configured\n  Discord:      not configured\n\n────────────────────────────────────────────────────────────\n  gauss config edit     # Edit config file\n  gauss config set <key> <value>\n  gauss setup           # Run setup wizard\n\n"
+    },
+    {
+      "name": "show-ssh",
+      "kind": "config-show",
+      "config": {
+        "terminal": {
+          "backend": "ssh"
+        },
+        "cli": {
+          "handoff": {
+            "mode": "strict"
+          }
+        }
+      },
+      "env_file": {
+        "TERMINAL_SSH_HOST": "h",
+        "TERMINAL_SSH_USER": "u"
+      },
+      "env": {},
+      "exit": 0,
+      "output": "\n┌─────────────────────────────────────────────────────────┐\n│              ⚕ Gauss Configuration                    │\n└─────────────────────────────────────────────────────────┘\n\n◆ Paths\n  Config:       <GAUSS_HOME>/config.yaml\n  Secrets:      <GAUSS_HOME>/.env\n  Install:      <SRC>\n\n◆ API Keys\n  OpenRouter     (not set)\n  OpenAI (STT/TTS) (not set)\n  Firecrawl      (not set)\n  Browserbase    (not set)\n  FAL            (not set)\n  Anthropic      (not set)\n\n◆ Model\n  Model:        anthropic/claude-opus-4.6\n  Max turns:    90\n  Toolsets:     gauss-cli\n\n◆ Display\n  Personality:  kawaii\n  Reasoning:    off\n  Bell:         off\n\n◆ Terminal\n  Backend:      ssh\n  Working dir:  .\n  Timeout:      180s\n  Handoff:      strict\n  SSH host:     h\n  SSH user:     u\n\n◆ Timezone\n  Timezone:     (server-local)\n\n◆ Context Compression\n  Enabled:      yes\n  Threshold:    50%\n  Model:        google/gemini-3-flash-preview\n\n◆ Messaging Platforms\n  Telegram:     not configured\n  Discord:      not configured\n\n────────────────────────────────────────────────────────────\n  gauss config edit     # Edit config file\n  gauss config set <key> <value>\n  gauss setup           # Run setup wizard\n\n"
+    },
+    {
+      "name": "show-modal",
+      "kind": "config-show",
+      "config": {
+        "terminal": {
+          "backend": "modal"
+        }
+      },
+      "env_file": {
+        "MODAL_TOKEN_ID": "m"
+      },
+      "env": {},
+      "exit": 0,
+      "output": "\n┌─────────────────────────────────────────────────────────┐\n│              ⚕ Gauss Configuration                    │\n└─────────────────────────────────────────────────────────┘\n\n◆ Paths\n  Config:       <GAUSS_HOME>/config.yaml\n  Secrets:      <GAUSS_HOME>/.env\n  Install:      <SRC>\n\n◆ API Keys\n  OpenRouter     (not set)\n  OpenAI (STT/TTS) (not set)\n  Firecrawl      (not set)\n  Browserbase    (not set)\n  FAL            (not set)\n  Anthropic      (not set)\n\n◆ Model\n  Model:        anthropic/claude-opus-4.6\n  Max turns:    90\n  Toolsets:     gauss-cli\n\n◆ Display\n  Personality:  kawaii\n  Reasoning:    off\n  Bell:         off\n\n◆ Terminal\n  Backend:      modal\n  Working dir:  .\n  Timeout:      180s\n  Handoff:      auto\n  Modal image:  nikolaik/python-nodejs:python3.11-nodejs20\n  Modal token:  configured\n\n◆ Timezone\n  Timezone:     (server-local)\n\n◆ Context Compression\n  Enabled:      yes\n  Threshold:    50%\n  Model:        google/gemini-3-flash-preview\n\n◆ Messaging Platforms\n  Telegram:     not configured\n  Discord:      not configured\n\n────────────────────────────────────────────────────────────\n  gauss config edit     # Edit config file\n  gauss config set <key> <value>\n  gauss setup           # Run setup wizard\n\n"
+    },
+    {
+      "name": "show-compression-off",
+      "kind": "config-show",
+      "config": {
+        "compression": {
+          "enabled": false
+        },
+        "timezone": "Europe/Paris"
+      },
+      "env_file": {},
+      "env": {},
+      "exit": 0,
+      "output": "\n┌─────────────────────────────────────────────────────────┐\n│              ⚕ Gauss Configuration                    │\n└─────────────────────────────────────────────────────────┘\n\n◆ Paths\n  Config:       <GAUSS_HOME>/config.yaml\n  Secrets:      <GAUSS_HOME>/.env\n  Install:      <SRC>\n\n◆ API Keys\n  OpenRouter     (not set)\n  OpenAI (STT/TTS) (not set)\n  Firecrawl      (not set)\n  Browserbase    (not set)\n  FAL            (not set)\n  Anthropic      (not set)\n\n◆ Model\n  Model:        anthropic/claude-opus-4.6\n  Max turns:    90\n  Toolsets:     gauss-cli\n\n◆ Display\n  Personality:  kawaii\n  Reasoning:    off\n  Bell:         off\n\n◆ Terminal\n  Backend:      local\n  Working dir:  .\n  Timeout:      180s\n  Handoff:      auto\n\n◆ Timezone\n  Timezone:     Europe/Paris\n\n◆ Context Compression\n  Enabled:      no\n\n◆ Messaging Platforms\n  Telegram:     not configured\n  Discord:      not configured\n\n────────────────────────────────────────────────────────────\n  gauss config edit     # Edit config file\n  gauss config set <key> <value>\n  gauss setup           # Run setup wizard\n\n"
+    },
+    {
+      "name": "show-compression-custom",
+      "kind": "config-show",
+      "config": {
+        "compression": {
+          "threshold": 0.755,
+          "summary_model": "m",
+          "summary_provider": "nous"
+        }
+      },
+      "env_file": {},
+      "env": {},
+      "exit": 0,
+      "output": "\n┌─────────────────────────────────────────────────────────┐\n│              ⚕ Gauss Configuration                    │\n└─────────────────────────────────────────────────────────┘\n\n◆ Paths\n  Config:       <GAUSS_HOME>/config.yaml\n  Secrets:      <GAUSS_HOME>/.env\n  Install:      <SRC>\n\n◆ API Keys\n  OpenRouter     (not set)\n  OpenAI (STT/TTS) (not set)\n  Firecrawl      (not set)\n  Browserbase    (not set)\n  FAL            (not set)\n  Anthropic      (not set)\n\n◆ Model\n  Model:        anthropic/claude-opus-4.6\n  Max turns:    90\n  Toolsets:     gauss-cli\n\n◆ Display\n  Personality:  kawaii\n  Reasoning:    off\n  Bell:         off\n\n◆ Terminal\n  Backend:      local\n  Working dir:  .\n  Timeout:      180s\n  Handoff:      auto\n\n◆ Timezone\n  Timezone:     (server-local)\n\n◆ Context Compression\n  Enabled:      yes\n  Threshold:    76%\n  Model:        m\n  Provider:     nous\n\n◆ Messaging Platforms\n  Telegram:     not configured\n  Discord:      not configured\n\n────────────────────────────────────────────────────────────\n  gauss config edit     # Edit config file\n  gauss config set <key> <value>\n  gauss setup           # Run setup wizard\n\n"
+    },
+    {
+      "name": "show-aux",
+      "kind": "config-show",
+      "config": {
+        "auxiliary": {
+          "vision": {
+            "provider": "openrouter",
+            "model": "v"
+          },
+          "web_extract": {
+            "model": "w"
+          }
+        }
+      },
+      "env_file": {},
+      "env": {},
+      "exit": 0,
+      "output": "\n┌─────────────────────────────────────────────────────────┐\n│              ⚕ Gauss Configuration                    │\n└─────────────────────────────────────────────────────────┘\n\n◆ Paths\n  Config:       <GAUSS_HOME>/config.yaml\n  Secrets:      <GAUSS_HOME>/.env\n  Install:      <SRC>\n\n◆ API Keys\n  OpenRouter     (not set)\n  OpenAI (STT/TTS) (not set)\n  Firecrawl      (not set)\n  Browserbase    (not set)\n  FAL            (not set)\n  Anthropic      (not set)\n\n◆ Model\n  Model:        anthropic/claude-opus-4.6\n  Max turns:    90\n  Toolsets:     gauss-cli\n\n◆ Display\n  Personality:  kawaii\n  Reasoning:    off\n  Bell:         off\n\n◆ Terminal\n  Backend:      local\n  Working dir:  .\n  Timeout:      180s\n  Handoff:      auto\n\n◆ Timezone\n  Timezone:     (server-local)\n\n◆ Context Compression\n  Enabled:      yes\n  Threshold:    50%\n  Model:        google/gemini-3-flash-preview\n\n◆ Auxiliary Models (overrides)\n  Vision        provider=openrouter, model=v\n  Web extract   provider=auto, model=w\n\n◆ Messaging Platforms\n  Telegram:     not configured\n  Discord:      not configured\n\n────────────────────────────────────────────────────────────\n  gauss config edit     # Edit config file\n  gauss config set <key> <value>\n  gauss setup           # Run setup wizard\n\n"
+    },
+    {
+      "name": "show-keys",
+      "kind": "config-show",
+      "config": {},
+      "env_file": {
+        "OPENROUTER_API_KEY": "sk-or-1234567890abcd",
+        "FAL_KEY": "short",
+        "ANTHROPIC_API_KEY": "sk-ant-abcdefghijklmnop",
+        "TELEGRAM_BOT_TOKEN": "t"
+      },
+      "env": {},
+      "exit": 0,
+      "output": "\n┌─────────────────────────────────────────────────────────┐\n│              ⚕ Gauss Configuration                    │\n└─────────────────────────────────────────────────────────┘\n\n◆ Paths\n  Config:       <GAUSS_HOME>/config.yaml\n  Secrets:      <GAUSS_HOME>/.env\n  Install:      <SRC>\n\n◆ API Keys\n  OpenRouter     sk-o...abcd\n  OpenAI (STT/TTS) (not set)\n  Firecrawl      (not set)\n  Browserbase    (not set)\n  FAL            ***\n  Anthropic      sk-a...mnop\n\n◆ Model\n  Model:        anthropic/claude-opus-4.6\n  Max turns:    90\n  Toolsets:     gauss-cli\n\n◆ Display\n  Personality:  kawaii\n  Reasoning:    off\n  Bell:         off\n\n◆ Terminal\n  Backend:      local\n  Working dir:  .\n  Timeout:      180s\n  Handoff:      auto\n\n◆ Timezone\n  Timezone:     (server-local)\n\n◆ Context Compression\n  Enabled:      yes\n  Threshold:    50%\n  Model:        google/gemini-3-flash-preview\n\n◆ Messaging Platforms\n  Telegram:     configured\n  Discord:      not configured\n\n────────────────────────────────────────────────────────────\n  gauss config edit     # Edit config file\n  gauss config set <key> <value>\n  gauss setup           # Run setup wizard\n\n"
+    },
+    {
+      "name": "show-keys-process",
+      "kind": "config-show",
+      "config": {},
+      "env_file": {},
+      "env": {
+        "OPENROUTER_API_KEY": "sk-proc-abcdefghijkl",
+        "ANTHROPIC_TOKEN": "tok-abcdefghijklmn",
+        "DISCORD_BOT_TOKEN": "d"
+      },
+      "exit": 0,
+      "output": "\n┌─────────────────────────────────────────────────────────┐\n│              ⚕ Gauss Configuration                    │\n└─────────────────────────────────────────────────────────┘\n\n◆ Paths\n  Config:       <GAUSS_HOME>/config.yaml\n  Secrets:      <GAUSS_HOME>/.env\n  Install:      <SRC>\n\n◆ API Keys\n  OpenRouter     sk-p...ijkl\n  OpenAI (STT/TTS) (not set)\n  Firecrawl      (not set)\n  Browserbase    (not set)\n  FAL            (not set)\n  Anthropic      tok-...klmn\n\n◆ Model\n  Model:        anthropic/claude-opus-4.6\n  Max turns:    90\n  Toolsets:     gauss-cli\n\n◆ Display\n  Personality:  kawaii\n  Reasoning:    off\n  Bell:         off\n\n◆ Terminal\n  Backend:      local\n  Working dir:  .\n  Timeout:      180s\n  Handoff:      auto\n\n◆ Timezone\n  Timezone:     (server-local)\n\n◆ Context Compression\n  Enabled:      yes\n  Threshold:    50%\n  Model:        google/gemini-3-flash-preview\n\n◆ Messaging Platforms\n  Telegram:     not configured\n  Discord:      configured\n\n────────────────────────────────────────────────────────────\n  gauss config edit     # Edit config file\n  gauss config set <key> <value>\n  gauss setup           # Run setup wizard\n\n"
+    },
+    {
+      "name": "show-handoff-not-dict",
+      "kind": "config-show",
+      "config": {
+        "cli": {
+          "handoff": "auto"
+        }
+      },
+      "env_file": {},
+      "env": {},
+      "exit": 0,
+      "output": "\n┌─────────────────────────────────────────────────────────┐\n│              ⚕ Gauss Configuration                    │\n└─────────────────────────────────────────────────────────┘\n\n◆ Paths\n  Config:       <GAUSS_HOME>/config.yaml\n  Secrets:      <GAUSS_HOME>/.env\n  Install:      <SRC>\n\n◆ API Keys\n  OpenRouter     (not set)\n  OpenAI (STT/TTS) (not set)\n  Firecrawl      (not set)\n  Browserbase    (not set)\n  FAL            (not set)\n  Anthropic      (not set)\n\n◆ Model\n  Model:        anthropic/claude-opus-4.6\n  Max turns:    90\n  Toolsets:     gauss-cli\n\n◆ Display\n  Personality:  kawaii\n  Reasoning:    off\n  Bell:         off\n\n◆ Terminal\n  Backend:      local\n  Working dir:  .\n  Timeout:      180s\n\n◆ Timezone\n  Timezone:     (server-local)\n\n◆ Context Compression\n  Enabled:      yes\n  Threshold:    50%\n  Model:        google/gemini-3-flash-preview\n\n◆ Messaging Platforms\n  Telegram:     not configured\n  Discord:      not configured\n\n────────────────────────────────────────────────────────────\n  gauss config edit     # Edit config file\n  gauss config set <key> <value>\n  gauss setup           # Run setup wizard\n\n"
+    },
+    {
+      "name": "edit-editor",
+      "kind": "config-edit",
+      "config": {},
+      "env": {
+        "EDITOR": "<BIN>/fake-editor"
+      },
+      "editor": true,
+      "exit": 0,
+      "output": "Opening <GAUSS_HOME>/config.yaml in <TMP>/bin/fake-editor...\n",
+      "editor_calls": [
+        "fake-editor <GAUSS_HOME>/config.yaml"
+      ],
+      "config_after": "{}\n"
+    },
+    {
+      "name": "edit-visual",
+      "kind": "config-edit",
+      "config": {},
+      "env": {
+        "VISUAL": "<BIN>/fake-editor"
+      },
+      "editor": true,
+      "exit": 0,
+      "output": "Opening <GAUSS_HOME>/config.yaml in <TMP>/bin/fake-editor...\n",
+      "editor_calls": [
+        "fake-editor <GAUSS_HOME>/config.yaml"
+      ],
+      "config_after": "{}\n"
+    },
+    {
+      "name": "edit-editor-wins",
+      "kind": "config-edit",
+      "config": {},
+      "env": {
+        "EDITOR": "<BIN>/fake-editor",
+        "VISUAL": "<BIN>/other"
+      },
+      "editor": true,
+      "exit": 0,
+      "output": "Opening <GAUSS_HOME>/config.yaml in <TMP>/bin/fake-editor...\n",
+      "editor_calls": [
+        "fake-editor <GAUSS_HOME>/config.yaml"
+      ],
+      "config_after": "{}\n"
+    },
+    {
+      "name": "edit-creates-config",
+      "kind": "config-edit",
+      "config": null,
+      "env": {
+        "EDITOR": "<BIN>/fake-editor"
+      },
+      "editor": true,
+      "exit": 0,
+      "output": "Created <GAUSS_HOME>/config.yaml\nOpening <GAUSS_HOME>/config.yaml in <TMP>/bin/fake-editor...\n",
+      "editor_calls": [
+        "fake-editor <GAUSS_HOME>/config.yaml"
+      ],
+      "config_after": "gauss:\n  compatibility:\n    legacy_skill_surface: false\n    legacy_cli_surface: false\n  autoformalize:\n    backend: claude-code\n    handoff_mode: auto\n    auth_mode: auto\n    managed_state_dir: ''\n  project:\n    template_source: ''\nmodel: anthropic/claude-opus-4.6\ntoolsets:\n- gauss-cli\nagent:\n  max_turns: 90\nterminal:\n  backend: local\n  cwd: .\n  timeout: 180\n  docker_image: nikolaik/python-nodejs:python3.11-nodejs20\n  singularity_image: docker://nikolaik/python-nodejs:python3.11-nodejs20\n  modal_image: nikolaik/python-nodejs:python3.11-nodejs20\n  daytona_image: nikolaik/python-nodejs:python3.11-nodejs20\n  container_cpu: 1\n  container_memory: 5120\n  container_disk: 51200\n  container_persistent: true\n  docker_volumes: []\n  docker_mount_cwd_to_workspace: false\n  persistent_shell: true\nbrowser:\n  inactivity_timeout: 120\n  record_sessions: false\ncli:\n  handoff:\n    mode: auto\n    launchers: {}\ncheckpoints:\n  enabled: true\n  max_snapshots: 50\ncompression:\n  enabled: true\n  threshold: 0.5\n  summary_model: google/gemini-3-flash-preview\n  summary_provider: auto\nauxiliary:\n  vision:\n    provider: auto\n    model: ''\n    base_url: ''\n    api_key: ''\n  web_extract:\n    provider: auto\n    model: ''\n    base_url: ''\n    api_key: ''\n  compression:\n    provider: auto\n    model: ''\n    base_url: ''\n    api_key: ''\n  session_search:\n    provider: auto\n    model: ''\n    base_url: ''\n    api_key: ''\n  skills_hub:\n    provider: auto\n    model: ''\n    base_url: ''\n    api_key: ''\n  approval:\n    provider: auto\n    model: ''\n    base_url: ''\n    api_key: ''\n  mcp:\n    provider: auto\n    model: ''\n    base_url: ''\n    api_key: ''\n  flush_memories:\n    provider: auto\n    model: ''\n    base_url: ''\n    api_key: ''\ndisplay:\n  compact: false\n  personality: kawaii\n  resume_display: full\n  bell_on_complete: false\n  show_reasoning: false\n  show_cost: false\n  skin: default\nprivacy:\n  redact_pii: false\ntts:\n  provider: edge\n  edge:\n    voice: en-US-AriaNeural\n  elevenlabs:\n    voice_id: pNInz6obpgDQGcFmaJgB\n    model_id: eleven_multilingual_v2\n  openai:\n    model: gpt-4o-mini-tts\n    voice: alloy\nstt:\n  enabled: true\n  provider: local\n  local:\n    model: base\n  openai:\n    model: whisper-1\nvoice:\n  record_key: ctrl+b\n  max_recording_seconds: 120\n  auto_tts: false\n  silence_threshold: 200\n  silence_duration: 3.0\nhuman_delay:\n  mode: 'off'\n  min_ms: 800\n  max_ms: 2500\nmemory:\n  memory_enabled: true\n  user_profile_enabled: true\n  memory_char_limit: 2200\n  user_char_limit: 1375\ndelegation:\n  model: ''\n  provider: ''\n  base_url: ''\n  api_key: ''\nprefill_messages_file: ''\ntimezone: ''\ndiscord:\n  require_mention: true\n  free_response_channels: ''\n  auto_thread: true\napprovals:\n  mode: manual\ncommand_allowlist: []\nquick_commands: {}\npersonalities: {}\nsecurity:\n  redact_secrets: true\n  tirith_enabled: true\n  tirith_path: tirith\n  tirith_timeout: 5\n  tirith_fail_open: true\n_config_version: 9\n\n# ── Fallback Model ────────────────────────────────────────────────────\n# Automatic provider failover when primary is unavailable.\n# Uncomment and configure to enable. Triggers on rate limits (429),\n# overload (529), service errors (503), or connection failures.\n#\n# Supported providers:\n#   openrouter   (OPENROUTER_API_KEY)  — routes to any model\n#   openai-codex (OAuth — gauss login) — OpenAI Codex\n#   nous         (OAuth — gauss login) — Nous Portal\n#   zai          (ZAI_API_KEY)         — Z.AI / GLM\n#   kimi-coding  (KIMI_API_KEY)        — Kimi / Moonshot\n#   minimax      (MINIMAX_API_KEY)     — MiniMax\n#   minimax-cn   (MINIMAX_CN_API_KEY)  — MiniMax (China)\n#\n# For custom OpenAI-compatible endpoints, add base_url and api_key_env.\n#\n# fallback_model:\n#   provider: openrouter\n#   model: anthropic/claude-sonnet-4\n"
+    },
+    {
+      "name": "edit-fallback-vi",
+      "kind": "config-edit",
+      "config": {},
+      "env": {},
+      "editor": "vi",
+      "exit": 0,
+      "output": "Opening <GAUSS_HOME>/config.yaml in vi...\n",
+      "editor_calls": [
+        "vi <GAUSS_HOME>/config.yaml"
+      ],
+      "config_after": "{}\n"
+    },
+    {
+      "name": "edit-no-editor",
+      "kind": "config-edit",
+      "config": {},
+      "env": {},
+      "editor": false,
+      "exit": 0,
+      "output": "No editor found. Config file is at:\n  <GAUSS_HOME>/config.yaml\n",
+      "editor_calls": [],
+      "config_after": "{}\n"
+    }
+  ]
+}

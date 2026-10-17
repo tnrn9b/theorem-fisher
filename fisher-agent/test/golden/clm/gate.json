@@ -1,0 +1,128 @@
+{
+ "spec": "docs/clm.md",
+ "session_id": "20261006_101500_ab12cd",
+ "fixture": "A",
+ "live": [
+  {
+   "role": "assistant",
+   "content": "",
+   "reasoning": null,
+   "finish_reason": "tool_calls",
+   "tool_calls": [
+    {
+     "id": "call_9",
+     "call_id": "call_9",
+     "response_item_id": "fc_9",
+     "type": "function",
+     "function": {
+      "name": "read_file",
+      "arguments": "{\"path\": \"{MIRROR}\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "content": "{\"content\": \"...\"}",
+   "tool_call_id": "call_9"
+  }
+ ],
+ "cases": [
+  {
+   "name": "fit-shrinks",
+   "mode": "fit",
+   "after": "drop-group",
+   "limit": 100000,
+   "accept": true,
+   "tokens": {
+    "before": 392,
+    "after": 297,
+    "after_with_live": 381
+   }
+  },
+  {
+   "name": "fit-grows-fits",
+   "mode": "fit",
+   "after": "new-block",
+   "limit": 100000,
+   "accept": true,
+   "tokens": {
+    "before": 392,
+    "after": 404,
+    "after_with_live": 488
+   }
+  },
+  {
+   "name": "fit-grows-over",
+   "mode": "fit",
+   "after": "new-block",
+   "limit": 476,
+   "accept": false,
+   "tokens": {
+    "before": 392,
+    "after": 404,
+    "after_with_live": 488
+   }
+  },
+  {
+   "name": "fit-shrinks-still-over",
+   "mode": "fit",
+   "after": "drop-group",
+   "limit": 10,
+   "accept": true,
+   "tokens": {
+    "before": 392,
+    "after": 297,
+    "after_with_live": 381
+   }
+  },
+  {
+   "name": "shrink-grows",
+   "mode": "shrink",
+   "after": "new-block",
+   "limit": 100000,
+   "accept": false,
+   "tokens": {
+    "before": 392,
+    "after": 404,
+    "after_with_live": 488
+   }
+  },
+  {
+   "name": "shrink-shrinks",
+   "mode": "shrink",
+   "after": "drop-group",
+   "limit": 100000,
+   "accept": true,
+   "tokens": {
+    "before": 392,
+    "after": 297,
+    "after_with_live": 381
+   }
+  },
+  {
+   "name": "shrink-same-size",
+   "mode": "shrink",
+   "after": "reorder-turns",
+   "limit": 100000,
+   "accept": false,
+   "tokens": {
+    "before": 392,
+    "after": 392,
+    "after_with_live": 476
+   }
+  },
+  {
+   "name": "fit-same-size",
+   "mode": "fit",
+   "after": "reorder-turns",
+   "limit": 100000,
+   "accept": true,
+   "tokens": {
+    "before": 392,
+    "after": 392,
+    "after_with_live": 476
+   }
+  }
+ ]
+}

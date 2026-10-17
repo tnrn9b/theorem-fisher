@@ -1,0 +1,22 @@
+{
+  "name": "fisher-provers",
+  "owner": {
+    "name": "Fisher"
+  },
+  "metadata": {
+    "description": "Fisher's skills for Rocq and Isabelle projects",
+    "version": "0.2.0"
+  },
+  "plugins": [
+    {
+      "name": "rocq",
+      "source": "./rocq",
+      "description": "Prove and draft Rocq theorems with the rocq MCP server"
+    },
+    {
+      "name": "isabelle",
+      "source": "./isabelle",
+      "description": "Prove and draft Isabelle theorems with the isabelle MCP server"
+    }
+  ]
+}

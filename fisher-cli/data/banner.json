@@ -1,0 +1,178 @@
+{
+ "version": "0.2.2",
+ "release_date": "2026.4.5",
+ "logo": "[bold #FFD700] ██████╗  █████╗ ██╗   ██╗███████╗███████╗[/]\n[bold #FFD700]██╔════╝ ██╔══██╗██║   ██║██╔════╝██╔════╝[/]\n[#FFBF00]██║  ███╗███████║██║   ██║███████╗███████╗[/]\n[#FFBF00]██║   ██║██╔══██║██║   ██║╚════██║╚════██║[/]\n[#CD7F32]╚██████╔╝██║  ██║╚██████╔╝███████║███████║[/]\n[#CD7F32] ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚══════╝[/]",
+ "logo_ascii": "[bold #FFD700]  ____    _    _   _ ____ ____[/]\n[bold #FFD700] / ___|  / \\  | | | / ___/ ___|[/]\n[#FFBF00]| |  _  / _ \\ | | | \\___ \\___ \\[/]\n[#FFBF00]| |_| |/ ___ \\| |_| |___) |__) |[/]\n[#CD7F32] \\____/_/   \\_\\\\___/|____/____/[/]",
+ "hero": "[#CD7F32]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⡀⠀⣀⣀⠀⢀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]\n[#CD7F32]⠀⠀⠀⠀⠀⠀⢀⣠⣴⣾⣿⣿⣇⠸⣿⣿⠇⣸⣿⣿⣷⣦⣄⡀⠀⠀⠀⠀⠀⠀[/]\n[#FFBF00]⠀⢀⣠⣴⣶⠿⠋⣩⡿⣿⡿⠻⣿⡇⢠⡄⢸⣿⠟⢿⣿⢿⣍⠙⠿⣶⣦⣄⡀⠀[/]\n[#FFBF00]⠀⠀⠉⠉⠁⠶⠟⠋⠀⠉⠀⢀⣈⣁⡈⢁⣈⣁⡀⠀⠉⠀⠙⠻⠶⠈⠉⠉⠀⠀[/]\n[#FFD700]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⡿⠛⢁⡈⠛⢿⣿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]\n[#FFD700]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠿⣿⣦⣤⣈⠁⢠⣴⣿⠿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]\n[#FFBF00]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠻⢿⣿⣦⡉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]\n[#FFBF00]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⢷⣦⣈⠛⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]\n[#CD7F32]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣴⠦⠈⠙⠿⣦⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]\n[#CD7F32]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⣿⣤⡈⠁⢤⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]\n[#B8860B]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠷⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]\n[#B8860B]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⠑⢶⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]\n[#B8860B]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠁⢰⡆⠈⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]\n[#B8860B]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⠈⣡⠞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]\n[#B8860B]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]",
+ "hero_ascii": "[dim #B8860B]Lean workspace and managed proof workflows[/]",
+ "compact": "[bold #FFD700]GAUSS[/] [dim #B8860B]· Lean Autoformalization[/]",
+ "compact_ascii": "[bold #FFD700]GAUSS[/] [dim #B8860B]- Lean Autoformalization[/]",
+ "commands": [
+  [
+   "Start Here",
+   [
+    [
+     "/chat",
+     "Show the first-step guide and enable plain-language chat mode"
+    ],
+    [
+     "/project",
+     "Create, convert, inspect, or switch the active Gauss project"
+    ]
+   ]
+  ],
+  [
+   "Workflow",
+   [
+    [
+     "/prove",
+     "Spawn a managed backend agent for the guided Lean prove workflow"
+    ],
+    [
+     "/draft",
+     "Spawn a managed backend agent for the Lean draft workflow"
+    ],
+    [
+     "/review",
+     "Spawn a managed backend agent for the read-only Lean review workflow"
+    ],
+    [
+     "/checkpoint",
+     "Spawn a managed backend agent for the Lean checkpoint workflow"
+    ],
+    [
+     "/refactor",
+     "Spawn a managed backend agent for the Lean refactor workflow"
+    ],
+    [
+     "/golf",
+     "Spawn a managed backend agent for the Lean proof golfing workflow"
+    ],
+    [
+     "/autoprove",
+     "Spawn a managed backend agent for the autonomous Lean autoprove workflow"
+    ],
+    [
+     "/formalize",
+     "Spawn a managed backend agent for the interactive Lean formalize workflow"
+    ],
+    [
+     "/autoformalize",
+     "Spawn a managed backend agent for the autonomous Lean autoformalize workflow"
+    ],
+    [
+     "/autoformalize-backend",
+     "Show or change the managed workflow backend"
+    ],
+    [
+     "/swarm",
+     "Show workflow agents · /swarm attach <id> · /swarm cancel <id>"
+    ]
+   ]
+  ],
+  [
+   "Session",
+   [
+    [
+     "/managed-chat",
+     "Open the configured managed backend child session and return to Gauss when it exits"
+    ],
+    [
+     "/new",
+     "Start a new session (fresh session ID + history)"
+    ],
+    [
+     "/reset",
+     "Start a new session (alias for /new)"
+    ],
+    [
+     "/clear",
+     "Clear screen and start a new session"
+    ],
+    [
+     "/history",
+     "Show conversation history"
+    ],
+    [
+     "/save",
+     "Save the current conversation"
+    ],
+    [
+     "/retry",
+     "Retry the last message (resend to agent)"
+    ],
+    [
+     "/undo",
+     "Remove the last user/assistant exchange"
+    ],
+    [
+     "/title",
+     "Set a title for the current session (usage: /title My Session Name)"
+    ],
+    [
+     "/compress",
+     "Manually compress conversation context (flush memories + summarize)"
+    ],
+    [
+     "/rollback",
+     "List or restore filesystem checkpoints (usage: /rollback [number])"
+    ],
+    [
+     "/stop",
+     "Kill all running background processes"
+    ]
+   ]
+  ],
+  [
+   "Configuration",
+   [
+    [
+     "/config",
+     "Show current configuration"
+    ],
+    [
+     "/model",
+     "Show or change the current model"
+    ],
+    [
+     "/provider",
+     "Show available providers and current provider"
+    ],
+    [
+     "/verbose",
+     "Cycle tool progress display: off → new → all → verbose"
+    ],
+    [
+     "/reasoning",
+     "Manage reasoning effort and display (usage: /reasoning [level|show|hide])"
+    ]
+   ]
+  ],
+  [
+   "Info",
+   [
+    [
+     "/help",
+     "Show this help message"
+    ],
+    [
+     "/usage",
+     "Show token usage for the current session"
+    ],
+    [
+     "/paste",
+     "Check clipboard for an image and attach it"
+    ]
+   ]
+  ],
+  [
+   "Exit",
+   [
+    [
+     "/quit",
+     "Exit the CLI (also: /exit, /q)"
+    ]
+   ]
+  ]
+ ]
+}

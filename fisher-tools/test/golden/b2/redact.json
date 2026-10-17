@@ -1,0 +1,317 @@
+{
+ "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+ "python": "3.11.15",
+ "cases": [
+  {
+   "text": "",
+   "redacted": ""
+  },
+  {
+   "text": "a",
+   "redacted": "a"
+  },
+  {
+   "text": "sk-abcdefghijklmnop",
+   "redacted": "sk-abc...mnop"
+  },
+  {
+   "text": "xsk-abcdefghijklmnop",
+   "redacted": "xsk-abcdefghijklmnop"
+  },
+  {
+   "text": "sk-abc",
+   "redacted": "sk-abc"
+  },
+  {
+   "text": "key sk-ant-api03-ABCDEFGHIJKLMNOPQRSTUVWX_yz end",
+   "redacted": "key sk-ant...X_yz end"
+  },
+  {
+   "text": "OPENAI_API_KEY=sk-1234567890abcdef",
+   "redacted": "OPENAI_API_KEY=***"
+  },
+  {
+   "text": "my_token = 'abc def'",
+   "redacted": "my_token=*** def'"
+  },
+  {
+   "text": "export SECRET=\"s3cr3t-value\"",
+   "redacted": "export SECRET=\"***\""
+  },
+  {
+   "text": "password=hunter2",
+   "redacted": "password=***"
+  },
+  {
+   "text": "{\"apiKey\": \"abcdefghijklmnopqrstuvwxyz\", \"token\":\"x\"}",
+   "redacted": "{\"apiKey\": \"abcdef...wxyz\", \"token\": \"***\"}"
+  },
+  {
+   "text": "Authorization: Bearer abc.def.ghi",
+   "redacted": "Authorization: Bearer ***"
+  },
+  {
+   "text": "authorization:bearer   tok",
+   "redacted": "authorization:bearer   ***"
+  },
+  {
+   "text": "bot123456789:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+   "redacted": "bot123456789:***"
+  },
+  {
+   "text": "12345678:abcdefghijklmnopqrstuvwxyz0123456789",
+   "redacted": "12345678:***"
+  },
+  {
+   "text": "-----BEGIN RSA PRIVATE KEY-----\nMIIE\n-----END RSA PRIVATE KEY-----",
+   "redacted": "[REDACTED PRIVATE KEY]"
+  },
+  {
+   "text": "postgres://user:pass@host/db",
+   "redacted": "postgres://user:***@host/db"
+  },
+  {
+   "text": "MongoDB+srv://u:p:q@h",
+   "redacted": "MongoDB+srv://u:***@h"
+  },
+  {
+   "text": "call +14155552671 now",
+   "redacted": "call +141****2671 now"
+  },
+  {
+   "text": "+1234567x",
+   "redacted": "+1234567x"
+  },
+  {
+   "text": "+123456789012345678",
+   "redacted": "+123456789012345678"
+  },
+  {
+   "text": "ghp_abcdefghijklmnopqrst",
+   "redacted": "ghp_ab...qrst"
+  },
+  {
+   "text": "AKIA0123456789ABCDEF",
+   "redacted": "AKIA01...CDEF"
+  },
+  {
+   "text": "xoxb-1234567890-abc",
+   "redacted": "xoxb-1...-abc"
+  },
+  {
+   "text": "AIzaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "redacted": "AIzaaa...aaaa"
+  },
+  {
+   "text": "*** Update File: src/a.py",
+   "redacted": "*** Update File: src/a.py"
+  },
+  {
+   "text": "***Update  File:x",
+   "redacted": "***Update  File:x"
+  },
+  {
+   "text": "*** Add File: new.txt ",
+   "redacted": "*** Add File: new.txt "
+  },
+  {
+   "text": "*** Delete File: old.py",
+   "redacted": "*** Delete File: old.py"
+  },
+  {
+   "text": "*** Move File: a.py -> b/c.py",
+   "redacted": "*** Move File: a.py -> b/c.py"
+  },
+  {
+   "text": "*** Move File: a -> b -> c",
+   "redacted": "*** Move File: a -> b -> c"
+  },
+  {
+   "text": "@@ def f(): @@",
+   "redacted": "@@ def f(): @@"
+  },
+  {
+   "text": "@@@@",
+   "redacted": "@@@@"
+  },
+  {
+   "text": "@@ x",
+   "redacted": "@@ x"
+  },
+  {
+   "text": "   12|content",
+   "redacted": "   12|content"
+  },
+  {
+   "text": "12|",
+   "redacted": "12|"
+  },
+  {
+   "text": "x12|",
+   "redacted": "x12|"
+  },
+  {
+   "text": "src/a.py:12:hello: world",
+   "redacted": "src/a.py:12:hello: world"
+  },
+  {
+   "text": "C:\\x\\y.py:3:z",
+   "redacted": "C:\\x\\y.py:3:z"
+  },
+  {
+   "text": "a-b-c.py-12-ctx line",
+   "redacted": "a-b-c.py-12-ctx line"
+  },
+  {
+   "text": "f.py-3-",
+   "redacted": "f.py-3-"
+  },
+  {
+   "text": "a:b:c",
+   "redacted": "a:b:c"
+  },
+  {
+   "text": "  \t  x \t y",
+   "redacted": "  \t  x \t y"
+  },
+  {
+   "text": "user.name-1",
+   "redacted": "user.name-1"
+  },
+  {
+   "text": "~bad;rm",
+   "redacted": "~bad;rm"
+  },
+  {
+   "text": "sudo apt",
+   "redacted": "sudo apt"
+  },
+  {
+   "text": "visudo",
+   "redacted": "visudo"
+  },
+  {
+   "text": "x.sudo y",
+   "redacted": "x.sudo y"
+  },
+  {
+   "text": "sudo-rs",
+   "redacted": "sudo-rs"
+  },
+  {
+   "text": "echo sudo",
+   "redacted": "echo sudo"
+  },
+  {
+   "text": "[Errno 2] No such file or directory: 'npx'",
+   "redacted": "[Errno 2] No such file or directory: 'npx'"
+  },
+  {
+   "text": "token=abc&key=def;secret=x,API_KEY=1 password='q'",
+   "redacted": "token=abc&ke...EY=1 password='***'"
+  },
+  {
+   "text": "Bearer   xyz123 more",
+   "redacted": "Bearer   xyz123 more"
+  },
+  {
+   "text": "MONKEY=banana apikey=zz",
+   "redacted": "MONKEY=banana apikey=***"
+  },
+  {
+   "text": "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+   "redacted": "ghp_AA...AAAA"
+  },
+  {
+   "text": "sk-bbbbbbbbbbbbbbbbbbbb-ccccc",
+   "redacted": "sk-bbb...cccc"
+  },
+  {
+   "text": "ÄÖÜ sk-ünicode123456 ß",
+   "redacted": "ÄÖÜ sk-ünicode123456 ß"
+  },
+  {
+   "text": "line1\nline2\n",
+   "redacted": "line1\nline2\n"
+  },
+  {
+   "text": "a\n",
+   "redacted": "a\n"
+  },
+  {
+   "text": "x\ny\nz",
+   "redacted": "x\ny\nz"
+  },
+  {
+   "text": "Here is my key: sk-proj-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 and also ghp_1234567890abcdefghij",
+   "redacted": "Here is my key: sk-pro...6789 and also ghp_12...ghij"
+  },
+  {
+   "text": "DATABASE_URL=postgres://admin:supersecret@db:5432/app\nREDIS=redis://:pw@r:6379",
+   "redacted": "DATABASE_URL=postgres://admin:***@db:5432/app\nREDIS=redis://:pw@r:6379"
+  },
+  {
+   "text": "{\"refresh_token\": \"1//0abcdefghijklmnop\", \"access_token\":\"ya29.abcdefghijklmnop\", \"bearer\": \"short\"}",
+   "redacted": "{\"refresh_token\": \"1//0ab...mnop\", \"access_token\": \"ya29.a...mnop\", \"bearer\": \"***\"}"
+  },
+  {
+   "text": "GITHUB_TOKEN=ghp_abcdefghijklmnopqrstuvwxyz0123456789",
+   "redacted": "GITHUB_TOKEN=***"
+  },
+  {
+   "text": "aws AKIAIOSFODNN7EXAMPLE end",
+   "redacted": "aws AKIAIO...MPLE end"
+  },
+  {
+   "text": "curl -H 'Authorization: Bearer sk-ant-oat01-abcdefghijklmnopqrstuvwxyz' https://x",
+   "redacted": "curl -H 'Authorization: Bearer *** https://x"
+  },
+  {
+   "text": "phone +447911123456, short +1234567, hex +1234567890abc",
+   "redacted": "phone +447****3456, short +1****67, hex +1234567890abc"
+  },
+  {
+   "text": "slack xoxp-1234-5678-abcdefghij",
+   "redacted": "slack xoxp-1...ghij"
+  },
+  {
+   "text": "-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXk\n-----END OPENSSH PRIVATE KEY-----\ntrailing",
+   "redacted": "[REDACTED PRIVATE KEY]\ntrailing"
+  },
+  {
+   "text": "hf_abcdefghijklmnop r8_abcdefghijkl npm_abcdefghijkl pypi-abcdefghijkl dop_v1_abcdefghijkl am_abcdefghijkl",
+   "redacted": "hf_abc...mnop *** *** *** dop_v1...ijkl ***"
+  },
+  {
+   "text": "SG.abcdefghijkl.mnop gAAAABcccccccccccccccccccccccccccccc sk_live_abcdefghijkl sk_test_abcdefghijkl rk_live_abcdefghijkl",
+   "redacted": "***.mnop gAAAAB...cccc sk_liv...ijkl sk_tes...ijkl rk_liv...ijkl"
+  },
+  {
+   "text": "fal_abcdefghijkl fc-abcdefghijkl bb_live_abcdefghijkl pplx-abcdefghijkl github_pat_abcdefghijkl_xyz",
+   "redacted": "*** *** bb_liv...ijkl *** github..._xyz"
+  },
+  {
+   "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaask-zzzzzzzzzzzzzzzzz sk-zzzzzzzzzzzzzzzzzz",
+   "redacted": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaask-zzzzzzzzzzzzzzzzz sk-zzz...zzzz"
+  },
+  {
+   "text": "MY_PASSWD='a b'",
+   "redacted": "MY_PASSWD=*** b'"
+  },
+  {
+   "text": "AUTH_X=\"q\"",
+   "redacted": "AUTH_X=\"***\""
+  },
+  {
+   "text": "token = \"\"",
+   "redacted": "token=***"
+  },
+  {
+   "text": "sk-abcdefghijklmnop",
+   "env": {
+    "GAUSS_REDACT_SECRETS": "off"
+   },
+   "redacted": "sk-abcdefghijklmnop"
+  }
+ ]
+}

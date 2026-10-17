@@ -1,0 +1,915 @@
+[
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Start (or restart) the Isabelle prover with the given session/logic.\n\n**Must be called before any evaluation or query tool** \u2014 the prover does not\nauto-start.\n\nNo need to check whether the session is built \u2014 launch checks\nautomatically: when its heap image (or any heap in its dependency chain)\nis missing or outdated, or the session name is undefined, it fails fast\n(~5s) instead of building implicitly. Run the `isabelle build -b ...`\ncommand from the error yourself, then relaunch \u2014 this server never builds\nsessions.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "debug": {
+          "default": false,
+          "description": "Launch with ML debugger instrumentation (`-o ML_debugger=true`):\nnewly compiled ML code gets breakable sites; code precompiled into\nthe heap is unaffected, and no heap is invalidated. Off by default\nbecause instrumentation slows compiled ML.",
+          "type": "boolean"
+        },
+        "session": {
+          "default": "Main",
+          "description": "Isabelle session/logic name, e.g. \"HOL-Analysis\", \"Minilang\".\nPick the one that fits the work (ask the user if unclear) \u2014 a\nsession only provides precompiled theories; anything else still\nloads, just slowly. Precompiled theories cannot be edited, so the\nsession must NOT contain the theories you will work on \u2014 for a\nproject, use its base session (the parent in its ROOT entry,\n`session NAME = BASE + \u2026`), not the project's own session.\nThe \"Main\" fallback precompiles very little. You need not check\nwhether the session is built \u2014 launch checks automatically and\nerrors with the exact build command if it is not.",
+          "type": "string"
+        },
+        "session_dirs": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Extra ``-d`` session search directories for non-builtin\nsessions (Isabelle reads their ROOT/ROOTS to discover the session).\nDefaults to the project root (the client's declared root directory,\nelse the server's working directory) when that directory is itself\na session root (contains ROOT/ROOTS), otherwise none. Built-in sessions\n(HOL, HOL-Analysis, \u2026) need no session dirs."
+        }
+      },
+      "type": "object"
+    },
+    "name": "isabelle_launch"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Terminate the running Isabelle prover.\n\nThe MCP server itself stays up; you can start a fresh prover (e.g. a different\nsession) with isabelle_launch afterwards.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "name": "isabelle_terminate"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Start evaluating a theory file up to a location on a line.\n\n**Errors do not stop the checking \u2014 they slow it down.** Isabelle still checks\nevery command up to your target when earlier ones fail. But many errors can\nmake the evaluation crawl: watch it using isabelle_evaluation_status, and when\nerrors pile up, cancel it with isabelle_cancel_evaluation.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "after_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional text snippet to stop at. Evaluation proceeds through\nthe command ending at this snippet. The snippet is matched on token\nboundaries (ASCII and Unicode forms are equivalent), must BEGIN on\n``line``, and may span onto following lines; its first occurrence is\nused. Without it (default), evaluation proceeds through the command on\n``line``."
+        },
+        "file_path": {
+          "description": "Absolute path to .thy file",
+          "type": "string"
+        },
+        "line": {
+          "description": "Target line number (1-indexed). Use -1 for last line.",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "file_path",
+        "line"
+      ],
+      "type": "object"
+    },
+    "name": "isabelle_evaluate_to"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Check the current evaluation state.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "name": "isabelle_evaluation_status"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Cancel an ongoing evaluation.\n\nStops Isabelle from processing further.  Results before the first\nunfinished command remain valid for querying.  Other tool calls wait\nwhile a cancellation is in progress.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "name": "isabelle_cancel_evaluation"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Get type and documentation for a symbol on a line.\n\nFinds all occurrences of the symbol on the line (up to 10), queries each,\nand deduplicates results. Accepts both ASCII and Unicode symbol forms.\n\nQueries never evaluate: evaluate up to the line with isabelle_evaluate_to\nfirst. Requires a launched session (see isabelle_launch).",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "file_path": {
+          "description": "Absolute path to .thy file",
+          "type": "string"
+        },
+        "line": {
+          "description": "Line number (1-indexed)",
+          "type": "integer"
+        },
+        "symbol": {
+          "description": "Symbol text to look up (e.g. \"Suc\", \"my_const\", \"\u27f9\")",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file_path",
+        "line",
+        "symbol"
+      ],
+      "type": "object"
+    },
+    "name": "isabelle_hover"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Find where a symbol is defined.\n\nFinds all occurrences of the symbol on the line (up to 10), queries each,\nand deduplicates locations. Accepts both ASCII and Unicode symbol forms.\n\nQueries never evaluate: evaluate up to the line with isabelle_evaluate_to\nfirst. Requires a launched session (see isabelle_launch).",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "file_path": {
+          "description": "Absolute path to .thy file",
+          "type": "string"
+        },
+        "line": {
+          "description": "Line number (1-indexed)",
+          "type": "integer"
+        },
+        "symbol": {
+          "description": "Symbol text to look up (e.g. \"my_const\", \"List.map\")",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file_path",
+        "line",
+        "symbol"
+      ],
+      "type": "object"
+    },
+    "name": "isabelle_definition"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Find every occurrence of a *locally-defined* entity within this file.\n\nGiven a symbol on a line, resolves the entity there and returns all places it\nappears in the SAME file \u2014 its definition site and its uses. Useful to see\nwhere a constant, abbreviation, or lemma defined in this theory is used.\n\nScope is the current file only, and only entities defined in this file resolve:\nreferences to global constants from imported theories, and plain free/bound\nvariables, return no occurrences.\n\nQueries never evaluate: evaluate up to the line with isabelle_evaluate_to\nfirst. Requires a launched session (see isabelle_launch).",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "file_path": {
+          "description": "Absolute path to .thy file",
+          "type": "string"
+        },
+        "line": {
+          "description": "Line number (1-indexed)",
+          "type": "integer"
+        },
+        "symbol": {
+          "description": "Symbol text to look up (e.g. \"my_const\", \"add_one\"), ASCII or Unicode.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file_path",
+        "line",
+        "symbol"
+      ],
+      "type": "object"
+    },
+    "name": "isabelle_local_occurrences"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Get the Isar command at a position and the proof state after it executes.\n\nReturns the command enclosing the position \u2014 its full source text and range \u2014\ntogether with the subgoals remaining after that command runs. Queries never\nevaluate: evaluate up to the line with isabelle_evaluate_to first. Requires\na launched session (see isabelle_launch).",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "after_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional text on the line; the command right after it is used.\nWithout it, the command at the end of the line is used."
+        },
+        "file_path": {
+          "description": "Absolute path to .thy file",
+          "type": "string"
+        },
+        "line": {
+          "description": "Line number (1-indexed)",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "file_path",
+        "line"
+      ],
+      "type": "object"
+    },
+    "name": "isabelle_goal"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Search the theorem database, like Isabelle's ``find_theorems``.\n\nThe search runs in the proof/theory context at the given position (resolved\nlike isabelle_goal: ``line`` + optional ``after_text``). Criteria are combined\nconjunctively; each returns matching theorems as name + statement. Queries\nnever evaluate: evaluate up to the line with isabelle_evaluate_to first.\nRequires a launched session.\n\nIMPORTANT \u2014 position matters: the goal-relative criteria (``intro``/``elim``/\n``dest``/``solves`` and bare ``patterns`` that use schematic ``_`` against the\ncurrent goal) only make sense when the caret is INSIDE an open proof. Using\n``intro``/``elim``/``dest``/``solves`` at a theory-level caret (no goal) is an\nerror and is surfaced as such. Name/pattern searches work in any context.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "after_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional text on the line; the command right after it is the\ncontext. Without it, the command at the end of the line is used."
+        },
+        "allow_duplicates": {
+          "default": false,
+          "description": "Keep alpha-equivalent duplicates (default removes them).",
+          "type": "boolean"
+        },
+        "dest": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "elim": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "exclude_names": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Like ``names`` but excludes matches (``-name:``)."
+        },
+        "exclude_patterns": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Like ``patterns`` but excluded."
+        },
+        "exclude_simp": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Like ``simp`` but excluded."
+        },
+        "file_path": {
+          "description": "Absolute path to .thy file.",
+          "type": "string"
+        },
+        "intro": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "limit": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Max theorems to return (default ~40, Isabelle's find_theorems_limit)."
+        },
+        "line": {
+          "description": "Line number (1-indexed) \u2014 the context to search in.",
+          "type": "integer"
+        },
+        "names": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Each restricts to facts whose name CONTAINS the string (a substring\nmatch, with ``*`` as a wildcard \u2014 e.g. \"add\" also matches \"padd_0\");\nmultiple names are AND-ed."
+        },
+        "patterns": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Term patterns the theorem must match, e.g. \"_ + _ = _ + _\"\n(ASCII notation; ``_`` is a wildcard). AND-ed."
+        },
+        "simp": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Each is a simp-rule LHS pattern the theorem (as a simp rule) must\nmatch. exclude_simp excludes."
+        },
+        "solves": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "file_path",
+        "line"
+      ],
+      "type": "object"
+    },
+    "name": "isabelle_find_theorems"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Get the Isar command at a position and the output messages it produced.\n\nReturns the command enclosing the position \u2014 its full source text and range \u2014\ntogether with the prover output it emitted (normal/tracing/warning/error/\ninformation/state messages). Queries never evaluate: evaluate up to the line\nwith isabelle_evaluate_to first. Requires a launched session\n(see isabelle_launch).",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "after_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional text on the line; the command right after it is used.\nWithout it, the command at the end of the line is used."
+        },
+        "file_path": {
+          "description": "Absolute path to .thy file",
+          "type": "string"
+        },
+        "line": {
+          "description": "Line number (1-indexed)",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "file_path",
+        "line"
+      ],
+      "type": "object"
+    },
+    "name": "isabelle_command_output"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Ask what state the command(s) covering each of several lines are in.\n\nAnswers one line per requested position, in the order asked, with one of:\n`processed`, `running for Ns`, `not evaluated`,\n`cancelled, re-evaluate to get a result`, `unknown, retry in a few seconds`,\n`no command`, `file not open`.\n\nA line may hold several commands \u2014 `lemma foo: \"P\" by auto` is two. When they\nagree the shared state is reported; only when they differ is a per-command\nbreakdown printed. A command spanning several lines is reported for every line\nit covers, so asking about a line in the middle of a proof reports that proof's\ncommand.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "positions": {
+          "description": "The positions to ask about, each a file_path and a 1-indexed line.",
+          "items": {
+            "description": "One position to ask about: a file and a line, no column.",
+            "properties": {
+              "file_path": {
+                "description": "Absolute path to .thy file",
+                "type": "string"
+              },
+              "line": {
+                "description": "Line number (1-indexed)",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "file_path",
+              "line"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "positions"
+      ],
+      "type": "object"
+    },
+    "name": "isabelle_command_status"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Get information about current Isabelle session.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "name": "isabelle_session_info"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Register a breakpoint and enable its breakable site.\n\nA breakable site exists only in ML code the prover has already compiled\nwith debugging on, at statement boundaries the compiler chooses \u2014 use\nisabelle_list_breakable_sites to discover where breakpoints can go.\nAfter the breakpoint is set, it is hit the next time the armed code is\nexecuted. If the target command has already been evaluated, insert a\nspace before it to force a re-evaluation so the command runs again and\nhits the breakpoint.\n\nThe usual workflow: evaluate up to the end of the ML block that defines the\ncode, or the `ML_file` command that loads it, then set the breakpoint and\nevaluate onward so the code runs and hits. This tool never evaluates: the\ndefining block must be evaluated before the site exists. If the code to hit\nhas already been evaluated, insert a space before it and re-evaluate to run\nit again. After an edit at or before the defining block, its breakpoints\nstop working: evaluate up to that block again, call\n`isabelle_enable_all_breakpoints`, then evaluate onward.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "at_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional text snippet on the line. The breakable site at or\nnearest before its first occurrence is used (execution stops\nbefore that code runs). Without at_text, the first site on the\nline."
+        },
+        "file_path": {
+          "description": "Absolute path to the .thy or .ML file",
+          "type": "string"
+        },
+        "line": {
+          "description": "Line number (1-indexed) of the breakable site",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "file_path",
+        "line"
+      ],
+      "type": "object"
+    },
+    "name": "isabelle_set_breakpoint"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Disable and remove breakpoints.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "breakpoints": {
+          "description": "The breakpoints to delete, as printed by\nisabelle_list_breakpoints.",
+          "items": {
+            "description": "One breakpoint reference for isabelle_del_breakpoints, matched against\nthe registry (file, recorded line, anchor snippet) \u2014 an input model, not a\nresult (the debugger tools return text).",
+            "properties": {
+              "at_text": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "The text shown in \u2039\u2026\u203a for that breakpoint by isabelle_list_breakpoints. May be omitted when the line has only one breakpoint."
+              },
+              "file_path": {
+                "description": "Path to the file, absolute or project-root-relative as listings print it",
+                "type": "string"
+              },
+              "line": {
+                "description": "Line number as shown by isabelle_list_breakpoints (1-indexed)",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "file_path",
+              "line"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "breakpoints"
+      ],
+      "type": "object"
+    },
+    "name": "isabelle_del_breakpoints"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "List the registered breakpoints. (For where breakpoints CAN go, see\nisabelle_list_breakable_sites.)",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "file_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Absolute path; restricts the listing to one file. Omit for\nthe whole registry."
+        }
+      },
+      "type": "object"
+    },
+    "name": "isabelle_list_breakpoints"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "List the breakable sites \u2014 the places where a breakpoint can be set \u2014\nin a file's evaluated ML code. This tool never evaluates: lines beyond the\nevaluated part of the file are reported as not evaluated.\n\nDo not guess breakpoint positions from the source \u2014 lines you would\nexpect to be breakable often are not. Call this first, then set\nbreakpoints at the listed sites.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "end_line": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Last line (1-indexed, inclusive). Default: whole file."
+        },
+        "file_path": {
+          "description": "Absolute path to the .thy or .ML file",
+          "type": "string"
+        },
+        "start_line": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "First line (1-indexed) of the range. Default: whole file."
+        }
+      },
+      "required": [
+        "file_path"
+      ],
+      "type": "object"
+    },
+    "name": "isabelle_list_breakable_sites"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Enable all no-longer-working breakpoints.\n\nWhen the code of a breakpoint is recompiled, when the breakpoint is\ndisabled, or when the prover is relaunched, the breakpoint may not\nwork. This tool re-arms these no-longer-working breakpoints if their\ncode has been evaluated. It never evaluates: a breakpoint whose code has\nnot been evaluated stays pending, tagged `not evaluated yet`.\n\nBreakpoints stop working when their code is recompiled or the prover is\nrelaunched; `isabelle_enable_all_breakpoints` re-arms them. Nothing\nre-arms in the background.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "file_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Restrict to breakpoints in this file. Omit for all\nbreakpoints."
+        }
+      },
+      "type": "object"
+    },
+    "name": "isabelle_enable_all_breakpoints"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Disable all breakpoints, so an evaluation runs undisturbed.\n\nThe breakpoints stay set but not working; isabelle_enable_all_breakpoints\nrestores them.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "file_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Restrict to breakpoints in this file. Omit for all\nbreakpoints."
+        }
+      },
+      "type": "object"
+    },
+    "name": "isabelle_disable_all_breakpoints"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Report all live hits \u2014 threads stopped in the debugger \u2014 with their\ncall stacks. Callable at any time.\n\nA hit is one occasion of a thread halting; its hit_id is what the\nbreakpoint tools take (thread names are shown as information, never an\ninput). The frame numbers in the call stack are the frame parameter of\nisabelle_eval_at_breakpoint / isabelle_locals_at_breakpoint.\n\nA **hit** is one occasion of execution halting at a breakpoint, named\n`h1`, `h2`, \u2026 Inspect it with `isabelle_debug_state`,\n`isabelle_locals_at_breakpoint` and `isabelle_eval_at_breakpoint`; resume\nwith `isabelle_continue_breakpoint` or `isabelle_step_at_breakpoint`.\nResuming ends the hit \u2014 stopping again is a new hit with a new id. A\n**frame** is one entry of a hit's call stack; frame 0 is the innermost,\ntop of the stack; outer frames follow.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "name": "isabelle_debug_state"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Evaluate an Isabelle/ML expression in the context of a hit.\n\nThe expression can access the local variables in the context.\nAntiquotations work. The evaluation is not affected by breakpoints\nand never re-enters the debugger.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "expr": {
+          "description": "Isabelle/ML expression to evaluate",
+          "type": "string"
+        },
+        "frame": {
+          "default": 0,
+          "description": "Stack frame index from the call stack (frame 0 is the\ninnermost, top of the stack; outer frames follow).",
+          "type": "integer"
+        },
+        "hit_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The hit to evaluate at (e.g. \"h1\", as shown by\nisabelle_debug_state). May be omitted when exactly one hit is\nlive."
+        },
+        "timeout": {
+          "default": 180.0,
+          "description": "Seconds before the evaluation is cut off.",
+          "type": "number"
+        }
+      },
+      "required": [
+        "expr"
+      ],
+      "type": "object"
+    },
+    "name": "isabelle_eval_at_breakpoint"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Print all local variables in the context of a hit, with their types\nand values \u2014 the cheap first look before isabelle_eval_at_breakpoint.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "frame": {
+          "default": 0,
+          "description": "Stack frame index from the call stack (frame 0 is the\ninnermost, top of the stack; outer frames follow).",
+          "type": "integer"
+        },
+        "hit_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The hit to inspect (e.g. \"h1\", as shown by\nisabelle_debug_state). May be omitted when exactly one hit is\nlive."
+        },
+        "timeout": {
+          "default": 180.0,
+          "description": "Seconds before the listing is cut off.",
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "name": "isabelle_locals_at_breakpoint"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Resume execution from a hit.\n\nBreakpoints stay armed \u2014 execution stops again at the next hit.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "hit_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Hit to resume. Omit to resume ALL live hits."
+        }
+      },
+      "type": "object"
+    },
+    "name": "isabelle_continue_breakpoint"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Single-step a hit's thread.\n\n`step` runs to the next breakable site, entering calls; `step_over`\nstays at the same or shallower stack depth; `step_out` runs until a\nshallower depth. Stepping only stops in ML compiled with debugging on:\nwhen execution leaves that region, stepping ends and the program simply\nruns on \u2014 to completion, or to the next armed breakpoint.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "hit_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Hit to step. May be omitted when exactly one hit is live."
+        },
+        "mode": {
+          "description": "\"step\", \"step_over\" or \"step_out\".",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "type": "object"
+    },
+    "name": "isabelle_step_at_breakpoint"
+  }
+]

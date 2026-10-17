@@ -1,0 +1,5 @@
+{"depth":0,"event":"node added","name":"Step.Summary.indist_dropDead","node":1,"t":0}
+{"attempt":1,"event":"launched","node":1,"t":0}
+{"event":"cost","role":"worker","t":210.8,"usd":0.4223568999999999}
+{"attempt":1,"event":"finished","node":1,"outcome":"closed (helpers: ifaceOff_replace)","t":221.9}
+{"event":"node proved","node":1,"t":221.9}

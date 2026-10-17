@@ -1,0 +1,5 @@
+{"attempt":1,"backend":"gauss","event":"launched","goal":"Step.Latency.a","t":1.0}
+{"attempt":1,"backend":"gauss","event":"finished","goal":"Step.Latency.a","outcome":"closed","stats":{"cost_usd":0.5,"turns":10},"t":300.0}
+{"attempt":1,"event":"closed","goal":"Step.Latency.a","t":300.0}
+{"attempt":2,"backend":"gauss","event":"launched","goal":"Step.Latency.b","t":1.0}
+{"attempt":2,"backend":"gauss","event":"finished","goal":"Step.Latency.b","outcome":"gave up","stats":{"cost_usd":0.75,"turns":12},"t":800.0}

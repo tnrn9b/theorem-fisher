@@ -1,0 +1,226 @@
+{
+  "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+  "openai": "3.22.1",
+  "anthropic": "1.11.0",
+  "cases": [
+    {
+      "name": "openrouter-text",
+      "mode": "chat_completions",
+      "model": "anthropic/claude-haiku-4.5",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "\n         \n{\"id\":\"gen-1790909750-vTOE1eIeq2vw1lMgplvu\",\"object\":\"chat.completion\",\"created\":1790909750,\"model\":\"anthropic/claude-haiku-4.5\",\"provider\":\"Amazon Bedrock\",\"system_fingerprint\":null,\"service_tier\":\"default\",\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"end_turn\",\"message\":{\"role\":\"assistant\",\"content\":\"pong\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":27,\"completion_tokens\":5,\"total_tokens\":32,\"cost\":0.000052,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.000052,\"upstream_inference_prompt_cost\":0.000027,\"upstream_inference_completions_cost\":0.000025},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0,\"audio_tokens\":0}}}",
+      "captured_at": "2026-10-02T02:55:51+00:00",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 27,
+          "completion_tokens": 5,
+          "total_tokens": 32,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "pong",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "openrouter-tool",
+      "mode": "chat_completions",
+      "model": "openai/gpt-4.1-mini",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "\n         \n{\"id\":\"gen-1790909751-HH2s8ptbWbh3WMWyIvGc\",\"object\":\"chat.completion\",\"created\":1790909751,\"model\":\"openai/gpt-4.1-mini\",\"provider\":\"OpenAI\",\"system_fingerprint\":null,\"service_tier\":\"default\",\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"completed\",\"message\":{\"role\":\"assistant\",\"content\":null,\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"type\":\"function\",\"index\":0,\"id\":\"call_ddsNWuu4XSbS7u5oMheE5FBX\",\"function\":{\"name\":\"get_time\",\"arguments\":\"{}\"}}]}}],\"usage\":{\"prompt_tokens\":63,\"completion_tokens\":11,\"total_tokens\":74,\"cost\":0.0000428,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.0000428,\"upstream_inference_prompt_cost\":0.0000252,\"upstream_inference_completions_cost\":0.0000176},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0,\"audio_tokens\":0}}}",
+      "captured_at": "2026-10-02T02:55:52+00:00",
+      "result": {
+        "pre_finish_reason": "tool_calls",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "prompt_tokens": 63,
+          "completion_tokens": 11,
+          "total_tokens": 74,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "",
+          "reasoning": null,
+          "finish_reason": "tool_calls",
+          "tool_calls": [
+            {
+              "id": "call_ddsNWuu4XSbS7u5oMheE5FBX",
+              "call_id": "call_ddsNWuu4XSbS7u5oMheE5FBX",
+              "response_item_id": "fc_ddsNWuu4XSbS7u5oMheE5FBX",
+              "type": "function",
+              "function": {
+                "name": "get_time",
+                "arguments": "{}"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "openrouter-tool-result",
+      "mode": "chat_completions",
+      "model": "openai/gpt-4.1-mini",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "\n         \n{\"id\":\"gen-1790909752-cupIA77dZ10UBRSgEzbE\",\"object\":\"chat.completion\",\"created\":1790909752,\"model\":\"openai/gpt-4.1-mini\",\"provider\":\"OpenAI\",\"system_fingerprint\":null,\"service_tier\":\"default\",\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"completed\",\"message\":{\"role\":\"assistant\",\"content\":\"The current time is 12:00:00 UTC on October 1, 2026.\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":92,\"completion_tokens\":22,\"total_tokens\":114,\"cost\":0.000072,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.000072,\"upstream_inference_prompt_cost\":0.0000368,\"upstream_inference_completions_cost\":0.0000352},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0,\"audio_tokens\":0}}}",
+      "captured_at": "2026-10-02T02:55:53+00:00",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 92,
+          "completion_tokens": 22,
+          "total_tokens": 114,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "The current time is 12:00:00 UTC on October 1, 2026.",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "openrouter-reasoning",
+      "mode": "chat_completions",
+      "model": "openai/gpt-5-mini",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "\n         \n{\"id\":\"gen-1790909753-hiplW6GFl32UMAmmce9c\",\"object\":\"chat.completion\",\"created\":1790909753,\"model\":\"openai/gpt-5-mini\",\"provider\":\"OpenAI\",\"system_fingerprint\":null,\"service_tier\":\"default\",\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"completed\",\"message\":{\"role\":\"assistant\",\"content\":\"No. 221 = 13 × 17, so it is composite.\",\"refusal\":null,\"reasoning\":\"**Determining primality of 221**\\n\\nThe user is asking if 221 is prime. Since 221 equals 13 times 17, I need to clarify that it's not prime, thus composite. I'll need to answer with \\\"No.\\\" first, followed by a concise explanation like, \\\"221 = 13 × 17, so it's composite.\\\" This structure works well as it effectively gives a clear yes/no response with an additional short sentence for context. Keeping it direct is key!\",\"reasoning_details\":[{\"type\":\"reasoning.summary\",\"summary\":\"**Determining primality of 221**\\n\\nThe user is asking if 221 is prime. Since 221 equals 13 times 17, I need to clarify that it's not prime, thus composite. I'll need to answer with \\\"No.\\\" first, followed by a concise explanation like, \\\"221 = 13 × 17, so it's composite.\\\" This structure works well as it effectively gives a clear yes/no response with an additional short sentence for context. Keeping it direct is key!\",\"format\":\"openai-responses-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"gAAAAABqvx07kq6BLcqxyTQN1gq56pyUWQPW40BqMizYi0R1s1qxGmw40GChNnmDqZzwbz8Y9ywM4rQmwDvNJJagH_LeomQaDYrsa9MMDLrLymXnA3phzVg5k34vKij-BJdqq2uHVaLuHNNzG5pBiB2sPNpLcfniZYn16xtY6wHRfiqQdYACNTBzMEjQj1oeO_pSgciute8VA4MMIexmW07vcfAu4oXHn8qaOzDKEh_87-jj9iVT2pw3QLkyjbBF3JIhc2HBXUfKSmza_7jMr4vw5ZEEU3n6caQmVEQ9bw0Uicr2QlnOmyhgCEm30OFkStcosMA9VrEGgbWqfdNfJTk_9U_R3hLIWWKTT-Uyl0OeB-WhH6RRJg9nQsBnfzGrd_-XiHjJ_xKiH3fAPHpLpHD1Bgk2LYwM7FX0ihhADLDmWSkD-0IH5THu4VzN_sP27ztNHTY7QPedofnBHtkRntrZ4W6og1QMuDNOrGYfMfowaklR1hoWnWqpbZe-R1RDHm__MuG-gDpLSC1RnA6JwrFZY8qxJfsDWhrV-0xsX3c-dtbHn7lHvXJ4W8En6OXB6RwDTrqQBzTPp3jjZsN08kJVPgjDArCTzf64aPwIn25DB1N3LfBVbrU58gJjpB5EHUx8W0el7mHljFxI2Z6TqCDm132QZuzPVvZbOJhYnNf8kusDgwsTGZR5S0FZVmxv5C2QYz0wD8-8-MUJLR0xAyF1sOFFiJ_axvnLcCiZSIE8iCOWAN32liPmlU3yoFDnUJ_ldEpPjriyaCaLD_mwNf2-YtPrxY_zpXnoYQ79o5aB8CdixOm-KAv6cwTq2Ci30EIGTZw17dYQVfSL_p6itiSELKeLqAHXKKiLNDhYk8xlVs2c4pG022hoSEFCz4KAylhPO2A2_fcC9RShVLNuWsyO1-CE8Gra4i6YiH3TYr97U67HkcYcJV0M9xpvuN5-OSbqJEjjC3bu2xzmB1EucINEH4aPUWRFnvEJUk55FtA6edFCF1p9D2J_wjHxJ6jjcuoMWVBgp5cSjrfYi3NkYh0DKtAmqstJVsXP9e9FkQLZzwJ8H7M1QXFWNuZcc6Fgu_iMAh5ePIpJK5WqfQHP6b6a8bRqtxAncS86mXzJ4iht9pkQkZovLBzMAXqmOfQeGQnTqWQoxcdT0xjmWRZf-hG7JfmACk7-q11YxlwiUf3vM5NYWYVGyb8KbZQTnAVxQsDcT_0iO0GPpeOzQT6vGgj5_ptf4mDxhbKgz2-cJZkyY41ol2wob3ozl96WYoYeZ4fKVnQ8dZ1yMKAURVCaEcTo5tdtD8vdlfH6417-DbwAooK655wyo2WencUUoBZqGKeGmWa-Wnu7CtJwTXQeWHAHoOQ7mY1ji30d8WWmkYjCPtBsLbTu3owP9QmypBMXQZYWpd9QOpU44DjUFPaNwWHBB26wHluDlaIli1i8PneoNII3KNekUTHu1WaZtetbaw-O_GsHqRenX8G-0tICDoXM4ZpvmSIxVjhWDUK7dkDZbxA-BytEAHDti-tr9giWVMUNYZQ22Q5ChvMDofKsOL6rriYyBKvBW0qU3op4zEq8NwZnCp4fxX-LShDa-LGIu9U7zpAEtBfaMjwDpTsuGa6hn7y9OHR0-NhIAZgb4YVkYMN1Ra6BfQRAdfR8Ui3m4eL9znMqkGHwy721-DcteaCo-_NPeHafpZ2ZjZ-mjOPIFcxGJc6pb5ik5CBuRzAbFVctBVizEx64MMztcHBp7lueQJfWOPVUQwbmZV-cAXuEJwTdBxZLdaim91INQLTrdJrobKK5Lhgk6fXBBvmHKIHTFP4y0FArGYZ1Qi_iXPncmxftUEmiHHsCq0tp-xhL4Kt1Z98rOegKbQca1pXYCzceYOz7AL7XQYMbZioaIf_xQ38CvzLIRYY=.eyJlbmRwb2ludF9zbHVnIjoib3BlbmFpL2dwdC01LW1pbmktMjAyNS0wOC0wN3xvcGVuYWkifQ\",\"format\":\"openai-responses-v1\",\"id\":\"rs_0353e9b87c5cfe67016abf1d3a224887d1a0b336c5038c2a42\",\"index\":1}]}}],\"usage\":{\"prompt_tokens\":36,\"completion_tokens\":132,\"total_tokens\":168,\"cost\":0.000273,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.000273,\"upstream_inference_prompt_cost\":0.000009,\"upstream_inference_completions_cost\":0.000264},\"completion_tokens_details\":{\"reasoning_tokens\":64,\"image_tokens\":0,\"audio_tokens\":0}}}",
+      "captured_at": "2026-10-02T02:55:56+00:00",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 36,
+          "completion_tokens": 132,
+          "total_tokens": 168,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "No. 221 = 13 × 17, so it is composite.",
+          "reasoning": "**Determining primality of 221**\n\nThe user is asking if 221 is prime. Since 221 equals 13 times 17, I need to clarify that it's not prime, thus composite. I'll need to answer with \"No.\" first, followed by a concise explanation like, \"221 = 13 × 17, so it's composite.\" This structure works well as it effectively gives a clear yes/no response with an additional short sentence for context. Keeping it direct is key!",
+          "finish_reason": "stop",
+          "reasoning_details": [
+            {
+              "type": "reasoning.summary",
+              "summary": "**Determining primality of 221**\n\nThe user is asking if 221 is prime. Since 221 equals 13 times 17, I need to clarify that it's not prime, thus composite. I'll need to answer with \"No.\" first, followed by a concise explanation like, \"221 = 13 × 17, so it's composite.\" This structure works well as it effectively gives a clear yes/no response with an additional short sentence for context. Keeping it direct is key!",
+              "format": "openai-responses-v1",
+              "index": 0
+            },
+            {
+              "type": "reasoning.encrypted",
+              "data": "gAAAAABqvx07kq6BLcqxyTQN1gq56pyUWQPW40BqMizYi0R1s1qxGmw40GChNnmDqZzwbz8Y9ywM4rQmwDvNJJagH_LeomQaDYrsa9MMDLrLymXnA3phzVg5k34vKij-BJdqq2uHVaLuHNNzG5pBiB2sPNpLcfniZYn16xtY6wHRfiqQdYACNTBzMEjQj1oeO_pSgciute8VA4MMIexmW07vcfAu4oXHn8qaOzDKEh_87-jj9iVT2pw3QLkyjbBF3JIhc2HBXUfKSmza_7jMr4vw5ZEEU3n6caQmVEQ9bw0Uicr2QlnOmyhgCEm30OFkStcosMA9VrEGgbWqfdNfJTk_9U_R3hLIWWKTT-Uyl0OeB-WhH6RRJg9nQsBnfzGrd_-XiHjJ_xKiH3fAPHpLpHD1Bgk2LYwM7FX0ihhADLDmWSkD-0IH5THu4VzN_sP27ztNHTY7QPedofnBHtkRntrZ4W6og1QMuDNOrGYfMfowaklR1hoWnWqpbZe-R1RDHm__MuG-gDpLSC1RnA6JwrFZY8qxJfsDWhrV-0xsX3c-dtbHn7lHvXJ4W8En6OXB6RwDTrqQBzTPp3jjZsN08kJVPgjDArCTzf64aPwIn25DB1N3LfBVbrU58gJjpB5EHUx8W0el7mHljFxI2Z6TqCDm132QZuzPVvZbOJhYnNf8kusDgwsTGZR5S0FZVmxv5C2QYz0wD8-8-MUJLR0xAyF1sOFFiJ_axvnLcCiZSIE8iCOWAN32liPmlU3yoFDnUJ_ldEpPjriyaCaLD_mwNf2-YtPrxY_zpXnoYQ79o5aB8CdixOm-KAv6cwTq2Ci30EIGTZw17dYQVfSL_p6itiSELKeLqAHXKKiLNDhYk8xlVs2c4pG022hoSEFCz4KAylhPO2A2_fcC9RShVLNuWsyO1-CE8Gra4i6YiH3TYr97U67HkcYcJV0M9xpvuN5-OSbqJEjjC3bu2xzmB1EucINEH4aPUWRFnvEJUk55FtA6edFCF1p9D2J_wjHxJ6jjcuoMWVBgp5cSjrfYi3NkYh0DKtAmqstJVsXP9e9FkQLZzwJ8H7M1QXFWNuZcc6Fgu_iMAh5ePIpJK5WqfQHP6b6a8bRqtxAncS86mXzJ4iht9pkQkZovLBzMAXqmOfQeGQnTqWQoxcdT0xjmWRZf-hG7JfmACk7-q11YxlwiUf3vM5NYWYVGyb8KbZQTnAVxQsDcT_0iO0GPpeOzQT6vGgj5_ptf4mDxhbKgz2-cJZkyY41ol2wob3ozl96WYoYeZ4fKVnQ8dZ1yMKAURVCaEcTo5tdtD8vdlfH6417-DbwAooK655wyo2WencUUoBZqGKeGmWa-Wnu7CtJwTXQeWHAHoOQ7mY1ji30d8WWmkYjCPtBsLbTu3owP9QmypBMXQZYWpd9QOpU44DjUFPaNwWHBB26wHluDlaIli1i8PneoNII3KNekUTHu1WaZtetbaw-O_GsHqRenX8G-0tICDoXM4ZpvmSIxVjhWDUK7dkDZbxA-BytEAHDti-tr9giWVMUNYZQ22Q5ChvMDofKsOL6rriYyBKvBW0qU3op4zEq8NwZnCp4fxX-LShDa-LGIu9U7zpAEtBfaMjwDpTsuGa6hn7y9OHR0-NhIAZgb4YVkYMN1Ra6BfQRAdfR8Ui3m4eL9znMqkGHwy721-DcteaCo-_NPeHafpZ2ZjZ-mjOPIFcxGJc6pb5ik5CBuRzAbFVctBVizEx64MMztcHBp7lueQJfWOPVUQwbmZV-cAXuEJwTdBxZLdaim91INQLTrdJrobKK5Lhgk6fXBBvmHKIHTFP4y0FArGYZ1Qi_iXPncmxftUEmiHHsCq0tp-xhL4Kt1Z98rOegKbQca1pXYCzceYOz7AL7XQYMbZioaIf_xQ38CvzLIRYY=.eyJlbmRwb2ludF9zbHVnIjoib3BlbmFpL2dwdC01LW1pbmktMjAyNS0wOC0wN3xvcGVuYWkifQ",
+              "format": "openai-responses-v1",
+              "id": "rs_0353e9b87c5cfe67016abf1d3a224887d1a0b336c5038c2a42",
+              "index": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "anthropic-text",
+      "mode": "anthropic_messages",
+      "model": "claude-haiku-4-5-20251001",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"model\":\"claude-haiku-4-5-20251001\",\"id\":\"msg_011Cfcf7CHVrEg3BNBMEscKt\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"pong\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":27,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":5,\"service_tier\":\"standard\",\"inference_geo\":\"not_available\"},\"diagnostics\":null}",
+      "captured_at": "2026-10-02T02:55:56+00:00",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 27,
+          "completion_tokens": 5,
+          "total_tokens": 32,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "pong",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "anthropic-tool",
+      "mode": "anthropic_messages",
+      "model": "claude-haiku-4-5-20251001",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"model\":\"claude-haiku-4-5-20251001\",\"id\":\"msg_011Cfcf7EQkTz6RtHWVqLYGc\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"tool_use\",\"id\":\"toolu_01Uyb5knvSbUxpPR45eozB9G\",\"name\":\"get_time\",\"input\":{},\"caller\":{\"type\":\"direct\"}}],\"container\":null,\"stop_reason\":\"tool_use\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":577,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":37,\"service_tier\":\"standard\",\"inference_geo\":\"not_available\"},\"diagnostics\":null}",
+      "captured_at": "2026-10-02T02:55:57+00:00",
+      "result": {
+        "pre_finish_reason": "tool_calls",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "prompt_tokens": 577,
+          "completion_tokens": 37,
+          "total_tokens": 614,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "",
+          "reasoning": null,
+          "finish_reason": "tool_calls",
+          "tool_calls": [
+            {
+              "id": "toolu_01Uyb5knvSbUxpPR45eozB9G",
+              "call_id": "toolu_01Uyb5knvSbUxpPR45eozB9G",
+              "response_item_id": "fc_toolu_01Uyb5knvSbUxpPR45eozB9G",
+              "type": "function",
+              "function": {
+                "name": "get_time",
+                "arguments": "{}"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "anthropic-thinking",
+      "mode": "anthropic_messages",
+      "model": "claude-sonnet-4-5",
+      "status": 429,
+      "content_type": "application/json",
+      "body": "{\"type\":\"error\",\"error\":{\"type\":\"rate_limit_error\",\"message\":\"Error\"},\"request_id\":\"req_011Cfcf7HXX5hddHkTTPxoVJ\"}",
+      "captured_at": "2026-10-02T02:55:57+00:00",
+      "result": {
+        "http_status": 429
+      }
+    }
+  ]
+}

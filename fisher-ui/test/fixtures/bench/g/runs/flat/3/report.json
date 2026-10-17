@@ -1,0 +1,57 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 185.1,
+            "goal": "Step.Concrete.fireRecv_wt",
+            "outcome": "closed",
+            "started_s": 0,
+            "stats": {
+                "cost_usd": 0.2763184999999999,
+                "exit": 0,
+                "input_tokens": 702639,
+                "output_tokens": 5924,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 3,
+                    "patch": 1,
+                    "read_file": 7,
+                    "search_files": 3,
+                    "terminal": 3
+                },
+                "turns": 14,
+                "wall_s": 160.9
+            }
+        }
+    ],
+    "backends": {
+        "gauss": [
+            1,
+            1
+        ]
+    },
+    "budget_s": 3600,
+    "budget_spent": false,
+    "closed_per_hour": 19.5,
+    "elapsed_s": 185.1,
+    "file": "Step/Concrete.lean",
+    "goals": [
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": 1,
+            "by_backend": "gauss",
+            "closed_at_s": 185.1,
+            "goal": "Step.Concrete.fireRecv_wt",
+            "status": "closed"
+        }
+    ],
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/g/3/lean",
+    "slots": 4
+}

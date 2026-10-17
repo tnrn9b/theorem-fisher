@@ -1,0 +1,55 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 103.5,
+            "goal": "Step.Summary.indist_dropDead",
+            "outcome": "closed",
+            "started_s": 0,
+            "stats": {
+                "cost_usd": 0.32034749999999995,
+                "exit": 0,
+                "input_tokens": 657653,
+                "output_tokens": 6776,
+                "tools": {
+                    "read_file": 7,
+                    "search_files": 1,
+                    "terminal": 6
+                },
+                "turns": 12,
+                "wall_s": 79.5
+            }
+        }
+    ],
+    "backends": {
+        "gauss": [
+            1,
+            1
+        ]
+    },
+    "budget_s": 3600,
+    "budget_spent": false,
+    "closed_per_hour": 34.8,
+    "elapsed_s": 103.5,
+    "file": "Step/Summary.lean",
+    "goals": [
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": 1,
+            "by_backend": "gauss",
+            "closed_at_s": 103.5,
+            "goal": "Step.Summary.indist_dropDead",
+            "status": "closed"
+        }
+    ],
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/g/6/lean",
+    "slots": 4
+}

@@ -1,0 +1,59 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 489.4,
+            "goal": "Step.Graft.runS_graft",
+            "outcome": "closed (helpers: GraftCtx.reads_ok, GraftCtx.writes_ok, Relabel.fixed_of_other, enqueue_buf_other, runS'_head, runS'_bufLen, runS'_graft_aux)",
+            "started_s": 0,
+            "stats": {
+                "cost_usd": 1.2393723999999997,
+                "exit": 0,
+                "input_tokens": 3661726,
+                "output_tokens": 42284,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 3,
+                    "mcp_lean_lsp_lean_verify": 1,
+                    "patch": 1,
+                    "read_file": 9,
+                    "search_files": 6,
+                    "terminal": 13,
+                    "write_file": 2
+                },
+                "turns": 28,
+                "wall_s": 465.3
+            }
+        }
+    ],
+    "backends": {
+        "gauss": [
+            1,
+            1
+        ]
+    },
+    "budget_s": 7200,
+    "budget_spent": false,
+    "closed_per_hour": 7.4,
+    "elapsed_s": 489.4,
+    "file": "Step/Graft.lean",
+    "goals": [
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": 1,
+            "by_backend": "gauss",
+            "closed_at_s": 489.4,
+            "goal": "Step.Graft.runS_graft",
+            "status": "closed"
+        }
+    ],
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/h/4/lean",
+    "slots": 4
+}

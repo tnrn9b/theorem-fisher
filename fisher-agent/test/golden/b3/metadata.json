@@ -1,0 +1,690 @@
+{
+ "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+ "python": "3.11.15",
+ "default_context_lengths": [
+  [
+   "anthropic/claude-opus-4",
+   200000
+  ],
+  [
+   "anthropic/claude-opus-4.5",
+   200000
+  ],
+  [
+   "anthropic/claude-opus-4.6",
+   200000
+  ],
+  [
+   "anthropic/claude-sonnet-4",
+   200000
+  ],
+  [
+   "anthropic/claude-sonnet-4-20250514",
+   200000
+  ],
+  [
+   "anthropic/claude-haiku-4.5",
+   200000
+  ],
+  [
+   "claude-opus-4-6",
+   200000
+  ],
+  [
+   "claude-sonnet-4-6",
+   200000
+  ],
+  [
+   "claude-opus-4-5-20251101",
+   200000
+  ],
+  [
+   "claude-sonnet-4-5-20250929",
+   200000
+  ],
+  [
+   "claude-opus-4-1-20250805",
+   200000
+  ],
+  [
+   "claude-opus-4-20250514",
+   200000
+  ],
+  [
+   "claude-sonnet-4-20250514",
+   200000
+  ],
+  [
+   "claude-haiku-4-5-20251001",
+   200000
+  ],
+  [
+   "openai/gpt-4o",
+   128000
+  ],
+  [
+   "openai/gpt-4-turbo",
+   128000
+  ],
+  [
+   "openai/gpt-4o-mini",
+   128000
+  ],
+  [
+   "google/gemini-2.0-flash",
+   1048576
+  ],
+  [
+   "google/gemini-2.5-pro",
+   1048576
+  ],
+  [
+   "meta-llama/llama-3.3-70b-instruct",
+   131072
+  ],
+  [
+   "deepseek/deepseek-chat-v3",
+   65536
+  ],
+  [
+   "qwen/qwen-2.5-72b-instruct",
+   32768
+  ],
+  [
+   "glm-4.7",
+   202752
+  ],
+  [
+   "glm-5",
+   202752
+  ],
+  [
+   "glm-4.5",
+   131072
+  ],
+  [
+   "glm-4.5-flash",
+   131072
+  ],
+  [
+   "kimi-for-coding",
+   262144
+  ],
+  [
+   "kimi-k2.5",
+   262144
+  ],
+  [
+   "kimi-k2-thinking",
+   262144
+  ],
+  [
+   "kimi-k2-thinking-turbo",
+   262144
+  ],
+  [
+   "kimi-k2-turbo-preview",
+   262144
+  ],
+  [
+   "kimi-k2-0905-preview",
+   131072
+  ],
+  [
+   "MiniMax-M2.5",
+   204800
+  ],
+  [
+   "MiniMax-M2.5-highspeed",
+   204800
+  ],
+  [
+   "MiniMax-M2.1",
+   204800
+  ]
+ ],
+ "probe_tiers": [
+  2000000,
+  1000000,
+  512000,
+  200000,
+  128000,
+  64000,
+  32000
+ ],
+ "models_answer": {
+  "data": [
+   {
+    "id": "anthropic/claude-opus-4.6",
+    "canonical_slug": "anthropic/claude-4.6-opus-20260101",
+    "context_length": 1000000,
+    "name": "Claude Opus 4.6",
+    "top_provider": {
+     "max_completion_tokens": 128000
+    },
+    "pricing": {
+     "prompt": "0.000015"
+    }
+   },
+   {
+    "id": "openai/gpt-5",
+    "context_length": 400000,
+    "name": "GPT-5"
+   },
+   {
+    "id": "tiny/model",
+    "context_length": 16000
+   },
+   {
+    "id": "nolen/model"
+   }
+  ]
+ },
+ "cases": [
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "anthropic/claude-opus-4.6",
+   "base_url": "",
+   "length": 1000000
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "anthropic/claude-4.6-opus-20260101",
+   "base_url": "",
+   "length": 1000000
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "openai/gpt-5",
+   "base_url": "",
+   "length": 400000
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "tiny/model",
+   "base_url": "",
+   "length": 16000
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "nolen/model",
+   "base_url": "",
+   "length": 128000
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "glm-4.7",
+   "base_url": "",
+   "length": 202752
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "glm-4",
+   "base_url": "",
+   "length": 202752
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "claude",
+   "base_url": "",
+   "length": 200000
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "openai/gpt-4o-mini-2024",
+   "base_url": "",
+   "length": 128000
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "my-model",
+   "base_url": "",
+   "length": 2000000
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "",
+   "base_url": "",
+   "length": 200000
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "gpt-4o",
+   "base_url": "",
+   "length": 128000
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "google/gemini-3-flash-preview",
+   "base_url": "",
+   "length": 2000000
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "deepseek-chat",
+   "base_url": "",
+   "length": 65536
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "MiniMax-M2.5",
+   "base_url": "",
+   "length": 204800
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "kimi-k2.5",
+   "base_url": "",
+   "length": 262144
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "qwen/qwen3-coder",
+   "base_url": "",
+   "length": 2000000
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "x-ai/grok-4",
+   "base_url": "",
+   "length": 2000000
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "meta-llama/llama-3.3-70b-instruct",
+   "base_url": "",
+   "length": 131072
+  },
+  {
+   "kind": "context_length",
+   "net": "ok",
+   "model": "anthropic/claude-sonnet-4.5",
+   "base_url": "",
+   "length": 200000
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "anthropic/claude-opus-4.6",
+   "base_url": "",
+   "length": 200000
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "anthropic/claude-4.6-opus-20260101",
+   "base_url": "",
+   "length": 2000000
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "openai/gpt-5",
+   "base_url": "",
+   "length": 2000000
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "tiny/model",
+   "base_url": "",
+   "length": 2000000
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "nolen/model",
+   "base_url": "",
+   "length": 2000000
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "glm-4.7",
+   "base_url": "",
+   "length": 202752
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "glm-4",
+   "base_url": "",
+   "length": 202752
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "claude",
+   "base_url": "",
+   "length": 200000
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "openai/gpt-4o-mini-2024",
+   "base_url": "",
+   "length": 128000
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "my-model",
+   "base_url": "",
+   "length": 2000000
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "",
+   "base_url": "",
+   "length": 200000
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "gpt-4o",
+   "base_url": "",
+   "length": 128000
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "google/gemini-3-flash-preview",
+   "base_url": "",
+   "length": 2000000
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "deepseek-chat",
+   "base_url": "",
+   "length": 65536
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "MiniMax-M2.5",
+   "base_url": "",
+   "length": 204800
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "kimi-k2.5",
+   "base_url": "",
+   "length": 262144
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "qwen/qwen3-coder",
+   "base_url": "",
+   "length": 2000000
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "x-ai/grok-4",
+   "base_url": "",
+   "length": 2000000
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "meta-llama/llama-3.3-70b-instruct",
+   "base_url": "",
+   "length": 131072
+  },
+  {
+   "kind": "context_length",
+   "net": "fail",
+   "model": "anthropic/claude-sonnet-4.5",
+   "base_url": "",
+   "length": 200000
+  },
+  {
+   "kind": "disk_cache",
+   "steps": [
+    {
+     "model": "m1",
+     "base_url": "http://a/v1",
+     "length": 32000,
+     "file": "context_lengths:\n  m1@http://a/v1: 32000\n",
+     "lookup": 32000
+    },
+    {
+     "model": "m1",
+     "base_url": "http://a/v1",
+     "length": 32000,
+     "file": "context_lengths:\n  m1@http://a/v1: 32000\n",
+     "lookup": 32000
+    },
+    {
+     "model": "m2",
+     "base_url": "https://b",
+     "length": 128000,
+     "file": "context_lengths:\n  m1@http://a/v1: 32000\n  m2@https://b: 128000\n",
+     "lookup": 128000
+    },
+    {
+     "model": "m1",
+     "base_url": "http://a/v1",
+     "length": 16000,
+     "file": "context_lengths:\n  m1@http://a/v1: 16000\n  m2@https://b: 128000\n",
+     "lookup": 16000
+    },
+    {
+     "model": "a/b:c",
+     "base_url": "http://x:1/v1",
+     "length": 1048576,
+     "file": "context_lengths:\n  a/b:c@http://x:1/v1: 1048576\n  m1@http://a/v1: 16000\n  m2@https://b: 128000\n",
+     "lookup": 1048576
+    }
+   ]
+  },
+  {
+   "kind": "probe_tier",
+   "current": 3000000,
+   "next": 2000000
+  },
+  {
+   "kind": "probe_tier",
+   "current": 2000000,
+   "next": 1000000
+  },
+  {
+   "kind": "probe_tier",
+   "current": 1999999,
+   "next": 1000000
+  },
+  {
+   "kind": "probe_tier",
+   "current": 1000000,
+   "next": 512000
+  },
+  {
+   "kind": "probe_tier",
+   "current": 512000,
+   "next": 200000
+  },
+  {
+   "kind": "probe_tier",
+   "current": 200000,
+   "next": 128000
+  },
+  {
+   "kind": "probe_tier",
+   "current": 150000,
+   "next": 128000
+  },
+  {
+   "kind": "probe_tier",
+   "current": 128000,
+   "next": 64000
+  },
+  {
+   "kind": "probe_tier",
+   "current": 64000,
+   "next": 32000
+  },
+  {
+   "kind": "probe_tier",
+   "current": 32000,
+   "next": null
+  },
+  {
+   "kind": "probe_tier",
+   "current": 1000,
+   "next": null
+  },
+  {
+   "kind": "probe_tier",
+   "current": 0,
+   "next": null
+  },
+  {
+   "kind": "parse_limit",
+   "error": "maximum context length is 32768 tokens",
+   "limit": 32768
+  },
+  {
+   "kind": "parse_limit",
+   "error": "prompt is too long: 250000 tokens > 200000 maximum",
+   "limit": 200000
+  },
+  {
+   "kind": "parse_limit",
+   "error": "context_length_exceeded: 131072",
+   "limit": null
+  },
+  {
+   "kind": "parse_limit",
+   "error": "Context size has been exceeded",
+   "limit": null
+  },
+  {
+   "kind": "parse_limit",
+   "error": "This model's maximum context length is 128000 tokens. However, you requested 130000 tokens",
+   "limit": 128000
+  },
+  {
+   "kind": "parse_limit",
+   "error": "Error code: 400 - {'error': {'message': 'Input is too long. Max context window: 64000'}}",
+   "limit": 64000
+  },
+  {
+   "kind": "parse_limit",
+   "error": "context window of 1048576 tokens exceeded",
+   "limit": 1048576
+  },
+  {
+   "kind": "parse_limit",
+   "error": "limit: 999",
+   "limit": null
+  },
+  {
+   "kind": "parse_limit",
+   "error": "limit 12345678901",
+   "limit": null
+  },
+  {
+   "kind": "parse_limit",
+   "error": "the limit is 50000",
+   "limit": 50000
+  },
+  {
+   "kind": "parse_limit",
+   "error": "Request too large: 8192 token limit",
+   "limit": 8192
+  },
+  {
+   "kind": "parse_limit",
+   "error": "input > 4096 max tokens",
+   "limit": 4096
+  },
+  {
+   "kind": "parse_limit",
+   "error": "300000 maximum allowed",
+   "limit": 300000
+  },
+  {
+   "kind": "parse_limit",
+   "error": "reduce the length of the messages",
+   "limit": null
+  },
+  {
+   "kind": "parse_limit",
+   "error": "",
+   "limit": null
+  },
+  {
+   "kind": "parse_limit",
+   "error": "max 2048",
+   "limit": 2048
+  },
+  {
+   "kind": "parse_limit",
+   "error": "context length: 1,000,000",
+   "limit": null
+  },
+  {
+   "kind": "parse_limit",
+   "error": "Error code: 413 - request entity too large",
+   "limit": null
+  },
+  {
+   "kind": "parse_limit",
+   "error": "too many tokens: 40960 tokens (limit 32768)",
+   "limit": 32768
+  },
+  {
+   "kind": "estimate_text",
+   "text": "",
+   "tokens": 0
+  },
+  {
+   "kind": "estimate_text",
+   "text": "a",
+   "tokens": 0
+  },
+  {
+   "kind": "estimate_text",
+   "text": "abcd",
+   "tokens": 1
+  },
+  {
+   "kind": "estimate_text",
+   "text": "abcde",
+   "tokens": 1
+  },
+  {
+   "kind": "estimate_text",
+   "text": "∀∀∀∀∀∀∀∀",
+   "tokens": 2
+  },
+  {
+   "kind": "estimate_text",
+   "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+   "tokens": 250
+  }
+ ]
+}

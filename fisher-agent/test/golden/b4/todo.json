@@ -1,0 +1,534 @@
+{
+ "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+ "python": "3.11.15",
+ "no_store": "{\"error\": \"TodoStore not initialized\"}",
+ "via_registry": "{\"error\": \"TodoStore not initialized\"}",
+ "hydration": [
+  {
+   "name": "none",
+   "history": [],
+   "items": [],
+   "printed": [],
+   "raised": null
+  },
+  {
+   "name": "one",
+   "history": [
+    {
+     "role": "user",
+     "content": "x"
+    },
+    {
+     "role": "tool",
+     "content": "{\"todos\": [{\"id\": \"1\", \"content\": \"a\", \"status\": \"pending\"}], \"summary\": {}}"
+    }
+   ],
+   "items": [
+    {
+     "id": "1",
+     "content": "a",
+     "status": "pending"
+    }
+   ],
+   "printed": [
+    "📋 Restored 1 todo item(s) from history"
+   ],
+   "raised": null
+  },
+  {
+   "name": "latest-wins",
+   "history": [
+    {
+     "role": "tool",
+     "content": "{\"todos\": [{\"id\": \"1\", \"content\": \"old\", \"status\": \"pending\"}], \"summary\": {}}"
+    },
+    {
+     "role": "tool",
+     "content": "{\"todos\": [{\"id\": \"2\", \"content\": \"new\", \"status\": \"in_progress\"}], \"summary\": {}}"
+    }
+   ],
+   "items": [
+    {
+     "id": "2",
+     "content": "new",
+     "status": "in_progress"
+    }
+   ],
+   "printed": [
+    "📋 Restored 1 todo item(s) from history"
+   ],
+   "raised": null
+  },
+  {
+   "name": "skip-non-tool",
+   "history": [
+    {
+     "role": "assistant",
+     "content": "{\"todos\": [{\"id\": \"1\", \"content\": \"a\", \"status\": \"pending\"}], \"summary\": {}}"
+    }
+   ],
+   "items": [],
+   "printed": [],
+   "raised": null
+  },
+  {
+   "name": "bad-json-then-older",
+   "history": [
+    {
+     "role": "tool",
+     "content": "{\"todos\": [{\"id\": \"1\", \"content\": \"a\", \"status\": \"pending\"}], \"summary\": {}}"
+    },
+    {
+     "role": "tool",
+     "content": "{\"todos\": ["
+    }
+   ],
+   "items": [
+    {
+     "id": "1",
+     "content": "a",
+     "status": "pending"
+    }
+   ],
+   "printed": [
+    "📋 Restored 1 todo item(s) from history"
+   ],
+   "raised": null
+  },
+  {
+   "name": "todos-not-list",
+   "history": [
+    {
+     "role": "tool",
+     "content": "{\"todos\": [{\"id\": \"1\", \"content\": \"a\", \"status\": \"pending\"}], \"summary\": {}}"
+    },
+    {
+     "role": "tool",
+     "content": "{\"todos\": \"x\"}"
+    }
+   ],
+   "items": [
+    {
+     "id": "1",
+     "content": "a",
+     "status": "pending"
+    }
+   ],
+   "printed": [
+    "📋 Restored 1 todo item(s) from history"
+   ],
+   "raised": null
+  },
+  {
+   "name": "empty-list",
+   "history": [
+    {
+     "role": "tool",
+     "content": "{\"todos\": [], \"summary\": {}}"
+    }
+   ],
+   "items": [],
+   "printed": [],
+   "raised": null
+  },
+  {
+   "name": "no-key",
+   "history": [
+    {
+     "role": "tool",
+     "content": "{\"other\": 1}"
+    }
+   ],
+   "items": [],
+   "printed": [],
+   "raised": null
+  },
+  {
+   "name": "content-not-str",
+   "history": [
+    {
+     "role": "tool",
+     "content": null
+    }
+   ],
+   "items": [],
+   "printed": [],
+   "raised": "TypeError: argument of type 'NoneType' is not iterable"
+  }
+ ],
+ "entry": {
+  "toolset": "todo",
+  "schema": {
+   "name": "todo",
+   "description": "Manage your task list for the current session. Use for complex tasks with 3+ steps or when the user provides multiple tasks. Call with no parameters to read the current list.\n\nWriting:\n- Provide 'todos' array to create/update items\n- merge=false (default): replace the entire list with a fresh plan\n- merge=true: update existing items by id, add any new ones\n\nEach item: {id: string, content: string, status: pending|in_progress|completed|cancelled}\nList order is priority. Only ONE item in_progress at a time.\nMark items completed immediately when done. If something fails, cancel it and add a revised item.\n\nAlways returns the full current list.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "todos": {
+      "type": "array",
+      "description": "Task items to write. Omit to read current list.",
+      "items": {
+       "type": "object",
+       "properties": {
+        "id": {
+         "type": "string",
+         "description": "Unique item identifier"
+        },
+        "content": {
+         "type": "string",
+         "description": "Task description"
+        },
+        "status": {
+         "type": "string",
+         "enum": [
+          "pending",
+          "in_progress",
+          "completed",
+          "cancelled"
+         ],
+         "description": "Current status"
+        }
+       },
+       "required": [
+        "id",
+        "content",
+        "status"
+       ]
+      }
+     },
+     "merge": {
+      "type": "boolean",
+      "description": "true: update existing items by id, add new ones. false (default): replace the entire list.",
+      "default": false
+     }
+    },
+    "required": []
+   }
+  },
+  "emoji": "📋"
+ },
+ "cases": [
+  {
+   "name": "read-empty",
+   "calls": [
+    {}
+   ],
+   "results": [
+    "{\"todos\": [], \"summary\": {\"total\": 0, \"pending\": 0, \"in_progress\": 0, \"completed\": 0, \"cancelled\": 0}}"
+   ],
+   "injection": null
+  },
+  {
+   "name": "write",
+   "calls": [
+    {
+     "todos": [
+      {
+       "id": "1",
+       "content": "Plan",
+       "status": "in_progress"
+      },
+      {
+       "id": "2",
+       "content": "Build",
+       "status": "pending"
+      }
+     ]
+    },
+    {}
+   ],
+   "results": [
+    "{\"todos\": [{\"id\": \"1\", \"content\": \"Plan\", \"status\": \"in_progress\"}, {\"id\": \"2\", \"content\": \"Build\", \"status\": \"pending\"}], \"summary\": {\"total\": 2, \"pending\": 1, \"in_progress\": 1, \"completed\": 0, \"cancelled\": 0}}",
+    "{\"todos\": [{\"id\": \"1\", \"content\": \"Plan\", \"status\": \"in_progress\"}, {\"id\": \"2\", \"content\": \"Build\", \"status\": \"pending\"}], \"summary\": {\"total\": 2, \"pending\": 1, \"in_progress\": 1, \"completed\": 0, \"cancelled\": 0}}"
+   ],
+   "injection": "[Your active task list was preserved across context compression]\n- [>] 1. Plan (in_progress)\n- [ ] 2. Build (pending)"
+  },
+  {
+   "name": "replace",
+   "calls": [
+    {
+     "todos": [
+      {
+       "id": "1",
+       "content": "a",
+       "status": "pending"
+      }
+     ]
+    },
+    {
+     "todos": [
+      {
+       "id": "9",
+       "content": "b",
+       "status": "completed"
+      }
+     ]
+    }
+   ],
+   "results": [
+    "{\"todos\": [{\"id\": \"1\", \"content\": \"a\", \"status\": \"pending\"}], \"summary\": {\"total\": 1, \"pending\": 1, \"in_progress\": 0, \"completed\": 0, \"cancelled\": 0}}",
+    "{\"todos\": [{\"id\": \"9\", \"content\": \"b\", \"status\": \"completed\"}], \"summary\": {\"total\": 1, \"pending\": 0, \"in_progress\": 0, \"completed\": 1, \"cancelled\": 0}}"
+   ],
+   "injection": null
+  },
+  {
+   "name": "merge",
+   "calls": [
+    {
+     "todos": [
+      {
+       "id": "1",
+       "content": "a",
+       "status": "pending"
+      },
+      {
+       "id": "2",
+       "content": "b",
+       "status": "pending"
+      }
+     ]
+    },
+    {
+     "todos": [
+      {
+       "id": "2",
+       "status": "completed"
+      },
+      {
+       "id": "3",
+       "content": "c",
+       "status": "pending"
+      }
+     ],
+     "merge": true
+    }
+   ],
+   "results": [
+    "{\"todos\": [{\"id\": \"1\", \"content\": \"a\", \"status\": \"pending\"}, {\"id\": \"2\", \"content\": \"b\", \"status\": \"pending\"}], \"summary\": {\"total\": 2, \"pending\": 2, \"in_progress\": 0, \"completed\": 0, \"cancelled\": 0}}",
+    "{\"todos\": [{\"id\": \"1\", \"content\": \"a\", \"status\": \"pending\"}, {\"id\": \"2\", \"content\": \"b\", \"status\": \"completed\"}, {\"id\": \"3\", \"content\": \"c\", \"status\": \"pending\"}], \"summary\": {\"total\": 3, \"pending\": 2, \"in_progress\": 0, \"completed\": 1, \"cancelled\": 0}}"
+   ],
+   "injection": "[Your active task list was preserved across context compression]\n- [ ] 1. a (pending)\n- [ ] 3. c (pending)"
+  },
+  {
+   "name": "merge-content",
+   "calls": [
+    {
+     "todos": [
+      {
+       "id": "1",
+       "content": "a",
+       "status": "pending"
+      }
+     ]
+    },
+    {
+     "todos": [
+      {
+       "id": "1",
+       "content": "  renamed  "
+      },
+      {
+       "id": "1",
+       "status": "BOGUS"
+      }
+     ],
+     "merge": true
+    }
+   ],
+   "results": [
+    "{\"todos\": [{\"id\": \"1\", \"content\": \"a\", \"status\": \"pending\"}], \"summary\": {\"total\": 1, \"pending\": 1, \"in_progress\": 0, \"completed\": 0, \"cancelled\": 0}}",
+    "{\"todos\": [{\"id\": \"1\", \"content\": \"renamed\", \"status\": \"pending\"}], \"summary\": {\"total\": 1, \"pending\": 1, \"in_progress\": 0, \"completed\": 0, \"cancelled\": 0}}"
+   ],
+   "injection": "[Your active task list was preserved across context compression]\n- [ ] 1. renamed (pending)"
+  },
+  {
+   "name": "merge-no-id",
+   "calls": [
+    {
+     "todos": [
+      {
+       "id": "1",
+       "content": "a",
+       "status": "pending"
+      }
+     ]
+    },
+    {
+     "todos": [
+      {
+       "content": "orphan"
+      },
+      {
+       "id": " ",
+       "content": "x"
+      }
+     ],
+     "merge": true
+    }
+   ],
+   "results": [
+    "{\"todos\": [{\"id\": \"1\", \"content\": \"a\", \"status\": \"pending\"}], \"summary\": {\"total\": 1, \"pending\": 1, \"in_progress\": 0, \"completed\": 0, \"cancelled\": 0}}",
+    "{\"todos\": [{\"id\": \"1\", \"content\": \"a\", \"status\": \"pending\"}], \"summary\": {\"total\": 1, \"pending\": 1, \"in_progress\": 0, \"completed\": 0, \"cancelled\": 0}}"
+   ],
+   "injection": "[Your active task list was preserved across context compression]\n- [ ] 1. a (pending)"
+  },
+  {
+   "name": "merge-dup-new",
+   "calls": [
+    {
+     "todos": []
+    },
+    {
+     "todos": [
+      {
+       "id": "1",
+       "content": "a",
+       "status": "pending"
+      },
+      {
+       "id": "1",
+       "content": "b",
+       "status": "in_progress"
+      }
+     ],
+     "merge": true
+    }
+   ],
+   "results": [
+    "{\"todos\": [], \"summary\": {\"total\": 0, \"pending\": 0, \"in_progress\": 0, \"completed\": 0, \"cancelled\": 0}}",
+    "{\"todos\": [{\"id\": \"1\", \"content\": \"b\", \"status\": \"in_progress\"}], \"summary\": {\"total\": 1, \"pending\": 0, \"in_progress\": 1, \"completed\": 0, \"cancelled\": 0}}"
+   ],
+   "injection": "[Your active task list was preserved across context compression]\n- [>] 1. b (in_progress)"
+  },
+  {
+   "name": "validate",
+   "calls": [
+    {
+     "todos": [
+      {},
+      {
+       "id": 5,
+       "content": 7,
+       "status": "In_Progress "
+      },
+      {
+       "id": "x",
+       "content": "  ",
+       "status": "done"
+      },
+      {
+       "id": null,
+       "content": null
+      }
+     ]
+    }
+   ],
+   "results": [
+    "{\"todos\": [{\"id\": \"?\", \"content\": \"(no description)\", \"status\": \"pending\"}, {\"id\": \"5\", \"content\": \"7\", \"status\": \"in_progress\"}, {\"id\": \"x\", \"content\": \"(no description)\", \"status\": \"pending\"}, {\"id\": \"None\", \"content\": \"None\", \"status\": \"pending\"}], \"summary\": {\"total\": 4, \"pending\": 3, \"in_progress\": 1, \"completed\": 0, \"cancelled\": 0}}"
+   ],
+   "injection": "[Your active task list was preserved across context compression]\n- [ ] ?. (no description) (pending)\n- [>] 5. 7 (in_progress)\n- [ ] x. (no description) (pending)\n- [ ] None. None (pending)"
+  },
+  {
+   "name": "empty-list",
+   "calls": [
+    {
+     "todos": [
+      {
+       "id": "1",
+       "content": "a",
+       "status": "pending"
+      }
+     ]
+    },
+    {
+     "todos": []
+    }
+   ],
+   "results": [
+    "{\"todos\": [{\"id\": \"1\", \"content\": \"a\", \"status\": \"pending\"}], \"summary\": {\"total\": 1, \"pending\": 1, \"in_progress\": 0, \"completed\": 0, \"cancelled\": 0}}",
+    "{\"todos\": [], \"summary\": {\"total\": 0, \"pending\": 0, \"in_progress\": 0, \"completed\": 0, \"cancelled\": 0}}"
+   ],
+   "injection": null
+  },
+  {
+   "name": "all-statuses",
+   "calls": [
+    {
+     "todos": [
+      {
+       "id": "a",
+       "content": "1",
+       "status": "pending"
+      },
+      {
+       "id": "b",
+       "content": "2",
+       "status": "in_progress"
+      },
+      {
+       "id": "c",
+       "content": "3",
+       "status": "completed"
+      },
+      {
+       "id": "d",
+       "content": "4",
+       "status": "cancelled"
+      }
+     ]
+    }
+   ],
+   "results": [
+    "{\"todos\": [{\"id\": \"a\", \"content\": \"1\", \"status\": \"pending\"}, {\"id\": \"b\", \"content\": \"2\", \"status\": \"in_progress\"}, {\"id\": \"c\", \"content\": \"3\", \"status\": \"completed\"}, {\"id\": \"d\", \"content\": \"4\", \"status\": \"cancelled\"}], \"summary\": {\"total\": 4, \"pending\": 1, \"in_progress\": 1, \"completed\": 1, \"cancelled\": 1}}"
+   ],
+   "injection": "[Your active task list was preserved across context compression]\n- [ ] a. 1 (pending)\n- [>] b. 2 (in_progress)"
+  },
+  {
+   "name": "unicode",
+   "calls": [
+    {
+     "todos": [
+      {
+       "id": "ü",
+       "content": "naïve → ok",
+       "status": "pending"
+      }
+     ]
+    }
+   ],
+   "results": [
+    "{\"todos\": [{\"id\": \"ü\", \"content\": \"naïve → ok\", \"status\": \"pending\"}], \"summary\": {\"total\": 1, \"pending\": 1, \"in_progress\": 0, \"completed\": 0, \"cancelled\": 0}}"
+   ],
+   "injection": "[Your active task list was preserved across context compression]\n- [ ] ü. naïve → ok (pending)"
+  },
+  {
+   "name": "merge-false-string",
+   "calls": [
+    {
+     "todos": [
+      {
+       "id": "1",
+       "content": "a",
+       "status": "pending"
+      }
+     ]
+    },
+    {
+     "todos": [
+      {
+       "id": "2",
+       "content": "b",
+       "status": "pending"
+      }
+     ],
+     "merge": "yes"
+    }
+   ],
+   "results": [
+    "{\"todos\": [{\"id\": \"1\", \"content\": \"a\", \"status\": \"pending\"}], \"summary\": {\"total\": 1, \"pending\": 1, \"in_progress\": 0, \"completed\": 0, \"cancelled\": 0}}",
+    "{\"todos\": [{\"id\": \"1\", \"content\": \"a\", \"status\": \"pending\"}, {\"id\": \"2\", \"content\": \"b\", \"status\": \"pending\"}], \"summary\": {\"total\": 2, \"pending\": 2, \"in_progress\": 0, \"completed\": 0, \"cancelled\": 0}}"
+   ],
+   "injection": "[Your active task list was preserved across context compression]\n- [ ] 1. a (pending)\n- [ ] 2. b (pending)"
+  }
+ ]
+}

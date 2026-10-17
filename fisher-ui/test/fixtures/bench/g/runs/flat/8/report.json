@@ -1,0 +1,57 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 183.2,
+            "goal": "Step.Relay.Setup.graftCtx",
+            "outcome": "closed",
+            "started_s": 0,
+            "stats": {
+                "cost_usd": 0.5102622,
+                "exit": 0,
+                "input_tokens": 1136210,
+                "output_tokens": 13241,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 3,
+                    "patch": 2,
+                    "read_file": 15,
+                    "search_files": 4,
+                    "terminal": 4
+                },
+                "turns": 15,
+                "wall_s": 160.2
+            }
+        }
+    ],
+    "backends": {
+        "gauss": [
+            1,
+            1
+        ]
+    },
+    "budget_s": 3600,
+    "budget_spent": false,
+    "closed_per_hour": 19.7,
+    "elapsed_s": 183.2,
+    "file": "Step/Relay.lean",
+    "goals": [
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": 1,
+            "by_backend": "gauss",
+            "closed_at_s": 183.2,
+            "goal": "Step.Relay.Setup.graftCtx",
+            "status": "closed"
+        }
+    ],
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/g/8/lean",
+    "slots": 4
+}

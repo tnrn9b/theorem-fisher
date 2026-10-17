@@ -1,0 +1,85 @@
+-- | Loading the B3 goldens.
+module Fisher.Agent.TestUtil
+  ( loadDoc
+  , loadCases
+  , txt
+  , field
+  , int
+  , list
+  , firstDiff
+  , shouldMatch
+  , registerOfflineTools
+  ) where
+
+import qualified Data.ByteString as BS
+import Data.Text (Text)
+
+import Fisher.Agent.Tools.Browser (RunOutcome (..), newBrowserEnv, registerBrowserTools)
+import Fisher.Agent.Tools.Web (newWebEnv, registerWebTools)
+import Fisher.Agent.Types (AuxError (..))
+import Fisher.LLM.Errors (LLMError (..))
+import Fisher.LLM.Http (Transport (..))
+import Fisher.Py.Value
+import Fisher.Tools.Registry (Registry)
+
+loadDoc :: FilePath -> IO PyVal
+loadDoc p = either fail pure . loads =<< BS.readFile p
+
+loadCases :: FilePath -> IO [PyVal]
+loadCases p = do
+  d <- loadDoc p
+  pure (list "cases" d)
+
+txt :: Text -> PyVal -> Text
+txt k c = case get k c of
+  Just (PStr s) -> s
+  _ -> ""
+
+field :: Text -> PyVal -> PyVal
+field k c = maybe PNull id (get k c)
+
+int :: Text -> PyVal -> Integer
+int k c = case get k c of
+  Just (PInt n) -> n
+  _ -> 0
+
+list :: Text -> PyVal -> [PyVal]
+list k c = case get k c of
+  Just (PList xs) -> xs
+  _ -> []
+
+-- | Where two values first differ: the path and both sides.
+firstDiff :: PyVal -> PyVal -> Maybe (String, PyVal, PyVal)
+firstDiff = go ""
+  where
+    go p a b
+      | a == b = Nothing
+      | otherwise = case (a, b) of
+          (PDict xs, PDict ys)
+            | map fst xs == map fst ys ->
+                case [d | ((k, x), (_, y)) <- zip xs ys, Just d <- [go (p <> "." <> show k) x y]] of
+                  (d : _) -> Just d
+                  [] -> Just (p, a, b)
+            | otherwise -> Just (p <> " keys", PList (map (PStr . fst) xs), PList (map (PStr . fst) ys))
+          (PList xs, PList ys) ->
+            case [d | (i, x, y) <- zip3 [0 :: Int ..] xs ys, Just d <- [go (p <> "[" <> show i <> "]") x y]] of
+              (d : _) -> Just d
+              [] -> Just (p <> " length", PInt (fromIntegral (length xs)), PInt (fromIntegral (length ys)))
+          _ -> Just (p, a, b)
+
+-- | 'shouldBe' for values, reporting the first difference.
+shouldMatch :: String -> PyVal -> PyVal -> IO ()
+shouldMatch label got want = case firstDiff got want of
+  Nothing -> pure ()
+  Just (p, g, w) -> fail (label <> " differs at " <> p <> "\n  got:  " <> take 1500 (show g) <> "\n  want: " <> take 1500 (show w))
+
+-- | The web and browser tools as the recordings saw them: no Firecrawl
+-- key, no agent-browser, no npx (so both toolsets are unavailable).
+registerOfflineTools :: Registry -> FilePath -> IO ()
+registerOfflineTools reg gh = do
+  let offline = Transport (\_ _ -> pure (Left ConnectionError)) (\_ _ _ -> pure (Left ConnectionError))
+      noAux _ = pure (Left (AuxNoProvider ""))
+  registerWebTools reg =<< newWebEnv offline (\_ -> pure Nothing) (\_ -> pure ()) noAux (pure False)
+  registerBrowserTools reg
+    =<< newBrowserEnv (\_ _ _ -> pure (RunFailed "offline")) (\_ -> pure Nothing) (\_ -> pure Nothing) offline noAux (pure False)
+      (pure "0") gh "/tmp" (\_ -> pure False) (\_ -> pure ()) (pure 0) (pure "") (pure False)

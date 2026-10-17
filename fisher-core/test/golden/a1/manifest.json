@@ -1,0 +1,633 @@
+{
+  "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+  "cases": [
+    {
+      "name": "good",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "ok": {
+        "root": "<TMP>/Demo",
+        "gauss_dir": "<TMP>/Demo/.gauss",
+        "manifest_path": "<TMP>/Demo/.gauss/project.yaml",
+        "name": "Demo Project",
+        "kind": "lean4",
+        "schema_version": 1,
+        "lean_root": "<TMP>/Demo",
+        "runtime_dir": "<TMP>/Demo/.gauss/runtime",
+        "cache_dir": "<TMP>/Demo/.gauss/cache",
+        "workflows_dir": "<TMP>/Demo/.gauss/workflows",
+        "created_at": "2026-03-18T00:00:00+00:00",
+        "source_mode": "init",
+        "template_source": "",
+        "blueprint_markers": [],
+        "label": "Demo Project",
+        "is_blueprint": false
+      },
+      "created_dirs": [
+        ".gauss",
+        ".gauss/cache",
+        ".gauss/runtime",
+        ".gauss/workflows",
+        "docs",
+        "sub"
+      ]
+    },
+    {
+      "name": "minimal",
+      "manifest": "schema_version: 1\nname: Bare\n",
+      "ok": {
+        "root": "<TMP>/Demo",
+        "gauss_dir": "<TMP>/Demo/.gauss",
+        "manifest_path": "<TMP>/Demo/.gauss/project.yaml",
+        "name": "Bare",
+        "kind": "lean4",
+        "schema_version": 1,
+        "lean_root": "<TMP>/Demo",
+        "runtime_dir": "<TMP>/Demo/.gauss/runtime",
+        "cache_dir": "<TMP>/Demo/.gauss/cache",
+        "workflows_dir": "<TMP>/Demo/.gauss/workflows",
+        "created_at": "",
+        "source_mode": "init",
+        "template_source": "",
+        "blueprint_markers": [],
+        "label": "Bare",
+        "is_blueprint": false
+      },
+      "created_dirs": [
+        ".gauss",
+        ".gauss/cache",
+        ".gauss/runtime",
+        ".gauss/workflows",
+        "docs",
+        "sub"
+      ]
+    },
+    {
+      "name": "schema-2",
+      "manifest": "schema_version: 2\nname: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "<TMP>/Demo/.gauss/project.yaml has schema_version=2; expected 1."
+      }
+    },
+    {
+      "name": "schema-missing",
+      "manifest": "name: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "<TMP>/Demo/.gauss/project.yaml has schema_version=None; expected 1."
+      }
+    },
+    {
+      "name": "schema-string",
+      "manifest": "schema_version: '1'\nname: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "<TMP>/Demo/.gauss/project.yaml has schema_version='1'; expected 1."
+      }
+    },
+    {
+      "name": "schema-true",
+      "manifest": "schema_version: true\nname: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "ok": {
+        "root": "<TMP>/Demo",
+        "gauss_dir": "<TMP>/Demo/.gauss",
+        "manifest_path": "<TMP>/Demo/.gauss/project.yaml",
+        "name": "Demo Project",
+        "kind": "lean4",
+        "schema_version": 1,
+        "lean_root": "<TMP>/Demo",
+        "runtime_dir": "<TMP>/Demo/.gauss/runtime",
+        "cache_dir": "<TMP>/Demo/.gauss/cache",
+        "workflows_dir": "<TMP>/Demo/.gauss/workflows",
+        "created_at": "2026-03-18T00:00:00+00:00",
+        "source_mode": "init",
+        "template_source": "",
+        "blueprint_markers": [],
+        "label": "Demo Project",
+        "is_blueprint": false
+      },
+      "created_dirs": [
+        ".gauss",
+        ".gauss/cache",
+        ".gauss/runtime",
+        ".gauss/workflows",
+        "docs",
+        "sub"
+      ]
+    },
+    {
+      "name": "schema-float",
+      "manifest": "schema_version: 1.0\nname: F\n",
+      "ok": {
+        "root": "<TMP>/Demo",
+        "gauss_dir": "<TMP>/Demo/.gauss",
+        "manifest_path": "<TMP>/Demo/.gauss/project.yaml",
+        "name": "F",
+        "kind": "lean4",
+        "schema_version": 1,
+        "lean_root": "<TMP>/Demo",
+        "runtime_dir": "<TMP>/Demo/.gauss/runtime",
+        "cache_dir": "<TMP>/Demo/.gauss/cache",
+        "workflows_dir": "<TMP>/Demo/.gauss/workflows",
+        "created_at": "",
+        "source_mode": "init",
+        "template_source": "",
+        "blueprint_markers": [],
+        "label": "F",
+        "is_blueprint": false
+      },
+      "created_dirs": [
+        ".gauss",
+        ".gauss/cache",
+        ".gauss/runtime",
+        ".gauss/workflows",
+        "docs",
+        "sub"
+      ]
+    },
+    {
+      "name": "name-blank",
+      "manifest": "schema_version: 1\nname: '   '\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "<TMP>/Demo/.gauss/project.yaml is missing a non-empty `name`."
+      }
+    },
+    {
+      "name": "name-number",
+      "manifest": "schema_version: 1\nname: 42\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "ok": {
+        "root": "<TMP>/Demo",
+        "gauss_dir": "<TMP>/Demo/.gauss",
+        "manifest_path": "<TMP>/Demo/.gauss/project.yaml",
+        "name": "42",
+        "kind": "lean4",
+        "schema_version": 1,
+        "lean_root": "<TMP>/Demo",
+        "runtime_dir": "<TMP>/Demo/.gauss/runtime",
+        "cache_dir": "<TMP>/Demo/.gauss/cache",
+        "workflows_dir": "<TMP>/Demo/.gauss/workflows",
+        "created_at": "2026-03-18T00:00:00+00:00",
+        "source_mode": "init",
+        "template_source": "",
+        "blueprint_markers": [],
+        "label": "42",
+        "is_blueprint": false
+      },
+      "created_dirs": [
+        ".gauss",
+        ".gauss/cache",
+        ".gauss/runtime",
+        ".gauss/workflows",
+        "docs",
+        "sub"
+      ]
+    },
+    {
+      "name": "name-missing",
+      "manifest": "schema_version: 1\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "<TMP>/Demo/.gauss/project.yaml is missing a non-empty `name`."
+      }
+    },
+    {
+      "name": "kind-coq",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: coq\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "<TMP>/Demo/.gauss/project.yaml has unsupported `kind`: 'coq'."
+      }
+    },
+    {
+      "name": "kind-blank",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: ''\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "ok": {
+        "root": "<TMP>/Demo",
+        "gauss_dir": "<TMP>/Demo/.gauss",
+        "manifest_path": "<TMP>/Demo/.gauss/project.yaml",
+        "name": "Demo Project",
+        "kind": "lean4",
+        "schema_version": 1,
+        "lean_root": "<TMP>/Demo",
+        "runtime_dir": "<TMP>/Demo/.gauss/runtime",
+        "cache_dir": "<TMP>/Demo/.gauss/cache",
+        "workflows_dir": "<TMP>/Demo/.gauss/workflows",
+        "created_at": "2026-03-18T00:00:00+00:00",
+        "source_mode": "init",
+        "template_source": "",
+        "blueprint_markers": [],
+        "label": "Demo Project",
+        "is_blueprint": false
+      },
+      "created_dirs": [
+        ".gauss",
+        ".gauss/cache",
+        ".gauss/runtime",
+        ".gauss/workflows",
+        "docs",
+        "sub"
+      ]
+    },
+    {
+      "name": "lean-root-outside",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: ../Outside\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "Project manifest field `lean_root` points outside the project root."
+      }
+    },
+    {
+      "name": "lean-root-null",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: null\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "Project manifest field `lean_root` must not be empty."
+      }
+    },
+    {
+      "name": "lean-root-absolute",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: /abs\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "Project manifest field `lean_root` must be relative."
+      }
+    },
+    {
+      "name": "lean-root-not-lean",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: docs\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "<TMP>/Demo/.gauss/project.yaml declares lean_root='docs', but that directory is not a Lean 4 project root."
+      }
+    },
+    {
+      "name": "lean-root-sub",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: sub\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "ok": {
+        "root": "<TMP>/Demo",
+        "gauss_dir": "<TMP>/Demo/.gauss",
+        "manifest_path": "<TMP>/Demo/.gauss/project.yaml",
+        "name": "Demo Project",
+        "kind": "lean4",
+        "schema_version": 1,
+        "lean_root": "<TMP>/Demo/sub",
+        "runtime_dir": "<TMP>/Demo/.gauss/runtime",
+        "cache_dir": "<TMP>/Demo/.gauss/cache",
+        "workflows_dir": "<TMP>/Demo/.gauss/workflows",
+        "created_at": "2026-03-18T00:00:00+00:00",
+        "source_mode": "init",
+        "template_source": "",
+        "blueprint_markers": [],
+        "label": "Demo Project",
+        "is_blueprint": false
+      },
+      "created_dirs": [
+        ".gauss",
+        ".gauss/cache",
+        ".gauss/runtime",
+        ".gauss/workflows",
+        "docs",
+        "sub"
+      ]
+    },
+    {
+      "name": "paths-null",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths: null\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "<TMP>/Demo/.gauss/project.yaml has invalid `paths` metadata."
+      }
+    },
+    {
+      "name": "paths-list",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n- a\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "<TMP>/Demo/.gauss/project.yaml has invalid `paths` metadata."
+      }
+    },
+    {
+      "name": "paths-cache-absolute",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  cache: /tmp/c\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "Project manifest field `paths.cache` must be relative."
+      }
+    },
+    {
+      "name": "paths-custom",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  runtime: rt\n  cache: c/d\n",
+      "ok": {
+        "root": "<TMP>/Demo",
+        "gauss_dir": "<TMP>/Demo/.gauss",
+        "manifest_path": "<TMP>/Demo/.gauss/project.yaml",
+        "name": "Demo Project",
+        "kind": "lean4",
+        "schema_version": 1,
+        "lean_root": "<TMP>/Demo",
+        "runtime_dir": "<TMP>/Demo/rt",
+        "cache_dir": "<TMP>/Demo/c/d",
+        "workflows_dir": "<TMP>/Demo/.gauss/workflows",
+        "created_at": "2026-03-18T00:00:00+00:00",
+        "source_mode": "init",
+        "template_source": "",
+        "blueprint_markers": [],
+        "label": "Demo Project",
+        "is_blueprint": false
+      },
+      "created_dirs": [
+        ".gauss",
+        ".gauss/workflows",
+        "c",
+        "c/d",
+        "docs",
+        "rt",
+        "sub"
+      ]
+    },
+    {
+      "name": "paths-cache-null",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: []\npaths:\n  cache: null\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "Project manifest field `paths.cache` must not be empty."
+      }
+    },
+    {
+      "name": "source-null",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource: null\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "ok": {
+        "root": "<TMP>/Demo",
+        "gauss_dir": "<TMP>/Demo/.gauss",
+        "manifest_path": "<TMP>/Demo/.gauss/project.yaml",
+        "name": "Demo Project",
+        "kind": "lean4",
+        "schema_version": 1,
+        "lean_root": "<TMP>/Demo",
+        "runtime_dir": "<TMP>/Demo/.gauss/runtime",
+        "cache_dir": "<TMP>/Demo/.gauss/cache",
+        "workflows_dir": "<TMP>/Demo/.gauss/workflows",
+        "created_at": "2026-03-18T00:00:00+00:00",
+        "source_mode": "init",
+        "template_source": "",
+        "blueprint_markers": [],
+        "label": "Demo Project",
+        "is_blueprint": false
+      },
+      "created_dirs": [
+        ".gauss",
+        ".gauss/cache",
+        ".gauss/runtime",
+        ".gauss/workflows",
+        "docs",
+        "sub"
+      ]
+    },
+    {
+      "name": "source-string",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource: x\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "<TMP>/Demo/.gauss/project.yaml has invalid `source` metadata."
+      }
+    },
+    {
+      "name": "source-mode-blank",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: '  '\n  template_source: ' t '\nblueprint:\n  markers: []\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "ok": {
+        "root": "<TMP>/Demo",
+        "gauss_dir": "<TMP>/Demo/.gauss",
+        "manifest_path": "<TMP>/Demo/.gauss/project.yaml",
+        "name": "Demo Project",
+        "kind": "lean4",
+        "schema_version": 1,
+        "lean_root": "<TMP>/Demo",
+        "runtime_dir": "<TMP>/Demo/.gauss/runtime",
+        "cache_dir": "<TMP>/Demo/.gauss/cache",
+        "workflows_dir": "<TMP>/Demo/.gauss/workflows",
+        "created_at": "2026-03-18T00:00:00+00:00",
+        "source_mode": "init",
+        "template_source": "t",
+        "blueprint_markers": [],
+        "label": "Demo Project",
+        "is_blueprint": false
+      },
+      "created_dirs": [
+        ".gauss",
+        ".gauss/cache",
+        ".gauss/runtime",
+        ".gauss/workflows",
+        "docs",
+        "sub"
+      ]
+    },
+    {
+      "name": "blueprint-null",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint: null\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "ok": {
+        "root": "<TMP>/Demo",
+        "gauss_dir": "<TMP>/Demo/.gauss",
+        "manifest_path": "<TMP>/Demo/.gauss/project.yaml",
+        "name": "Demo Project",
+        "kind": "lean4",
+        "schema_version": 1,
+        "lean_root": "<TMP>/Demo",
+        "runtime_dir": "<TMP>/Demo/.gauss/runtime",
+        "cache_dir": "<TMP>/Demo/.gauss/cache",
+        "workflows_dir": "<TMP>/Demo/.gauss/workflows",
+        "created_at": "2026-03-18T00:00:00+00:00",
+        "source_mode": "init",
+        "template_source": "",
+        "blueprint_markers": [],
+        "label": "Demo Project",
+        "is_blueprint": false
+      },
+      "created_dirs": [
+        ".gauss",
+        ".gauss/cache",
+        ".gauss/runtime",
+        ".gauss/workflows",
+        "docs",
+        "sub"
+      ]
+    },
+    {
+      "name": "blueprint-list",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n- 1\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "<TMP>/Demo/.gauss/project.yaml has invalid `blueprint` metadata."
+      }
+    },
+    {
+      "name": "markers-mixed",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers:\n  - a\n  - ' '\n  - null\n  - 3\n  - ' b '\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "ok": {
+        "root": "<TMP>/Demo",
+        "gauss_dir": "<TMP>/Demo/.gauss",
+        "manifest_path": "<TMP>/Demo/.gauss/project.yaml",
+        "name": "Demo Project",
+        "kind": "lean4",
+        "schema_version": 1,
+        "lean_root": "<TMP>/Demo",
+        "runtime_dir": "<TMP>/Demo/.gauss/runtime",
+        "cache_dir": "<TMP>/Demo/.gauss/cache",
+        "workflows_dir": "<TMP>/Demo/.gauss/workflows",
+        "created_at": "2026-03-18T00:00:00+00:00",
+        "source_mode": "init",
+        "template_source": "",
+        "blueprint_markers": [
+          "a",
+          "None",
+          "3",
+          "b"
+        ],
+        "label": "Demo Project",
+        "is_blueprint": true
+      },
+      "created_dirs": [
+        ".gauss",
+        ".gauss/cache",
+        ".gauss/runtime",
+        ".gauss/workflows",
+        "docs",
+        "sub"
+      ]
+    },
+    {
+      "name": "markers-string",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers: ab\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "ok": {
+        "root": "<TMP>/Demo",
+        "gauss_dir": "<TMP>/Demo/.gauss",
+        "manifest_path": "<TMP>/Demo/.gauss/project.yaml",
+        "name": "Demo Project",
+        "kind": "lean4",
+        "schema_version": 1,
+        "lean_root": "<TMP>/Demo",
+        "runtime_dir": "<TMP>/Demo/.gauss/runtime",
+        "cache_dir": "<TMP>/Demo/.gauss/cache",
+        "workflows_dir": "<TMP>/Demo/.gauss/workflows",
+        "created_at": "2026-03-18T00:00:00+00:00",
+        "source_mode": "init",
+        "template_source": "",
+        "blueprint_markers": [
+          "a",
+          "b"
+        ],
+        "label": "Demo Project",
+        "is_blueprint": true
+      },
+      "created_dirs": [
+        ".gauss",
+        ".gauss/cache",
+        ".gauss/runtime",
+        ".gauss/workflows",
+        "docs",
+        "sub"
+      ]
+    },
+    {
+      "name": "markers-mapping",
+      "manifest": "schema_version: 1\nname: Demo Project\nkind: lean4\nlean_root: .\ncreated_at: '2026-03-18T00:00:00+00:00'\nsource:\n  mode: init\n  template_source: ''\nblueprint:\n  markers:\n    k1: 1\n    k2: 2\npaths:\n  runtime: .gauss/runtime\n  cache: .gauss/cache\n  workflows: .gauss/workflows\n",
+      "ok": {
+        "root": "<TMP>/Demo",
+        "gauss_dir": "<TMP>/Demo/.gauss",
+        "manifest_path": "<TMP>/Demo/.gauss/project.yaml",
+        "name": "Demo Project",
+        "kind": "lean4",
+        "schema_version": 1,
+        "lean_root": "<TMP>/Demo",
+        "runtime_dir": "<TMP>/Demo/.gauss/runtime",
+        "cache_dir": "<TMP>/Demo/.gauss/cache",
+        "workflows_dir": "<TMP>/Demo/.gauss/workflows",
+        "created_at": "2026-03-18T00:00:00+00:00",
+        "source_mode": "init",
+        "template_source": "",
+        "blueprint_markers": [
+          "k1",
+          "k2"
+        ],
+        "label": "Demo Project",
+        "is_blueprint": true
+      },
+      "created_dirs": [
+        ".gauss",
+        ".gauss/cache",
+        ".gauss/runtime",
+        ".gauss/workflows",
+        "docs",
+        "sub"
+      ]
+    },
+    {
+      "name": "not-a-mapping",
+      "manifest": "- a\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "<TMP>/Demo/.gauss/project.yaml must contain a mapping."
+      }
+    },
+    {
+      "name": "empty",
+      "manifest": "",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "<TMP>/Demo/.gauss/project.yaml has schema_version=None; expected 1."
+      }
+    },
+    {
+      "name": "zero",
+      "manifest": "0\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "<TMP>/Demo/.gauss/project.yaml has schema_version=None; expected 1."
+      }
+    },
+    {
+      "name": "bad-yaml",
+      "manifest": "name: [x\n",
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "Failed to read <TMP>/Demo/.gauss/project.yaml: while parsing a flow sequence\n  in \"<unicode string>\", line 1, column 7:\n    name: [x\n          ^\nexpected ',' or ']', but got '<stream end>'\n  in \"<unicode string>\", line 2, column 1:\n    \n    ^"
+      }
+    },
+    {
+      "name": "no-gauss-dir",
+      "manifest": null,
+      "error": {
+        "class": "ProjectNotFoundError",
+        "message": "Gauss project directory not found at <TMP>/Demo/.gauss."
+      },
+      "discover": {
+        "class": "ProjectNotFoundError",
+        "message": "No active Gauss project found. Use `/project init`, `/project convert`, or `/project use <path>` first."
+      }
+    },
+    {
+      "name": "gauss-dir-no-manifest",
+      "manifest": null,
+      "error": {
+        "class": "ProjectManifestError",
+        "message": "Found `<TMP>/Demo/.gauss` but `project.yaml` is missing."
+      },
+      "discover": {
+        "class": "ProjectManifestError",
+        "message": "Found `<TMP>/Demo/.gauss` but `project.yaml` is missing."
+      }
+    },
+    {
+      "name": "gauss-is-file",
+      "manifest": null,
+      "error": {
+        "class": "ProjectNotFoundError",
+        "message": "Gauss project directory not found at <TMP>/Demo/.gauss."
+      },
+      "discover": {
+        "class": "ProjectNotFoundError",
+        "message": "Gauss project directory not found at <TMP>/Demo/.gauss."
+      }
+    }
+  ]
+}

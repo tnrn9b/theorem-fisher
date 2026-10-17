@@ -1,0 +1,8 @@
+{
+  "name": "isabelle",
+  "version": "0.2.0",
+  "description": "Prove and draft Isabelle theorems with the isabelle MCP server",
+  "author": {
+    "name": "Fisher"
+  }
+}

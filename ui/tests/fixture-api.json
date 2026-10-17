@@ -1,0 +1,2693 @@
+{
+ "routes": {
+  "/api/context/20261001_100000_aaaaaa": [
+   {
+    "body": {
+     "events": [
+      {
+       "detail": {
+        "text": "goal: t"
+       },
+       "kind": "clm_write",
+       "turn": 1
+      },
+      {
+       "detail": {
+        "chars": 900,
+        "item": 1,
+        "turn": 2
+       },
+       "kind": "clm_spill",
+       "turn": 2
+      },
+      {
+       "detail": {
+        "file": "goal: t\nproved"
+       },
+       "kind": "clm_read",
+       "turn": 3
+      }
+     ],
+     "now": "goal: t\nproved",
+     "prev": "goal: t",
+     "state": {
+      "counter": 3,
+      "turns": [],
+      "version": 1
+     },
+     "strategy": "clm",
+     "summaries": []
+    },
+    "status": 200
+   }
+  ],
+  "/api/context/20261001_110000_bbbbbb": [
+   {
+    "body": {
+     "events": [],
+     "now": null,
+     "prev": null,
+     "state": null,
+     "strategy": "compress",
+     "summaries": [
+      {
+       "session": "20261001_113000_cccccc",
+       "text": "[CONTEXT COMPACTION] Earlier turns were compacted.\nProved two lemmas."
+      }
+     ]
+    },
+    "status": 200
+   }
+  ],
+  "/api/context/20261001_113000_cccccc": [
+   {
+    "body": {
+     "events": [],
+     "now": null,
+     "prev": null,
+     "state": null,
+     "strategy": "compress",
+     "summaries": [
+      {
+       "session": "20261001_113000_cccccc",
+       "text": "[CONTEXT COMPACTION] Earlier turns were compacted.\nProved two lemmas."
+      }
+     ]
+    },
+    "status": 200
+   }
+  ],
+  "/api/context/nope": [
+   {
+    "body": {
+     "error": "no such session"
+    },
+    "status": 404
+   }
+  ],
+  "/api/ping": [
+   {
+    "body": {
+     "ok": true
+    },
+    "status": 200
+   }
+  ],
+  "/api/runs": [
+   {
+    "body": [
+     {
+      "arm": "flat",
+      "bench": "g",
+      "root": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/flat"
+     },
+     {
+      "arm": "graph",
+      "bench": "g",
+      "root": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/graph"
+     },
+     {
+      "arm": "auto",
+      "bench": "h",
+      "root": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/auto"
+     },
+     {
+      "arm": "noauto",
+      "bench": "h",
+      "root": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/noauto"
+     },
+     {
+      "arm": "A",
+      "bench": "w",
+      "root": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/w/runs/A"
+     },
+     {
+      "arm": "B",
+      "bench": "w",
+      "root": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/w/runs/B"
+     },
+     {
+      "arm": "C",
+      "bench": "w",
+      "root": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/w/runs/C"
+     }
+    ],
+    "status": 200
+   }
+  ],
+  "/api/runs/c3": [
+   {
+    "body": {
+     "arms": [],
+     "bench": "c3",
+     "gate": null,
+     "gateStatus": null,
+     "goals": []
+    },
+    "status": 200
+   }
+  ],
+  "/api/runs/clm4": [
+   {
+    "body": {
+     "arms": [],
+     "bench": "clm4",
+     "gate": null,
+     "gateStatus": null,
+     "goals": []
+    },
+    "status": 200
+   }
+  ],
+  "/api/runs/d": [
+   {
+    "body": {
+     "arms": [],
+     "bench": "d",
+     "gate": null,
+     "gateStatus": null,
+     "goals": []
+    },
+    "status": 200
+   }
+  ],
+  "/api/runs/g": [
+   {
+    "body": {
+     "arms": [
+      "flat",
+      "graph"
+     ],
+     "bench": "g",
+     "gate": null,
+     "gateStatus": null,
+     "goals": [
+      {
+       "arm": "flat",
+       "closedBy": null,
+       "dollars": 0.5520478999999909,
+       "goal": "Step.Summary.machineClose_of_bodyClose",
+       "solved": true,
+       "turns": 28
+      },
+      {
+       "arm": "flat",
+       "closedBy": null,
+       "dollars": 0.480992399999991,
+       "goal": "Step.Graft.runBody_append",
+       "solved": true,
+       "turns": 19
+      },
+      {
+       "arm": "flat",
+       "closedBy": null,
+       "dollars": 0.2550198000000137,
+       "goal": "Step.Concrete.fireRecv_wt",
+       "solved": true,
+       "turns": 14
+      },
+      {
+       "arm": "flat",
+       "closedBy": null,
+       "dollars": 0.288292800000022,
+       "goal": "Step.Diamond.runBody_pop",
+       "solved": true,
+       "turns": 13
+      },
+      {
+       "arm": "flat",
+       "closedBy": null,
+       "dollars": 0.6403030999999828,
+       "goal": "Step.Relay.fireCand_third",
+       "solved": true,
+       "turns": 22
+      },
+      {
+       "arm": "flat",
+       "closedBy": null,
+       "dollars": 0.2977553000000057,
+       "goal": "Step.Summary.indist_dropDead",
+       "solved": true,
+       "turns": 12
+      },
+      {
+       "arm": "flat",
+       "closedBy": null,
+       "dollars": 1.0728743999999892,
+       "goal": "Channels.ObfsSummary.good_eq",
+       "solved": true,
+       "turns": 23
+      },
+      {
+       "arm": "flat",
+       "closedBy": null,
+       "dollars": 0.4793339999999944,
+       "goal": "Step.Relay.Setup.graftCtx",
+       "solved": true,
+       "turns": 15
+      },
+      {
+       "arm": "graph",
+       "closedBy": null,
+       "dollars": 0.546283399999993,
+       "goal": "Step.Summary.machineClose_of_bodyClose",
+       "solved": true,
+       "turns": 26
+      },
+      {
+       "arm": "graph",
+       "closedBy": null,
+       "dollars": 0.29291729999999916,
+       "goal": "Step.Graft.runBody_append",
+       "solved": true,
+       "turns": 12
+      },
+      {
+       "arm": "graph",
+       "closedBy": null,
+       "dollars": 0.2832075999999688,
+       "goal": "Step.Concrete.fireRecv_wt",
+       "solved": true,
+       "turns": 14
+      },
+      {
+       "arm": "graph",
+       "closedBy": null,
+       "dollars": 0.29965089999996053,
+       "goal": "Step.Diamond.runBody_pop",
+       "solved": true,
+       "turns": 13
+      },
+      {
+       "arm": "graph",
+       "closedBy": null,
+       "dollars": 0.603685100000007,
+       "goal": "Step.Relay.fireCand_third",
+       "solved": true,
+       "turns": 22
+      },
+      {
+       "arm": "graph",
+       "closedBy": null,
+       "dollars": 0.40914490000000114,
+       "goal": "Step.Summary.indist_dropDead",
+       "solved": true,
+       "turns": 18
+      },
+      {
+       "arm": "graph",
+       "closedBy": null,
+       "dollars": 0.787890300000015,
+       "goal": "Channels.ObfsSummary.good_eq",
+       "solved": true,
+       "turns": 36
+      },
+      {
+       "arm": "graph",
+       "closedBy": null,
+       "dollars": 0.35534890000002406,
+       "goal": "Step.Relay.Setup.graftCtx",
+       "solved": true,
+       "turns": 13
+      }
+     ]
+    },
+    "status": 200
+   }
+  ],
+  "/api/runs/h": [
+   {
+    "body": {
+     "arms": [
+      "auto",
+      "noauto"
+     ],
+     "bench": "h",
+     "gate": null,
+     "gateStatus": "pending",
+     "goals": [
+      {
+       "arm": "auto",
+       "closedBy": "model",
+       "dollars": 0.8827010000000001,
+       "goal": "Step.Diamond.fireDiamond_of'",
+       "solved": true,
+       "turns": 19
+      },
+      {
+       "arm": "auto",
+       "closedBy": "model",
+       "dollars": 1.061965,
+       "goal": "Step.Graft.spliced_run",
+       "solved": true,
+       "turns": 25
+      },
+      {
+       "arm": "auto",
+       "closedBy": "model",
+       "dollars": 0.8108757999999999,
+       "goal": "Step.Graft.runBody_subst",
+       "solved": true,
+       "turns": 28
+      },
+      {
+       "arm": "auto",
+       "closedBy": "model",
+       "dollars": 1.1700381000000002,
+       "goal": "Step.Graft.runS_graft",
+       "solved": true,
+       "turns": 28
+      },
+      {
+       "arm": "auto",
+       "closedBy": "model",
+       "dollars": 1.0260106,
+       "goal": "Step.Diamond.twoFire_joint",
+       "solved": true,
+       "turns": 22
+      },
+      {
+       "arm": "auto",
+       "closedBy": "model",
+       "dollars": 0.9525895999999999,
+       "goal": "Step.Cone.rel_kept",
+       "solved": true,
+       "turns": 22
+      },
+      {
+       "arm": "auto",
+       "closedBy": "model",
+       "dollars": 0.4440062,
+       "goal": "Step.SymExpr.evalPure_typed",
+       "solved": true,
+       "turns": 16
+      },
+      {
+       "arm": "auto",
+       "closedBy": "model",
+       "dollars": 0.4222138,
+       "goal": "Step.Frame.runBody_split",
+       "solved": true,
+       "turns": 15
+      },
+      {
+       "arm": "noauto",
+       "closedBy": null,
+       "dollars": 0.8983304999999999,
+       "goal": "Step.Diamond.fireDiamond_of'",
+       "solved": true,
+       "turns": 18
+      },
+      {
+       "arm": "noauto",
+       "closedBy": null,
+       "dollars": 1.0884246,
+       "goal": "Step.Graft.spliced_run",
+       "solved": true,
+       "turns": 28
+      },
+      {
+       "arm": "noauto",
+       "closedBy": null,
+       "dollars": 0.8278810000000001,
+       "goal": "Step.Graft.runBody_subst",
+       "solved": true,
+       "turns": 29
+      },
+      {
+       "arm": "noauto",
+       "closedBy": null,
+       "dollars": 1.2393723999999997,
+       "goal": "Step.Graft.runS_graft",
+       "solved": true,
+       "turns": 28
+      },
+      {
+       "arm": "noauto",
+       "closedBy": null,
+       "dollars": 1.1011251000000002,
+       "goal": "Step.Diamond.twoFire_joint",
+       "solved": true,
+       "turns": 25
+      },
+      {
+       "arm": "noauto",
+       "closedBy": null,
+       "dollars": 0.8933558000000001,
+       "goal": "Step.Cone.rel_kept",
+       "solved": true,
+       "turns": 21
+      },
+      {
+       "arm": "noauto",
+       "closedBy": null,
+       "dollars": 0.4378116,
+       "goal": "Step.SymExpr.evalPure_typed",
+       "solved": true,
+       "turns": 15
+      },
+      {
+       "arm": "noauto",
+       "closedBy": null,
+       "dollars": 0.4892814,
+       "goal": "Step.Frame.runBody_split",
+       "solved": true,
+       "turns": 16
+      }
+     ]
+    },
+    "status": 200
+   },
+   {
+    "body": {
+     "arms": [
+      "auto",
+      "noauto"
+     ],
+     "bench": "h",
+     "gate": "auto closes more, or as many for at least 25% fewer dollars: PASS",
+     "gateStatus": "ok",
+     "goals": [
+      {
+       "arm": "auto",
+       "closedBy": "model",
+       "dollars": 0.8827010000000001,
+       "goal": "Step.Diamond.fireDiamond_of'",
+       "solved": true,
+       "turns": 19
+      },
+      {
+       "arm": "auto",
+       "closedBy": "model",
+       "dollars": 1.061965,
+       "goal": "Step.Graft.spliced_run",
+       "solved": true,
+       "turns": 25
+      },
+      {
+       "arm": "auto",
+       "closedBy": "model",
+       "dollars": 0.8108757999999999,
+       "goal": "Step.Graft.runBody_subst",
+       "solved": true,
+       "turns": 28
+      },
+      {
+       "arm": "auto",
+       "closedBy": "model",
+       "dollars": 1.1700381000000002,
+       "goal": "Step.Graft.runS_graft",
+       "solved": true,
+       "turns": 28
+      },
+      {
+       "arm": "auto",
+       "closedBy": "model",
+       "dollars": 1.0260106,
+       "goal": "Step.Diamond.twoFire_joint",
+       "solved": true,
+       "turns": 22
+      },
+      {
+       "arm": "auto",
+       "closedBy": "model",
+       "dollars": 0.9525895999999999,
+       "goal": "Step.Cone.rel_kept",
+       "solved": true,
+       "turns": 22
+      },
+      {
+       "arm": "auto",
+       "closedBy": "model",
+       "dollars": 0.4440062,
+       "goal": "Step.SymExpr.evalPure_typed",
+       "solved": true,
+       "turns": 16
+      },
+      {
+       "arm": "auto",
+       "closedBy": "model",
+       "dollars": 0.4222138,
+       "goal": "Step.Frame.runBody_split",
+       "solved": true,
+       "turns": 15
+      },
+      {
+       "arm": "noauto",
+       "closedBy": null,
+       "dollars": 0.8983304999999999,
+       "goal": "Step.Diamond.fireDiamond_of'",
+       "solved": true,
+       "turns": 18
+      },
+      {
+       "arm": "noauto",
+       "closedBy": null,
+       "dollars": 1.0884246,
+       "goal": "Step.Graft.spliced_run",
+       "solved": true,
+       "turns": 28
+      },
+      {
+       "arm": "noauto",
+       "closedBy": null,
+       "dollars": 0.8278810000000001,
+       "goal": "Step.Graft.runBody_subst",
+       "solved": true,
+       "turns": 29
+      },
+      {
+       "arm": "noauto",
+       "closedBy": null,
+       "dollars": 1.2393723999999997,
+       "goal": "Step.Graft.runS_graft",
+       "solved": true,
+       "turns": 28
+      },
+      {
+       "arm": "noauto",
+       "closedBy": null,
+       "dollars": 1.1011251000000002,
+       "goal": "Step.Diamond.twoFire_joint",
+       "solved": true,
+       "turns": 25
+      },
+      {
+       "arm": "noauto",
+       "closedBy": null,
+       "dollars": 0.8933558000000001,
+       "goal": "Step.Cone.rel_kept",
+       "solved": true,
+       "turns": 21
+      },
+      {
+       "arm": "noauto",
+       "closedBy": null,
+       "dollars": 0.4378116,
+       "goal": "Step.SymExpr.evalPure_typed",
+       "solved": true,
+       "turns": 15
+      },
+      {
+       "arm": "noauto",
+       "closedBy": null,
+       "dollars": 0.4892814,
+       "goal": "Step.Frame.runBody_split",
+       "solved": true,
+       "turns": 16
+      }
+     ]
+    },
+    "status": 200
+   }
+  ],
+  "/api/runs/rlm": [
+   {
+    "body": {
+     "arms": [],
+     "bench": "rlm",
+     "gate": null,
+     "gateStatus": null,
+     "goals": []
+    },
+    "status": 200
+   }
+  ],
+  "/api/runs/w": [
+   {
+    "body": {
+     "arms": [
+      "A",
+      "B",
+      "C"
+     ],
+     "bench": "w",
+     "files": [
+      {
+       "arm": "A",
+       "closed": 1,
+       "dollars": 2,
+       "factsMean": null,
+       "file": "Step/Latency.lean",
+       "offered": null,
+       "report": true,
+       "run": "4",
+       "total": 3,
+       "used": null
+      },
+      {
+       "arm": "B",
+       "closed": 2,
+       "dollars": 0.75,
+       "factsMean": 13.3,
+       "file": "Step/Latency.lean",
+       "offered": 0,
+       "report": true,
+       "run": "4",
+       "total": 3,
+       "used": 0
+      },
+      {
+       "arm": "C",
+       "closed": 2,
+       "dollars": 0.75,
+       "factsMean": 13.3,
+       "file": "Step/Latency.lean",
+       "offered": 3,
+       "report": true,
+       "run": "4",
+       "total": 3,
+       "used": 1
+      }
+     ],
+     "gate": null,
+     "gateStatus": null,
+     "goals": [
+      {
+       "arm": "A",
+       "closedBy": null,
+       "dollars": null,
+       "goal": "Step.Latency.a",
+       "solved": true,
+       "turns": null
+      },
+      {
+       "arm": "A",
+       "closedBy": null,
+       "dollars": null,
+       "goal": "Step.Latency.b",
+       "solved": false,
+       "turns": null
+      },
+      {
+       "arm": "A",
+       "closedBy": null,
+       "dollars": null,
+       "goal": "Step.Latency.c",
+       "solved": false,
+       "turns": null
+      },
+      {
+       "arm": "B",
+       "closedBy": null,
+       "dollars": null,
+       "facts": 20,
+       "goal": "Step.Latency.a",
+       "offered": 0,
+       "solved": true,
+       "turns": null,
+       "used": 0
+      },
+      {
+       "arm": "B",
+       "closedBy": null,
+       "dollars": null,
+       "facts": 12,
+       "goal": "Step.Latency.b",
+       "offered": 0,
+       "solved": true,
+       "turns": null,
+       "used": 0
+      },
+      {
+       "arm": "B",
+       "closedBy": null,
+       "dollars": null,
+       "facts": 8,
+       "goal": "Step.Latency.c",
+       "offered": 0,
+       "solved": false,
+       "turns": null,
+       "used": 0
+      },
+      {
+       "arm": "C",
+       "closedBy": null,
+       "dollars": null,
+       "facts": 20,
+       "goal": "Step.Latency.a",
+       "offered": 2,
+       "solved": true,
+       "turns": null,
+       "used": 1
+      },
+      {
+       "arm": "C",
+       "closedBy": null,
+       "dollars": null,
+       "facts": 12,
+       "goal": "Step.Latency.b",
+       "offered": 1,
+       "solved": true,
+       "turns": null,
+       "used": 0
+      },
+      {
+       "arm": "C",
+       "closedBy": null,
+       "dollars": null,
+       "facts": 8,
+       "goal": "Step.Latency.c",
+       "offered": 0,
+       "solved": false,
+       "turns": null,
+       "used": 0
+      }
+     ]
+    },
+    "status": 200
+   }
+  ],
+  "/api/runs/zz": [
+   {
+    "body": {
+     "error": "no such bench"
+    },
+    "status": 404
+   }
+  ],
+  "/api/search": [
+   {
+    "body": [
+     {
+      "bench": null,
+      "closed": 2,
+      "dir": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-repo-09cdd41d6216d023/search/20261016-080000",
+      "file": "Demo/Flat.lean",
+      "mode": "flat",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-repo-09cdd41d6216d023/lean",
+      "run": "s.20261016-080000",
+      "running": false,
+      "started": 1792146614.184204,
+      "status": "done",
+      "total": 4
+     },
+     {
+      "bench": null,
+      "closed": 1,
+      "dir": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-repo-09cdd41d6216d023/search/20261016-090000",
+      "file": "Demo/Graph.lean",
+      "mode": "graph",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-repo-09cdd41d6216d023/lean",
+      "run": "s.20261016-090000",
+      "running": false,
+      "started": 1792146584.1839783,
+      "status": "done",
+      "total": 2
+     },
+     {
+      "bench": "w",
+      "closed": 2,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/w/runs/C/4",
+      "file": "Step/Latency.lean",
+      "mode": "flat",
+      "project": null,
+      "run": "w.C.4",
+      "running": false,
+      "started": 1792145359.2736044,
+      "status": "done",
+      "total": 3
+     },
+     {
+      "bench": "w",
+      "closed": 2,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/w/runs/B/4",
+      "file": "Step/Latency.lean",
+      "mode": "flat",
+      "project": null,
+      "run": "w.B.4",
+      "running": false,
+      "started": 1792145359.2725427,
+      "status": "done",
+      "total": 3
+     },
+     {
+      "bench": "w",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/w/runs/A/4",
+      "file": "Step/Latency.lean",
+      "mode": "flat",
+      "project": null,
+      "run": "w.A.4",
+      "running": false,
+      "started": 1792144922.0535505,
+      "status": "done",
+      "total": 3
+     },
+     {
+      "bench": "g",
+      "closed": 0,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/graph/5-unparsed",
+      "file": "Step/Relay.lean",
+      "mode": "graph",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/5/lean",
+      "run": "g.graph.5-unparsed",
+      "running": false,
+      "started": 1792115506.6448228,
+      "status": "done",
+      "total": 0
+     },
+     {
+      "bench": "g",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/graph/3",
+      "file": "Step/Concrete.lean",
+      "mode": "graph",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/3/lean",
+      "run": "g.graph.3",
+      "running": false,
+      "started": 1792115377.1436853,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "g",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/graph/2",
+      "file": "Step/Graft.lean",
+      "mode": "graph",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/2/lean",
+      "run": "g.graph.2",
+      "running": false,
+      "started": 1792115366.7431402,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "g",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/graph/4",
+      "file": "Step/Diamond.lean",
+      "mode": "graph",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/4/lean",
+      "run": "g.graph.4",
+      "running": false,
+      "started": 1792115349.4442432,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "g",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/graph/8",
+      "file": "Step/Relay.lean",
+      "mode": "graph",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/8/lean",
+      "run": "g.graph.8",
+      "running": false,
+      "started": 1792115333.7473884,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "g",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/graph/6",
+      "file": "Step/Summary.lean",
+      "mode": "graph",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/6/lean",
+      "run": "g.graph.6",
+      "running": false,
+      "started": 1792115284.6462915,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "g",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/graph/5",
+      "file": "Step/Relay.lean",
+      "mode": "graph",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/5/lean",
+      "run": "g.graph.5",
+      "running": false,
+      "started": 1792115259.845729,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "g",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/graph/1",
+      "file": "Step/Summary.lean",
+      "mode": "graph",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/1/lean",
+      "run": "g.graph.1",
+      "running": false,
+      "started": 1792115212.6425545,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "g",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/graph/7",
+      "file": "Channels/ObfsSummary.lean",
+      "mode": "graph",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/7/lean",
+      "run": "g.graph.7",
+      "running": false,
+      "started": 1792114296.8468444,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "g",
+      "closed": 0,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/flat/5-unparsed",
+      "file": "Step/Relay.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/5/lean",
+      "run": "g.flat.5-unparsed",
+      "running": false,
+      "started": 1792102745.327357,
+      "status": "done",
+      "total": 0
+     },
+     {
+      "bench": "g",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/flat/6",
+      "file": "Step/Summary.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/6/lean",
+      "run": "g.flat.6",
+      "running": false,
+      "started": 1792102641.8305683,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "g",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/flat/4",
+      "file": "Step/Diamond.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/4/lean",
+      "run": "g.flat.4",
+      "running": false,
+      "started": 1792102588.9260097,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "g",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/flat/8",
+      "file": "Step/Relay.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/8/lean",
+      "run": "g.flat.8",
+      "running": false,
+      "started": 1792102562.1336012,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "g",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/flat/3",
+      "file": "Step/Concrete.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/3/lean",
+      "run": "g.flat.3",
+      "running": false,
+      "started": 1792102560.2244706,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "h",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/auto/8",
+      "file": "Step/Frame.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/h/8/lean",
+      "run": "h.auto.8",
+      "running": false,
+      "started": 1792102533.2600777,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "h",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/noauto/8",
+      "file": "Step/Frame.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/h/8/lean",
+      "run": "h.noauto.8",
+      "running": false,
+      "started": 1792102511.477461,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "g",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/flat/5",
+      "file": "Step/Relay.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/5/lean",
+      "run": "g.flat.5",
+      "running": false,
+      "started": 1792102493.4290059,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "g",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/flat/2",
+      "file": "Step/Graft.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/2/lean",
+      "run": "g.flat.2",
+      "running": false,
+      "started": 1792102474.1227999,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "h",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/auto/7",
+      "file": "Step/SymExpr.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/h/7/lean",
+      "run": "h.auto.7",
+      "running": false,
+      "started": 1792102406.1586614,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "h",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/auto/6",
+      "file": "Step/Cone.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/h/6/lean",
+      "run": "h.auto.6",
+      "running": false,
+      "started": 1792102397.7571604,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "h",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/noauto/6",
+      "file": "Step/Cone.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/h/6/lean",
+      "run": "h.noauto.6",
+      "running": false,
+      "started": 1792102395.674467,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "h",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/noauto/7",
+      "file": "Step/SymExpr.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/h/7/lean",
+      "run": "h.noauto.7",
+      "running": false,
+      "started": 1792102361.6759853,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "g",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/flat/1",
+      "file": "Step/Summary.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/1/lean",
+      "run": "g.flat.1",
+      "running": false,
+      "started": 1792102349.721138,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "h",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/auto/1",
+      "file": "Step/Diamond.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/h/1/lean",
+      "run": "h.auto.1",
+      "running": false,
+      "started": 1792102342.0495386,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "h",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/noauto/1",
+      "file": "Step/Diamond.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/h/1/lean",
+      "run": "h.noauto.1",
+      "running": false,
+      "started": 1792102332.2664316,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "h",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/auto/3",
+      "file": "Step/Graft.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/h/3/lean",
+      "run": "h.auto.3",
+      "running": false,
+      "started": 1792102331.4526763,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "h",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/auto/4",
+      "file": "Step/Graft.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/h/4/lean",
+      "run": "h.auto.4",
+      "running": false,
+      "started": 1792102319.1542041,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "h",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/auto/5",
+      "file": "Step/Diamond.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/h/5/lean",
+      "run": "h.auto.5",
+      "running": false,
+      "started": 1792102292.955765,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "h",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/auto/2",
+      "file": "Step/Graft.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/h/2/lean",
+      "run": "h.auto.2",
+      "running": false,
+      "started": 1792102292.6509838,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "h",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/noauto/2",
+      "file": "Step/Graft.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/h/2/lean",
+      "run": "h.noauto.2",
+      "running": false,
+      "started": 1792102284.0679657,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "h",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/noauto/3",
+      "file": "Step/Graft.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/h/3/lean",
+      "run": "h.noauto.3",
+      "running": false,
+      "started": 1792102270.7694976,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "h",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/noauto/5",
+      "file": "Step/Diamond.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/h/5/lean",
+      "run": "h.noauto.5",
+      "running": false,
+      "started": 1792102269.0730035,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "h",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/noauto/4",
+      "file": "Step/Graft.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/h/4/lean",
+      "run": "h.noauto.4",
+      "running": false,
+      "started": 1792102255.9714775,
+      "status": "done",
+      "total": 1
+     },
+     {
+      "bench": "g",
+      "closed": 1,
+      "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/flat/7",
+      "file": "Channels/ObfsSummary.lean",
+      "mode": "flat",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/7/lean",
+      "run": "g.flat.7",
+      "running": false,
+      "started": 1792101180.3321078,
+      "status": "done",
+      "total": 1
+     }
+    ],
+    "status": 200
+   }
+  ],
+  "/api/search/g.graph.5": [
+   {
+    "body": {
+     "apply": {
+      "allowed": false,
+      "changed": false,
+      "reason": "a bench run's workspace is the bench's; apply is for runs of fisher search"
+     },
+     "attempts": [],
+     "auto": false,
+     "bench": "g",
+     "closed": 1,
+     "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/g/runs/graph/5",
+     "file": "Step/Relay.lean",
+     "goals": null,
+     "graph": {
+      "nodes": [
+       {
+        "attempts": 0,
+        "depth": 0,
+        "id": 1,
+        "key": "\u2200 {E : Step.Exec.Eval} {Dw : Step.Exec.Draw} {Sb : Step.Fuse.Subst} {n : Step.Network}\n  {relay upstream : Step.TAName} {inbound : Step.ChannelName} {pat : Step.Expr} {rest graft : List.{0} Step.BStmt}\n  {mr : Step.Machine} {\u03c1 : Step.VarName \u2192 Step.VarName}\n  (H : Step.Relay.Setup E Dw Sb n relay upstream inbound pat rest graft mr \u03c1) {n' : Step.Network}\n  (hwf' : Step.Schedule.WellFormed n') (o' : Step.Store) {g : Step.GState}\n  (hpend : @Eq.{1} Step.Pending (Step.GState.pending g) (@List.nil.{0} Step.TAName)) {c c' : Step.Exec.Cand}\n  (hc :\n    @Membership.mem.{0, 0} Step.Exec.Cand (List.{0} Step.Exec.Cand) (@List.instMembership.{0} Step.Exec.Cand)\n      (Step.Exec.networkCands E g n) c)\n  (hc' :\n    @Membership.mem.{0, 0} Step.Exec.Cand (List.{0} Step.Exec.Cand) (@List.instMembership.{0} Step.Exec.Cand)\n      (Step.Exec.networkCands E (Step.Graft.fuseT \u03c1 (Step.Graft.Masked inbound pat) o' g) n') c')\n  (hcc : Step.Relay.CandFu Sb (Step.Fuse.outbound relay upstream) inbound pat graft upstream c c')\n  (hta : @Ne.{1} Step.TAName (Step.Exec.Cand.ta c) relay) (hup : @Ne.{1} Step.TAName (Step.Exec.Cand.ta c) upstream)\n  {s s' : Step.Step} (hs : @Eq.{1} (Option.{0} Step.Step) (Step.Exec.Cand.step c) (@Option.some.{0} Step.Step s))\n  (hs' : @Eq.{1} (Option.{0} Step.Step) (Step.Exec.Cand.step c') (@Option.some.{0} Step.Step s')),\n  @Eq.{1} (PMF.{0} (Except.{0, 0} Step.ExecError (Prod.{0, 0} Step.GState Step.Change)))\n    (Step.Exec.fireCand E Dw c' s' (Step.Graft.fuseT \u03c1 (Step.Graft.Masked inbound pat) o' g))\n    (@PMF.map.{0, 0} (Except.{0, 0} Step.ExecError (Prod.{0, 0} Step.GState Step.Change))\n      (Except.{0, 0} Step.ExecError (Prod.{0, 0} Step.GState Step.Change))\n      (@Except.map.{0, 0, 0} Step.ExecError (Prod.{0, 0} Step.GState Step.Change) (Prod.{0, 0} Step.GState Step.Change)\n        fun (x : Prod.{0, 0} Step.GState Step.Change) =>\n        @Prod.mk.{0, 0} Step.GState Step.Change\n          (Step.Graft.fuseT \u03c1 (Step.Graft.Masked inbound pat) o' (@Prod.fst.{0, 0} Step.GState Step.Change x))\n          (have __src : Step.Change := @Prod.snd.{0, 0} Step.GState Step.Change x;\n          Step.Change.mk (Step.Change.machine __src) (Step.Change.time __src)\n            (Step.GState.store\n              (Step.Graft.fuseT \u03c1 (Step.Graft.Masked inbound pat) o' (Step.GState.atTime g (Step.Exec.Cand.fire c))))\n            (Step.GState.store\n              (Step.Graft.fuseT \u03c1 (Step.Graft.Masked inbound pat) o' (@Prod.fst.{0, 0} Step.GState Step.Change x)))\n            (Step.Relay.renameRecvd (Step.Fuse.outbound relay upstream)\n              (Step.Change.delta (@Prod.snd.{0, 0} Step.GState Step.Change x)))\n            (Step.Change.ref __src)))\n      (Step.Exec.fireCand E Dw c s g))",
+        "name": "Step.Relay.fireCand_third",
+        "root": 1,
+        "splits": [],
+        "status": "proved"
+       }
+      ],
+      "roots": [
+       1
+      ],
+      "splits": [],
+      "whiteboards": [
+       {
+        "root": 1,
+        "text": "# Plan for Step.Relay.fireCand_third\n- Step.Relay.fireCand_third (proved)"
+       }
+      ]
+     },
+     "library": true,
+     "mode": "graph",
+     "project": "/Users/thomasreynolds/.cache/fisher/bench/g/5/lean",
+     "report": {
+      "attempt_s": 1200,
+      "attempts": [
+       {
+        "attempt": 1,
+        "backend": "gauss",
+        "ended_s": 246.8,
+        "goal": "Step.Relay.fireCand_third",
+        "outcome": "closed",
+        "started_s": 0,
+        "stats": {
+         "cost_usd": 0.6018534,
+         "exit": 0,
+         "input_tokens": 1764848,
+         "output_tokens": 14001,
+         "tools": {
+          "mcp_lean_lsp_lean_diagnostic_messages": 8,
+          "mcp_lean_lsp_lean_goal": 1,
+          "mcp_lean_lsp_lean_verify": 1,
+          "patch": 6,
+          "read_file": 9,
+          "terminal": 9,
+          "write_file": 1
+         },
+         "turns": 22,
+         "wall_s": 222.8
+        }
+       }
+      ],
+      "backends": [
+       "gauss"
+      ],
+      "budget_s": 3600,
+      "cap_usd": 6,
+      "dollars": {
+       "planner": 0,
+       "total": 0.6019,
+       "verifier": 0,
+       "worker": 0.6019
+      },
+      "elapsed_s": 246.8,
+      "file": "Step/Relay.lean",
+      "goals_closed": 1,
+      "goals_total": 1,
+      "max_depth": 3,
+      "max_splits": 2,
+      "max_turns": 40,
+      "mode": "graph",
+      "model": "example/model-a",
+      "nodes_proved": 1,
+      "nodes_total": 1,
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/g/5/lean",
+      "slots": 4,
+      "splits_total": 0,
+      "stopped": null,
+      "tree": [
+       {
+        "attempts": 0,
+        "depth": 0,
+        "id": 1,
+        "name": "Step.Relay.fireCand_third",
+        "splits": [],
+        "status": "proved"
+       }
+      ]
+     },
+     "retrieval": true,
+     "run": "g.graph.5",
+     "running": false,
+     "started": 1792115259.845729,
+     "status": "done",
+     "total": 1,
+     "whiteboards": [
+      {
+       "file": "whiteboard-1-Step_Relay_fireCand_third.md",
+       "root": 1,
+       "text": "# Plan for Step.Relay.fireCand_third\n- Step.Relay.fireCand_third (proved)"
+      }
+     ]
+    },
+    "status": 200
+   }
+  ],
+  "/api/search/g.graph.5/events": [
+   {
+    "status": 200,
+    "text": "retry: 1000\n\nid: 83\ndata: {\"depth\":0,\"event\":\"node added\",\"name\":\"Step.Relay.fireCand_third\",\"node\":1,\"t\":0}\n\nid: 131\ndata: {\"attempt\":1,\"event\":\"launched\",\"node\":1,\"t\":0}\n\nid: 190\ndata: {\"event\":\"cost\",\"role\":\"worker\",\"t\":235.9,\"usd\":0.6018534}\n\nid: 261\ndata: {\"attempt\":1,\"event\":\"finished\",\"node\":1,\"outcome\":\"closed\",\"t\":246.8}\n\nid: 304\ndata: {\"event\":\"node proved\",\"node\":1,\"t\":246.8}\n\nevent: end\ndata: {\"status\":\"done\"}\n\n"
+   }
+  ],
+  "/api/search/h.auto.4": [
+   {
+    "body": {
+     "apply": {
+      "allowed": false,
+      "changed": false,
+      "reason": "a bench run's workspace is the bench's; apply is for runs of fisher search"
+     },
+     "attempts": [],
+     "auto": true,
+     "bench": "h",
+     "closed": 1,
+     "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/h/runs/auto/4",
+     "file": "Step/Graft.lean",
+     "goals": [
+      {
+       "attempts": [
+        "gauss"
+       ],
+       "by_attempt": 1,
+       "by_backend": "gauss",
+       "closedBy": "model",
+       "closed_at_s": 426.2,
+       "goal": "Step.Graft.runS_graft",
+       "status": "closed"
+      }
+     ],
+     "graph": null,
+     "library": true,
+     "mode": "flat",
+     "project": "/Users/thomasreynolds/.cache/fisher/bench/h/4/lean",
+     "report": {
+      "attempt_s": 1200,
+      "attempts": [
+       {
+        "attempt": 1,
+        "backend": "gauss",
+        "ended_s": 426.2,
+        "goal": "Step.Graft.runS_graft",
+        "outcome": "closed (helpers: commEffect_bufLen_ge, runBody_bufLen_ge, flush_run_le, flush_run_comm, GraftCtx.reads_ok, runS_graft_core)",
+        "started_s": 26.8,
+        "stats": {
+         "cost_usd": 1.1700381000000002,
+         "exit": 0,
+         "input_tokens": 3582259,
+         "output_tokens": 36115,
+         "tools": {
+          "mcp_lean_lsp_lean_diagnostic_messages": 6,
+          "mcp_lean_lsp_lean_verify": 1,
+          "patch": 6,
+          "read_file": 13,
+          "search_files": 8,
+          "terminal": 3
+         },
+         "turns": 28,
+         "wall_s": 374
+        }
+       }
+      ],
+      "auto_closed": 0,
+      "auto_off": null,
+      "auto_ran": true,
+      "auto_requested": true,
+      "auto_warmup_s": 50.8,
+      "backends": {
+       "gauss": [
+        1,
+        1
+       ]
+      },
+      "budget_s": 7200,
+      "budget_spent": false,
+      "closed_per_hour": 8.4,
+      "disproved": 0,
+      "elapsed_s": 426.2,
+      "file": "Step/Graft.lean",
+      "goals": [
+       {
+        "attempts": [
+         "gauss"
+        ],
+        "by_attempt": 1,
+        "by_backend": "gauss",
+        "closedBy": "model",
+        "closed_at_s": 426.2,
+        "goal": "Step.Graft.runS_graft",
+        "status": "closed"
+       }
+      ],
+      "goals_closed": 1,
+      "goals_total": 1,
+      "max_turns": 40,
+      "mode": "swarm",
+      "project": "/Users/thomasreynolds/.cache/fisher/bench/h/4/lean",
+      "repaired_then_closed": 0,
+      "repairs_kept": 0,
+      "slots": 4
+     },
+     "retrieval": true,
+     "run": "h.auto.4",
+     "running": false,
+     "started": 1792102319.1542041,
+     "status": "done",
+     "total": 1,
+     "whiteboards": []
+    },
+    "status": 200
+   }
+  ],
+  "/api/search/h.auto.4/events": [
+   {
+    "status": 200,
+    "text": "retry: 1000\n\nid: 79\ndata: {\"event\":\"auto missed\",\"goal\":\"Step.Graft.runS_graft\",\"seconds\":26.8,\"t\":26.8}\n\nid: 170\ndata: {\"attempt\":1,\"backend\":\"gauss\",\"event\":\"launched\",\"goal\":\"Step.Graft.runS_graft\",\"t\":26.8}\n\nid: 652\ndata: {\"attempt\":1,\"backend\":\"gauss\",\"event\":\"finished\",\"goal\":\"Step.Graft.runS_graft\",\"outcome\":\"closed (helpers: commEffect_bufLen_ge, runBody_bufLen_ge, flush_run_le, flush_run_comm, GraftCtx.reads_ok, runS_graft_core)\",\"stats\":{\"cost_usd\":1.1700381000000002,\"exit\":0,\"input_tokens\":3582259,\"output_tokens\":36115,\"tools\":{\"mcp_lean_lsp_lean_diagnostic_messages\":6,\"mcp_lean_lsp_lean_verify\":1,\"patch\":6,\"read_file\":13,\"search_files\":8,\"terminal\":3},\"turns\":28,\"wall_s\":374},\"t\":426.2}\n\nid: 724\ndata: {\"attempt\":1,\"event\":\"closed\",\"goal\":\"Step.Graft.runS_graft\",\"t\":426.2}\n\nevent: end\ndata: {\"status\":\"done\"}\n\n"
+   }
+  ],
+  "/api/search/s.20261016-080000": [
+   {
+    "body": {
+     "apply": {
+      "allowed": true,
+      "changed": false,
+      "reason": null
+     },
+     "attempts": [
+      "1-Demo_b-gauss",
+      "2-Demo_d-gauss"
+     ],
+     "auto": true,
+     "bench": null,
+     "closed": 2,
+     "dir": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-repo-09cdd41d6216d023/search/20261016-080000",
+     "file": "Demo/Flat.lean",
+     "goals": [
+      {
+       "attempts": [],
+       "by_attempt": null,
+       "by_backend": null,
+       "closedBy": "auto",
+       "closed_at_s": 3.2,
+       "goal": "Demo.a",
+       "status": "closed"
+      },
+      {
+       "attempts": [
+        "gauss"
+       ],
+       "by_attempt": 1,
+       "by_backend": "gauss",
+       "closedBy": "model+repair",
+       "closed_at_s": 50.5,
+       "goal": "Demo.b",
+       "status": "closed"
+      },
+      {
+       "attempts": [],
+       "by_attempt": null,
+       "by_backend": null,
+       "closedBy": null,
+       "closed_at_s": null,
+       "disproof": {
+        "tactic": "decide",
+        "verdict": "false"
+       },
+       "goal": "Demo.c",
+       "status": "disproved"
+      },
+      {
+       "attempts": [
+        "gauss"
+       ],
+       "by_attempt": null,
+       "by_backend": null,
+       "closedBy": null,
+       "closed_at_s": null,
+       "goal": "Demo.d",
+       "status": "gave up"
+      }
+     ],
+     "graph": null,
+     "library": true,
+     "mode": "flat",
+     "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-repo-09cdd41d6216d023/lean",
+     "report": {
+      "attempt_s": 1200,
+      "attempts": [
+       {
+        "attempt": 1,
+        "backend": "gauss",
+        "ended_s": 50.5,
+        "goal": "Demo.b",
+        "outcome": "closed",
+        "started_s": 14,
+        "stats": {
+         "cost_usd": 0.25,
+         "exit": 0,
+         "input_tokens": 1000,
+         "output_tokens": 100,
+         "tools": {
+          "patch": 2
+         },
+         "turns": 10,
+         "wall_s": 36
+        }
+       },
+       {
+        "attempt": 2,
+        "backend": "gauss",
+        "ended_s": 70,
+        "goal": "Demo.d",
+        "outcome": "exit 0",
+        "started_s": 14,
+        "stats": {
+         "cost_usd": 0.4,
+         "exit": 0,
+         "input_tokens": 1000,
+         "output_tokens": 100,
+         "tools": {
+          "patch": 2
+         },
+         "turns": 20,
+         "wall_s": 56
+        }
+       }
+      ],
+      "auto_closed": 1,
+      "auto_off": null,
+      "auto_ran": true,
+      "auto_requested": true,
+      "backends": {
+       "gauss": [
+        2,
+        1
+       ]
+      },
+      "budget_s": 7200,
+      "budget_spent": false,
+      "closed_per_hour": 102.9,
+      "disproved": 1,
+      "elapsed_s": 70,
+      "file": "Demo/Flat.lean",
+      "goals": [
+       {
+        "attempts": [],
+        "by_attempt": null,
+        "by_backend": null,
+        "closedBy": "auto",
+        "closed_at_s": 3.2,
+        "goal": "Demo.a",
+        "status": "closed"
+       },
+       {
+        "attempts": [
+         "gauss"
+        ],
+        "by_attempt": 1,
+        "by_backend": "gauss",
+        "closedBy": "model+repair",
+        "closed_at_s": 50.5,
+        "goal": "Demo.b",
+        "status": "closed"
+       },
+       {
+        "attempts": [],
+        "by_attempt": null,
+        "by_backend": null,
+        "closedBy": null,
+        "closed_at_s": null,
+        "disproof": {
+         "tactic": "decide",
+         "verdict": "false"
+        },
+        "goal": "Demo.c",
+        "status": "disproved"
+       },
+       {
+        "attempts": [
+         "gauss"
+        ],
+        "by_attempt": null,
+        "by_backend": null,
+        "closedBy": null,
+        "closed_at_s": null,
+        "goal": "Demo.d",
+        "status": "gave up"
+       }
+      ],
+      "goals_closed": 2,
+      "goals_total": 4,
+      "max_turns": 40,
+      "mode": "swarm",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-repo-09cdd41d6216d023/lean",
+      "repaired_then_closed": 1,
+      "repairs_kept": 1,
+      "slots": 4
+     },
+     "retrieval": true,
+     "run": "s.20261016-080000",
+     "running": false,
+     "started": 1792146614.184204,
+     "status": "done",
+     "total": 4,
+     "whiteboards": []
+    },
+    "status": 200
+   }
+  ],
+  "/api/search/s.20261016-080000/events": [
+   {
+    "status": 200,
+    "text": "retry: 1000\n\nid: 80\ndata: {\"event\":\"auto closed\",\"goal\":\"Demo.a\",\"seconds\":3.2,\"snippets\":\"simp\",\"t\":3.2}\n\nid: 140\ndata: {\"event\":\"auto missed\",\"goal\":\"Demo.b\",\"seconds\":5,\"t\":8.2}\n\nid: 219\ndata: {\"event\":\"disproved\",\"goal\":\"Demo.c\",\"result\":\"false\",\"t\":9,\"tactic\":\"decide\"}\n\nid: 278\ndata: {\"event\":\"auto missed\",\"goal\":\"Demo.d\",\"seconds\":5,\"t\":14}\n\nid: 352\ndata: {\"attempt\":1,\"backend\":\"gauss\",\"event\":\"launched\",\"goal\":\"Demo.b\",\"t\":14}\n\nid: 426\ndata: {\"attempt\":2,\"backend\":\"gauss\",\"event\":\"launched\",\"goal\":\"Demo.d\",\"t\":14}\n\nid: 531\ndata: {\"attempt\":1,\"auto_closed\":1,\"event\":\"repaired\",\"goal\":\"Demo.b\",\"holes_after\":0,\"holes_before\":1,\"t\":50}\n\nid: 744\ndata: {\"attempt\":1,\"backend\":\"gauss\",\"event\":\"finished\",\"goal\":\"Demo.b\",\"outcome\":\"closed\",\"stats\":{\"cost_usd\":0.25,\"exit\":0,\"input_tokens\":1000,\"output_tokens\":100,\"tools\":{\"patch\":2},\"turns\":10,\"wall_s\":36},\"t\":50.5}\n\nid: 800\ndata: {\"attempt\":1,\"event\":\"closed\",\"goal\":\"Demo.b\",\"t\":50.5}\n\nid: 1010\ndata: {\"attempt\":2,\"backend\":\"gauss\",\"event\":\"finished\",\"goal\":\"Demo.d\",\"outcome\":\"exit 0\",\"stats\":{\"cost_usd\":0.4,\"exit\":0,\"input_tokens\":1000,\"output_tokens\":100,\"tools\":{\"patch\":2},\"turns\":20,\"wall_s\":56},\"t\":70}\n\nid: 1053\ndata: {\"event\":\"gave up\",\"goal\":\"Demo.d\",\"t\":70}\n\nevent: end\ndata: {\"status\":\"done\"}\n\n"
+   }
+  ],
+  "/api/search/s.20261016-090000": [
+   {
+    "body": {
+     "apply": {
+      "allowed": false,
+      "changed": false,
+      "reason": "not applied: 1 lemmas from splits are still sorry (Demo.main_thm_l2)"
+     },
+     "attempts": [
+      "1-Demo_main_thm-gauss",
+      "2-Demo_side_thm-gauss"
+     ],
+     "auto": true,
+     "bench": null,
+     "closed": 1,
+     "dir": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-repo-09cdd41d6216d023/search/20261016-090000",
+     "file": "Demo/Graph.lean",
+     "goals": null,
+     "graph": {
+      "nodes": [
+       {
+        "attempts": 1,
+        "depth": 0,
+        "id": 1,
+        "key": "1 + 1 = 2",
+        "name": "Demo.main_thm",
+        "root": 1,
+        "splits": [
+         1,
+         2
+        ],
+        "status": "open"
+       },
+       {
+        "attempts": 1,
+        "depth": 0,
+        "id": 2,
+        "key": "2 + 2 = 4",
+        "name": "Demo.side_thm",
+        "root": 2,
+        "splits": [],
+        "status": "proved"
+       },
+       {
+        "attempts": 0,
+        "depth": 1,
+        "id": 3,
+        "key": "1 = 1",
+        "name": "Demo.main_thm_l1",
+        "root": 1,
+        "splits": [],
+        "status": "proved"
+       },
+       {
+        "attempts": 0,
+        "depth": 1,
+        "id": 4,
+        "key": "0 = 1",
+        "name": "Demo.main_thm_l2",
+        "reason": "disproved by decide",
+        "root": 1,
+        "splits": [],
+        "status": "failed"
+       }
+      ],
+      "roots": [
+       1,
+       2
+      ],
+      "splits": [
+       {
+        "id": 1,
+        "lemmas": [
+         3,
+         4
+        ],
+        "parent": 1,
+        "status": "accepted"
+       },
+       {
+        "id": 2,
+        "lemmas": [],
+        "parent": 1,
+        "reason": "the lemmas do not imply the goal",
+        "status": "rejected"
+       }
+      ],
+      "whiteboards": [
+       {
+        "root": 1,
+        "text": "# Plan for Demo.main_thm\n- Demo.main_thm (open)\n  - split 1 (accepted)\n    - Demo.main_thm_l1 (proved)\n    - Demo.main_thm_l2 (failed: disproved by decide)\n  - split 2 (rejected: the lemmas do not imply the goal)"
+       },
+       {
+        "root": 2,
+        "text": "# Plan for Demo.side_thm\n- Demo.side_thm (proved)"
+       }
+      ]
+     },
+     "library": true,
+     "mode": "graph",
+     "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-repo-09cdd41d6216d023/lean",
+     "report": {
+      "attempt_s": 1200,
+      "attempts": [
+       {
+        "attempt": 1,
+        "backend": "gauss",
+        "ended_s": 60.5,
+        "goal": "Demo.main_thm",
+        "outcome": "exit 0",
+        "started_s": 0.1,
+        "stats": {
+         "cost_usd": 0.2,
+         "exit": 0,
+         "input_tokens": 1000,
+         "output_tokens": 100,
+         "tools": {
+          "patch": 2
+         },
+         "turns": 12,
+         "wall_s": 60
+        }
+       },
+       {
+        "attempt": 2,
+        "backend": "gauss",
+        "ended_s": 41,
+        "goal": "Demo.side_thm",
+        "outcome": "closed",
+        "started_s": 0.1,
+        "stats": {
+         "cost_usd": 0.3,
+         "exit": 0,
+         "input_tokens": 1000,
+         "output_tokens": 100,
+         "tools": {
+          "patch": 2
+         },
+         "turns": 9,
+         "wall_s": 40
+        }
+       }
+      ],
+      "auto_off": null,
+      "auto_ran": true,
+      "auto_requested": true,
+      "backends": [
+       "gauss"
+      ],
+      "budget_s": 3600,
+      "cap_usd": 6,
+      "dollars": {
+       "planner": 0.04,
+       "total": 0.55,
+       "verifier": 0.01,
+       "worker": 0.5
+      },
+      "elapsed_s": 100,
+      "file": "Demo/Graph.lean",
+      "goals_closed": 1,
+      "goals_total": 2,
+      "max_depth": 3,
+      "max_splits": 2,
+      "max_turns": 40,
+      "mode": "graph",
+      "model": "example/model-a",
+      "nodes_proved": 2,
+      "nodes_total": 4,
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-repo-09cdd41d6216d023/lean",
+      "slots": 4,
+      "splits_total": 2,
+      "stopped": "no action left",
+      "tree": [
+       {
+        "attempts": 1,
+        "depth": 0,
+        "id": 1,
+        "name": "Demo.main_thm",
+        "splits": [
+         {
+          "id": 1,
+          "lemmas": [
+           {
+            "attempts": 0,
+            "depth": 1,
+            "id": 3,
+            "name": "Demo.main_thm_l1",
+            "splits": [],
+            "status": "proved"
+           },
+           {
+            "attempts": 0,
+            "depth": 1,
+            "id": 4,
+            "name": "Demo.main_thm_l2",
+            "reason": "disproved by decide",
+            "splits": [],
+            "status": "failed"
+           }
+          ],
+          "status": "accepted"
+         },
+         {
+          "id": 2,
+          "lemmas": [],
+          "reason": "the lemmas do not imply the goal",
+          "status": "rejected"
+         }
+        ],
+        "status": "open"
+       },
+       {
+        "attempts": 1,
+        "depth": 0,
+        "id": 2,
+        "name": "Demo.side_thm",
+        "splits": [],
+        "status": "proved"
+       }
+      ]
+     },
+     "retrieval": true,
+     "run": "s.20261016-090000",
+     "running": false,
+     "started": 1792146584.1839783,
+     "status": "done",
+     "total": 2,
+     "whiteboards": [
+      {
+       "file": "whiteboard-1-Demo_main_thm.md",
+       "root": 1,
+       "text": "# Plan for Demo.main_thm\n- Demo.main_thm (open)\n  - split 1 (accepted)\n    - Demo.main_thm_l1 (proved)\n    - Demo.main_thm_l2 (failed: disproved by decide)\n  - split 2 (rejected: the lemmas do not imply the goal)"
+      },
+      {
+       "file": "whiteboard-2-Demo_side_thm.md",
+       "root": 2,
+       "text": "# Plan for Demo.side_thm\n- Demo.side_thm (proved)"
+      }
+     ]
+    },
+    "status": 200
+   }
+  ],
+  "/api/search/s.20261016-090000/events": [
+   {
+    "status": 200,
+    "text": "retry: 1000\n\nid: 71\ndata: {\"depth\":0,\"event\":\"node added\",\"name\":\"Demo.main_thm\",\"node\":1,\"t\":0}\n\nid: 142\ndata: {\"depth\":0,\"event\":\"node added\",\"name\":\"Demo.side_thm\",\"node\":2,\"t\":0}\n\nid: 192\ndata: {\"attempt\":1,\"event\":\"launched\",\"node\":1,\"t\":0.1}\n\nid: 242\ndata: {\"attempt\":2,\"event\":\"launched\",\"node\":2,\"t\":0.1}\n\nid: 326\ndata: {\"attempt\":2,\"event\":\"repaired\",\"holes_after\":0,\"holes_before\":2,\"node\":2,\"t\":40.2}\n\nid: 394\ndata: {\"attempt\":2,\"event\":\"finished\",\"node\":2,\"outcome\":\"closed\",\"t\":41}\n\nid: 434\ndata: {\"event\":\"node proved\",\"node\":2,\"t\":41}\n\nid: 484\ndata: {\"event\":\"cost\",\"role\":\"worker\",\"t\":41,\"usd\":0.3}\n\nid: 554\ndata: {\"attempt\":1,\"event\":\"finished\",\"node\":1,\"outcome\":\"exit 0\",\"t\":60.5}\n\nid: 606\ndata: {\"event\":\"cost\",\"role\":\"worker\",\"t\":60.5,\"usd\":0.2}\n\nid: 659\ndata: {\"event\":\"split proposed\",\"node\":1,\"split\":1,\"t\":61}\n\nid: 711\ndata: {\"event\":\"cost\",\"role\":\"planner\",\"t\":70,\"usd\":0.02}\n\nid: 764\ndata: {\"event\":\"cost\",\"role\":\"verifier\",\"t\":74,\"usd\":0.01}\n\nid: 823\ndata: {\"event\":\"split accepted\",\"lemmas\":[3,4],\"split\":1,\"t\":75}\n\nid: 898\ndata: {\"depth\":1,\"event\":\"node added\",\"name\":\"Demo.main_thm_l1\",\"node\":3,\"t\":75}\n\nid: 973\ndata: {\"depth\":1,\"event\":\"node added\",\"name\":\"Demo.main_thm_l2\",\"node\":4,\"t\":75}\n\nid: 1031\ndata: {\"event\":\"auto closed\",\"node\":3,\"snippets\":\"simp\",\"t\":80}\n\nid: 1071\ndata: {\"event\":\"node proved\",\"node\":3,\"t\":80}\n\nid: 1144\ndata: {\"event\":\"disproved\",\"node\":4,\"result\":\"false\",\"t\":82,\"tactic\":\"decide\"}\n\nid: 1215\ndata: {\"event\":\"node failed\",\"node\":4,\"reason\":\"disproved by decide\",\"t\":82}\n\nid: 1268\ndata: {\"event\":\"split proposed\",\"node\":1,\"split\":2,\"t\":90}\n\nid: 1320\ndata: {\"event\":\"cost\",\"role\":\"planner\",\"t\":94,\"usd\":0.02}\n\nid: 1408\ndata: {\"event\":\"split rejected\",\"reason\":\"the lemmas do not imply the goal\",\"split\":2,\"t\":95}\n\nid: 1462\ndata: {\"event\":\"stopped\",\"reason\":\"no action left\",\"t\":100}\n\nevent: end\ndata: {\"status\":\"done\"}\n\n"
+   }
+  ],
+  "/api/search/w.B.4": [
+   {
+    "body": {
+     "apply": {
+      "allowed": false,
+      "changed": false,
+      "reason": "a bench run's workspace is the bench's; apply is for runs of fisher search"
+     },
+     "attempts": [],
+     "auto": false,
+     "bench": "w",
+     "closed": 2,
+     "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/w/runs/B/4",
+     "file": "Step/Latency.lean",
+     "goals": [
+      {
+       "attempts": [
+        "gauss"
+       ],
+       "by_attempt": 1,
+       "by_backend": "gauss",
+       "closed_at_s": 200.0,
+       "facts": 20,
+       "goal": "Step.Latency.a",
+       "offered": [],
+       "status": "closed",
+       "used": []
+      },
+      {
+       "attempts": [
+        "gauss"
+       ],
+       "by_attempt": 2,
+       "by_backend": "gauss",
+       "closed_at_s": 500.0,
+       "facts": 12,
+       "goal": "Step.Latency.b",
+       "offered": [],
+       "status": "closed",
+       "used": []
+      },
+      {
+       "attempts": [],
+       "by_attempt": null,
+       "by_backend": null,
+       "closed_at_s": null,
+       "facts": 8,
+       "goal": "Step.Latency.c",
+       "offered": [],
+       "status": "open",
+       "used": []
+      }
+     ],
+     "graph": null,
+     "library": false,
+     "mode": "flat",
+     "project": null,
+     "report": {
+      "attempts": [
+       {
+        "attempt": 1,
+        "backend": "gauss",
+        "goal": "Step.Latency.a",
+        "stats": {
+         "cost_usd": 0.25,
+         "turns": 8
+        }
+       },
+       {
+        "attempt": 2,
+        "backend": "gauss",
+        "goal": "Step.Latency.b",
+        "stats": {
+         "cost_usd": 0.5,
+         "turns": 9
+        }
+       }
+      ],
+      "auto_requested": false,
+      "elapsed_s": 700.0,
+      "facts_mean": 13.3,
+      "file": "Step/Latency.lean",
+      "goals": [
+       {
+        "attempts": [
+         "gauss"
+        ],
+        "by_attempt": 1,
+        "by_backend": "gauss",
+        "closed_at_s": 200.0,
+        "facts": 20,
+        "goal": "Step.Latency.a",
+        "offered": [],
+        "status": "closed",
+        "used": []
+       },
+       {
+        "attempts": [
+         "gauss"
+        ],
+        "by_attempt": 2,
+        "by_backend": "gauss",
+        "closed_at_s": 500.0,
+        "facts": 12,
+        "goal": "Step.Latency.b",
+        "offered": [],
+        "status": "closed",
+        "used": []
+       },
+       {
+        "attempts": [],
+        "by_attempt": null,
+        "by_backend": null,
+        "closed_at_s": null,
+        "facts": 8,
+        "goal": "Step.Latency.c",
+        "offered": [],
+        "status": "open",
+        "used": []
+       }
+      ],
+      "goals_closed": 2,
+      "goals_total": 3,
+      "mode": "swarm",
+      "offered_total": 0,
+      "used_total": 0
+     },
+     "retrieval": true,
+     "run": "w.B.4",
+     "running": false,
+     "started": 1792145359.2725427,
+     "status": "done",
+     "total": 3,
+     "whiteboards": []
+    },
+    "status": 200
+   }
+  ],
+  "/api/search/w.B.4/events": [
+   {
+    "status": 200,
+    "text": "retry: 1000\n\nid: 76\ndata: {\"event\":\"index built\",\"t\":0.5,\"files\":40,\"declarations\":812,\"seconds\":3.2}\n\nid: 152\ndata: {\"event\":\"facts\",\"t\":1.0,\"goal\":\"Step.Latency.a\",\"entries\":20,\"chars\":5400}\n\nid: 235\ndata: {\"attempt\":1,\"backend\":\"gauss\",\"event\":\"launched\",\"goal\":\"Step.Latency.a\",\"t\":1.0}\n\nid: 311\ndata: {\"event\":\"facts\",\"t\":1.0,\"goal\":\"Step.Latency.b\",\"entries\":12,\"chars\":3100}\n\nid: 394\ndata: {\"attempt\":2,\"backend\":\"gauss\",\"event\":\"launched\",\"goal\":\"Step.Latency.b\",\"t\":1.0}\n\nid: 534\ndata: {\"attempt\":1,\"backend\":\"gauss\",\"event\":\"finished\",\"goal\":\"Step.Latency.a\",\"outcome\":\"closed\",\"stats\":{\"cost_usd\":0.25,\"turns\":8},\"t\":200.0}\n\nid: 599\ndata: {\"attempt\":1,\"event\":\"closed\",\"goal\":\"Step.Latency.a\",\"t\":200.0}\n\nid: 738\ndata: {\"attempt\":2,\"backend\":\"gauss\",\"event\":\"finished\",\"goal\":\"Step.Latency.b\",\"outcome\":\"closed\",\"stats\":{\"cost_usd\":0.5,\"turns\":9},\"t\":500.0}\n\nid: 803\ndata: {\"attempt\":2,\"event\":\"closed\",\"goal\":\"Step.Latency.b\",\"t\":500.0}\n\nevent: end\ndata: {\"status\":\"done\"}\n\n"
+   }
+  ],
+  "/api/search/w.C.4": [
+   {
+    "body": {
+     "apply": {
+      "allowed": false,
+      "changed": false,
+      "reason": "a bench run's workspace is the bench's; apply is for runs of fisher search"
+     },
+     "attempts": [],
+     "auto": false,
+     "bench": "w",
+     "closed": 2,
+     "dir": "/Users/thomasreynolds/IdeaProjects/Fisher/.build/ui-tree/fisher-ui/test/fixtures/bench/w/runs/C/4",
+     "file": "Step/Latency.lean",
+     "goals": [
+      {
+       "attempts": [
+        "gauss"
+       ],
+       "by_attempt": 1,
+       "by_backend": "gauss",
+       "closed_at_s": 200.0,
+       "facts": 20,
+       "goal": "Step.Latency.a",
+       "offered": [
+        "Step.Topology.lemma1",
+        "Step.Check.lemma2"
+       ],
+       "status": "closed",
+       "used": [
+        "Step.Topology.lemma1"
+       ]
+      },
+      {
+       "attempts": [
+        "gauss"
+       ],
+       "by_attempt": 2,
+       "by_backend": "gauss",
+       "closed_at_s": 500.0,
+       "facts": 12,
+       "goal": "Step.Latency.b",
+       "offered": [
+        "Step.Check.lemma2"
+       ],
+       "status": "closed",
+       "used": []
+      },
+      {
+       "attempts": [],
+       "by_attempt": null,
+       "by_backend": null,
+       "closed_at_s": null,
+       "facts": 8,
+       "goal": "Step.Latency.c",
+       "offered": [],
+       "status": "open",
+       "used": []
+      }
+     ],
+     "graph": null,
+     "library": true,
+     "mode": "flat",
+     "project": null,
+     "report": {
+      "attempts": [
+       {
+        "attempt": 1,
+        "backend": "gauss",
+        "goal": "Step.Latency.a",
+        "stats": {
+         "cost_usd": 0.25,
+         "turns": 8
+        }
+       },
+       {
+        "attempt": 2,
+        "backend": "gauss",
+        "goal": "Step.Latency.b",
+        "stats": {
+         "cost_usd": 0.5,
+         "turns": 9
+        }
+       }
+      ],
+      "auto_requested": false,
+      "elapsed_s": 700.0,
+      "facts_mean": 13.3,
+      "file": "Step/Latency.lean",
+      "goals": [
+       {
+        "attempts": [
+         "gauss"
+        ],
+        "by_attempt": 1,
+        "by_backend": "gauss",
+        "closed_at_s": 200.0,
+        "facts": 20,
+        "goal": "Step.Latency.a",
+        "offered": [
+         "Step.Topology.lemma1",
+         "Step.Check.lemma2"
+        ],
+        "status": "closed",
+        "used": [
+         "Step.Topology.lemma1"
+        ]
+       },
+       {
+        "attempts": [
+         "gauss"
+        ],
+        "by_attempt": 2,
+        "by_backend": "gauss",
+        "closed_at_s": 500.0,
+        "facts": 12,
+        "goal": "Step.Latency.b",
+        "offered": [
+         "Step.Check.lemma2"
+        ],
+        "status": "closed",
+        "used": []
+       },
+       {
+        "attempts": [],
+        "by_attempt": null,
+        "by_backend": null,
+        "closed_at_s": null,
+        "facts": 8,
+        "goal": "Step.Latency.c",
+        "offered": [],
+        "status": "open",
+        "used": []
+       }
+      ],
+      "goals_closed": 2,
+      "goals_total": 3,
+      "mode": "swarm",
+      "offered_total": 3,
+      "used_total": 1
+     },
+     "retrieval": true,
+     "run": "w.C.4",
+     "running": false,
+     "started": 1792145359.2736044,
+     "status": "done",
+     "total": 3,
+     "whiteboards": []
+    },
+    "status": 200
+   }
+  ],
+  "/api/search/w.C.4/events": [
+   {
+    "status": 200,
+    "text": "retry: 1000\n\nid: 76\ndata: {\"event\":\"index built\",\"t\":0.5,\"files\":40,\"declarations\":812,\"seconds\":3.2}\n\nid: 152\ndata: {\"event\":\"facts\",\"t\":1.0,\"goal\":\"Step.Latency.a\",\"entries\":20,\"chars\":5400}\n\nid: 276\ndata: {\"event\":\"library offered\",\"t\":1.0,\"goal\":\"Step.Latency.a\",\"lemmas\":[\"Step.Topology.lemma1\",\"Step.Check.lemma2\"],\"notes\":1}\n\nid: 359\ndata: {\"attempt\":1,\"backend\":\"gauss\",\"event\":\"launched\",\"goal\":\"Step.Latency.a\",\"t\":1.0}\n\nid: 435\ndata: {\"event\":\"facts\",\"t\":1.0,\"goal\":\"Step.Latency.b\",\"entries\":12,\"chars\":3100}\n\nid: 536\ndata: {\"event\":\"library offered\",\"t\":1.0,\"goal\":\"Step.Latency.b\",\"lemmas\":[\"Step.Check.lemma2\"],\"notes\":0}\n\nid: 619\ndata: {\"attempt\":2,\"backend\":\"gauss\",\"event\":\"launched\",\"goal\":\"Step.Latency.b\",\"t\":1.0}\n\nid: 759\ndata: {\"attempt\":1,\"backend\":\"gauss\",\"event\":\"finished\",\"goal\":\"Step.Latency.a\",\"outcome\":\"closed\",\"stats\":{\"cost_usd\":0.25,\"turns\":8},\"t\":200.0}\n\nid: 824\ndata: {\"attempt\":1,\"event\":\"closed\",\"goal\":\"Step.Latency.a\",\"t\":200.0}\n\nid: 963\ndata: {\"attempt\":2,\"backend\":\"gauss\",\"event\":\"finished\",\"goal\":\"Step.Latency.b\",\"outcome\":\"closed\",\"stats\":{\"cost_usd\":0.5,\"turns\":9},\"t\":500.0}\n\nid: 1028\ndata: {\"attempt\":2,\"event\":\"closed\",\"goal\":\"Step.Latency.b\",\"t\":500.0}\n\nid: 1102\ndata: {\"event\":\"library problem\",\"t\":690.0,\"reason\":\"the library is read-only\"}\n\nevent: end\ndata: {\"status\":\"done\"}\n\n"
+   }
+  ],
+  "/api/sessions": [
+   {
+    "body": [
+     {
+      "dollars": 0,
+      "id": "20261001_113000_cccccc",
+      "model": "openai/gpt-5",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/rocq",
+      "prover": "rocq",
+      "result": null,
+      "started": 1790001004,
+      "strategy": "compress",
+      "title": null,
+      "turns": 1
+     },
+     {
+      "dollars": 0.5,
+      "id": "20261001_110000_bbbbbb",
+      "model": "openai/gpt-5",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/rocq",
+      "prover": "rocq",
+      "result": "compression",
+      "started": 1790001000,
+      "strategy": "compress",
+      "title": null,
+      "turns": 1
+     },
+     {
+      "dollars": 0.034999999999999996,
+      "id": "20261001_100000_aaaaaa",
+      "model": "example/model-a",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/lean",
+      "prover": "lean4",
+      "result": "completed",
+      "started": 1790000000,
+      "strategy": "clm",
+      "title": "Lean session",
+      "turns": 2
+     }
+    ],
+    "status": 200
+   }
+  ],
+  "/api/sessions/20261001_100000_aaaaaa": [
+   {
+    "body": {
+     "children": [],
+     "cost": {
+      "cacheRead": 120,
+      "dollars": 0.034999999999999996,
+      "input": 300,
+      "output": 30
+     },
+     "messages": [
+      {
+       "at": 1790000001,
+       "content": "prove t",
+       "role": "user",
+       "toolCallId": null,
+       "toolCalls": null,
+       "toolName": null
+      },
+      {
+       "at": 1790000002,
+       "content": "",
+       "role": "assistant",
+       "toolCallId": null,
+       "toolCalls": [
+        {
+         "function": {
+          "arguments": "{}",
+          "name": "read_file"
+         },
+         "id": "call_1",
+         "type": "function"
+        }
+       ],
+       "toolName": null
+      },
+      {
+       "at": 1790000003,
+       "content": "theorem t",
+       "role": "tool",
+       "toolCallId": "call_1",
+       "toolCalls": null,
+       "toolName": "read_file"
+      },
+      {
+       "at": 1790000004,
+       "content": "done",
+       "role": "assistant",
+       "toolCallId": null,
+       "toolCalls": null,
+       "toolName": null
+      }
+     ],
+     "session": {
+      "dollars": 0.034999999999999996,
+      "id": "20261001_100000_aaaaaa",
+      "model": "example/model-a",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/lean",
+      "prover": "lean4",
+      "result": "completed",
+      "started": 1790000000,
+      "strategy": "clm",
+      "title": "Lean session",
+      "turns": 2
+     }
+    },
+    "status": 200
+   }
+  ],
+  "/api/sessions/20261001_110000_bbbbbb": [
+   {
+    "body": {
+     "children": [
+      "20261001_113000_cccccc"
+     ],
+     "cost": {
+      "cacheRead": 40,
+      "dollars": 0.5,
+      "input": 100,
+      "output": 10
+     },
+     "messages": [
+      {
+       "at": 1790001001,
+       "content": "prove it in Rocq",
+       "role": "user",
+       "toolCallId": null,
+       "toolCalls": null,
+       "toolName": null
+      },
+      {
+       "at": 1790001002,
+       "content": "working",
+       "role": "assistant",
+       "toolCallId": null,
+       "toolCalls": null,
+       "toolName": null
+      }
+     ],
+     "session": {
+      "dollars": 0.5,
+      "id": "20261001_110000_bbbbbb",
+      "model": "openai/gpt-5",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/rocq",
+      "prover": "rocq",
+      "result": "compression",
+      "started": 1790001000,
+      "strategy": "compress",
+      "title": null,
+      "turns": 1
+     }
+    },
+    "status": 200
+   }
+  ],
+  "/api/sessions/20261001_113000_cccccc": [
+   {
+    "body": {
+     "children": [],
+     "cost": {
+      "cacheRead": 0,
+      "dollars": 0,
+      "input": 0,
+      "output": 0
+     },
+     "messages": [
+      {
+       "at": 1790001004,
+       "content": "[CONTEXT COMPACTION] Earlier turns were compacted.\nProved two lemmas.",
+       "role": "user",
+       "toolCallId": null,
+       "toolCalls": null,
+       "toolName": null
+      },
+      {
+       "at": 1790001005,
+       "content": "continuing",
+       "role": "assistant",
+       "toolCallId": null,
+       "toolCalls": null,
+       "toolName": null
+      }
+     ],
+     "session": {
+      "dollars": 0,
+      "id": "20261001_113000_cccccc",
+      "model": "openai/gpt-5",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/rocq",
+      "prover": "rocq",
+      "result": null,
+      "started": 1790001004,
+      "strategy": "compress",
+      "title": null,
+      "turns": 1
+     }
+    },
+    "status": 200
+   }
+  ],
+  "/api/sessions/nope": [
+   {
+    "body": {
+     "error": "no such session"
+    },
+    "status": 404
+   }
+  ],
+  "/api/sessions?model=example%2Fmodel-a": [
+   {
+    "body": [
+     {
+      "dollars": 0.034999999999999996,
+      "id": "20261001_100000_aaaaaa",
+      "model": "example/model-a",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/lean",
+      "prover": "lean4",
+      "result": "completed",
+      "started": 1790000000,
+      "strategy": "clm",
+      "title": "Lean session",
+      "turns": 2
+     }
+    ],
+    "status": 200
+   }
+  ],
+  "/api/sessions?model=openai%2Fgpt-5": [
+   {
+    "body": [
+     {
+      "dollars": 0,
+      "id": "20261001_113000_cccccc",
+      "model": "openai/gpt-5",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/rocq",
+      "prover": "rocq",
+      "result": null,
+      "started": 1790001004,
+      "strategy": "compress",
+      "title": null,
+      "turns": 1
+     },
+     {
+      "dollars": 0.5,
+      "id": "20261001_110000_bbbbbb",
+      "model": "openai/gpt-5",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/rocq",
+      "prover": "rocq",
+      "result": "compression",
+      "started": 1790001000,
+      "strategy": "compress",
+      "title": null,
+      "turns": 1
+     }
+    ],
+    "status": 200
+   }
+  ],
+  "/api/sessions?project=%2Fprivate%2Fvar%2Ffolders%2Fnd%2Ftqqtf0hx6tl3_pcyb_mwqpsh0000gn%2FT%2Ffisher-ui-11289ebf278d0494%2Fprojects%2Flean": [
+   {
+    "body": [
+     {
+      "dollars": 0.034999999999999996,
+      "id": "20261001_100000_aaaaaa",
+      "model": "example/model-a",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/lean",
+      "prover": "lean4",
+      "result": "completed",
+      "started": 1790000000,
+      "strategy": "clm",
+      "title": "Lean session",
+      "turns": 2
+     }
+    ],
+    "status": 200
+   }
+  ],
+  "/api/sessions?project=%2Fprivate%2Fvar%2Ffolders%2Fnd%2Ftqqtf0hx6tl3_pcyb_mwqpsh0000gn%2FT%2Ffisher-ui-11289ebf278d0494%2Fprojects%2Frocq": [
+   {
+    "body": [
+     {
+      "dollars": 0,
+      "id": "20261001_113000_cccccc",
+      "model": "openai/gpt-5",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/rocq",
+      "prover": "rocq",
+      "result": null,
+      "started": 1790001004,
+      "strategy": "compress",
+      "title": null,
+      "turns": 1
+     },
+     {
+      "dollars": 0.5,
+      "id": "20261001_110000_bbbbbb",
+      "model": "openai/gpt-5",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/rocq",
+      "prover": "rocq",
+      "result": "compression",
+      "started": 1790001000,
+      "strategy": "compress",
+      "title": null,
+      "turns": 1
+     }
+    ],
+    "status": 200
+   }
+  ],
+  "/api/sessions?prover=lean4": [
+   {
+    "body": [
+     {
+      "dollars": 0.034999999999999996,
+      "id": "20261001_100000_aaaaaa",
+      "model": "example/model-a",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/lean",
+      "prover": "lean4",
+      "result": "completed",
+      "started": 1790000000,
+      "strategy": "clm",
+      "title": "Lean session",
+      "turns": 2
+     }
+    ],
+    "status": 200
+   }
+  ],
+  "/api/sessions?prover=rocq": [
+   {
+    "body": [
+     {
+      "dollars": 0,
+      "id": "20261001_113000_cccccc",
+      "model": "openai/gpt-5",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/rocq",
+      "prover": "rocq",
+      "result": null,
+      "started": 1790001004,
+      "strategy": "compress",
+      "title": null,
+      "turns": 1
+     },
+     {
+      "dollars": 0.5,
+      "id": "20261001_110000_bbbbbb",
+      "model": "openai/gpt-5",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/rocq",
+      "prover": "rocq",
+      "result": "compression",
+      "started": 1790001000,
+      "strategy": "compress",
+      "title": null,
+      "turns": 1
+     }
+    ],
+    "status": 200
+   }
+  ],
+  "/api/sessions?strategy=clm": [
+   {
+    "body": [
+     {
+      "dollars": 0.034999999999999996,
+      "id": "20261001_100000_aaaaaa",
+      "model": "example/model-a",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/lean",
+      "prover": "lean4",
+      "result": "completed",
+      "started": 1790000000,
+      "strategy": "clm",
+      "title": "Lean session",
+      "turns": 2
+     }
+    ],
+    "status": 200
+   }
+  ],
+  "/api/sessions?strategy=compress": [
+   {
+    "body": [
+     {
+      "dollars": 0,
+      "id": "20261001_113000_cccccc",
+      "model": "openai/gpt-5",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/rocq",
+      "prover": "rocq",
+      "result": null,
+      "started": 1790001004,
+      "strategy": "compress",
+      "title": null,
+      "turns": 1
+     },
+     {
+      "dollars": 0.5,
+      "id": "20261001_110000_bbbbbb",
+      "model": "openai/gpt-5",
+      "project": "/private/var/folders/nd/tqqtf0hx6tl3_pcyb_mwqpsh0000gn/T/fisher-ui-11289ebf278d0494/projects/rocq",
+      "prover": "rocq",
+      "result": "compression",
+      "started": 1790001000,
+      "strategy": "compress",
+      "title": null,
+      "turns": 1
+     }
+    ],
+    "status": 200
+   }
+  ]
+ },
+ "token": "0123456789abcdef0123456789abcdef",
+ "unauthorized": {
+  "status": 401,
+  "text": "Open the URL that fisher ui printed."
+ }
+}

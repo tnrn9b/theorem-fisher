@@ -1,0 +1,2922 @@
+{
+ "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+ "python": "3.11.15",
+ "cases": [
+  {
+   "content": "abc",
+   "old": "",
+   "new": "x",
+   "replace_all": false,
+   "result": "abc",
+   "count": 0,
+   "error": "old_string cannot be empty"
+  },
+  {
+   "content": "abc",
+   "old": "b",
+   "new": "b",
+   "replace_all": false,
+   "result": "abc",
+   "count": 0,
+   "error": "old_string and new_string are identical"
+  },
+  {
+   "content": "aXbXc",
+   "old": "X",
+   "new": "Y",
+   "replace_all": false,
+   "result": "aXbXc",
+   "count": 0,
+   "error": "Found 2 matches for old_string. Provide more context to make it unique, or use replace_all=True."
+  },
+  {
+   "content": "aXbXc",
+   "old": "X",
+   "new": "Y",
+   "replace_all": true,
+   "result": "aYbYc",
+   "count": 2,
+   "error": null
+  },
+  {
+   "content": "abc",
+   "old": "zzz",
+   "new": "y",
+   "replace_all": false,
+   "result": "abc",
+   "count": 0,
+   "error": "Could not find a match for old_string in the file"
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1",
+   "new": "x = 9",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "count": 0,
+   "error": "Found 3 matches for old_string. Provide more context to make it unique, or use replace_all=True."
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1",
+   "new": "x = 9",
+   "replace_all": true,
+   "result": "x = 9\nx = 9\nx = 9\ny = 2\n",
+   "count": 3,
+   "error": null
+  },
+  {
+   "content": "aaaa",
+   "old": "aa",
+   "new": "b",
+   "replace_all": true,
+   "result": "b",
+   "count": 3,
+   "error": null
+  },
+  {
+   "content": "line\n",
+   "old": "line\\n",
+   "new": "LINE\n",
+   "replace_all": false,
+   "result": "LINE\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "    return None\\n",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "def bar(a, b):\n    if a:",
+   "new": "DEF BAR(A, B):\n    IF A:",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n\nDEF BAR(A, B):\n    IF A:\n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "\n\ndef bar(a, b):\n  if a:",
+   "new": "\n\nDEF BAR(A, B):\n  IF A:",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n\nDEF BAR(A, B):\n  IF A:\n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "def foo():\n    x = 1\n    return x\n",
+   "new": "DEF FOO():\n    X = 1\n    RETURN X\n",
+   "replace_all": false,
+   "result": "DEF FOO():\n    X = 1\n    RETURN X\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "def foo():\n    x = 1",
+   "new": "DEF FOO():\n    X = 1",
+   "replace_all": false,
+   "result": "DEF FOO():\n    X = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "return None",
+   "new": "",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    \n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "    return xx\n",
+   "new": "REPLACED",
+   "replace_all": true,
+   "result": "def foo():\n    x = 1\nREPLACEDREPLACED\ndef bar(a, b):\n    if a:\nREPLACED",
+   "count": 4,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "if a:\nreturn b\nreturn None",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    indented\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "        return b\\n    return None",
+   "new": "    indented",
+   "replace_all": true,
+   "result": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n    indented\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "def foo():\\n    x = 1\\n    return x",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "new\nlines\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "def bar(a, b):\n    if a: # changed\n        return b\n    return None",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n\nnew\nlines\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "    x = 1\n    return x\n",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "def foo():\nnew\nlines\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "    if a:\\n        return b\\n    return None",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    indented\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "\\n\\ndef bar(a, b):",
+   "new": "",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n    if a:\n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "  def bar(a, b):\n      if a:",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n\nnew\nlines\n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "    return x",
+   "new": "",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "    if a:",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    indented\n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "\ndef bar(a, b):\n    if a:",
+   "new": "",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n\n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "def bar(a, b):",
+   "new": "",
+   "replace_all": true,
+   "result": "def foo():\n    x = 1\n    return x\n\n\n\n    if a:\n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "  def bar(a, b):\n    if a:\n        return b  ",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n\nREPLACED\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "  if a:\n    return b\n  return None",
+   "new": "",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "\n\ndef bar(a, b): # changed\n    if a:",
+   "new": "",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "        return b\n    return None",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\nnew\nlines\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "def bar(a, b):\n  if a:\n    return b",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n\n    indented\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "  def bar(a, b):\n      if a:\n          return b",
+   "new": "    indented",
+   "replace_all": true,
+   "result": "def foo():\n    x = 1\n    return x\n\n\n    indented\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "      return x  ",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\nnew\nlines\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "    return None\n",
+   "new": "",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "    return x\n\n # changed\ndef bar(a, b):",
+   "new": "    RETURN X\n\n # CHANGED\nDEF BAR(A, B):",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    RETURN X\n\n # CHANGED\nDEF BAR(A, B):\n    if a:\n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "def foo():\n    x = 1",
+   "new": "",
+   "replace_all": false,
+   "result": "\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "      if a:\n        return b\n    return None  ",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\nREPLACED\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "def foo():\n    x = 1 # changed\n    return x\n",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "REPLACED\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "def foo():\n    x = 1\n    return x\n\n\ndef bar(a, b):\n    if a:\n        return b\n    return None\n",
+   "old": "  \ndef bar(a, b):\n    if a:  ",
+   "new": "  \nDEF BAR(A, B):\n    IF A:  ",
+   "replace_all": false,
+   "result": "def foo():\n    x = 1\n    return x\n\n  \nDEF BAR(A, B):\n    IF A:  \n        return b\n    return None\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "          with open(path) as f:\n              return f.read()\n  ",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\nnew\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "          self.size = 10  # bytes\n  ",
+   "new": "          SELF.SIZE = 10  # BYTES\n  ",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n          SELF.SIZE = 10  # BYTES\n  \n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "\\n    def load(self, path):\\n        with open(path) as f:\\n            return f.read()",
+   "new": "",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "          with open(path) as f:\n            return f.read()\n  ",
+   "new": "          WITH OPEN(PATH) AS F:\n            RETURN F.READ()\n  ",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n          WITH OPEN(PATH) AS F:\n            RETURN F.READ()\n  ",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "        self.size = 10  # bytes",
+   "new": "        SELF.SIZE = 10  # BYTES",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        SELF.SIZE = 10  # BYTES\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "        self.size = 10  # bytes\nx",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n    indented\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "      def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes  ",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "class Config:\nREPLACED\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "        with open(path) as f:\n            return f.read() # changed\n",
+   "new": "",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "        with open(path) as f:\\n            return f.read()",
+   "new": "",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "        self.size = 10  # bytes\\n\\n    def load(self, path):",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\nnew\nlines\n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "class Config:\ndef __init__(self):\nself.name = “default”",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "new\nlines\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "        self.size = 10  # bytes\n\n    def load(self, path):",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\nREPLACED\n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "  def __init__(self):\n    self.name = “default”\n    self.size = 10  # bytes\n",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "class Config:\nnew\nlines\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "      def load(self, path):  ",
+   "new": "      DEF LOAD(SELF, PATH):  ",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n      DEF LOAD(SELF, PATH):  \n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "  def __init__(self):\n    self.name = “default”\n    self.size = 10  # bytes",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "class Config:\nREPLACED\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "",
+   "new": "",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "count": 0,
+   "error": "old_string cannot be empty"
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "        self.name = “default”\n        self.size = 10  # bytes\nx",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n    indented\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "        self.name = “default”\n        self.size = 10  # bytes",
+   "new": "",
+   "replace_all": true,
+   "result": "class Config:\n    def __init__(self):\n\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "  ",
+   "new": "  ",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "count": 0,
+   "error": "old_string and new_string are identical"
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "          self.name = “default”",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\nnew\nlines\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "      def load(self, path):\n          with open(path) as f:",
+   "new": "",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "          self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:  ",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\nnew\nlines\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "\n    def load(self, path):\n        with open(path) as f:",
+   "new": "",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "count": 0,
+   "error": "old_string cannot be empty"
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "      def load(self, path):",
+   "new": "REPLACED",
+   "replace_all": true,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\nREPLACED\n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "            return f.read()\n",
+   "new": "            RETURN F.READ()\n",
+   "replace_all": true,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            RETURN F.READ()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "    with open(path) as f:\n      return f.read()\n",
+   "new": "",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "class Config:\n    def __init__(self):",
+   "new": "    indented",
+   "replace_all": true,
+   "result": "    indented\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "        with open(path) as f:",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\nnew\nlines\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "      def __init__(self):\n        self.name = “default”  ",
+   "new": "",
+   "replace_all": false,
+   "result": "class Config:\n\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "class Config:\n    def __init__(self):",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "              return f.read()\n  ",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "    def load(self, path):\n        with open(path) as f:",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    indented\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "\ndef load(self, path):\nwith open(path) as f:\nreturn f.read()",
+   "new": "\nDEF LOAD(SELF, PATH):\nWITH OPEN(PATH) AS F:\nRETURN F.READ()",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\nDEF LOAD(SELF, PATH):\nWITH OPEN(PATH) AS F:\nRETURN F.READ()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "        with open(path) as f:\\n            return f.read()\\n",
+   "new": "new\nlines",
+   "replace_all": true,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\nnew\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "    def __init__(self):\n        self.name = \"default\"",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "class Config:\nnew\nlines\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\n        with open(path) as f:\n            return f.read()\n",
+   "old": "        with open(path) as f:",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "class Config:\n    def __init__(self):\n        self.name = “default”\n        self.size = 10  # bytes\n\n    def load(self, path):\nnew\nlines\n            return f.read()\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "\tif i > 5:\\n\t\tbreak\\n\\nprint('done')",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "\nprint('done')",
+   "new": "\nPRINT('DONE')",
+   "replace_all": true,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nPRINT('DONE')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "import os\nimport sys # changed\n",
+   "new": "IMPORT OS\nIMPORT SYS # CHANGED\n",
+   "replace_all": false,
+   "result": "IMPORT OS\nIMPORT SYS # CHANGED\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "print('done')",
+   "new": "",
+   "replace_all": false,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "\tif i > 5:x",
+   "new": "",
+   "replace_all": true,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "import sysx\n",
+   "new": "",
+   "replace_all": false,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "count": 0,
+   "error": "Found 3 matches for old_string. Provide more context to make it unique, or use replace_all=True."
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "\tif i > 5:\n\t\tbreak",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n    indented\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "import os",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "new\nlines\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "  import sys\n  \n  for i in range(10):",
+   "new": "new\nlines",
+   "replace_all": true,
+   "result": "import os\nnew\nlines\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "  \nfor i in range(10):\n\tprint(i)\n\tif i > 5:  ",
+   "new": "  \nFOR I IN RANGE(10):\n\tPRINT(I)\n\tIF I > 5:  ",
+   "replace_all": true,
+   "result": "import os\nimport sys\n  \nFOR I IN RANGE(10):\n\tPRINT(I)\n\tIF I > 5:  \n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "  \nfor i in range(10):\n\tprint(i)  ",
+   "new": "  \nFOR I IN RANGE(10):\n\tPRINT(I)  ",
+   "replace_all": false,
+   "result": "import os\nimport sys\n  \nFOR I IN RANGE(10):\n\tPRINT(I)  \n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "\nprint('done')",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\nnew\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "  \tif i > 5:\n\t\tbreak\n\nprint('done')  ",
+   "new": "    indented",
+   "replace_all": true,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "import sys\n\nfor i in range(10):",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "import os\nREPLACED\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "  \n  print('done')",
+   "new": "",
+   "replace_all": false,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "  \nprint('done')  ",
+   "new": "",
+   "replace_all": false,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "import os\nimport sys",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "REPLACED\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "  \n  for i in range(10):",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "import os\nimport sys\nREPLACED\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "  \tif i > 5:\n  \t\tbreak\n  ",
+   "new": "    indented",
+   "replace_all": true,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n    indented\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "  print('done')  ",
+   "new": "REPLACED",
+   "replace_all": true,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "  print('done')",
+   "new": "  PRINT('DONE')",
+   "replace_all": false,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\n  PRINT('DONE')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": " if i > 5:\n  break",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\nnew\nlines\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "\tif i > 5:x",
+   "new": "\tIF I > 5:X",
+   "replace_all": false,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tIF I > 5:X\n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "  for i in range(10):\n\tprint(i)\n\tif i > 5:  ",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "import os\nimport sys\n\nREPLACED\n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "print('done')",
+   "new": "new\nlines",
+   "replace_all": true,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nnew\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "\tif i > 5:\n\t\tbreakx\nx\nprint('done')x",
+   "new": "\tIF I > 5:\n\t\tBREAKX\nX\nPRINT('DONE')X",
+   "replace_all": false,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tIF I > 5:\n\t\tBREAKX\nX\nPRINT('DONE')X",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "print('done')",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "for i in range(10):\nprint(i)\nif i > 5:",
+   "new": "",
+   "replace_all": true,
+   "result": "import os\nimport sys\n\n\n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "\t\tbreak\n",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\nREPLACED\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "import osx\nimport sys\n\nfor i in range(10):",
+   "new": "IMPORT OSX\nIMPORT SYS\n\nFOR I IN RANGE(10):",
+   "replace_all": false,
+   "result": "IMPORT OSX\nIMPORT SYS\n\nFOR I IN RANGE(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "print('done')",
+   "new": "",
+   "replace_all": false,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "\tif i > 5:\\n\t\tbreak\\n",
+   "new": "",
+   "replace_all": false,
+   "result": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "for i in range(10):\\n\tprint(i)",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "import os\nimport sys\n\n    indented\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "\nfor i in range(10):",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "import os\nimport sys\n    indented\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "import sys\n\nfor i in range(10):",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "import os\nnew\nlines\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "  for i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak  ",
+   "new": "  FOR I IN RANGE(10):\n\tPRINT(I)\n\tIF I > 5:\n\t\tBREAK  ",
+   "replace_all": true,
+   "result": "import os\nimport sys\n\n  FOR I IN RANGE(10):\n\tPRINT(I)\n\tIF I > 5:\n\t\tBREAK  \n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "  import os\nimport sys\n  ",
+   "new": "  IMPORT OS\nIMPORT SYS\n  ",
+   "replace_all": false,
+   "result": "  IMPORT OS\nIMPORT SYS\n  \nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "  for i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak  ",
+   "new": "",
+   "replace_all": true,
+   "result": "import os\nimport sys\n\n\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "import os\nimport sys\n\nfor i in range(10):\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "old": "import sys\n\nfor i in range(10):",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "import os\n    indented\n\tprint(i)\n\tif i > 5:\n\t\tbreak\n\nprint('done')",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "theorem foo (n : Nat) : n + 0 = n := by\nsimp\n\ntheorem bar (n : Nat) : 0 + n = n := by",
+   "new": "new\nlines",
+   "replace_all": true,
+   "result": "new\nlines\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "theorem foo (n : Nat) : n + 0 = n := by",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "theorem foo (n : Nat) : n + 0 = n := by\\n  simp\\n",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "REPLACED\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "induction n with\n| zero => rfl\n| succ n ih => simp\n",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "theorem bar (n : Nat) : 0 + n = n := by\n  induction n with",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\nnew\nlines\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "theorem bar (n : Nat) : 0 + n = n := by\\n  induction n with",
+   "new": "REPLACED",
+   "replace_all": true,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\nREPLACED\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "  induction n with\n  | zero => rfl",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\nREPLACED\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "  simp\n",
+   "new": "  SIMP\n",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  SIMP\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "    simp\n  \n  theorem bar (n : Nat) : 0 + n = n := by",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\nREPLACED\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "\\ntheorem bar (n : Nat) : 0 + n = n := by\\n  induction n with",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\nnew\nlines\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "  | zero => rfl\\n  | succ n ih => simp\\n",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "  | zero => rfl\n  | succ n ih => simp\n",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "theorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\nREPLACED\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "    | succ n ih => simp\n  ",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "    | zero => rfl\n    | succ n ih => simp\n  ",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "  | zero => rfl\n  | succ n ih => simp",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\nnew\nlines\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "  simp\nx\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n withx",
+   "new": "new\nlines",
+   "replace_all": true,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\nnew\nlines\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "  induction n with\n  | zero => rfl # changed\n  | succ n ih => simp",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\nnew\nlines\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "  induction n with\\n  | zero => rfl\\n  | succ n ih => simp",
+   "new": "",
+   "replace_all": true,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "  | succ n ih => simp\n",
+   "new": "  | SUCC N IH => SIMP\n",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | SUCC N IH => SIMP\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "    induction n with  ",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n    indented\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "  theorem foo (n : Nat) : n + 0 = n := by",
+   "new": "  THEOREM FOO (N : NAT) : N + 0 = N := BY",
+   "replace_all": true,
+   "result": "  THEOREM FOO (N : NAT) : N + 0 = N := BY\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "theorem foo (n : Nat) : n + 0 = n := by\n  simp",
+   "new": "",
+   "replace_all": false,
+   "result": "\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "  | zero => rfl\n  | succ n ih => simpx",
+   "new": "",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "theorem foo (n : Nat) : n + 0 = n := by\\n  simp",
+   "new": "",
+   "replace_all": false,
+   "result": "\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "  | zero => rfl\n  | succ n ih => simp\n",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "  simpx\nx",
+   "new": "  SIMPX\nX",
+   "replace_all": true,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  SIMPX\nX\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "  theorem foo (n : Nat) : n + 0 = n := by\n  simp\n  ",
+   "new": "new\nlines",
+   "replace_all": true,
+   "result": "new\nlines\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "  | succ n ih => simp\n",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\nnew\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with",
+   "new": "",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "theorem foo (n : Nat) : n + 0 = n := by",
+   "new": "THEOREM FOO (N : NAT) : N + 0 = N := BY",
+   "replace_all": false,
+   "result": "THEOREM FOO (N : NAT) : N + 0 = N := BY\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "theorem foo (n : Nat) : n + 0 = n := by\n  simp # changed\n\ntheorem bar (n : Nat) : 0 + n = n := by",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "REPLACED\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "theorem bar (n : Nat) : 0 + n = n := by\ninduction n with",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\nnew\nlines\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "    | succ n ih => simp\n  ",
+   "new": "REPLACED",
+   "replace_all": true,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "  | zero => rfl",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\nREPLACED\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "theorem bar (n : Nat) : 0 + n = n := by\n  induction n with",
+   "new": "    indented",
+   "replace_all": true,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\n    indented\n  | zero => rfl\n  | succ n ih => simp\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\n  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "old": "  induction n with\n  | zero => rfl\n  | succ n ih => simp\n",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "theorem foo (n : Nat) : n + 0 = n := by\n  simp\n\ntheorem bar (n : Nat) : 0 + n = n := by\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "",
+   "new": "",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "count": 0,
+   "error": "old_string cannot be empty"
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1\nx = 1\nx = 1",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented\ny = 2\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "  x = 1\nx = 1\nx = 1\ny = 2  ",
+   "new": "",
+   "replace_all": false,
+   "result": "\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1\nx = 1\ny = 2",
+   "new": "new\nlines",
+   "replace_all": true,
+   "result": "x = 1\nnew\nlines\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1",
+   "new": "",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "count": 0,
+   "error": "Found 3 matches for old_string. Provide more context to make it unique, or use replace_all=True."
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "y = 2\n",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "count": 0,
+   "error": "Found 3 matches for old_string. Provide more context to make it unique, or use replace_all=True."
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1",
+   "new": "",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "count": 0,
+   "error": "Found 3 matches for old_string. Provide more context to make it unique, or use replace_all=True."
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "y = 2\n",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1",
+   "new": "",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "count": 0,
+   "error": "Found 3 matches for old_string. Provide more context to make it unique, or use replace_all=True."
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1\\nx = 1\\nx = 1\\ny = 2",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "new\nlines\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "y = 2\n",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1\nx = 1\nx = 1\ny = 2",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "new\nlines\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "  y = 2\n  ",
+   "new": "",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "y = 2\n",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\nnew\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "  y = 2  ",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\nnew\nlines\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1\nx = 1\nx = 1\ny = 2",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1\\nx = 1",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "count": 0,
+   "error": "Found 2 matches for old_string. Provide more context to make it unique, or use replace_all=True."
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1\nx = 1",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "count": 0,
+   "error": "Found 2 matches for old_string. Provide more context to make it unique, or use replace_all=True."
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1\ny = 2\n",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "",
+   "new": "",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "count": 0,
+   "error": "old_string cannot be empty"
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1\nx = 1\nx = 1\ny = 2",
+   "new": "X = 1\nX = 1\nX = 1\nY = 2",
+   "replace_all": true,
+   "result": "X = 1\nX = 1\nX = 1\nY = 2\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1x\nx = 1x\nx = 1x",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "count": 0,
+   "error": "Found 2 matches for old_string. Provide more context to make it unique, or use replace_all=True."
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "  x = 1\ny = 2\n  ",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1\ny = 2\n",
+   "new": "    indented",
+   "replace_all": true,
+   "result": "x = 1\nx = 1\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1\ny = 2x",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "count": 0,
+   "error": "Found 3 matches for old_string. Provide more context to make it unique, or use replace_all=True."
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1",
+   "new": "",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "count": 0,
+   "error": "Found 3 matches for old_string. Provide more context to make it unique, or use replace_all=True."
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "  x = 1\n  x = 1\n  y = 2",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "x = 1\nnew\nlines\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1\nx = 1 # changed\ny = 2",
+   "new": "",
+   "replace_all": false,
+   "result": "x = 1\n\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1\ny = 2\nx",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "x = 1",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "count": 0,
+   "error": "Found 3 matches for old_string. Provide more context to make it unique, or use replace_all=True."
+  },
+  {
+   "content": "x = 1\nx = 1\nx = 1\ny = 2\n",
+   "old": "y = 2\\n",
+   "new": "",
+   "replace_all": false,
+   "result": "x = 1\nx = 1\nx = 1\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "  end",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "a b — c…\n‘quoted’ line\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "endx",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "a b — c…\n‘quoted’ line\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "a b — c…\n‘quoted’ linex",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "REPLACED\nend",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "‘quoted’ line\nendx",
+   "new": "‘QUOTED’ LINE\nENDX",
+   "replace_all": false,
+   "result": "a b — c…\n‘QUOTED’ LINE\nENDX",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "a b — c…\n‘quoted’ line\nend",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "a b — c…\n‘quoted’ line\nend",
+   "new": "A B — C…\n‘QUOTED’ LINE\nEND",
+   "replace_all": false,
+   "result": "A B — C…\n‘QUOTED’ LINE\nEND",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "‘quoted’ line",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "a b — c…\nREPLACED\nend",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "‘quoted’ line",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "a b — c…\nnew\nlines\nend",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "a b — c…\n‘quoted’ line",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented\nend",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "end",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "a b — c…\n‘quoted’ line\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "end",
+   "new": "",
+   "replace_all": true,
+   "result": "a b — c…\n‘quoted’ line\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "end",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "a b — c…\n‘quoted’ line\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "a b — c…\n‘quoted’ line",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented\nend",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "  ‘quoted’ line\nend  ",
+   "new": "new\nlines",
+   "replace_all": true,
+   "result": "a b — c…\nnew\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "‘quoted’ line\nend",
+   "new": "‘QUOTED’ LINE\nEND",
+   "replace_all": true,
+   "result": "a b — c…\n‘QUOTED’ LINE\nEND",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "a b — c…x",
+   "new": "new\nlines",
+   "replace_all": true,
+   "result": "new\nlines\n‘quoted’ line\nend",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "end",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "a b — c…\n‘quoted’ line\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "end",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "a b — c…\n‘quoted’ line\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "end",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "a b — c…\n‘quoted’ line\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "a b — c…\\n‘quoted’ line",
+   "new": "A B — C…\\N‘QUOTED’ LINE",
+   "replace_all": true,
+   "result": "A B — C…\\N‘QUOTED’ LINE\nend",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "a b — c…",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented\n‘quoted’ line\nend",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "  a b — c…  ",
+   "new": "",
+   "replace_all": false,
+   "result": "\n‘quoted’ line\nend",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "a b — c…\n‘quoted’ line\nend",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "new\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "‘quoted’ line",
+   "new": "new\nlines",
+   "replace_all": true,
+   "result": "a b — c…\nnew\nlines\nend",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "end",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "a b — c…\n‘quoted’ line\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "‘quoted’ linex",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "a b — c…\n    indented\nend",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "a b — c…",
+   "new": "",
+   "replace_all": true,
+   "result": "\n‘quoted’ line\nend",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "end",
+   "new": "",
+   "replace_all": false,
+   "result": "a b — c…\n‘quoted’ line\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "‘quoted’ line\\nend",
+   "new": "",
+   "replace_all": true,
+   "result": "a b — c…\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "  a b — c…\n‘quoted’ line\nend  ",
+   "new": "",
+   "replace_all": false,
+   "result": "",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "a b -- c…\n‘quoted’ line\nend",
+   "new": "A B -- C…\n‘QUOTED’ LINE\nEND",
+   "replace_all": false,
+   "result": "A B -- C…\n‘QUOTED’ LINE\nEND",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "a b — c…",
+   "new": "",
+   "replace_all": false,
+   "result": "\n‘quoted’ line\nend",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "‘quoted’ line",
+   "new": "",
+   "replace_all": false,
+   "result": "a b — c…\n\nend",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "end",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "a b — c…\n‘quoted’ line\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "  ‘quoted’ line\nend  ",
+   "new": "  ‘QUOTED’ LINE\nEND  ",
+   "replace_all": false,
+   "result": "a b — c…\n  ‘QUOTED’ LINE\nEND  ",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "‘quoted’ line\\nend",
+   "new": "REPLACED",
+   "replace_all": true,
+   "result": "a b — c…\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "  ‘quoted’ line\nend  ",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "a b — c…\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "end",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "a b — c…\n‘quoted’ line\nnew\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "end",
+   "new": "END",
+   "replace_all": false,
+   "result": "a b — c…\n‘quoted’ line\nEND",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "a b — c…\n‘quoted’ line\nend",
+   "old": "  end  ",
+   "new": "  END  ",
+   "replace_all": true,
+   "result": "a b — c…\n‘quoted’ line\n  END  ",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "",
+   "old": "x",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "",
+   "count": 0,
+   "error": "Could not find a match for old_string in the file"
+  },
+  {
+   "content": "",
+   "old": "",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "",
+   "count": 0,
+   "error": "old_string cannot be empty"
+  },
+  {
+   "content": "",
+   "old": "    ",
+   "new": "",
+   "replace_all": false,
+   "result": "",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "",
+   "old": "  ",
+   "new": "REPLACED",
+   "replace_all": true,
+   "result": "REPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "",
+   "old": "",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "",
+   "count": 0,
+   "error": "old_string cannot be empty"
+  },
+  {
+   "content": "",
+   "old": "    ",
+   "new": "    ",
+   "replace_all": false,
+   "result": "",
+   "count": 0,
+   "error": "old_string and new_string are identical"
+  },
+  {
+   "content": "",
+   "old": "",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "",
+   "count": 0,
+   "error": "old_string cannot be empty"
+  },
+  {
+   "content": "",
+   "old": "",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "",
+   "count": 0,
+   "error": "old_string cannot be empty"
+  },
+  {
+   "content": "",
+   "old": "    ",
+   "new": "",
+   "replace_all": false,
+   "result": "",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "",
+   "old": "",
+   "new": "",
+   "replace_all": false,
+   "result": "",
+   "count": 0,
+   "error": "old_string cannot be empty"
+  },
+  {
+   "content": "",
+   "old": "",
+   "new": "",
+   "replace_all": true,
+   "result": "",
+   "count": 0,
+   "error": "old_string cannot be empty"
+  },
+  {
+   "content": "",
+   "old": "",
+   "new": "",
+   "replace_all": false,
+   "result": "",
+   "count": 0,
+   "error": "old_string cannot be empty"
+  },
+  {
+   "content": "",
+   "old": "",
+   "new": "",
+   "replace_all": true,
+   "result": "",
+   "count": 0,
+   "error": "old_string cannot be empty"
+  },
+  {
+   "content": "",
+   "old": "",
+   "new": "",
+   "replace_all": false,
+   "result": "",
+   "count": 0,
+   "error": "old_string cannot be empty"
+  },
+  {
+   "content": "",
+   "old": "",
+   "new": "",
+   "replace_all": false,
+   "result": "",
+   "count": 0,
+   "error": "old_string cannot be empty"
+  },
+  {
+   "content": "",
+   "old": "  ",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "new\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "",
+   "old": "    ",
+   "new": "",
+   "replace_all": false,
+   "result": "",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "REPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "  single line no newline  ",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "REPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "REPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "REPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "  single line no newline  ",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "REPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newlinex",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "REPLACED",
+   "replace_all": true,
+   "result": "REPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "",
+   "replace_all": false,
+   "result": "",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "  single line no newline  ",
+   "new": "  SINGLE LINE NO NEWLINE  ",
+   "replace_all": false,
+   "result": "  SINGLE LINE NO NEWLINE  ",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "new\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "  single line no newline  ",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "new\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "    indented",
+   "replace_all": true,
+   "result": "    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "new\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "",
+   "replace_all": false,
+   "result": "",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "REPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "REPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "",
+   "replace_all": false,
+   "result": "",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "  single line no newline",
+   "new": "  SINGLE LINE NO NEWLINE",
+   "replace_all": false,
+   "result": "  SINGLE LINE NO NEWLINE",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "    indented",
+   "replace_all": true,
+   "result": "    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "  single line no newline",
+   "new": "",
+   "replace_all": false,
+   "result": "",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "  single line no newline  ",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "  single line no newline",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "REPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "REPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newlinex",
+   "new": "REPLACED",
+   "replace_all": true,
+   "result": "REPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "REPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "new\nlines",
+   "replace_all": true,
+   "result": "new\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "",
+   "replace_all": false,
+   "result": "",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "REPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "SINGLE LINE NO NEWLINE",
+   "replace_all": false,
+   "result": "SINGLE LINE NO NEWLINE",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "new\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "SINGLE LINE NO NEWLINE",
+   "replace_all": false,
+   "result": "SINGLE LINE NO NEWLINE",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "new\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "single line no newline",
+   "old": "single line no newline",
+   "new": "SINGLE LINE NO NEWLINE",
+   "replace_all": true,
+   "result": "SINGLE LINE NO NEWLINE",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "    indented first\n  mixed # changed\n\t\ttabs\n  trailing   ",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented\nlast",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "    indented first",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "new\nlines\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "    trailing   \n  last",
+   "new": "    TRAILING   \n  LAST",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n\t\ttabs\n    TRAILING   \n  LAST",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "\t\ttabs\n  trailing   \nlast",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "  trailing   \nlast",
+   "new": "  TRAILING   \nLAST",
+   "replace_all": true,
+   "result": "    indented first\n  mixed\n\t\ttabs\n  TRAILING   \nLAST",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "  trailing   \nlast",
+   "new": "REPLACED",
+   "replace_all": true,
+   "result": "    indented first\n  mixed\n\t\ttabs\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "  trailing   \nlast",
+   "new": "  TRAILING   \nLAST",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n\t\ttabs\n  TRAILING   \nLAST",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "\t\ttabs",
+   "new": "new\nlines",
+   "replace_all": true,
+   "result": "    indented first\n  mixed\nnew\nlines\n  trailing   \nlast",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "mixed\ntabs\ntrailing\nlast",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "    indented first\nnew\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "    indented first",
+   "new": "",
+   "replace_all": false,
+   "result": "\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "    indented first\n  mixed\n\t\ttabs",
+   "new": "",
+   "replace_all": false,
+   "result": "\n  trailing   \nlast",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "lastx",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "indented first\nmixed\ntabs\ntrailing",
+   "new": "INDENTED FIRST\nMIXED\nTABS\nTRAILING",
+   "replace_all": false,
+   "result": "INDENTED FIRST\nMIXED\nTABS\nTRAILING\nlast",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "      indented first\n    mixed",
+   "new": "REPLACED",
+   "replace_all": true,
+   "result": "REPLACED\n\t\ttabs\n  trailing   \nlast",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "  last  ",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nnew\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "last",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n\t\ttabs\n  trailing   \n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "\t\ttabs",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n    indented\n  trailing   \nlast",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "    trailing   \nlast  ",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n\t\ttabs\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "  indented first\n  mixed",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "  REPLACED\n\t\ttabs\n  trailing   \nlast",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "\t\ttabs\n  trailing   \nlast",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "  trailing   \nlast",
+   "new": "new\nlines",
+   "replace_all": true,
+   "result": "    indented first\n  mixed\n\t\ttabs\nnew\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "      indented first\n  mixed  ",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "REPLACED\n\t\ttabs\n  trailing   \nlast",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "    trailing   \nlast  ",
+   "new": "    TRAILING   \nLAST  ",
+   "replace_all": true,
+   "result": "    indented first\n  mixed\n\t\ttabs\n    TRAILING   \nLAST  ",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "  last  ",
+   "new": "    indented",
+   "replace_all": true,
+   "result": "    indented first\n  mixed\n\t\ttabs\n  trailing   \n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "trailing",
+   "new": "REPLACED",
+   "replace_all": true,
+   "result": "    indented first\n  mixed\n\t\ttabs\n  REPLACED   \nlast",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "    indented first\n  mixed\n\t\ttabs\n  trailing   ",
+   "new": "",
+   "replace_all": true,
+   "result": "\nlast",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "  trailing   \nlast",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n\t\ttabs\nnew\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "mixed\ntabs\ntrailing",
+   "new": "MIXED\nTABS\nTRAILING",
+   "replace_all": false,
+   "result": "    indented first\nMIXED\nTABS\nTRAILING\nlast",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "  trailing   \\nlast",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n\t\ttabs\nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "  trailing   \\nlast",
+   "new": "  TRAILING   \\NLAST",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n\t\ttabs\n  TRAILING   \\NLAST",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "last",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nnew\nlines",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "      indented first  ",
+   "new": "      INDENTED FIRST  ",
+   "replace_all": false,
+   "result": "      INDENTED FIRST  \n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "last",
+   "new": "REPLACED",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nREPLACED",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "indented first",
+   "new": "",
+   "replace_all": false,
+   "result": "    \n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "  trailing   \nlast",
+   "new": "",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n\t\ttabs\n",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "  mixed",
+   "new": "  MIXED",
+   "replace_all": false,
+   "result": "    indented first\n  MIXED\n\t\ttabs\n  trailing   \nlast",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "last",
+   "new": "    indented",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n\t\ttabs\n  trailing   \n    indented",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "\t\ttabs\n  trailing   ",
+   "new": "new\nlines",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\nnew\nlines\nlast",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "last",
+   "new": "LAST",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nLAST",
+   "count": 1,
+   "error": null
+  },
+  {
+   "content": "    indented first\n  mixed\n\t\ttabs\n  trailing   \nlast",
+   "old": "    trailing     ",
+   "new": "    TRAILING     ",
+   "replace_all": false,
+   "result": "    indented first\n  mixed\n\t\ttabs\n    TRAILING     \nlast",
+   "count": 1,
+   "error": null
+  }
+ ]
+}

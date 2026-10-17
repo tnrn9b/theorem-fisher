@@ -1,0 +1,57 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 156.4,
+            "goal": "Step.Diamond.runBody_pop",
+            "outcome": "closed",
+            "started_s": 0,
+            "stats": {
+                "cost_usd": 0.3442322,
+                "exit": 0,
+                "input_tokens": 802130,
+                "output_tokens": 7649,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 3,
+                    "patch": 6,
+                    "read_file": 6,
+                    "search_files": 3,
+                    "terminal": 1
+                },
+                "turns": 13,
+                "wall_s": 132.7
+            }
+        }
+    ],
+    "backends": {
+        "gauss": [
+            1,
+            1
+        ]
+    },
+    "budget_s": 3600,
+    "budget_spent": false,
+    "closed_per_hour": 23,
+    "elapsed_s": 156.4,
+    "file": "Step/Diamond.lean",
+    "goals": [
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": 1,
+            "by_backend": "gauss",
+            "closed_at_s": 156.4,
+            "goal": "Step.Diamond.runBody_pop",
+            "status": "closed"
+        }
+    ],
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/g/4/lean",
+    "slots": 4
+}

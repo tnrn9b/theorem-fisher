@@ -1,0 +1,65 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 403.3,
+            "goal": "Step.Diamond.fireDiamond_of'",
+            "outcome": "closed (helpers: joinFire_swap)",
+            "started_s": 29.2,
+            "stats": {
+                "cost_usd": 0.8827010000000001,
+                "exit": 0,
+                "input_tokens": 1894878,
+                "output_tokens": 35365,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 3,
+                    "patch": 1,
+                    "read_file": 1,
+                    "terminal": 15
+                },
+                "turns": 19,
+                "wall_s": 349.2
+            }
+        }
+    ],
+    "auto_closed": 0,
+    "auto_off": null,
+    "auto_ran": true,
+    "auto_requested": true,
+    "auto_warmup_s": 52.2,
+    "backends": {
+        "gauss": [
+            1,
+            1
+        ]
+    },
+    "budget_s": 7200,
+    "budget_spent": false,
+    "closed_per_hour": 8.9,
+    "disproved": 0,
+    "elapsed_s": 403.3,
+    "file": "Step/Diamond.lean",
+    "goals": [
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": 1,
+            "by_backend": "gauss",
+            "closedBy": "model",
+            "closed_at_s": 403.3,
+            "goal": "Step.Diamond.fireDiamond_of'",
+            "status": "closed"
+        }
+    ],
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/h/1/lean",
+    "repaired_then_closed": 0,
+    "repairs_kept": 0,
+    "slots": 4
+}

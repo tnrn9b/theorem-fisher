@@ -1,0 +1,8 @@
+{
+  "name": "rocq",
+  "version": "0.2.0",
+  "description": "Prove and draft Rocq theorems with the rocq MCP server",
+  "author": {
+    "name": "Fisher"
+  }
+}

@@ -1,0 +1,669 @@
+{
+  "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+  "cases": [
+    {
+      "name": "claude-healthy",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude-code",
+            "auth_mode": "auto"
+          },
+          "project": {
+            "template_source": "https://example.com/t.git"
+          }
+        }
+      },
+      "bins": [
+        "claude",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {
+        ".claude/.credentials.json": {
+          "claudeAiOauth": {
+            "accessToken": "token"
+          }
+        }
+      },
+      "env": {},
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ✓ Project template source (https://example.com/t.git)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude auth (local Claude login)\n",
+      "issues": []
+    },
+    {
+      "name": "codex-missing",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "codex",
+            "auth_mode": "api-key"
+          }
+        }
+      },
+      "bins": [],
+      "home_files": {},
+      "env": {},
+      "persisted_env": "",
+      "cwd": "outside",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✗ uv / uvx (Neither `uvx` nor `uv` is available. Install uv so Fisher can run the managed Lean MCP server.)\n  ✗ Lean toolchain (lake) (required for managed Lean workflows)\n  ✓ Active working directory (<TMP>/outside)\n  ⚠ Active Gauss project (none under <TMP>/outside)\n  ✗ Codex CLI (install the OpenAI Codex CLI)\n  ✗ Codex API-key auth (not found)\n",
+      "issues": [
+        "Install uv so Fisher can launch the managed Lean MCP server",
+        "Install elan / Lean so `lake` is available on PATH",
+        "Create or select a Gauss project with `/project init`, `/project convert`, or `/project use <path>`",
+        "Install the OpenAI Codex CLI for managed Lean workflows",
+        "Save `OPENAI_API_KEY`, or switch `gauss.autoformalize.auth_mode` back to `auto` or `login`"
+      ]
+    },
+    {
+      "name": "claude-login-only-api-key",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude-code",
+            "auth_mode": "login"
+          },
+          "project": {
+            "template_source": "https://example.com/t.git"
+          }
+        }
+      },
+      "bins": [
+        "claude",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {
+        ".claude.json": {
+          "primaryApiKey": "sk-ant"
+        }
+      },
+      "env": {},
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (login)\n  ✓ Project template source (https://example.com/t.git)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ⚠ Claude auth (login mode ignores local Claude API keys; first launch will prompt)\n",
+      "issues": []
+    },
+    {
+      "name": "claude-auto-local-api-key",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude-code",
+            "auth_mode": "auto"
+          }
+        }
+      },
+      "bins": [
+        "claude",
+        "uv",
+        "lake"
+      ],
+      "home_files": {
+        ".claude.json": {
+          "primaryApiKey": "sk-ant"
+        }
+      },
+      "env": {},
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uv)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude auth (local Claude API key)\n",
+      "issues": []
+    },
+    {
+      "name": "claude-auto-staged-env",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude-code",
+            "auth_mode": "auto"
+          }
+        }
+      },
+      "bins": [
+        "claude",
+        "uvx"
+      ],
+      "home_files": {},
+      "env": {
+        "CLAUDE_CODE_OAUTH_TOKEN": "t",
+        "ANTHROPIC_API_KEY": "k"
+      },
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✗ Lean toolchain (lake) (required for managed Lean workflows)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude auth (staged via CLAUDE_CODE_OAUTH_TOKEN)\n",
+      "issues": [
+        "Install elan / Lean so `lake` is available on PATH"
+      ]
+    },
+    {
+      "name": "claude-auto-persisted",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude-code",
+            "auth_mode": "auto"
+          }
+        }
+      },
+      "bins": [
+        "claude",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {},
+      "env": {},
+      "persisted_env": "ANTHROPIC_API_KEY=sk\n",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude auth (staged via ANTHROPIC_API_KEY)\n",
+      "issues": []
+    },
+    {
+      "name": "claude-auto-nothing",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude-code",
+            "auth_mode": "auto"
+          }
+        }
+      },
+      "bins": [
+        "uvx",
+        "lake"
+      ],
+      "home_files": {},
+      "env": {},
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✗ Claude Code CLI (install with `npm install -g @anthropic-ai/claude-code`)\n  ✗ Claude auth (not found)\n",
+      "issues": [
+        "Install the Claude Code CLI for managed Lean workflows",
+        "Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `gauss.autoformalize.auth_mode: login`"
+      ]
+    },
+    {
+      "name": "claude-login-nothing",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude-code",
+            "auth_mode": "login"
+          }
+        }
+      },
+      "bins": [
+        "claude",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {},
+      "env": {},
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (login)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ⚠ Claude auth (login mode will prompt on first launch)\n",
+      "issues": []
+    },
+    {
+      "name": "claude-login-ok",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude-code",
+            "auth_mode": "login"
+          }
+        }
+      },
+      "bins": [
+        "claude",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {
+        ".claude/.credentials.json": {
+          "claudeAiOauth": {
+            "accessToken": "a"
+          }
+        }
+      },
+      "env": {},
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (login)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude auth (local Claude login)\n",
+      "issues": []
+    },
+    {
+      "name": "claude-apikey-staged",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude-code",
+            "auth_mode": "api-key"
+          }
+        }
+      },
+      "bins": [
+        "claude",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {},
+      "env": {
+        "ANTHROPIC_TOKEN": "t"
+      },
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude API-key auth (staged via ANTHROPIC_TOKEN)\n",
+      "issues": []
+    },
+    {
+      "name": "claude-apikey-local",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude-code",
+            "auth_mode": "api-key"
+          }
+        }
+      },
+      "bins": [
+        "claude",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {
+        ".claude.json": {
+          "primaryApiKey": "sk"
+        }
+      },
+      "env": {},
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude API-key auth (local Claude API key)\n",
+      "issues": []
+    },
+    {
+      "name": "claude-apikey-nothing",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude-code",
+            "auth_mode": "api-key"
+          }
+        }
+      },
+      "bins": [
+        "claude",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {},
+      "env": {},
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✗ Claude API-key auth (not found)\n",
+      "issues": [
+        "Save `ANTHROPIC_API_KEY` / `ANTHROPIC_TOKEN` / `CLAUDE_CODE_OAUTH_TOKEN`, or switch `gauss.autoformalize.auth_mode` back to `auto` or `login`"
+      ]
+    },
+    {
+      "name": "claude-bad-credentials",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude-code",
+            "auth_mode": "auto"
+          }
+        }
+      },
+      "bins": [
+        "claude",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {
+        ".claude/.credentials.json": "not json",
+        ".claude.json": [
+          "list"
+        ]
+      },
+      "env": {},
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✗ Claude auth (not found)\n",
+      "issues": [
+        "Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `gauss.autoformalize.auth_mode: login`"
+      ]
+    },
+    {
+      "name": "codex-auto-tokens",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "codex",
+            "auth_mode": "auto"
+          }
+        }
+      },
+      "bins": [
+        "codex",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {
+        ".codex/auth.json": {
+          "tokens": {
+            "access_token": "a",
+            "refresh_token": "r",
+            "id_token": "i"
+          }
+        }
+      },
+      "env": {},
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✓ Codex auth (local Codex auth)\n",
+      "issues": []
+    },
+    {
+      "name": "codex-auto-partial-tokens",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "codex",
+            "auth_mode": "auto"
+          }
+        }
+      },
+      "bins": [
+        "codex",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {
+        ".codex/auth.json": {
+          "tokens": {
+            "access_token": "a",
+            "refresh_token": ""
+          }
+        }
+      },
+      "env": {},
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✗ Codex auth (not found)\n",
+      "issues": [
+        "Run `codex login`, save `OPENAI_API_KEY`, or set `gauss.autoformalize.auth_mode: login`"
+      ]
+    },
+    {
+      "name": "codex-auto-staged",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "codex",
+            "auth_mode": "auto"
+          }
+        }
+      },
+      "bins": [
+        "codex",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {},
+      "env": {
+        "OPENAI_API_KEY": "k"
+      },
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✓ Codex auth (staged OPENAI_API_KEY)\n",
+      "issues": []
+    },
+    {
+      "name": "codex-login-nothing",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "codex",
+            "auth_mode": "login"
+          }
+        }
+      },
+      "bins": [
+        "codex",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {},
+      "env": {},
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (login)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ⚠ Codex auth (login mode will prompt on first launch)\n",
+      "issues": []
+    },
+    {
+      "name": "codex-apikey-local",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "codex",
+            "auth_mode": "api-key"
+          }
+        }
+      },
+      "bins": [
+        "codex",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {
+        ".codex/auth.json": {
+          "auth_mode": "ApiKey",
+          "OPENAI_API_KEY": "k"
+        }
+      },
+      "env": {},
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✓ Codex API-key auth (local Codex API key)\n",
+      "issues": []
+    },
+    {
+      "name": "codex-home-env",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "codex",
+            "auth_mode": "auto"
+          }
+        }
+      },
+      "bins": [
+        "codex",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {
+        "alt-codex/auth.json": {
+          "auth_mode": "apikey",
+          "OPENAI_API_KEY": "k"
+        }
+      },
+      "env": {
+        "CODEX_HOME": "<HOME>/alt-codex"
+      },
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✓ Codex auth (local Codex auth)\n",
+      "issues": []
+    },
+    {
+      "name": "backend-invalid",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "frobnicator",
+            "auth_mode": "auto"
+          }
+        }
+      },
+      "bins": [],
+      "home_files": {},
+      "env": {},
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✗ Managed workflow config (`gauss.autoformalize.backend` must be one of: claude-code, codex.)\n",
+      "issues": [
+        "Fix gauss.autoformalize config: `gauss.autoformalize.backend` must be one of: claude-code, codex."
+      ]
+    },
+    {
+      "name": "auth-invalid",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude-code",
+            "auth_mode": "sometimes"
+          }
+        }
+      },
+      "bins": [],
+      "home_files": {},
+      "env": {},
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✗ Managed workflow config (`gauss.autoformalize.auth_mode` must be one of: auto, login, api-key.)\n",
+      "issues": [
+        "Fix gauss.autoformalize config: `gauss.autoformalize.auth_mode` must be one of: auto, login, api-key."
+      ]
+    },
+    {
+      "name": "backend-env-override",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude-code",
+            "auth_mode": "auto"
+          }
+        }
+      },
+      "bins": [
+        "codex",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {},
+      "env": {
+        "GAUSS_AUTOFORMALIZE_BACKEND": "Codex_CLI",
+        "GAUSS_AUTOFORMALIZE_AUTH_MODE": "API_KEY",
+        "OPENAI_API_KEY": "k"
+      },
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✓ Codex API-key auth (staged OPENAI_API_KEY)\n",
+      "issues": []
+    },
+    {
+      "name": "backend-alias",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude",
+            "auth_mode": "auto"
+          }
+        }
+      },
+      "bins": [
+        "claude",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {},
+      "env": {},
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✗ Claude auth (not found)\n",
+      "issues": [
+        "Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `gauss.autoformalize.auth_mode: login`"
+      ]
+    },
+    {
+      "name": "cwd-missing",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude-code",
+            "auth_mode": "auto"
+          }
+        }
+      },
+      "bins": [
+        "claude",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {},
+      "env": {},
+      "persisted_env": "",
+      "cwd": "nowhere",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✗ Active working directory (<TMP>/nowhere does not exist)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✗ Claude auth (not found)\n",
+      "issues": [
+        "Fix the managed workflow working directory: <TMP>/nowhere",
+        "Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `gauss.autoformalize.auth_mode: login`"
+      ]
+    },
+    {
+      "name": "manifest-broken",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude-code",
+            "auth_mode": "auto"
+          }
+        }
+      },
+      "bins": [
+        "claude",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {},
+      "env": {},
+      "persisted_env": "",
+      "cwd": "broken",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `gauss.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/broken)\n  ✗ Gauss project manifest (<TMP>/broken/.gauss/project.yaml has schema_version=None; expected 1.)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✗ Claude auth (not found)\n",
+      "issues": [
+        "Repair the active Gauss project manifest: <TMP>/broken/.gauss/project.yaml has schema_version=None; expected 1.",
+        "Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `gauss.autoformalize.auth_mode: login`"
+      ]
+    },
+    {
+      "name": "template-from-env",
+      "config": {
+        "gauss": {
+          "autoformalize": {
+            "backend": "claude-code",
+            "auth_mode": "auto"
+          }
+        }
+      },
+      "bins": [
+        "claude",
+        "uvx",
+        "lake"
+      ],
+      "home_files": {},
+      "env": {
+        "GAUSS_BLUEPRINT_TEMPLATE_SOURCE": " env-src "
+      },
+      "persisted_env": "",
+      "cwd": "project",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ✓ Project template source (env-src)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Gauss project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✗ Claude auth (not found)\n",
+      "issues": [
+        "Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `gauss.autoformalize.auth_mode: login`"
+      ]
+    }
+  ]
+}

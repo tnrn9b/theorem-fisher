@@ -1,0 +1,526 @@
+{
+ "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+ "python": "3.11.15",
+ "cases": [
+  {
+   "text": "",
+   "error": "Expecting value: line 1 column 1 (char 0)"
+  },
+  {
+   "text": " ",
+   "error": "Expecting value: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "}",
+   "error": "Expecting value: line 1 column 1 (char 0)"
+  },
+  {
+   "text": "[",
+   "error": "Expecting value: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "]",
+   "error": "Expecting value: line 1 column 1 (char 0)"
+  },
+  {
+   "text": "{\"a\"",
+   "error": "Expecting ':' delimiter: line 1 column 5 (char 4)"
+  },
+  {
+   "text": "{\"a\":",
+   "error": "Expecting value: line 1 column 6 (char 5)"
+  },
+  {
+   "text": "{\"a\": 1",
+   "error": "Expecting ',' delimiter: line 1 column 8 (char 7)"
+  },
+  {
+   "text": "{\"a\": 1,",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 9 (char 8)"
+  },
+  {
+   "text": "{\"a\": 1,}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 9 (char 8)"
+  },
+  {
+   "text": "{'a': 1}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{a: 1}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "[1, 2",
+   "error": "Expecting ',' delimiter: line 1 column 6 (char 5)"
+  },
+  {
+   "text": "[1, 2,]",
+   "error": "Expecting value: line 1 column 7 (char 6)"
+  },
+  {
+   "text": "[1 2]",
+   "error": "Expecting ',' delimiter: line 1 column 4 (char 3)"
+  },
+  {
+   "text": "{\"a\" 1}",
+   "error": "Expecting ':' delimiter: line 1 column 6 (char 5)"
+  },
+  {
+   "text": "{\"a\": 1 \"b\": 2}",
+   "error": "Expecting ',' delimiter: line 1 column 9 (char 8)"
+  },
+  {
+   "text": "\"abc",
+   "error": "Unterminated string starting at: line 1 column 1 (char 0)"
+  },
+  {
+   "text": "\"a\\qb\"",
+   "error": "Invalid \\escape: line 1 column 3 (char 2)"
+  },
+  {
+   "text": "\"\\u12\"",
+   "error": "Invalid \\uXXXX escape: line 1 column 3 (char 2)"
+  },
+  {
+   "text": "\"\\u12G4\"",
+   "error": "Invalid \\uXXXX escape: line 1 column 3 (char 2)"
+  },
+  {
+   "text": "\"a\tb\"",
+   "error": "Invalid control character at: line 1 column 3 (char 2)"
+  },
+  {
+   "text": "\"a\nb\"",
+   "error": "Invalid control character at: line 1 column 3 (char 2)"
+  },
+  {
+   "text": "tru",
+   "error": "Expecting value: line 1 column 1 (char 0)"
+  },
+  {
+   "text": "nul",
+   "error": "Expecting value: line 1 column 1 (char 0)"
+  },
+  {
+   "text": "fals",
+   "error": "Expecting value: line 1 column 1 (char 0)"
+  },
+  {
+   "text": "NaN",
+   "error": null
+  },
+  {
+   "text": "-Infinity",
+   "error": null
+  },
+  {
+   "text": "Infinity",
+   "error": null
+  },
+  {
+   "text": "-",
+   "error": "Expecting value: line 1 column 1 (char 0)"
+  },
+  {
+   "text": "1.",
+   "error": "Extra data: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "1e",
+   "error": "Extra data: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "01",
+   "error": "Extra data: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{} x",
+   "error": "Extra data: line 1 column 4 (char 3)"
+  },
+  {
+   "text": "[] []",
+   "error": "Extra data: line 1 column 4 (char 3)"
+  },
+  {
+   "text": "1 2",
+   "error": "Extra data: line 1 column 3 (char 2)"
+  },
+  {
+   "text": "{\"a\": 1}\n\n{",
+   "error": "Extra data: line 3 column 1 (char 10)"
+  },
+  {
+   "text": "\n\n  {\"a\":\n  }",
+   "error": "Expecting value: line 4 column 3 (char 12)"
+  },
+  {
+   "text": "{\"cmd\": \"ls\", }",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 15 (char 14)"
+  },
+  {
+   "text": "{\"path\": \"a.py\"",
+   "error": "Expecting ',' delimiter: line 1 column 16 (char 15)"
+  },
+  {
+   "text": "{\"path\": a.py}",
+   "error": "Expecting value: line 1 column 10 (char 9)"
+  },
+  {
+   "text": "{\"x\": [1, {\"y\": }]}",
+   "error": "Expecting value: line 1 column 17 (char 16)"
+  },
+  {
+   "text": "﻿{}",
+   "error": "Unexpected UTF-8 BOM (decode using utf-8-sig): line 1 column 1 (char 0)"
+  },
+  {
+   "text": "{\"a\": \"\\ud800\"}",
+   "error": null
+  },
+  {
+   "text": "{\"é\": \"ü\" x}",
+   "error": "Expecting ',' delimiter: line 1 column 11 (char 10)"
+  },
+  {
+   "text": "[\"€\" \"x\"]",
+   "error": "Expecting ',' delimiter: line 1 column 6 (char 5)"
+  },
+  {
+   "text": "{\"a\": tru}",
+   "error": "Expecting value: line 1 column 7 (char 6)"
+  },
+  {
+   "text": "{\"a\": -}",
+   "error": "Expecting value: line 1 column 7 (char 6)"
+  },
+  {
+   "text": "{\"a\": 1.5e}",
+   "error": "Expecting ',' delimiter: line 1 column 10 (char 9)"
+  },
+  {
+   "text": "{\"a\": .5}",
+   "error": "Expecting value: line 1 column 7 (char 6)"
+  },
+  {
+   "text": "  \t\n",
+   "error": "Expecting value: line 2 column 1 (char 4)"
+  },
+  {
+   "text": "{\"a\": 1}  ",
+   "error": null
+  },
+  {
+   "text": "[1, 2, 3]",
+   "error": null
+  },
+  {
+   "text": "{\"a\": {\"b\": [1, 2, {\"c\": null}]}}",
+   "error": null
+  },
+  {
+   "text": "123",
+   "error": null
+  },
+  {
+   "text": "\"s\"",
+   "error": null
+  },
+  {
+   "text": "null",
+   "error": null
+  },
+  {
+   "text": "true",
+   "error": null
+  },
+  {
+   "text": "{\"a\":\"b\"}}",
+   "error": "Extra data: line 1 column 10 (char 9)"
+  },
+  {
+   "text": "{\"a\": \"b\"]",
+   "error": "Expecting ',' delimiter: line 1 column 10 (char 9)"
+  },
+  {
+   "text": "[{]",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 3 (char 2)"
+  },
+  {
+   "text": "{[}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{\"\":1}",
+   "error": null
+  },
+  {
+   "text": "{\"a\": 1, \"a\": 2}",
+   "error": null
+  },
+  {
+   "text": "\"\\\"",
+   "error": "Unterminated string starting at: line 1 column 1 (char 0)"
+  },
+  {
+   "text": "\"\\",
+   "error": "Unterminated string starting at: line 1 column 1 (char 0)"
+  },
+  {
+   "text": "[\"a\\",
+   "error": "Unterminated string starting at: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{\"k\": \"v\\u00e9\"}",
+   "error": null
+  },
+  {
+   "text": "{\"k\": \"\u0001\"}",
+   "error": "Invalid control character at: line 1 column 8 (char 7)"
+  },
+  {
+   "text": "{\"path\": \"src/zb_\", \"n\": 463, \"flag\": false, \"list\":: [1, \"two\", null]}",
+   "error": "Expecting value: line 1 column 53 (char 52)"
+  },
+  {
+   "text": "{\"path\": \"src/zx\", \"n\": 157, \"flag",
+   "error": "Unterminated string starting at: line 1 column 30 (char 29)"
+  },
+  {
+   "text": "{\"path\": \"src/zbcxyayz\", \"n",
+   "error": "Unterminated string starting at: line 1 column 26 (char 25)"
+  },
+  {
+   "text": "{'path': 'src/caz', \"n\": 21, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{'path': \"src/_cxy_\", \"n\": 117, \"flag\": true, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{\"\"path\": \"src/_zba_y_\", \"n\": 111, \"flag\": true, \"list\": [1, \"two\", null]}",
+   "error": "Expecting ':' delimiter: line 1 column 4 (char 3)"
+  },
+  {
+   "text": "{\"path\": \"src/zxa\", \"n\": 172, \"flag\": false, \"list\": [1, \"two\", null]",
+   "error": "Expecting ',' delimiter: line 1 column 70 (char 69)"
+  },
+  {
+   "text": "{'path': 'src/b', \"n\": 131, \"flag\": true, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{\"path\": ",
+   "error": "Expecting value: line 1 column 10 (char 9)"
+  },
+  {
+   "text": "{\"path\": \"src/azy\", \"n\": 361, \"",
+   "error": "Unterminated string starting at: line 1 column 31 (char 30)"
+  },
+  {
+   "text": "{'path': 'src/zx', \"n\": 69, \"flag\": true, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{'path': 'src/axxby\", \"n\": 313, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{\"ath\": \"src/cxzxxyc\", \"n\": 418, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": null
+  },
+  {
+   "text": "{'path\": \"src/xacbxybz\", \"n\": 420, \"flag\": true, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{\"path\": \"src/ayxbyza\", \"n\": 395, \"flag\": false, \"list\": [1, \"t",
+   "error": "Unterminated string starting at: line 1 column 62 (char 61)"
+  },
+  {
+   "text": "{'path': 'src/_cxc_\", \"n\": 500, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{'path': 'src/zczx', \"n\": 459, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{\"path\": \"src/zaa_b_cc\", \"n\": 411, \"flag\"\": false, \"list\": [1, \"two\", null]}",
+   "error": "Expecting ':' delimiter: line 1 column 42 (char 41)"
+  },
+  {
+   "text": "{\"path\": \"src/xxybc\", \"n\": 611, \"flag\": true, \"list\": [1, \"two\", null]}",
+   "error": null
+  },
+  {
+   "text": "{\"path\": \"src/xxbyc\", \"n\": 300, \"flag\"",
+   "error": "Expecting ':' delimiter: line 1 column 39 (char 38)"
+  },
+  {
+   "text": "{'path': 'src/a\", \"n\": 202, \"flag\": true, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{\"path\": \"src/yzyy\", \"n\": 213, \"flag\":: false, \"list\": [1, \"two\", null]}",
+   "error": "Expecting value: line 1 column 39 (char 38)"
+  },
+  {
+   "text": "{\"\"path\": \"src/cyax_cxc\", \"n\": 269, \"flag\": true, \"list\": [1, \"two\", null]}",
+   "error": "Expecting ':' delimiter: line 1 column 4 (char 3)"
+  },
+  {
+   "text": "{'path': 'src/c', \"n\": 461, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{'path\": \"src/xzccbza\", \"n\": 301, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{\"path\": \"src/bx_zax\", \"n\": 263, \"flag\": falsse, \"list\": [1, \"two\", null]}",
+   "error": "Expecting value: line 1 column 42 (char 41)"
+  },
+  {
+   "text": "{'path': 'src/ay', \"n\": 500, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{'path': 'src/c\", \"n\": 346, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{\"paath\": \"src/cb\", \"n\": 164, \"flag\": true, \"list\": [1, \"two\", null]}",
+   "error": null
+  },
+  {
+   "text": "{\"path\": \"src/_xbbbx\", \"n\": 21, \"flag\"",
+   "error": "Expecting ':' delimiter: line 1 column 39 (char 38)"
+  },
+  {
+   "text": "{'path': 'src/a_xa\", \"n\": 385, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{\"path\": \"src/xczca\", \"n\": 408, \"flag\": false, \"list\": [1,  \"two\", null]}",
+   "error": null
+  },
+  {
+   "text": "{\"path\": \"src/",
+   "error": "Unterminated string starting at: line 1 column 10 (char 9)"
+  },
+  {
+   "text": "{'path': 'src/_xyxaxzc\", \"n\": 438, \"flag\": true, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{\"path\": \"src/y\", \"n\": 191, \"flag\": true, \"lis\": [1, \"two\", null]}",
+   "error": null
+  },
+  {
+   "text": "{\"path\": \"src/zyxz__ay\", \"n\": 457, \"flag\": false, \"list\": [1, \"tw",
+   "error": "Unterminated string starting at: line 1 column 63 (char 62)"
+  },
+  {
+   "text": "{\"p",
+   "error": "Unterminated string starting at: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{\"path\": \"src/axz_bax\", \"n\": 111, \"flag\": false, \"list\": [1, ",
+   "error": "Expecting value: line 1 column 62 (char 61)"
+  },
+  {
+   "text": "{\"path\": \"src/cbx\", \"n\": 182, \"flag\": false, \"\"list\": [1, \"two\", null]}",
+   "error": "Expecting ':' delimiter: line 1 column 48 (char 47)"
+  },
+  {
+   "text": "{\"path\": \"src/xy\", \"n\": 25, \"flag\": fa",
+   "error": "Expecting value: line 1 column 37 (char 36)"
+  },
+  {
+   "text": "{\"path\": \"srczcxzxyb\", \"n\": -3, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": null
+  },
+  {
+   "text": "{\"path\": \"src/xb\", \"nn\": 174, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": null
+  },
+  {
+   "text": "{\"path\": \"src/aa_ay\", \"n\": 468, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": null
+  },
+  {
+   "text": "{\"path\": \"src/cy_ayxyc\", \"n\": 383, \"fl",
+   "error": "Unterminated string starting at: line 1 column 36 (char 35)"
+  },
+  {
+   "text": "{'path': 'src/zbcbcbac', \"n\": 292, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{\"path\": \"src/x\", \"n\": 254, \"fag\": true, \"list\": [1, \"two\", null]}",
+   "error": null
+  },
+  {
+   "text": "{\"path\": \"src/y\", \"n\":  361, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": null
+  },
+  {
+   "text": "{\"path\": \"src/b__\", \"",
+   "error": "Unterminated string starting at: line 1 column 21 (char 20)"
+  },
+  {
+   "text": "{\"path\": \"src/_x_bccxz\", \"n\": 282, \"flag\": false, \"list\": [1, \"two\"",
+   "error": "Expecting ',' delimiter: line 1 column 68 (char 67)"
+  },
+  {
+   "text": "{\"path\": \"src/ybx\", \"n\":  448, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": null
+  },
+  {
+   "text": "{'path\": \"src/z_xcbx\", \"n\": 143, \"flag\": true, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{\"path\": \"src/zcxyy_y\", \"n\": 447",
+   "error": "Expecting ',' delimiter: line 1 column 33 (char 32)"
+  },
+  {
+   "text": "{\"path\": \"src/yx\", \"n\": 313, \"flag\": true, \"liist\": [1, \"two\", null]}",
+   "error": null
+  },
+  {
+   "text": "{\"path\": \"src/ybzbzy_\", \"n\": 251, \"flag\": true, \"list\": [1, \"two, null]}",
+   "error": "Unterminated string starting at: line 1 column 61 (char 60)"
+  },
+  {
+   "text": "{\"path\": \"src/bbaab\", \"n\": 159, \"fflag\": true, \"list\": [1, \"two\", null]}",
+   "error": null
+  },
+  {
+   "text": "{\"path\": \"src/azyc_\", \"nn\": 252, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": null
+  },
+  {
+   "text": "{'path': \"src/cyz_b__\", \"n\": 374, \"flag\": false, \"list\": [1, \"two\", null]}",
+   "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "text": "{\"pat\": \"src/abxx\", \"n\": 255, \"flag\": true, \"list\": [1, \"two\", null]}",
+   "error": null
+  },
+  {
+   "text": "{\"path\": \"src/a\", \"n\": 325, \"flag\": false, \"list\": [1, \"tw\", null]}",
+   "error": null
+  },
+  {
+   "text": "{\"pat",
+   "error": "Unterminated string starting at: line 1 column 2 (char 1)"
+  }
+ ]
+}

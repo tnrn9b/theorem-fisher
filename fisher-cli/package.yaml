@@ -1,0 +1,98 @@
+name:        fisher-cli
+version:     0.2.0.0
+synopsis:    The fisher executable, and the commands behind it
+license:     BSD-3-Clause
+author:      Tom Reynolds
+
+language: GHC2021
+
+default-extensions:
+- OverloadedStrings
+- LambdaCase
+
+ghc-options:
+- -Wall
+- -Wcompat
+
+dependencies:
+- base >= 4.14 && < 5
+- fisher-core
+- fisher-workflow
+- fisher-swarm
+- fisher-llm
+- fisher-tools
+- fisher-mcp
+- fisher-agent
+- fisher-rlm
+- fisher-search
+- fisher-lean
+- fisher-ui
+- aeson-pretty
+- async
+- unix
+- aeson
+- bytestring
+- containers
+- directory
+- filepath
+- text
+- file-embed
+- haskeline
+- process
+- scientific
+- time
+- vector
+- yaml
+- optparse-applicative
+- sqlite-simple
+- filelock
+
+extra-source-files:
+- data/*
+
+library:
+  source-dirs: src
+
+executables:
+  fisher:
+    main:        Main.hs
+    source-dirs: app
+    # The swarm waits on children and reads PTYs from separate threads;
+    # without the threaded RTS one blocking wait stops them all.
+    ghc-options: -threaded
+    dependencies:
+    - fisher-cli
+    - fisher-lean
+    - optparse-applicative
+
+tests:
+  fisher-cli-test:
+    main:        Spec.hs
+    source-dirs: test
+    build-tools: hspec-discover
+    # ProverChatSpec runs MCP servers as children: a timed-out wait on one
+    # needs the threaded RTS, as the fisher executable has
+    ghc-options: -threaded
+    dependencies:
+    - fisher-cli
+    - hspec
+    - temporary
+    - unix
+    - vector
+    - aeson
+    - containers
+    - directory
+    - filepath
+    - text
+    - fisher-core
+    - fisher-workflow
+    - fisher-swarm
+    - fisher-llm
+    - sqlite-simple
+    - fisher-agent
+    - fisher-tools
+    - fisher-search
+    - fisher-lean
+    - fisher-ui
+    - bytestring
+    - process

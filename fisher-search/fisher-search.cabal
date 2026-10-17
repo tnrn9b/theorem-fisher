@@ -1,0 +1,134 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.39.1.
+--
+-- see: https://github.com/sol/hpack
+
+name:           fisher-search
+version:        0.2.0.0
+synopsis:       The proof-search swarm (D) - open goals, parallel attempts across backends, shared kernel-checked lemmas, budgets
+author:         Tom Reynolds
+maintainer:     Tom Reynolds
+license:        BSD-3-Clause
+build-type:     Simple
+
+library
+  exposed-modules:
+      Fisher.Search.Auto
+      Fisher.Search.Bm25
+      Fisher.Search.Check
+      Fisher.Search.Child
+      Fisher.Search.Controller
+      Fisher.Search.Disprove
+      Fisher.Search.Facts
+      Fisher.Search.Graph
+      Fisher.Search.GraphJobs
+      Fisher.Search.GraphRun
+      Fisher.Search.Headless
+      Fisher.Search.Index
+      Fisher.Search.Lean
+      Fisher.Search.Library
+      Fisher.Search.Repair
+      Fisher.Search.Report
+      Fisher.Search.Retrieval
+      Fisher.Search.Review
+      Fisher.Search.Scheduler
+      Fisher.Search.Sketch
+      Fisher.Search.Splice
+      Fisher.Search.Split
+      Fisher.Search.Verify
+      Fisher.Search.Whiteboard
+      Fisher.Search.Workspace
+  other-modules:
+      Paths_fisher_search
+  autogen-modules:
+      Paths_fisher_search
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat
+  build-depends:
+      aeson
+    , async
+    , base >=4.14 && <5
+    , bytestring
+    , containers
+    , directory
+    , filepath
+    , fisher-llm
+    , process
+    , scientific
+    , text
+    , time
+    , unix
+  default-language: GHC2021
+
+test-suite fisher-search-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Fisher.Search.AutoSpec
+      Fisher.Search.Bm25Spec
+      Fisher.Search.CheckSpec
+      Fisher.Search.ControllerSpec
+      Fisher.Search.DisproveSpec
+      Fisher.Search.FactsSpec
+      Fisher.Search.FakeLean
+      Fisher.Search.FakeLsp
+      Fisher.Search.Golden
+      Fisher.Search.GraphAutoSpec
+      Fisher.Search.GraphHarness
+      Fisher.Search.GraphLiveSpec
+      Fisher.Search.GraphRetrievalSpec
+      Fisher.Search.GraphRunSpec
+      Fisher.Search.GraphSpec
+      Fisher.Search.HeadlessSpec
+      Fisher.Search.IndexSpec
+      Fisher.Search.LeanSpec
+      Fisher.Search.LibrarySpec
+      Fisher.Search.RepairSpec
+      Fisher.Search.ReportSpec
+      Fisher.Search.RetrievalFixture
+      Fisher.Search.ReviewSpec
+      Fisher.Search.SchedulerAutoSpec
+      Fisher.Search.SchedulerRetrievalSpec
+      Fisher.Search.SchedulerSpec
+      Fisher.Search.SchedulerStopSpec
+      Fisher.Search.SchedulerTierSpec
+      Fisher.Search.Scripted
+      Fisher.Search.SketchSpec
+      Fisher.Search.SpliceSpec
+      Fisher.Search.SplitSpec
+      Fisher.Search.WhiteboardSpec
+      Paths_fisher_search
+  autogen-modules:
+      Paths_fisher_search
+  hs-source-dirs:
+      test
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat -threaded
+  build-tool-depends:
+      hspec-discover:hspec-discover
+  build-depends:
+      QuickCheck
+    , aeson
+    , async
+    , base >=4.14 && <5
+    , bytestring
+    , containers
+    , directory
+    , filepath
+    , fisher-llm
+    , fisher-search
+    , hspec
+    , process
+    , scientific
+    , temporary
+    , text
+    , time
+    , unix
+  default-language: GHC2021

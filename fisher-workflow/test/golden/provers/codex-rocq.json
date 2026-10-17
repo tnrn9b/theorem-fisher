@@ -1,0 +1,69 @@
+{
+  "argv": [
+    "<TMP>/bin/codex",
+    "--dangerously-bypass-approvals-and-sandbox",
+    "You are in a Fisher-managed Rocq workflow session. Read the startup context at <TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-draft.md first. Then explicitly invoke the `$rocq` skill and follow the requested Rocq workflow in the active project. Important: `/rocq:*` entries in the startup context are skill workflow names, not shell commands, so do not try to execute them in bash. The staged skill entrypoint is <TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/rocq/SKILL.md. The matching workflow guide is <TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/rocq/commands/draft.md."
+  ],
+  "backend_command": "/rocq:draft two evens sum to an even",
+  "config_toml": [
+    "model_instructions_file = \"<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md\"",
+    "",
+    "[mcp_servers.rocq]",
+    "command = \"<TMP>/bin/uvx\"",
+    "args = [\"--from\", \"git+https://github.com/LLM4Rocq/rocq-mcp@6983113d0844c0b7f987c79dab13988445109bfb\", \"rocq-mcp\"]",
+    "cwd = \"<TMP>/rocqproj\"",
+    "startup_timeout_sec = 300",
+    "tool_timeout_sec = 300",
+    "",
+    "[mcp_servers.rocq.env]",
+    "ROCQ_PROJECT_PATH = \"<TMP>/rocqproj\"",
+    "ROCQ_WORKSPACE = \"<TMP>/rocqproj\""
+  ],
+  "instructions": [
+    "# Fisher Managed Rocq Workflow Instructions",
+    "",
+    "You are in a Fisher-managed Rocq workflow session.",
+    "",
+    "- Project root: `<TMP>/rocqproj`",
+    "- Rocq root: `<TMP>/rocqproj`",
+    "- Active working directory: `<TMP>/rocqproj`",
+    "- Installed Rocq skill: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/rocq`",
+    "- Startup context: `<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-draft.md`",
+    "",
+    "## Codex Skill Contract",
+    "- The staged Rocq workflow is exposed as the `$rocq` skill.",
+    "- Skill entrypoint: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/rocq/SKILL.md`",
+    "- Requested workflow guide: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/rocq/commands/draft.md`",
+    "- `/rocq:*` names in the startup context are workflow labels from the skill docs, not shell commands.",
+    "- Start by invoking `$rocq`, then follow the matching workflow guide before running project commands.",
+    "",
+    "## Session Contract",
+    "- Work inside the current Rocq project.",
+    "- Use the `rocq` MCP server for goals, searches and checking.",
+    "- A proof is done when `fisher check` passes on it.",
+    "- Keep changes reproducible and explain blockers clearly if the workflow cannot proceed."
+  ],
+  "skills": [
+    "SKILL.md",
+    "commands/draft.md",
+    "commands/prove.md"
+  ],
+  "staged_paths": {
+    "backend_command": "/rocq:draft two evens sum to an even",
+    "backend_config_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml",
+    "backend_home": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home",
+    "backend_name": "codex",
+    "claude_home": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home",
+    "frontend_command": "/draft",
+    "instructions_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md",
+    "lean_root": "<TMP>/rocqproj",
+    "managed_root": "<TMP>/gauss-home/autoformalize/codex/managed",
+    "mcp_config_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml",
+    "plugin_root": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/rocq",
+    "project_manifest_path": "<TMP>/rocqproj/.gauss/project.yaml",
+    "project_root": "<TMP>/rocqproj",
+    "skills_root": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/rocq",
+    "startup_context_path": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-draft.md",
+    "workflow_kind": "draft"
+  }
+}

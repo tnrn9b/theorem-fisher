@@ -1,0 +1,4 @@
+# fisher check's live fixture
+-Q theories Proj
+theories/Base.v
+theories/A.v

@@ -1,0 +1,10 @@
+Running Fisher_Check ...
+Fisher_Check FAILED (see also "isabelle build_log -H Error Fisher_Check")
+*** FISHER_OK good
+*** FISHER_ORACLES bad: Pure.skip_proof
+*** FISHER_MISSING ugly
+*** FISHER_MISSING nothere
+*** 
+*** At command "ML" (line 21 of "~/IdeaProjects/Fisher/.build/probe/isa6/Fisher_Check.thy")
+Unfinished session(s): Fisher_Check
+0:00:05 elapsed time

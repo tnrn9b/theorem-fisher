@@ -1,0 +1,4627 @@
+{
+ "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+ "python": "3.11.15",
+ "entries": {
+  "browser_back": {
+   "toolset": "browser",
+   "schema": {
+    "name": "browser_back",
+    "description": "Navigate back to the previous page in browser history. Requires browser_navigate to be called first.",
+    "parameters": {
+     "type": "object",
+     "properties": {},
+     "required": []
+    }
+   },
+   "requires_env": [],
+   "is_async": false,
+   "emoji": "◀️"
+  },
+  "browser_click": {
+   "toolset": "browser",
+   "schema": {
+    "name": "browser_click",
+    "description": "Click on an element identified by its ref ID from the snapshot (e.g., '@e5'). The ref IDs are shown in square brackets in the snapshot output. Requires browser_navigate and browser_snapshot to be called first.",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "ref": {
+       "type": "string",
+       "description": "The element reference from the snapshot (e.g., '@e5', '@e12')"
+      }
+     },
+     "required": [
+      "ref"
+     ]
+    }
+   },
+   "requires_env": [],
+   "is_async": false,
+   "emoji": "👆"
+  },
+  "browser_close": {
+   "toolset": "browser",
+   "schema": {
+    "name": "browser_close",
+    "description": "Close the browser session and release resources. Call this when done with browser tasks to free up Browserbase session quota.",
+    "parameters": {
+     "type": "object",
+     "properties": {},
+     "required": []
+    }
+   },
+   "requires_env": [],
+   "is_async": false,
+   "emoji": "🚪"
+  },
+  "browser_console": {
+   "toolset": "browser",
+   "schema": {
+    "name": "browser_console",
+    "description": "Get browser console output and JavaScript errors from the current page. Returns console.log/warn/error/info messages and uncaught JS exceptions. Use this to detect silent JavaScript errors, failed API calls, and application warnings. Requires browser_navigate to be called first.",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "clear": {
+       "type": "boolean",
+       "default": false,
+       "description": "If true, clear the message buffers after reading"
+      }
+     },
+     "required": []
+    }
+   },
+   "requires_env": [],
+   "is_async": false,
+   "emoji": "🖥️"
+  },
+  "browser_get_images": {
+   "toolset": "browser",
+   "schema": {
+    "name": "browser_get_images",
+    "description": "Get a list of all images on the current page with their URLs and alt text. Useful for finding images to analyze with the vision tool. Requires browser_navigate to be called first.",
+    "parameters": {
+     "type": "object",
+     "properties": {},
+     "required": []
+    }
+   },
+   "requires_env": [],
+   "is_async": false,
+   "emoji": "🖼️"
+  },
+  "browser_navigate": {
+   "toolset": "browser",
+   "schema": {
+    "name": "browser_navigate",
+    "description": "Navigate to a URL in the browser. Initializes the session and loads the page. Must be called before other browser tools. For simple information retrieval, prefer web_search or web_extract (faster, cheaper). Use browser tools when you need to interact with a page (click, fill forms, dynamic content).",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "url": {
+       "type": "string",
+       "description": "The URL to navigate to (e.g., 'https://example.com')"
+      }
+     },
+     "required": [
+      "url"
+     ]
+    }
+   },
+   "requires_env": [],
+   "is_async": false,
+   "emoji": "🌐"
+  },
+  "browser_press": {
+   "toolset": "browser",
+   "schema": {
+    "name": "browser_press",
+    "description": "Press a keyboard key. Useful for submitting forms (Enter), navigating (Tab), or keyboard shortcuts. Requires browser_navigate to be called first.",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "key": {
+       "type": "string",
+       "description": "Key to press (e.g., 'Enter', 'Tab', 'Escape', 'ArrowDown')"
+      }
+     },
+     "required": [
+      "key"
+     ]
+    }
+   },
+   "requires_env": [],
+   "is_async": false,
+   "emoji": "⌨️"
+  },
+  "browser_scroll": {
+   "toolset": "browser",
+   "schema": {
+    "name": "browser_scroll",
+    "description": "Scroll the page in a direction. Use this to reveal more content that may be below or above the current viewport. Requires browser_navigate to be called first.",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "direction": {
+       "type": "string",
+       "enum": [
+        "up",
+        "down"
+       ],
+       "description": "Direction to scroll"
+      }
+     },
+     "required": [
+      "direction"
+     ]
+    }
+   },
+   "requires_env": [],
+   "is_async": false,
+   "emoji": "📜"
+  },
+  "browser_snapshot": {
+   "toolset": "browser",
+   "schema": {
+    "name": "browser_snapshot",
+    "description": "Get a text-based snapshot of the current page's accessibility tree. Returns interactive elements with ref IDs (like @e1, @e2) for browser_click and browser_type. full=false (default): compact view with interactive elements. full=true: complete page content. Snapshots over 8000 chars are truncated or LLM-summarized. Requires browser_navigate first.",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "full": {
+       "type": "boolean",
+       "description": "If true, returns complete page content. If false (default), returns compact view with interactive elements only.",
+       "default": false
+      }
+     },
+     "required": []
+    }
+   },
+   "requires_env": [],
+   "is_async": false,
+   "emoji": "📸"
+  },
+  "browser_type": {
+   "toolset": "browser",
+   "schema": {
+    "name": "browser_type",
+    "description": "Type text into an input field identified by its ref ID. Clears the field first, then types the new text. Requires browser_navigate and browser_snapshot to be called first.",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "ref": {
+       "type": "string",
+       "description": "The element reference from the snapshot (e.g., '@e3')"
+      },
+      "text": {
+       "type": "string",
+       "description": "The text to type into the field"
+      }
+     },
+     "required": [
+      "ref",
+      "text"
+     ]
+    }
+   },
+   "requires_env": [],
+   "is_async": false,
+   "emoji": "⌨️"
+  },
+  "browser_vision": {
+   "toolset": "browser",
+   "schema": {
+    "name": "browser_vision",
+    "description": "Take a screenshot of the current page and analyze it with vision AI. Use this when you need to visually understand what's on the page - especially useful for CAPTCHAs, visual verification challenges, complex layouts, or when the text snapshot doesn't capture important visual information. Returns both the AI analysis and a screenshot_path that you can share with the user by including MEDIA:<screenshot_path> in your response. Requires browser_navigate to be called first.",
+    "parameters": {
+     "type": "object",
+     "properties": {
+      "question": {
+       "type": "string",
+       "description": "What you want to know about the page visually. Be specific about what you're looking for."
+      },
+      "annotate": {
+       "type": "boolean",
+       "default": false,
+       "description": "If true, overlay numbered [N] labels on interactive elements. Each [N] maps to ref @eN for subsequent browser commands. Useful for QA and spatial reasoning about page layout."
+      }
+     },
+     "required": [
+      "question"
+     ]
+    }
+   },
+   "requires_env": [],
+   "is_async": false,
+   "emoji": "👁️"
+  }
+ },
+ "cases": [
+  {
+   "name": "navigate",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "Example Domain",
+       "url": "https://example.com/"
+      }
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"url\": \"https://example.com/\", \"title\": \"Example Domain\", \"stealth_warning\": \"Running WITHOUT residential proxies. Bot detection may be more aggressive. Consider upgrading Browserbase plan for proxy support.\", \"stealth_features\": [\"local\"]}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://example.com"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "navigate-twice",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://a.example"
+     },
+     "ctx": {}
+    },
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://b.example"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "A",
+       "url": "https://a.example/"
+      }
+     }
+    },
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "B"
+      }
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"url\": \"https://a.example/\", \"title\": \"A\", \"stealth_warning\": \"Running WITHOUT residential proxies. Bot detection may be more aggressive. Consider upgrading Browserbase plan for proxy support.\", \"stealth_features\": [\"local\"]}",
+    "{\"success\": true, \"url\": \"https://b.example\", \"title\": \"B\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://a.example"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://b.example"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "navigate-blocked",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://x.example"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "Just a moment...",
+       "url": "https://x.example/"
+      }
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"url\": \"https://x.example/\", \"title\": \"Just a moment...\", \"bot_detection_warning\": \"Page title 'Just a moment...' suggests bot detection. The site may have blocked this request. Options: 1) Try adding delays between actions, 2) Access different pages first, 3) Enable advanced stealth (BROWSERBASE_ADVANCED_STEALTH=true, requires Scale plan), 4) Some sites have very aggressive bot detection that may be unavoidable.\", \"stealth_warning\": \"Running WITHOUT residential proxies. Bot detection may be more aggressive. Consider upgrading Browserbase plan for proxy support.\", \"stealth_features\": [\"local\"]}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://x.example"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "navigate-error",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://x.example"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": false,
+      "error": "net::ERR_NAME_NOT_RESOLVED"
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": false, \"error\": \"net::ERR_NAME_NOT_RESOLVED\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://x.example"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "navigate-error-no-message",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://x.example"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": false
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": false, \"error\": \"Navigation failed\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://x.example"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "navigate-rc-stderr",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://x.example"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "stdout": "",
+     "stderr": "  daemon failed to start \n",
+     "rc": 1
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": false, \"error\": \"daemon failed to start\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://x.example"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "navigate-rc-silent",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://x.example"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "stdout": "",
+     "stderr": "",
+     "rc": 3
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": false, \"error\": \"Command failed with code 3\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://x.example"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "navigate-empty-ok",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://x.example"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "stdout": "  \n",
+     "rc": 0
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"url\": \"https://x.example\", \"title\": \"\", \"stealth_warning\": \"Running WITHOUT residential proxies. Bot detection may be more aggressive. Consider upgrading Browserbase plan for proxy support.\", \"stealth_features\": [\"local\"]}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://x.example"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "navigate-non-json",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://x.example"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "stdout": "Opened page zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+     "rc": 0
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": false, \"error\": \"Non-JSON output from agent-browser for 'open': Opened page zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://x.example"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "navigate-timeout",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://x.example"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "timeout": true
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": false, \"error\": \"Command timed out after 60 seconds\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://x.example"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "navigate-oserror",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://x.example"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "raise": "exec format error"
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": false, \"error\": \"exec format error\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://x.example"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "navigate-no-url",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"url\": \"\", \"title\": \"\", \"stealth_warning\": \"Running WITHOUT residential proxies. Bot detection may be more aggressive. Consider upgrading Browserbase plan for proxy support.\", \"stealth_features\": [\"local\"]}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      ""
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "navigate-task",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {
+      "task_id": "t-42"
+     }
+    },
+    {
+     "tool": "browser_snapshot",
+     "args": {},
+     "ctx": {
+      "task_id": "t-42"
+     }
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "E"
+      }
+     }
+    },
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "snapshot": "- heading \"Example Domain\" [ref=e1]\n- link \"More information...\" [ref=e2]",
+       "refs": {
+        "e1": {},
+        "e2": {}
+       }
+      }
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"url\": \"https://example.com\", \"title\": \"E\", \"stealth_warning\": \"Running WITHOUT residential proxies. Bot detection may be more aggressive. Consider upgrading Browserbase plan for proxy support.\", \"stealth_features\": [\"local\"]}",
+    "{\"success\": true, \"snapshot\": \"- heading \\\"Example Domain\\\" [ref=e1]\\n- link \\\"More information...\\\" [ref=e2]\", \"element_count\": 2}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://example.com"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "snapshot",
+      "-c"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "snapshot-compact",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {}
+    },
+    {
+     "tool": "browser_snapshot",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "E"
+      }
+     }
+    },
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "snapshot": "- heading \"Example Domain\" [ref=e1]\n- link \"More information...\" [ref=e2]",
+       "refs": {
+        "e1": {},
+        "e2": {}
+       }
+      }
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"url\": \"https://example.com\", \"title\": \"E\", \"stealth_warning\": \"Running WITHOUT residential proxies. Bot detection may be more aggressive. Consider upgrading Browserbase plan for proxy support.\", \"stealth_features\": [\"local\"]}",
+    "{\"success\": true, \"snapshot\": \"- heading \\\"Example Domain\\\" [ref=e1]\\n- link \\\"More information...\\\" [ref=e2]\", \"element_count\": 2}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://example.com"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "snapshot",
+      "-c"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "snapshot-full",
+   "calls": [
+    {
+     "tool": "browser_snapshot",
+     "args": {
+      "full": true
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "snapshot": "- heading \"Example Domain\" [ref=e1]\n- link \"More information...\" [ref=e2]",
+       "refs": null
+      }
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"snapshot\": \"- heading \\\"Example Domain\\\" [ref=e1]\\n- link \\\"More information...\\\" [ref=e2]\", \"element_count\": 0}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "snapshot"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "snapshot-empty",
+   "calls": [
+    {
+     "tool": "browser_snapshot",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"snapshot\": \"\", \"element_count\": 0}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "snapshot",
+      "-c"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "snapshot-long",
+   "calls": [
+    {
+     "tool": "browser_snapshot",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "snapshot": "- link \"Item 0\" [ref=e0]\n- link \"Item 1\" [ref=e1]\n- link \"Item 2\" [ref=e2]\n- link \"Item 3\" [ref=e3]\n- link \"Item 4\" [ref=e4]\n- link \"Item 5\" [ref=e5]\n- link \"Item 6\" [ref=e6]\n- link \"Item 7\" [ref=e7]\n- link \"Item 8\" [ref=e8]\n- link \"Item 9\" [ref=e9]\n- link \"Item 10\" [ref=e10]\n- link \"Item 11\" [ref=e11]\n- link \"Item 12\" [ref=e12]\n- link \"Item 13\" [ref=e13]\n- link \"Item 14\" [ref=e14]\n- link \"Item 15\" [ref=e15]\n- link \"Item 16\" [ref=e16]\n- link \"Item 17\" [ref=e17]\n- link \"Item 18\" [ref=e18]\n- link \"Item 19\" [ref=e19]\n- link \"Item 20\" [ref=e20]\n- link \"Item 21\" [ref=e21]\n- link \"Item 22\" [ref=e22]\n- link \"Item 23\" [ref=e23]\n- link \"Item 24\" [ref=e24]\n- link \"Item 25\" [ref=e25]\n- link \"Item 26\" [ref=e26]\n- link \"Item 27\" [ref=e27]\n- link \"Item 28\" [ref=e28]\n- link \"Item 29\" [ref=e29]\n- link \"Item 30\" [ref=e30]\n- link \"Item 31\" [ref=e31]\n- link \"Item 32\" [ref=e32]\n- link \"Item 33\" [ref=e33]\n- link \"Item 34\" [ref=e34]\n- link \"Item 35\" [ref=e35]\n- link \"Item 36\" [ref=e36]\n- link \"Item 37\" [ref=e37]\n- link \"Item 38\" [ref=e38]\n- link \"Item 39\" [ref=e39]\n- link \"Item 40\" [ref=e40]\n- link \"Item 41\" [ref=e41]\n- link \"Item 42\" [ref=e42]\n- link \"Item 43\" [ref=e43]\n- link \"Item 44\" [ref=e44]\n- link \"Item 45\" [ref=e45]\n- link \"Item 46\" [ref=e46]\n- link \"Item 47\" [ref=e47]\n- link \"Item 48\" [ref=e48]\n- link \"Item 49\" [ref=e49]\n- link \"Item 50\" [ref=e50]\n- link \"Item 51\" [ref=e51]\n- link \"Item 52\" [ref=e52]\n- link \"Item 53\" [ref=e53]\n- link \"Item 54\" [ref=e54]\n- link \"Item 55\" [ref=e55]\n- link \"Item 56\" [ref=e56]\n- link \"Item 57\" [ref=e57]\n- link \"Item 58\" [ref=e58]\n- link \"Item 59\" [ref=e59]\n- link \"Item 60\" [ref=e60]\n- link \"Item 61\" [ref=e61]\n- link \"Item 62\" [ref=e62]\n- link \"Item 63\" [ref=e63]\n- link \"Item 64\" [ref=e64]\n- link \"Item 65\" [ref=e65]\n- link \"Item 66\" [ref=e66]\n- link \"Item 67\" [ref=e67]\n- link \"Item 68\" [ref=e68]\n- link \"Item 69\" [ref=e69]\n- link \"Item 70\" [ref=e70]\n- link \"Item 71\" [ref=e71]\n- link \"Item 72\" [ref=e72]\n- link \"Item 73\" [ref=e73]\n- link \"Item 74\" [ref=e74]\n- link \"Item 75\" [ref=e75]\n- link \"Item 76\" [ref=e76]\n- link \"Item 77\" [ref=e77]\n- link \"Item 78\" [ref=e78]\n- link \"Item 79\" [ref=e79]\n- link \"Item 80\" [ref=e80]\n- link \"Item 81\" [ref=e81]\n- link \"Item 82\" [ref=e82]\n- link \"Item 83\" [ref=e83]\n- link \"Item 84\" [ref=e84]\n- link \"Item 85\" [ref=e85]\n- link \"Item 86\" [ref=e86]\n- link \"Item 87\" [ref=e87]\n- link \"Item 88\" [ref=e88]\n- link \"Item 89\" [ref=e89]\n- link \"Item 90\" [ref=e90]\n- link \"Item 91\" [ref=e91]\n- link \"Item 92\" [ref=e92]\n- link \"Item 93\" [ref=e93]\n- link \"Item 94\" [ref=e94]\n- link \"Item 95\" [ref=e95]\n- link \"Item 96\" [ref=e96]\n- link \"Item 97\" [ref=e97]\n- link \"Item 98\" [ref=e98]\n- link \"Item 99\" [ref=e99]\n- link \"Item 100\" [ref=e100]\n- link \"Item 101\" [ref=e101]\n- link \"Item 102\" [ref=e102]\n- link \"Item 103\" [ref=e103]\n- link \"Item 104\" [ref=e104]\n- link \"Item 105\" [ref=e105]\n- link \"Item 106\" [ref=e106]\n- link \"Item 107\" [ref=e107]\n- link \"Item 108\" [ref=e108]\n- link \"Item 109\" [ref=e109]\n- link \"Item 110\" [ref=e110]\n- link \"Item 111\" [ref=e111]\n- link \"Item 112\" [ref=e112]\n- link \"Item 113\" [ref=e113]\n- link \"Item 114\" [ref=e114]\n- link \"Item 115\" [ref=e115]\n- link \"Item 116\" [ref=e116]\n- link \"Item 117\" [ref=e117]\n- link \"Item 118\" [ref=e118]\n- link \"Item 119\" [ref=e119]\n- link \"Item 120\" [ref=e120]\n- link \"Item 121\" [ref=e121]\n- link \"Item 122\" [ref=e122]\n- link \"Item 123\" [ref=e123]\n- link \"Item 124\" [ref=e124]\n- link \"Item 125\" [ref=e125]\n- link \"Item 126\" [ref=e126]\n- link \"Item 127\" [ref=e127]\n- link \"Item 128\" [ref=e128]\n- link \"Item 129\" [ref=e129]\n- link \"Item 130\" [ref=e130]\n- link \"Item 131\" [ref=e131]\n- link \"Item 132\" [ref=e132]\n- link \"Item 133\" [ref=e133]\n- link \"Item 134\" [ref=e134]\n- link \"Item 135\" [ref=e135]\n- link \"Item 136\" [ref=e136]\n- link \"Item 137\" [ref=e137]\n- link \"Item 138\" [ref=e138]\n- link \"Item 139\" [ref=e139]\n- link \"Item 140\" [ref=e140]\n- link \"Item 141\" [ref=e141]\n- link \"Item 142\" [ref=e142]\n- link \"Item 143\" [ref=e143]\n- link \"Item 144\" [ref=e144]\n- link \"Item 145\" [ref=e145]\n- link \"Item 146\" [ref=e146]\n- link \"Item 147\" [ref=e147]\n- link \"Item 148\" [ref=e148]\n- link \"Item 149\" [ref=e149]\n- link \"Item 150\" [ref=e150]\n- link \"Item 151\" [ref=e151]\n- link \"Item 152\" [ref=e152]\n- link \"Item 153\" [ref=e153]\n- link \"Item 154\" [ref=e154]\n- link \"Item 155\" [ref=e155]\n- link \"Item 156\" [ref=e156]\n- link \"Item 157\" [ref=e157]\n- link \"Item 158\" [ref=e158]\n- link \"Item 159\" [ref=e159]\n- link \"Item 160\" [ref=e160]\n- link \"Item 161\" [ref=e161]\n- link \"Item 162\" [ref=e162]\n- link \"Item 163\" [ref=e163]\n- link \"Item 164\" [ref=e164]\n- link \"Item 165\" [ref=e165]\n- link \"Item 166\" [ref=e166]\n- link \"Item 167\" [ref=e167]\n- link \"Item 168\" [ref=e168]\n- link \"Item 169\" [ref=e169]\n- link \"Item 170\" [ref=e170]\n- link \"Item 171\" [ref=e171]\n- link \"Item 172\" [ref=e172]\n- link \"Item 173\" [ref=e173]\n- link \"Item 174\" [ref=e174]\n- link \"Item 175\" [ref=e175]\n- link \"Item 176\" [ref=e176]\n- link \"Item 177\" [ref=e177]\n- link \"Item 178\" [ref=e178]\n- link \"Item 179\" [ref=e179]\n- link \"Item 180\" [ref=e180]\n- link \"Item 181\" [ref=e181]\n- link \"Item 182\" [ref=e182]\n- link \"Item 183\" [ref=e183]\n- link \"Item 184\" [ref=e184]\n- link \"Item 185\" [ref=e185]\n- link \"Item 186\" [ref=e186]\n- link \"Item 187\" [ref=e187]\n- link \"Item 188\" [ref=e188]\n- link \"Item 189\" [ref=e189]\n- link \"Item 190\" [ref=e190]\n- link \"Item 191\" [ref=e191]\n- link \"Item 192\" [ref=e192]\n- link \"Item 193\" [ref=e193]\n- link \"Item 194\" [ref=e194]\n- link \"Item 195\" [ref=e195]\n- link \"Item 196\" [ref=e196]\n- link \"Item 197\" [ref=e197]\n- link \"Item 198\" [ref=e198]\n- link \"Item 199\" [ref=e199]\n- link \"Item 200\" [ref=e200]\n- link \"Item 201\" [ref=e201]\n- link \"Item 202\" [ref=e202]\n- link \"Item 203\" [ref=e203]\n- link \"Item 204\" [ref=e204]\n- link \"Item 205\" [ref=e205]\n- link \"Item 206\" [ref=e206]\n- link \"Item 207\" [ref=e207]\n- link \"Item 208\" [ref=e208]\n- link \"Item 209\" [ref=e209]\n- link \"Item 210\" [ref=e210]\n- link \"Item 211\" [ref=e211]\n- link \"Item 212\" [ref=e212]\n- link \"Item 213\" [ref=e213]\n- link \"Item 214\" [ref=e214]\n- link \"Item 215\" [ref=e215]\n- link \"Item 216\" [ref=e216]\n- link \"Item 217\" [ref=e217]\n- link \"Item 218\" [ref=e218]\n- link \"Item 219\" [ref=e219]\n- link \"Item 220\" [ref=e220]\n- link \"Item 221\" [ref=e221]\n- link \"Item 222\" [ref=e222]\n- link \"Item 223\" [ref=e223]\n- link \"Item 224\" [ref=e224]\n- link \"Item 225\" [ref=e225]\n- link \"Item 226\" [ref=e226]\n- link \"Item 227\" [ref=e227]\n- link \"Item 228\" [ref=e228]\n- link \"Item 229\" [ref=e229]\n- link \"Item 230\" [ref=e230]\n- link \"Item 231\" [ref=e231]\n- link \"Item 232\" [ref=e232]\n- link \"Item 233\" [ref=e233]\n- link \"Item 234\" [ref=e234]\n- link \"Item 235\" [ref=e235]\n- link \"Item 236\" [ref=e236]\n- link \"Item 237\" [ref=e237]\n- link \"Item 238\" [ref=e238]\n- link \"Item 239\" [ref=e239]\n- link \"Item 240\" [ref=e240]\n- link \"Item 241\" [ref=e241]\n- link \"Item 242\" [ref=e242]\n- link \"Item 243\" [ref=e243]\n- link \"Item 244\" [ref=e244]\n- link \"Item 245\" [ref=e245]\n- link \"Item 246\" [ref=e246]\n- link \"Item 247\" [ref=e247]\n- link \"Item 248\" [ref=e248]\n- link \"Item 249\" [ref=e249]\n- link \"Item 250\" [ref=e250]\n- link \"Item 251\" [ref=e251]\n- link \"Item 252\" [ref=e252]\n- link \"Item 253\" [ref=e253]\n- link \"Item 254\" [ref=e254]\n- link \"Item 255\" [ref=e255]\n- link \"Item 256\" [ref=e256]\n- link \"Item 257\" [ref=e257]\n- link \"Item 258\" [ref=e258]\n- link \"Item 259\" [ref=e259]\n- link \"Item 260\" [ref=e260]\n- link \"Item 261\" [ref=e261]\n- link \"Item 262\" [ref=e262]\n- link \"Item 263\" [ref=e263]\n- link \"Item 264\" [ref=e264]\n- link \"Item 265\" [ref=e265]\n- link \"Item 266\" [ref=e266]\n- link \"Item 267\" [ref=e267]\n- link \"Item 268\" [ref=e268]\n- link \"Item 269\" [ref=e269]\n- link \"Item 270\" [ref=e270]\n- link \"Item 271\" [ref=e271]\n- link \"Item 272\" [ref=e272]\n- link \"Item 273\" [ref=e273]\n- link \"Item 274\" [ref=e274]\n- link \"Item 275\" [ref=e275]\n- link \"Item 276\" [ref=e276]\n- link \"Item 277\" [ref=e277]\n- link \"Item 278\" [ref=e278]\n- link \"Item 279\" [ref=e279]\n- link \"Item 280\" [ref=e280]\n- link \"Item 281\" [ref=e281]\n- link \"Item 282\" [ref=e282]\n- link \"Item 283\" [ref=e283]\n- link \"Item 284\" [ref=e284]\n- link \"Item 285\" [ref=e285]\n- link \"Item 286\" [ref=e286]\n- link \"Item 287\" [ref=e287]\n- link \"Item 288\" [ref=e288]\n- link \"Item 289\" [ref=e289]\n- link \"Item 290\" [ref=e290]\n- link \"Item 291\" [ref=e291]\n- link \"Item 292\" [ref=e292]\n- link \"Item 293\" [ref=e293]\n- link \"Item 294\" [ref=e294]\n- link \"Item 295\" [ref=e295]\n- link \"Item 296\" [ref=e296]\n- link \"Item 297\" [ref=e297]\n- link \"Item 298\" [ref=e298]\n- link \"Item 299\" [ref=e299]\n- link \"Item 300\" [ref=e300]\n- link \"Item 301\" [ref=e301]\n- link \"Item 302\" [ref=e302]\n- link \"Item 303\" [ref=e303]\n- link \"Item 304\" [ref=e304]\n- link \"Item 305\" [ref=e305]\n- link \"Item 306\" [ref=e306]\n- link \"Item 307\" [ref=e307]\n- link \"Item 308\" [ref=e308]\n- link \"Item 309\" [ref=e309]\n- link \"Item 310\" [ref=e310]\n- link \"Item 311\" [ref=e311]\n- link \"Item 312\" [ref=e312]\n- link \"Item 313\" [ref=e313]\n- link \"Item 314\" [ref=e314]\n- link \"Item 315\" [ref=e315]\n- link \"Item 316\" [ref=e316]\n- link \"Item 317\" [ref=e317]\n- link \"Item 318\" [ref=e318]\n- link \"Item 319\" [ref=e319]\n- link \"Item 320\" [ref=e320]\n- link \"Item 321\" [ref=e321]\n- link \"Item 322\" [ref=e322]\n- link \"Item 323\" [ref=e323]\n- link \"Item 324\" [ref=e324]\n- link \"Item 325\" [ref=e325]\n- link \"Item 326\" [ref=e326]\n- link \"Item 327\" [ref=e327]\n- link \"Item 328\" [ref=e328]\n- link \"Item 329\" [ref=e329]\n- link \"Item 330\" [ref=e330]\n- link \"Item 331\" [ref=e331]\n- link \"Item 332\" [ref=e332]\n- link \"Item 333\" [ref=e333]\n- link \"Item 334\" [ref=e334]\n- link \"Item 335\" [ref=e335]\n- link \"Item 336\" [ref=e336]\n- link \"Item 337\" [ref=e337]\n- link \"Item 338\" [ref=e338]\n- link \"Item 339\" [ref=e339]\n- link \"Item 340\" [ref=e340]\n- link \"Item 341\" [ref=e341]\n- link \"Item 342\" [ref=e342]\n- link \"Item 343\" [ref=e343]\n- link \"Item 344\" [ref=e344]\n- link \"Item 345\" [ref=e345]\n- link \"Item 346\" [ref=e346]\n- link \"Item 347\" [ref=e347]\n- link \"Item 348\" [ref=e348]\n- link \"Item 349\" [ref=e349]\n- link \"Item 350\" [ref=e350]\n- link \"Item 351\" [ref=e351]\n- link \"Item 352\" [ref=e352]\n- link \"Item 353\" [ref=e353]\n- link \"Item 354\" [ref=e354]\n- link \"Item 355\" [ref=e355]\n- link \"Item 356\" [ref=e356]\n- link \"Item 357\" [ref=e357]\n- link \"Item 358\" [ref=e358]\n- link \"Item 359\" [ref=e359]\n- link \"Item 360\" [ref=e360]\n- link \"Item 361\" [ref=e361]\n- link \"Item 362\" [ref=e362]\n- link \"Item 363\" [ref=e363]\n- link \"Item 364\" [ref=e364]\n- link \"Item 365\" [ref=e365]\n- link \"Item 366\" [ref=e366]\n- link \"Item 367\" [ref=e367]\n- link \"Item 368\" [ref=e368]\n- link \"Item 369\" [ref=e369]\n- link \"Item 370\" [ref=e370]\n- link \"Item 371\" [ref=e371]\n- link \"Item 372\" [ref=e372]\n- link \"Item 373\" [ref=e373]\n- link \"Item 374\" [ref=e374]\n- link \"Item 375\" [ref=e375]\n- link \"Item 376\" [ref=e376]\n- link \"Item 377\" [ref=e377]\n- link \"Item 378\" [ref=e378]\n- link \"Item 379\" [ref=e379]\n- link \"Item 380\" [ref=e380]\n- link \"Item 381\" [ref=e381]\n- link \"Item 382\" [ref=e382]\n- link \"Item 383\" [ref=e383]\n- link \"Item 384\" [ref=e384]\n- link \"Item 385\" [ref=e385]\n- link \"Item 386\" [ref=e386]\n- link \"Item 387\" [ref=e387]\n- link \"Item 388\" [ref=e388]\n- link \"Item 389\" [ref=e389]\n- link \"Item 390\" [ref=e390]\n- link \"Item 391\" [ref=e391]\n- link \"Item 392\" [ref=e392]\n- link \"Item 393\" [ref=e393]\n- link \"Item 394\" [ref=e394]\n- link \"Item 395\" [ref=e395]\n- link \"Item 396\" [ref=e396]\n- link \"Item 397\" [ref=e397]\n- link \"Item 398\" [ref=e398]\n- link \"Item 399\" [ref=e399]",
+       "refs": {
+        "e0": {},
+        "e1": {},
+        "e2": {},
+        "e3": {},
+        "e4": {},
+        "e5": {},
+        "e6": {},
+        "e7": {},
+        "e8": {},
+        "e9": {},
+        "e10": {},
+        "e11": {},
+        "e12": {},
+        "e13": {},
+        "e14": {},
+        "e15": {},
+        "e16": {},
+        "e17": {},
+        "e18": {},
+        "e19": {},
+        "e20": {},
+        "e21": {},
+        "e22": {},
+        "e23": {},
+        "e24": {},
+        "e25": {},
+        "e26": {},
+        "e27": {},
+        "e28": {},
+        "e29": {},
+        "e30": {},
+        "e31": {},
+        "e32": {},
+        "e33": {},
+        "e34": {},
+        "e35": {},
+        "e36": {},
+        "e37": {},
+        "e38": {},
+        "e39": {},
+        "e40": {},
+        "e41": {},
+        "e42": {},
+        "e43": {},
+        "e44": {},
+        "e45": {},
+        "e46": {},
+        "e47": {},
+        "e48": {},
+        "e49": {},
+        "e50": {},
+        "e51": {},
+        "e52": {},
+        "e53": {},
+        "e54": {},
+        "e55": {},
+        "e56": {},
+        "e57": {},
+        "e58": {},
+        "e59": {},
+        "e60": {},
+        "e61": {},
+        "e62": {},
+        "e63": {},
+        "e64": {},
+        "e65": {},
+        "e66": {},
+        "e67": {},
+        "e68": {},
+        "e69": {},
+        "e70": {},
+        "e71": {},
+        "e72": {},
+        "e73": {},
+        "e74": {},
+        "e75": {},
+        "e76": {},
+        "e77": {},
+        "e78": {},
+        "e79": {},
+        "e80": {},
+        "e81": {},
+        "e82": {},
+        "e83": {},
+        "e84": {},
+        "e85": {},
+        "e86": {},
+        "e87": {},
+        "e88": {},
+        "e89": {},
+        "e90": {},
+        "e91": {},
+        "e92": {},
+        "e93": {},
+        "e94": {},
+        "e95": {},
+        "e96": {},
+        "e97": {},
+        "e98": {},
+        "e99": {},
+        "e100": {},
+        "e101": {},
+        "e102": {},
+        "e103": {},
+        "e104": {},
+        "e105": {},
+        "e106": {},
+        "e107": {},
+        "e108": {},
+        "e109": {},
+        "e110": {},
+        "e111": {},
+        "e112": {},
+        "e113": {},
+        "e114": {},
+        "e115": {},
+        "e116": {},
+        "e117": {},
+        "e118": {},
+        "e119": {},
+        "e120": {},
+        "e121": {},
+        "e122": {},
+        "e123": {},
+        "e124": {},
+        "e125": {},
+        "e126": {},
+        "e127": {},
+        "e128": {},
+        "e129": {},
+        "e130": {},
+        "e131": {},
+        "e132": {},
+        "e133": {},
+        "e134": {},
+        "e135": {},
+        "e136": {},
+        "e137": {},
+        "e138": {},
+        "e139": {},
+        "e140": {},
+        "e141": {},
+        "e142": {},
+        "e143": {},
+        "e144": {},
+        "e145": {},
+        "e146": {},
+        "e147": {},
+        "e148": {},
+        "e149": {},
+        "e150": {},
+        "e151": {},
+        "e152": {},
+        "e153": {},
+        "e154": {},
+        "e155": {},
+        "e156": {},
+        "e157": {},
+        "e158": {},
+        "e159": {},
+        "e160": {},
+        "e161": {},
+        "e162": {},
+        "e163": {},
+        "e164": {},
+        "e165": {},
+        "e166": {},
+        "e167": {},
+        "e168": {},
+        "e169": {},
+        "e170": {},
+        "e171": {},
+        "e172": {},
+        "e173": {},
+        "e174": {},
+        "e175": {},
+        "e176": {},
+        "e177": {},
+        "e178": {},
+        "e179": {},
+        "e180": {},
+        "e181": {},
+        "e182": {},
+        "e183": {},
+        "e184": {},
+        "e185": {},
+        "e186": {},
+        "e187": {},
+        "e188": {},
+        "e189": {},
+        "e190": {},
+        "e191": {},
+        "e192": {},
+        "e193": {},
+        "e194": {},
+        "e195": {},
+        "e196": {},
+        "e197": {},
+        "e198": {},
+        "e199": {},
+        "e200": {},
+        "e201": {},
+        "e202": {},
+        "e203": {},
+        "e204": {},
+        "e205": {},
+        "e206": {},
+        "e207": {},
+        "e208": {},
+        "e209": {},
+        "e210": {},
+        "e211": {},
+        "e212": {},
+        "e213": {},
+        "e214": {},
+        "e215": {},
+        "e216": {},
+        "e217": {},
+        "e218": {},
+        "e219": {},
+        "e220": {},
+        "e221": {},
+        "e222": {},
+        "e223": {},
+        "e224": {},
+        "e225": {},
+        "e226": {},
+        "e227": {},
+        "e228": {},
+        "e229": {},
+        "e230": {},
+        "e231": {},
+        "e232": {},
+        "e233": {},
+        "e234": {},
+        "e235": {},
+        "e236": {},
+        "e237": {},
+        "e238": {},
+        "e239": {},
+        "e240": {},
+        "e241": {},
+        "e242": {},
+        "e243": {},
+        "e244": {},
+        "e245": {},
+        "e246": {},
+        "e247": {},
+        "e248": {},
+        "e249": {},
+        "e250": {},
+        "e251": {},
+        "e252": {},
+        "e253": {},
+        "e254": {},
+        "e255": {},
+        "e256": {},
+        "e257": {},
+        "e258": {},
+        "e259": {},
+        "e260": {},
+        "e261": {},
+        "e262": {},
+        "e263": {},
+        "e264": {},
+        "e265": {},
+        "e266": {},
+        "e267": {},
+        "e268": {},
+        "e269": {},
+        "e270": {},
+        "e271": {},
+        "e272": {},
+        "e273": {},
+        "e274": {},
+        "e275": {},
+        "e276": {},
+        "e277": {},
+        "e278": {},
+        "e279": {},
+        "e280": {},
+        "e281": {},
+        "e282": {},
+        "e283": {},
+        "e284": {},
+        "e285": {},
+        "e286": {},
+        "e287": {},
+        "e288": {},
+        "e289": {},
+        "e290": {},
+        "e291": {},
+        "e292": {},
+        "e293": {},
+        "e294": {},
+        "e295": {},
+        "e296": {},
+        "e297": {},
+        "e298": {},
+        "e299": {},
+        "e300": {},
+        "e301": {},
+        "e302": {},
+        "e303": {},
+        "e304": {},
+        "e305": {},
+        "e306": {},
+        "e307": {},
+        "e308": {},
+        "e309": {},
+        "e310": {},
+        "e311": {},
+        "e312": {},
+        "e313": {},
+        "e314": {},
+        "e315": {},
+        "e316": {},
+        "e317": {},
+        "e318": {},
+        "e319": {},
+        "e320": {},
+        "e321": {},
+        "e322": {},
+        "e323": {},
+        "e324": {},
+        "e325": {},
+        "e326": {},
+        "e327": {},
+        "e328": {},
+        "e329": {},
+        "e330": {},
+        "e331": {},
+        "e332": {},
+        "e333": {},
+        "e334": {},
+        "e335": {},
+        "e336": {},
+        "e337": {},
+        "e338": {},
+        "e339": {},
+        "e340": {},
+        "e341": {},
+        "e342": {},
+        "e343": {},
+        "e344": {},
+        "e345": {},
+        "e346": {},
+        "e347": {},
+        "e348": {},
+        "e349": {},
+        "e350": {},
+        "e351": {},
+        "e352": {},
+        "e353": {},
+        "e354": {},
+        "e355": {},
+        "e356": {},
+        "e357": {},
+        "e358": {},
+        "e359": {},
+        "e360": {},
+        "e361": {},
+        "e362": {},
+        "e363": {},
+        "e364": {},
+        "e365": {},
+        "e366": {},
+        "e367": {},
+        "e368": {},
+        "e369": {},
+        "e370": {},
+        "e371": {},
+        "e372": {},
+        "e373": {},
+        "e374": {},
+        "e375": {},
+        "e376": {},
+        "e377": {},
+        "e378": {},
+        "e379": {},
+        "e380": {},
+        "e381": {},
+        "e382": {},
+        "e383": {},
+        "e384": {},
+        "e385": {},
+        "e386": {},
+        "e387": {},
+        "e388": {},
+        "e389": {},
+        "e390": {},
+        "e391": {},
+        "e392": {},
+        "e393": {},
+        "e394": {},
+        "e395": {},
+        "e396": {},
+        "e397": {},
+        "e398": {},
+        "e399": {}
+       }
+      }
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"snapshot\": \"- link \\\"Item 0\\\" [ref=e0]\\n- link \\\"Item 1\\\" [ref=e1]\\n- link \\\"Item 2\\\" [ref=e2]\\n- link \\\"Item 3\\\" [ref=e3]\\n- link \\\"Item 4\\\" [ref=e4]\\n- link \\\"Item 5\\\" [ref=e5]\\n- link \\\"Item 6\\\" [ref=e6]\\n- link \\\"Item 7\\\" [ref=e7]\\n- link \\\"Item 8\\\" [ref=e8]\\n- link \\\"Item 9\\\" [ref=e9]\\n- link \\\"Item 10\\\" [ref=e10]\\n- link \\\"Item 11\\\" [ref=e11]\\n- link \\\"Item 12\\\" [ref=e12]\\n- link \\\"Item 13\\\" [ref=e13]\\n- link \\\"Item 14\\\" [ref=e14]\\n- link \\\"Item 15\\\" [ref=e15]\\n- link \\\"Item 16\\\" [ref=e16]\\n- link \\\"Item 17\\\" [ref=e17]\\n- link \\\"Item 18\\\" [ref=e18]\\n- link \\\"Item 19\\\" [ref=e19]\\n- link \\\"Item 20\\\" [ref=e20]\\n- link \\\"Item 21\\\" [ref=e21]\\n- link \\\"Item 22\\\" [ref=e22]\\n- link \\\"Item 23\\\" [ref=e23]\\n- link \\\"Item 24\\\" [ref=e24]\\n- link \\\"Item 25\\\" [ref=e25]\\n- link \\\"Item 26\\\" [ref=e26]\\n- link \\\"Item 27\\\" [ref=e27]\\n- link \\\"Item 28\\\" [ref=e28]\\n- link \\\"Item 29\\\" [ref=e29]\\n- link \\\"Item 30\\\" [ref=e30]\\n- link \\\"Item 31\\\" [ref=e31]\\n- link \\\"Item 32\\\" [ref=e32]\\n- link \\\"Item 33\\\" [ref=e33]\\n- link \\\"Item 34\\\" [ref=e34]\\n- link \\\"Item 35\\\" [ref=e35]\\n- link \\\"Item 36\\\" [ref=e36]\\n- link \\\"Item 37\\\" [ref=e37]\\n- link \\\"Item 38\\\" [ref=e38]\\n- link \\\"Item 39\\\" [ref=e39]\\n- link \\\"Item 40\\\" [ref=e40]\\n- link \\\"Item 41\\\" [ref=e41]\\n- link \\\"Item 42\\\" [ref=e42]\\n- link \\\"Item 43\\\" [ref=e43]\\n- link \\\"Item 44\\\" [ref=e44]\\n- link \\\"Item 45\\\" [ref=e45]\\n- link \\\"Item 46\\\" [ref=e46]\\n- link \\\"Item 47\\\" [ref=e47]\\n- link \\\"Item 48\\\" [ref=e48]\\n- link \\\"Item 49\\\" [ref=e49]\\n- link \\\"Item 50\\\" [ref=e50]\\n- link \\\"Item 51\\\" [ref=e51]\\n- link \\\"Item 52\\\" [ref=e52]\\n- link \\\"Item 53\\\" [ref=e53]\\n- link \\\"Item 54\\\" [ref=e54]\\n- link \\\"Item 55\\\" [ref=e55]\\n- link \\\"Item 56\\\" [ref=e56]\\n- link \\\"Item 57\\\" [ref=e57]\\n- link \\\"Item 58\\\" [ref=e58]\\n- link \\\"Item 59\\\" [ref=e59]\\n- link \\\"Item 60\\\" [ref=e60]\\n- link \\\"Item 61\\\" [ref=e61]\\n- link \\\"Item 62\\\" [ref=e62]\\n- link \\\"Item 63\\\" [ref=e63]\\n- link \\\"Item 64\\\" [ref=e64]\\n- link \\\"Item 65\\\" [ref=e65]\\n- link \\\"Item 66\\\" [ref=e66]\\n- link \\\"Item 67\\\" [ref=e67]\\n- link \\\"Item 68\\\" [ref=e68]\\n- link \\\"Item 69\\\" [ref=e69]\\n- link \\\"Item 70\\\" [ref=e70]\\n- link \\\"Item 71\\\" [ref=e71]\\n- link \\\"Item 72\\\" [ref=e72]\\n- link \\\"Item 73\\\" [ref=e73]\\n- link \\\"Item 74\\\" [ref=e74]\\n- link \\\"Item 75\\\" [ref=e75]\\n- link \\\"Item 76\\\" [ref=e76]\\n- link \\\"Item 77\\\" [ref=e77]\\n- link \\\"Item 78\\\" [ref=e78]\\n- link \\\"Item 79\\\" [ref=e79]\\n- link \\\"Item 80\\\" [ref=e80]\\n- link \\\"Item 81\\\" [ref=e81]\\n- link \\\"Item 82\\\" [ref=e82]\\n- link \\\"Item 83\\\" [ref=e83]\\n- link \\\"Item 84\\\" [ref=e84]\\n- link \\\"Item 85\\\" [ref=e85]\\n- link \\\"Item 86\\\" [ref=e86]\\n- link \\\"Item 87\\\" [ref=e87]\\n- link \\\"Item 88\\\" [ref=e88]\\n- link \\\"Item 89\\\" [ref=e89]\\n- link \\\"Item 90\\\" [ref=e90]\\n- link \\\"Item 91\\\" [ref=e91]\\n- link \\\"Item 92\\\" [ref=e92]\\n- link \\\"Item 93\\\" [ref=e93]\\n- link \\\"Item 94\\\" [ref=e94]\\n- link \\\"Item 95\\\" [ref=e95]\\n- link \\\"Item 96\\\" [ref=e96]\\n- link \\\"Item 97\\\" [ref=e97]\\n- link \\\"Item 98\\\" [ref=e98]\\n- link \\\"Item 99\\\" [ref=e99]\\n- link \\\"Item 100\\\" [ref=e100]\\n- link \\\"Item 101\\\" [ref=e101]\\n- link \\\"Item 102\\\" [ref=e102]\\n- link \\\"Item 103\\\" [ref=e103]\\n- link \\\"Item 104\\\" [ref=e104]\\n- link \\\"Item 105\\\" [ref=e105]\\n- link \\\"Item 106\\\" [ref=e106]\\n- link \\\"Item 107\\\" [ref=e107]\\n- link \\\"Item 108\\\" [ref=e108]\\n- link \\\"Item 109\\\" [ref=e109]\\n- link \\\"Item 110\\\" [ref=e110]\\n- link \\\"Item 111\\\" [ref=e111]\\n- link \\\"Item 112\\\" [ref=e112]\\n- link \\\"Item 113\\\" [ref=e113]\\n- link \\\"Item 114\\\" [ref=e114]\\n- link \\\"Item 115\\\" [ref=e115]\\n- link \\\"Item 116\\\" [ref=e116]\\n- link \\\"Item 117\\\" [ref=e117]\\n- link \\\"Item 118\\\" [ref=e118]\\n- link \\\"Item 119\\\" [ref=e119]\\n- link \\\"Item 120\\\" [ref=e120]\\n- link \\\"Item 121\\\" [ref=e121]\\n- link \\\"Item 122\\\" [ref=e122]\\n- link \\\"Item 123\\\" [ref=e123]\\n- link \\\"Item 124\\\" [ref=e124]\\n- link \\\"Item 125\\\" [ref=e125]\\n- link \\\"Item 126\\\" [ref=e126]\\n- link \\\"Item 127\\\" [ref=e127]\\n- link \\\"Item 128\\\" [ref=e128]\\n- link \\\"Item 129\\\" [ref=e129]\\n- link \\\"Item 130\\\" [ref=e130]\\n- link \\\"Item 131\\\" [ref=e131]\\n- link \\\"Item 132\\\" [ref=e132]\\n- link \\\"Item 133\\\" [ref=e133]\\n- link \\\"Item 134\\\" [ref=e134]\\n- link \\\"Item 135\\\" [ref=e135]\\n- link \\\"Item 136\\\" [ref=e136]\\n- link \\\"Item 137\\\" [ref=e137]\\n- link \\\"Item 138\\\" [ref=e138]\\n- link \\\"Item 139\\\" [ref=e139]\\n- link \\\"Item 140\\\" [ref=e140]\\n- link \\\"Item 141\\\" [ref=e141]\\n- link \\\"Item 142\\\" [ref=e142]\\n- link \\\"Item 143\\\" [ref=e143]\\n- link \\\"Item 144\\\" [ref=e144]\\n- link \\\"Item 145\\\" [ref=e145]\\n- link \\\"Item 146\\\" [ref=e146]\\n- link \\\"Item 147\\\" [ref=e147]\\n- link \\\"Item 148\\\" [ref=e148]\\n- link \\\"Item 149\\\" [ref=e149]\\n- link \\\"Item 150\\\" [ref=e150]\\n- link \\\"Item 151\\\" [ref=e151]\\n- link \\\"Item 152\\\" [ref=e152]\\n- link \\\"Item 153\\\" [ref=e153]\\n- link \\\"Item 154\\\" [ref=e154]\\n- link \\\"Item 155\\\" [ref=e155]\\n- link \\\"Item 156\\\" [ref=e156]\\n- link \\\"Item 157\\\" [ref=e157]\\n- link \\\"Item 158\\\" [ref=e158]\\n- link \\\"Item 159\\\" [ref=e159]\\n- link \\\"Item 160\\\" [ref=e160]\\n- link \\\"Item 161\\\" [ref=e161]\\n- link \\\"Item 162\\\" [ref=e162]\\n- link \\\"Item 163\\\" [ref=e163]\\n- link \\\"Item 164\\\" [ref=e164]\\n- link \\\"Item 165\\\" [ref=e165]\\n- link \\\"Item 166\\\" [ref=e166]\\n- link \\\"Item 167\\\" [ref=e167]\\n- link \\\"Item 168\\\" [ref=e168]\\n- link \\\"Item 169\\\" [ref=e169]\\n- link \\\"Item 170\\\" [ref=e170]\\n- link \\\"Item 171\\\" [ref=e171]\\n- link \\\"Item 172\\\" [ref=e172]\\n- link \\\"Item 173\\\" [ref=e173]\\n- link \\\"Item 174\\\" [ref=e174]\\n- link \\\"Item 175\\\" [ref=e175]\\n- link \\\"Item 176\\\" [ref=e176]\\n- link \\\"Item 177\\\" [ref=e177]\\n- link \\\"Item 178\\\" [ref=e178]\\n- link \\\"Item 179\\\" [ref=e179]\\n- link \\\"Item 180\\\" [ref=e180]\\n- link \\\"Item 181\\\" [ref=e181]\\n- link \\\"Item 182\\\" [ref=e182]\\n- link \\\"Item 183\\\" [ref=e183]\\n- link \\\"Item 184\\\" [ref=e184]\\n- link \\\"Item 185\\\" [ref=e185]\\n- link \\\"Item 186\\\" [ref=e186]\\n- link \\\"Item 187\\\" [ref=e187]\\n- link \\\"Item 188\\\" [ref=e188]\\n- link \\\"Item 189\\\" [ref=e189]\\n- link \\\"Item 190\\\" [ref=e190]\\n- link \\\"Item 191\\\" [ref=e191]\\n- link \\\"Item 192\\\" [ref=e192]\\n- link \\\"Item 193\\\" [ref=e193]\\n- link \\\"Item 194\\\" [ref=e194]\\n- link \\\"Item 195\\\" [ref=e195]\\n- link \\\"Item 196\\\" [ref=e196]\\n- link \\\"Item 197\\\" [ref=e197]\\n- link \\\"Item 198\\\" [ref=e198]\\n- link \\\"Item 199\\\" [ref=e199]\\n- link \\\"Item 200\\\" [ref=e200]\\n- link \\\"Item 201\\\" [ref=e201]\\n- link \\\"Item 202\\\" [ref=e202]\\n- link \\\"Item 203\\\" [ref=e203]\\n- link \\\"Item 204\\\" [ref=e204]\\n- link \\\"Item 205\\\" [ref=e205]\\n- link \\\"Item 206\\\" [ref=e206]\\n- link \\\"Item 207\\\" [ref=e207]\\n- link \\\"Item 208\\\" [ref=e208]\\n- link \\\"Item 209\\\" [ref=e209]\\n- link \\\"Item 210\\\" [ref=e210]\\n- link \\\"Item 211\\\" [ref=e211]\\n- link \\\"Item 212\\\" [ref=e212]\\n- link \\\"Item 213\\\" [ref=e213]\\n- link \\\"Item 214\\\" [ref=e214]\\n- link \\\"Item 215\\\" [ref=e215]\\n- link \\\"Item 216\\\" [ref=e216]\\n- link \\\"Item 217\\\" [ref=e217]\\n- link \\\"Item 218\\\" [ref=e218]\\n- link \\\"Item 219\\\" [ref=e219]\\n- link \\\"Item 220\\\" [ref=e220]\\n- link \\\"Item 221\\\" [ref=e221]\\n- link \\\"Item 222\\\" [ref=e222]\\n- link \\\"Item 223\\\" [ref=e223]\\n- link \\\"Item 224\\\" [ref=e224]\\n- link \\\"Item 225\\\" [ref=e225]\\n- link \\\"Item 226\\\" [ref=e226]\\n- link \\\"Item 227\\\" [ref=e227]\\n- link \\\"Item 228\\\" [ref=e228]\\n- link \\\"Item 229\\\" [ref=e229]\\n- link \\\"Item 230\\\" [ref=e230]\\n- link \\\"Item 231\\\" [ref=e231]\\n- link \\\"Item 232\\\" [ref=e232]\\n- link \\\"Item 233\\\" [ref=e233]\\n- link \\\"Item 234\\\" [ref=e234]\\n- link \\\"Item 235\\\" [ref=e235]\\n- link \\\"Item 236\\\" [ref=e236]\\n- link \\\"Item 237\\\" [ref=e237]\\n- link \\\"Item 238\\\" [ref=e238]\\n- link \\\"Item 239\\\" [ref=e239]\\n- link \\\"Item 240\\\" [ref=e240]\\n- link \\\"Item 241\\\" [ref=e241]\\n- link \\\"Item 242\\\" [ref=e242]\\n- link \\\"Item 243\\\" [ref=e243]\\n- link \\\"Item 244\\\" [ref=e244]\\n- link \\\"Item 245\\\" [ref=e245]\\n- link \\\"Item 246\\\" [ref=e246]\\n- link \\\"Item 247\\\" [ref=e247]\\n- link \\\"Item 248\\\" [ref=e248]\\n- link \\\"Item 249\\\" [ref=e249]\\n- link \\\"Item 250\\\" [ref=e250]\\n- link \\\"Item 251\\\" [ref=e251]\\n- link \\\"Item 252\\\" [ref=e252]\\n- link \\\"Item 253\\\" [ref=e253]\\n- link \\\"Item 254\\\" [ref=e254]\\n- link \\\"Item 255\\\" [ref=e255]\\n- link \\\"Item 256\\\" [ref=e256]\\n- link \\\"Item 257\\\" [ref=e257]\\n- link \\\"Item 258\\\" [ref=e258]\\n- link \\\"Item 259\\\" [ref=e259]\\n- link \\\"Item 260\\\" [ref=e260]\\n- link \\\"Item 261\\\" [ref=e261]\\n- link \\\"Item 262\\\" [ref=e262]\\n- link \\\"Item 263\\\" [ref=e263]\\n- link \\\"Item 264\\\" [ref=e264]\\n- link \\\"Item 265\\\" [ref=e265]\\n- link \\\"Item 266\\\" [ref=e266]\\n- link \\\"Item 267\\\" [ref=e267]\\n- link \\\"Item 268\\\" [ref=e268]\\n- link \\\"Item 269\\\" [ref=e269]\\n- link \\\"Item 270\\\" [ref=e270]\\n- link \\\"Item 271\\\" [ref=e271]\\n- link \\\"Item 272\\\" [ref=e272]\\n- link \\\"Item 273\\\" [ref=e273]\\n- link \\\"Item 274\\\" [ref=e274]\\n- link \\\"Item 275\\\" [ref=e275]\\n- link \\\"Item 276\\\" [ref=e276]\\n- link \\\"Item 277\\\" [ref=e277]\\n- link \\\"Item 278\\\" [ref=e278]\\n- link \\\"Item 279\\\" [ref=e279]\\n- link \\\"Item 280\\\" [ref=e280]\\n- link \\\"Item 281\\\" [ref=e281]\\n- link \\\"Item 282\\\" [ref=e282]\\n- link \\\"Item \\n\\n[... content truncated ...]\", \"element_count\": 400}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "snapshot",
+      "-c"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "snapshot-long-task",
+   "calls": [
+    {
+     "tool": "browser_snapshot",
+     "args": {},
+     "ctx": {
+      "user_task": "find item 7"
+     }
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "snapshot": "- link \"Item 0\" [ref=e0]\n- link \"Item 1\" [ref=e1]\n- link \"Item 2\" [ref=e2]\n- link \"Item 3\" [ref=e3]\n- link \"Item 4\" [ref=e4]\n- link \"Item 5\" [ref=e5]\n- link \"Item 6\" [ref=e6]\n- link \"Item 7\" [ref=e7]\n- link \"Item 8\" [ref=e8]\n- link \"Item 9\" [ref=e9]\n- link \"Item 10\" [ref=e10]\n- link \"Item 11\" [ref=e11]\n- link \"Item 12\" [ref=e12]\n- link \"Item 13\" [ref=e13]\n- link \"Item 14\" [ref=e14]\n- link \"Item 15\" [ref=e15]\n- link \"Item 16\" [ref=e16]\n- link \"Item 17\" [ref=e17]\n- link \"Item 18\" [ref=e18]\n- link \"Item 19\" [ref=e19]\n- link \"Item 20\" [ref=e20]\n- link \"Item 21\" [ref=e21]\n- link \"Item 22\" [ref=e22]\n- link \"Item 23\" [ref=e23]\n- link \"Item 24\" [ref=e24]\n- link \"Item 25\" [ref=e25]\n- link \"Item 26\" [ref=e26]\n- link \"Item 27\" [ref=e27]\n- link \"Item 28\" [ref=e28]\n- link \"Item 29\" [ref=e29]\n- link \"Item 30\" [ref=e30]\n- link \"Item 31\" [ref=e31]\n- link \"Item 32\" [ref=e32]\n- link \"Item 33\" [ref=e33]\n- link \"Item 34\" [ref=e34]\n- link \"Item 35\" [ref=e35]\n- link \"Item 36\" [ref=e36]\n- link \"Item 37\" [ref=e37]\n- link \"Item 38\" [ref=e38]\n- link \"Item 39\" [ref=e39]\n- link \"Item 40\" [ref=e40]\n- link \"Item 41\" [ref=e41]\n- link \"Item 42\" [ref=e42]\n- link \"Item 43\" [ref=e43]\n- link \"Item 44\" [ref=e44]\n- link \"Item 45\" [ref=e45]\n- link \"Item 46\" [ref=e46]\n- link \"Item 47\" [ref=e47]\n- link \"Item 48\" [ref=e48]\n- link \"Item 49\" [ref=e49]\n- link \"Item 50\" [ref=e50]\n- link \"Item 51\" [ref=e51]\n- link \"Item 52\" [ref=e52]\n- link \"Item 53\" [ref=e53]\n- link \"Item 54\" [ref=e54]\n- link \"Item 55\" [ref=e55]\n- link \"Item 56\" [ref=e56]\n- link \"Item 57\" [ref=e57]\n- link \"Item 58\" [ref=e58]\n- link \"Item 59\" [ref=e59]\n- link \"Item 60\" [ref=e60]\n- link \"Item 61\" [ref=e61]\n- link \"Item 62\" [ref=e62]\n- link \"Item 63\" [ref=e63]\n- link \"Item 64\" [ref=e64]\n- link \"Item 65\" [ref=e65]\n- link \"Item 66\" [ref=e66]\n- link \"Item 67\" [ref=e67]\n- link \"Item 68\" [ref=e68]\n- link \"Item 69\" [ref=e69]\n- link \"Item 70\" [ref=e70]\n- link \"Item 71\" [ref=e71]\n- link \"Item 72\" [ref=e72]\n- link \"Item 73\" [ref=e73]\n- link \"Item 74\" [ref=e74]\n- link \"Item 75\" [ref=e75]\n- link \"Item 76\" [ref=e76]\n- link \"Item 77\" [ref=e77]\n- link \"Item 78\" [ref=e78]\n- link \"Item 79\" [ref=e79]\n- link \"Item 80\" [ref=e80]\n- link \"Item 81\" [ref=e81]\n- link \"Item 82\" [ref=e82]\n- link \"Item 83\" [ref=e83]\n- link \"Item 84\" [ref=e84]\n- link \"Item 85\" [ref=e85]\n- link \"Item 86\" [ref=e86]\n- link \"Item 87\" [ref=e87]\n- link \"Item 88\" [ref=e88]\n- link \"Item 89\" [ref=e89]\n- link \"Item 90\" [ref=e90]\n- link \"Item 91\" [ref=e91]\n- link \"Item 92\" [ref=e92]\n- link \"Item 93\" [ref=e93]\n- link \"Item 94\" [ref=e94]\n- link \"Item 95\" [ref=e95]\n- link \"Item 96\" [ref=e96]\n- link \"Item 97\" [ref=e97]\n- link \"Item 98\" [ref=e98]\n- link \"Item 99\" [ref=e99]\n- link \"Item 100\" [ref=e100]\n- link \"Item 101\" [ref=e101]\n- link \"Item 102\" [ref=e102]\n- link \"Item 103\" [ref=e103]\n- link \"Item 104\" [ref=e104]\n- link \"Item 105\" [ref=e105]\n- link \"Item 106\" [ref=e106]\n- link \"Item 107\" [ref=e107]\n- link \"Item 108\" [ref=e108]\n- link \"Item 109\" [ref=e109]\n- link \"Item 110\" [ref=e110]\n- link \"Item 111\" [ref=e111]\n- link \"Item 112\" [ref=e112]\n- link \"Item 113\" [ref=e113]\n- link \"Item 114\" [ref=e114]\n- link \"Item 115\" [ref=e115]\n- link \"Item 116\" [ref=e116]\n- link \"Item 117\" [ref=e117]\n- link \"Item 118\" [ref=e118]\n- link \"Item 119\" [ref=e119]\n- link \"Item 120\" [ref=e120]\n- link \"Item 121\" [ref=e121]\n- link \"Item 122\" [ref=e122]\n- link \"Item 123\" [ref=e123]\n- link \"Item 124\" [ref=e124]\n- link \"Item 125\" [ref=e125]\n- link \"Item 126\" [ref=e126]\n- link \"Item 127\" [ref=e127]\n- link \"Item 128\" [ref=e128]\n- link \"Item 129\" [ref=e129]\n- link \"Item 130\" [ref=e130]\n- link \"Item 131\" [ref=e131]\n- link \"Item 132\" [ref=e132]\n- link \"Item 133\" [ref=e133]\n- link \"Item 134\" [ref=e134]\n- link \"Item 135\" [ref=e135]\n- link \"Item 136\" [ref=e136]\n- link \"Item 137\" [ref=e137]\n- link \"Item 138\" [ref=e138]\n- link \"Item 139\" [ref=e139]\n- link \"Item 140\" [ref=e140]\n- link \"Item 141\" [ref=e141]\n- link \"Item 142\" [ref=e142]\n- link \"Item 143\" [ref=e143]\n- link \"Item 144\" [ref=e144]\n- link \"Item 145\" [ref=e145]\n- link \"Item 146\" [ref=e146]\n- link \"Item 147\" [ref=e147]\n- link \"Item 148\" [ref=e148]\n- link \"Item 149\" [ref=e149]\n- link \"Item 150\" [ref=e150]\n- link \"Item 151\" [ref=e151]\n- link \"Item 152\" [ref=e152]\n- link \"Item 153\" [ref=e153]\n- link \"Item 154\" [ref=e154]\n- link \"Item 155\" [ref=e155]\n- link \"Item 156\" [ref=e156]\n- link \"Item 157\" [ref=e157]\n- link \"Item 158\" [ref=e158]\n- link \"Item 159\" [ref=e159]\n- link \"Item 160\" [ref=e160]\n- link \"Item 161\" [ref=e161]\n- link \"Item 162\" [ref=e162]\n- link \"Item 163\" [ref=e163]\n- link \"Item 164\" [ref=e164]\n- link \"Item 165\" [ref=e165]\n- link \"Item 166\" [ref=e166]\n- link \"Item 167\" [ref=e167]\n- link \"Item 168\" [ref=e168]\n- link \"Item 169\" [ref=e169]\n- link \"Item 170\" [ref=e170]\n- link \"Item 171\" [ref=e171]\n- link \"Item 172\" [ref=e172]\n- link \"Item 173\" [ref=e173]\n- link \"Item 174\" [ref=e174]\n- link \"Item 175\" [ref=e175]\n- link \"Item 176\" [ref=e176]\n- link \"Item 177\" [ref=e177]\n- link \"Item 178\" [ref=e178]\n- link \"Item 179\" [ref=e179]\n- link \"Item 180\" [ref=e180]\n- link \"Item 181\" [ref=e181]\n- link \"Item 182\" [ref=e182]\n- link \"Item 183\" [ref=e183]\n- link \"Item 184\" [ref=e184]\n- link \"Item 185\" [ref=e185]\n- link \"Item 186\" [ref=e186]\n- link \"Item 187\" [ref=e187]\n- link \"Item 188\" [ref=e188]\n- link \"Item 189\" [ref=e189]\n- link \"Item 190\" [ref=e190]\n- link \"Item 191\" [ref=e191]\n- link \"Item 192\" [ref=e192]\n- link \"Item 193\" [ref=e193]\n- link \"Item 194\" [ref=e194]\n- link \"Item 195\" [ref=e195]\n- link \"Item 196\" [ref=e196]\n- link \"Item 197\" [ref=e197]\n- link \"Item 198\" [ref=e198]\n- link \"Item 199\" [ref=e199]\n- link \"Item 200\" [ref=e200]\n- link \"Item 201\" [ref=e201]\n- link \"Item 202\" [ref=e202]\n- link \"Item 203\" [ref=e203]\n- link \"Item 204\" [ref=e204]\n- link \"Item 205\" [ref=e205]\n- link \"Item 206\" [ref=e206]\n- link \"Item 207\" [ref=e207]\n- link \"Item 208\" [ref=e208]\n- link \"Item 209\" [ref=e209]\n- link \"Item 210\" [ref=e210]\n- link \"Item 211\" [ref=e211]\n- link \"Item 212\" [ref=e212]\n- link \"Item 213\" [ref=e213]\n- link \"Item 214\" [ref=e214]\n- link \"Item 215\" [ref=e215]\n- link \"Item 216\" [ref=e216]\n- link \"Item 217\" [ref=e217]\n- link \"Item 218\" [ref=e218]\n- link \"Item 219\" [ref=e219]\n- link \"Item 220\" [ref=e220]\n- link \"Item 221\" [ref=e221]\n- link \"Item 222\" [ref=e222]\n- link \"Item 223\" [ref=e223]\n- link \"Item 224\" [ref=e224]\n- link \"Item 225\" [ref=e225]\n- link \"Item 226\" [ref=e226]\n- link \"Item 227\" [ref=e227]\n- link \"Item 228\" [ref=e228]\n- link \"Item 229\" [ref=e229]\n- link \"Item 230\" [ref=e230]\n- link \"Item 231\" [ref=e231]\n- link \"Item 232\" [ref=e232]\n- link \"Item 233\" [ref=e233]\n- link \"Item 234\" [ref=e234]\n- link \"Item 235\" [ref=e235]\n- link \"Item 236\" [ref=e236]\n- link \"Item 237\" [ref=e237]\n- link \"Item 238\" [ref=e238]\n- link \"Item 239\" [ref=e239]\n- link \"Item 240\" [ref=e240]\n- link \"Item 241\" [ref=e241]\n- link \"Item 242\" [ref=e242]\n- link \"Item 243\" [ref=e243]\n- link \"Item 244\" [ref=e244]\n- link \"Item 245\" [ref=e245]\n- link \"Item 246\" [ref=e246]\n- link \"Item 247\" [ref=e247]\n- link \"Item 248\" [ref=e248]\n- link \"Item 249\" [ref=e249]\n- link \"Item 250\" [ref=e250]\n- link \"Item 251\" [ref=e251]\n- link \"Item 252\" [ref=e252]\n- link \"Item 253\" [ref=e253]\n- link \"Item 254\" [ref=e254]\n- link \"Item 255\" [ref=e255]\n- link \"Item 256\" [ref=e256]\n- link \"Item 257\" [ref=e257]\n- link \"Item 258\" [ref=e258]\n- link \"Item 259\" [ref=e259]\n- link \"Item 260\" [ref=e260]\n- link \"Item 261\" [ref=e261]\n- link \"Item 262\" [ref=e262]\n- link \"Item 263\" [ref=e263]\n- link \"Item 264\" [ref=e264]\n- link \"Item 265\" [ref=e265]\n- link \"Item 266\" [ref=e266]\n- link \"Item 267\" [ref=e267]\n- link \"Item 268\" [ref=e268]\n- link \"Item 269\" [ref=e269]\n- link \"Item 270\" [ref=e270]\n- link \"Item 271\" [ref=e271]\n- link \"Item 272\" [ref=e272]\n- link \"Item 273\" [ref=e273]\n- link \"Item 274\" [ref=e274]\n- link \"Item 275\" [ref=e275]\n- link \"Item 276\" [ref=e276]\n- link \"Item 277\" [ref=e277]\n- link \"Item 278\" [ref=e278]\n- link \"Item 279\" [ref=e279]\n- link \"Item 280\" [ref=e280]\n- link \"Item 281\" [ref=e281]\n- link \"Item 282\" [ref=e282]\n- link \"Item 283\" [ref=e283]\n- link \"Item 284\" [ref=e284]\n- link \"Item 285\" [ref=e285]\n- link \"Item 286\" [ref=e286]\n- link \"Item 287\" [ref=e287]\n- link \"Item 288\" [ref=e288]\n- link \"Item 289\" [ref=e289]\n- link \"Item 290\" [ref=e290]\n- link \"Item 291\" [ref=e291]\n- link \"Item 292\" [ref=e292]\n- link \"Item 293\" [ref=e293]\n- link \"Item 294\" [ref=e294]\n- link \"Item 295\" [ref=e295]\n- link \"Item 296\" [ref=e296]\n- link \"Item 297\" [ref=e297]\n- link \"Item 298\" [ref=e298]\n- link \"Item 299\" [ref=e299]\n- link \"Item 300\" [ref=e300]\n- link \"Item 301\" [ref=e301]\n- link \"Item 302\" [ref=e302]\n- link \"Item 303\" [ref=e303]\n- link \"Item 304\" [ref=e304]\n- link \"Item 305\" [ref=e305]\n- link \"Item 306\" [ref=e306]\n- link \"Item 307\" [ref=e307]\n- link \"Item 308\" [ref=e308]\n- link \"Item 309\" [ref=e309]\n- link \"Item 310\" [ref=e310]\n- link \"Item 311\" [ref=e311]\n- link \"Item 312\" [ref=e312]\n- link \"Item 313\" [ref=e313]\n- link \"Item 314\" [ref=e314]\n- link \"Item 315\" [ref=e315]\n- link \"Item 316\" [ref=e316]\n- link \"Item 317\" [ref=e317]\n- link \"Item 318\" [ref=e318]\n- link \"Item 319\" [ref=e319]\n- link \"Item 320\" [ref=e320]\n- link \"Item 321\" [ref=e321]\n- link \"Item 322\" [ref=e322]\n- link \"Item 323\" [ref=e323]\n- link \"Item 324\" [ref=e324]\n- link \"Item 325\" [ref=e325]\n- link \"Item 326\" [ref=e326]\n- link \"Item 327\" [ref=e327]\n- link \"Item 328\" [ref=e328]\n- link \"Item 329\" [ref=e329]\n- link \"Item 330\" [ref=e330]\n- link \"Item 331\" [ref=e331]\n- link \"Item 332\" [ref=e332]\n- link \"Item 333\" [ref=e333]\n- link \"Item 334\" [ref=e334]\n- link \"Item 335\" [ref=e335]\n- link \"Item 336\" [ref=e336]\n- link \"Item 337\" [ref=e337]\n- link \"Item 338\" [ref=e338]\n- link \"Item 339\" [ref=e339]\n- link \"Item 340\" [ref=e340]\n- link \"Item 341\" [ref=e341]\n- link \"Item 342\" [ref=e342]\n- link \"Item 343\" [ref=e343]\n- link \"Item 344\" [ref=e344]\n- link \"Item 345\" [ref=e345]\n- link \"Item 346\" [ref=e346]\n- link \"Item 347\" [ref=e347]\n- link \"Item 348\" [ref=e348]\n- link \"Item 349\" [ref=e349]\n- link \"Item 350\" [ref=e350]\n- link \"Item 351\" [ref=e351]\n- link \"Item 352\" [ref=e352]\n- link \"Item 353\" [ref=e353]\n- link \"Item 354\" [ref=e354]\n- link \"Item 355\" [ref=e355]\n- link \"Item 356\" [ref=e356]\n- link \"Item 357\" [ref=e357]\n- link \"Item 358\" [ref=e358]\n- link \"Item 359\" [ref=e359]\n- link \"Item 360\" [ref=e360]\n- link \"Item 361\" [ref=e361]\n- link \"Item 362\" [ref=e362]\n- link \"Item 363\" [ref=e363]\n- link \"Item 364\" [ref=e364]\n- link \"Item 365\" [ref=e365]\n- link \"Item 366\" [ref=e366]\n- link \"Item 367\" [ref=e367]\n- link \"Item 368\" [ref=e368]\n- link \"Item 369\" [ref=e369]\n- link \"Item 370\" [ref=e370]\n- link \"Item 371\" [ref=e371]\n- link \"Item 372\" [ref=e372]\n- link \"Item 373\" [ref=e373]\n- link \"Item 374\" [ref=e374]\n- link \"Item 375\" [ref=e375]\n- link \"Item 376\" [ref=e376]\n- link \"Item 377\" [ref=e377]\n- link \"Item 378\" [ref=e378]\n- link \"Item 379\" [ref=e379]\n- link \"Item 380\" [ref=e380]\n- link \"Item 381\" [ref=e381]\n- link \"Item 382\" [ref=e382]\n- link \"Item 383\" [ref=e383]\n- link \"Item 384\" [ref=e384]\n- link \"Item 385\" [ref=e385]\n- link \"Item 386\" [ref=e386]\n- link \"Item 387\" [ref=e387]\n- link \"Item 388\" [ref=e388]\n- link \"Item 389\" [ref=e389]\n- link \"Item 390\" [ref=e390]\n- link \"Item 391\" [ref=e391]\n- link \"Item 392\" [ref=e392]\n- link \"Item 393\" [ref=e393]\n- link \"Item 394\" [ref=e394]\n- link \"Item 395\" [ref=e395]\n- link \"Item 396\" [ref=e396]\n- link \"Item 397\" [ref=e397]\n- link \"Item 398\" [ref=e398]\n- link \"Item 399\" [ref=e399]",
+       "refs": {}
+      }
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [
+    {
+     "content": "Item 7 is [ref=e7]"
+    }
+   ],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"snapshot\": \"Item 7 is [ref=e7]\", \"element_count\": 0}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "snapshot",
+      "-c"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [
+    {
+     "task": "web_extract",
+     "max_tokens": 4000,
+     "temperature": 0.1,
+     "messages": [
+      {
+       "role": "user",
+       "content": "You are a content extractor for a browser automation agent.\n\nThe user's task is: find item 7\n\nGiven the following page snapshot (accessibility tree representation), extract and summarize the most relevant information for completing this task. Focus on:\n1. Interactive elements (buttons, links, inputs) that might be needed\n2. Text content relevant to the task (prices, descriptions, headings, important info)\n3. Navigation structure if relevant\n\nKeep ref IDs (like [ref=e5]) for interactive elements so the agent can use them.\n\nPage Snapshot:\n- link \"Item 0\" [ref=e0]\n- link \"Item 1\" [ref=e1]\n- link \"Item 2\" [ref=e2]\n- link \"Item 3\" [ref=e3]\n- link \"Item 4\" [ref=e4]\n- link \"Item 5\" [ref=e5]\n- link \"Item 6\" [ref=e6]\n- link \"Item 7\" [ref=e7]\n- link \"Item 8\" [ref=e8]\n- link \"Item 9\" [ref=e9]\n- link \"Item 10\" [ref=e10]\n- link \"Item 11\" [ref=e11]\n- link \"Item 12\" [ref=e12]\n- link \"Item 13\" [ref=e13]\n- link \"Item 14\" [ref=e14]\n- link \"Item 15\" [ref=e15]\n- link \"Item 16\" [ref=e16]\n- link \"Item 17\" [ref=e17]\n- link \"Item 18\" [ref=e18]\n- link \"Item 19\" [ref=e19]\n- link \"Item 20\" [ref=e20]\n- link \"Item 21\" [ref=e21]\n- link \"Item 22\" [ref=e22]\n- link \"Item 23\" [ref=e23]\n- link \"Item 24\" [ref=e24]\n- link \"Item 25\" [ref=e25]\n- link \"Item 26\" [ref=e26]\n- link \"Item 27\" [ref=e27]\n- link \"Item 28\" [ref=e28]\n- link \"Item 29\" [ref=e29]\n- link \"Item 30\" [ref=e30]\n- link \"Item 31\" [ref=e31]\n- link \"Item 32\" [ref=e32]\n- link \"Item 33\" [ref=e33]\n- link \"Item 34\" [ref=e34]\n- link \"Item 35\" [ref=e35]\n- link \"Item 36\" [ref=e36]\n- link \"Item 37\" [ref=e37]\n- link \"Item 38\" [ref=e38]\n- link \"Item 39\" [ref=e39]\n- link \"Item 40\" [ref=e40]\n- link \"Item 41\" [ref=e41]\n- link \"Item 42\" [ref=e42]\n- link \"Item 43\" [ref=e43]\n- link \"Item 44\" [ref=e44]\n- link \"Item 45\" [ref=e45]\n- link \"Item 46\" [ref=e46]\n- link \"Item 47\" [ref=e47]\n- link \"Item 48\" [ref=e48]\n- link \"Item 49\" [ref=e49]\n- link \"Item 50\" [ref=e50]\n- link \"Item 51\" [ref=e51]\n- link \"Item 52\" [ref=e52]\n- link \"Item 53\" [ref=e53]\n- link \"Item 54\" [ref=e54]\n- link \"Item 55\" [ref=e55]\n- link \"Item 56\" [ref=e56]\n- link \"Item 57\" [ref=e57]\n- link \"Item 58\" [ref=e58]\n- link \"Item 59\" [ref=e59]\n- link \"Item 60\" [ref=e60]\n- link \"Item 61\" [ref=e61]\n- link \"Item 62\" [ref=e62]\n- link \"Item 63\" [ref=e63]\n- link \"Item 64\" [ref=e64]\n- link \"Item 65\" [ref=e65]\n- link \"Item 66\" [ref=e66]\n- link \"Item 67\" [ref=e67]\n- link \"Item 68\" [ref=e68]\n- link \"Item 69\" [ref=e69]\n- link \"Item 70\" [ref=e70]\n- link \"Item 71\" [ref=e71]\n- link \"Item 72\" [ref=e72]\n- link \"Item 73\" [ref=e73]\n- link \"Item 74\" [ref=e74]\n- link \"Item 75\" [ref=e75]\n- link \"Item 76\" [ref=e76]\n- link \"Item 77\" [ref=e77]\n- link \"Item 78\" [ref=e78]\n- link \"Item 79\" [ref=e79]\n- link \"Item 80\" [ref=e80]\n- link \"Item 81\" [ref=e81]\n- link \"Item 82\" [ref=e82]\n- link \"Item 83\" [ref=e83]\n- link \"Item 84\" [ref=e84]\n- link \"Item 85\" [ref=e85]\n- link \"Item 86\" [ref=e86]\n- link \"Item 87\" [ref=e87]\n- link \"Item 88\" [ref=e88]\n- link \"Item 89\" [ref=e89]\n- link \"Item 90\" [ref=e90]\n- link \"Item 91\" [ref=e91]\n- link \"Item 92\" [ref=e92]\n- link \"Item 93\" [ref=e93]\n- link \"Item 94\" [ref=e94]\n- link \"Item 95\" [ref=e95]\n- link \"Item 96\" [ref=e96]\n- link \"Item 97\" [ref=e97]\n- link \"Item 98\" [ref=e98]\n- link \"Item 99\" [ref=e99]\n- link \"Item 100\" [ref=e100]\n- link \"Item 101\" [ref=e101]\n- link \"Item 102\" [ref=e102]\n- link \"Item 103\" [ref=e103]\n- link \"Item 104\" [ref=e104]\n- link \"Item 105\" [ref=e105]\n- link \"Item 106\" [ref=e106]\n- link \"Item 107\" [ref=e107]\n- link \"Item 108\" [ref=e108]\n- link \"Item 109\" [ref=e109]\n- link \"Item 110\" [ref=e110]\n- link \"Item 111\" [ref=e111]\n- link \"Item 112\" [ref=e112]\n- link \"Item 113\" [ref=e113]\n- link \"Item 114\" [ref=e114]\n- link \"Item 115\" [ref=e115]\n- link \"Item 116\" [ref=e116]\n- link \"Item 117\" [ref=e117]\n- link \"Item 118\" [ref=e118]\n- link \"Item 119\" [ref=e119]\n- link \"Item 120\" [ref=e120]\n- link \"Item 121\" [ref=e121]\n- link \"Item 122\" [ref=e122]\n- link \"Item 123\" [ref=e123]\n- link \"Item 124\" [ref=e124]\n- link \"Item 125\" [ref=e125]\n- link \"Item 126\" [ref=e126]\n- link \"Item 127\" [ref=e127]\n- link \"Item 128\" [ref=e128]\n- link \"Item 129\" [ref=e129]\n- link \"Item 130\" [ref=e130]\n- link \"Item 131\" [ref=e131]\n- link \"Item 132\" [ref=e132]\n- link \"Item 133\" [ref=e133]\n- link \"Item 134\" [ref=e134]\n- link \"Item 135\" [ref=e135]\n- link \"Item 136\" [ref=e136]\n- link \"Item 137\" [ref=e137]\n- link \"Item 138\" [ref=e138]\n- link \"Item 139\" [ref=e139]\n- link \"Item 140\" [ref=e140]\n- link \"Item 141\" [ref=e141]\n- link \"Item 142\" [ref=e142]\n- link \"Item 143\" [ref=e143]\n- link \"Item 144\" [ref=e144]\n- link \"Item 145\" [ref=e145]\n- link \"Item 146\" [ref=e146]\n- link \"Item 147\" [ref=e147]\n- link \"Item 148\" [ref=e148]\n- link \"Item 149\" [ref=e149]\n- link \"Item 150\" [ref=e150]\n- link \"Item 151\" [ref=e151]\n- link \"Item 152\" [ref=e152]\n- link \"Item 153\" [ref=e153]\n- link \"Item 154\" [ref=e154]\n- link \"Item 155\" [ref=e155]\n- link \"Item 156\" [ref=e156]\n- link \"Item 157\" [ref=e157]\n- link \"Item 158\" [ref=e158]\n- link \"Item 159\" [ref=e159]\n- link \"Item 160\" [ref=e160]\n- link \"Item 161\" [ref=e161]\n- link \"Item 162\" [ref=e162]\n- link \"Item 163\" [ref=e163]\n- link \"Item 164\" [ref=e164]\n- link \"Item 165\" [ref=e165]\n- link \"Item 166\" [ref=e166]\n- link \"Item 167\" [ref=e167]\n- link \"Item 168\" [ref=e168]\n- link \"Item 169\" [ref=e169]\n- link \"Item 170\" [ref=e170]\n- link \"Item 171\" [ref=e171]\n- link \"Item 172\" [ref=e172]\n- link \"Item 173\" [ref=e173]\n- link \"Item 174\" [ref=e174]\n- link \"Item 175\" [ref=e175]\n- link \"Item 176\" [ref=e176]\n- link \"Item 177\" [ref=e177]\n- link \"Item 178\" [ref=e178]\n- link \"Item 179\" [ref=e179]\n- link \"Item 180\" [ref=e180]\n- link \"Item 181\" [ref=e181]\n- link \"Item 182\" [ref=e182]\n- link \"Item 183\" [ref=e183]\n- link \"Item 184\" [ref=e184]\n- link \"Item 185\" [ref=e185]\n- link \"Item 186\" [ref=e186]\n- link \"Item 187\" [ref=e187]\n- link \"Item 188\" [ref=e188]\n- link \"Item 189\" [ref=e189]\n- link \"Item 190\" [ref=e190]\n- link \"Item 191\" [ref=e191]\n- link \"Item 192\" [ref=e192]\n- link \"Item 193\" [ref=e193]\n- link \"Item 194\" [ref=e194]\n- link \"Item 195\" [ref=e195]\n- link \"Item 196\" [ref=e196]\n- link \"Item 197\" [ref=e197]\n- link \"Item 198\" [ref=e198]\n- link \"Item 199\" [ref=e199]\n- link \"Item 200\" [ref=e200]\n- link \"Item 201\" [ref=e201]\n- link \"Item 202\" [ref=e202]\n- link \"Item 203\" [ref=e203]\n- link \"Item 204\" [ref=e204]\n- link \"Item 205\" [ref=e205]\n- link \"Item 206\" [ref=e206]\n- link \"Item 207\" [ref=e207]\n- link \"Item 208\" [ref=e208]\n- link \"Item 209\" [ref=e209]\n- link \"Item 210\" [ref=e210]\n- link \"Item 211\" [ref=e211]\n- link \"Item 212\" [ref=e212]\n- link \"Item 213\" [ref=e213]\n- link \"Item 214\" [ref=e214]\n- link \"Item 215\" [ref=e215]\n- link \"Item 216\" [ref=e216]\n- link \"Item 217\" [ref=e217]\n- link \"Item 218\" [ref=e218]\n- link \"Item 219\" [ref=e219]\n- link \"Item 220\" [ref=e220]\n- link \"Item 221\" [ref=e221]\n- link \"Item 222\" [ref=e222]\n- link \"Item 223\" [ref=e223]\n- link \"Item 224\" [ref=e224]\n- link \"Item 225\" [ref=e225]\n- link \"Item 226\" [ref=e226]\n- link \"Item 227\" [ref=e227]\n- link \"Item 228\" [ref=e228]\n- link \"Item 229\" [ref=e229]\n- link \"Item 230\" [ref=e230]\n- link \"Item 231\" [ref=e231]\n- link \"Item 232\" [ref=e232]\n- link \"Item 233\" [ref=e233]\n- link \"Item 234\" [ref=e234]\n- link \"Item 235\" [ref=e235]\n- link \"Item 236\" [ref=e236]\n- link \"Item 237\" [ref=e237]\n- link \"Item 238\" [ref=e238]\n- link \"Item 239\" [ref=e239]\n- link \"Item 240\" [ref=e240]\n- link \"Item 241\" [ref=e241]\n- link \"Item 242\" [ref=e242]\n- link \"Item 243\" [ref=e243]\n- link \"Item 244\" [ref=e244]\n- link \"Item 245\" [ref=e245]\n- link \"Item 246\" [ref=e246]\n- link \"Item 247\" [ref=e247]\n- link \"Item 248\" [ref=e248]\n- link \"Item 249\" [ref=e249]\n- link \"Item 250\" [ref=e250]\n- link \"Item 251\" [ref=e251]\n- link \"Item 252\" [ref=e252]\n- link \"Item 253\" [ref=e253]\n- link \"Item 254\" [ref=e254]\n- link \"Item 255\" [ref=e255]\n- link \"Item 256\" [ref=e256]\n- link \"Item 257\" [ref=e257]\n- link \"Item 258\" [ref=e258]\n- link \"Item 259\" [ref=e259]\n- link \"Item 260\" [ref=e260]\n- link \"Item 261\" [ref=e261]\n- link \"Item 262\" [ref=e262]\n- link \"Item 263\" [ref=e263]\n- link \"Item 264\" [ref=e264]\n- link \"Item 265\" [ref=e265]\n- link \"Item 266\" [ref=e266]\n- link \"Item 267\" [ref=e267]\n- link \"Item 268\" [ref=e268]\n- link \"Item 269\" [ref=e269]\n- link \"Item 270\" [ref=e270]\n- link \"Item 271\" [ref=e271]\n- link \"Item 272\" [ref=e272]\n- link \"Item 273\" [ref=e273]\n- link \"Item 274\" [ref=e274]\n- link \"Item 275\" [ref=e275]\n- link \"Item 276\" [ref=e276]\n- link \"Item 277\" [ref=e277]\n- link \"Item 278\" [ref=e278]\n- link \"Item 279\" [ref=e279]\n- link \"Item 280\" [ref=e280]\n- link \"Item 281\" [ref=e281]\n- link \"Item 282\" [ref=e282]\n- link \"Item 283\" [ref=e283]\n- link \"Item 284\" [ref=e284]\n- link \"Item 285\" [ref=e285]\n- link \"Item 286\" [ref=e286]\n- link \"Item 287\" [ref=e287]\n- link \"Item 288\" [ref=e288]\n- link \"Item 289\" [ref=e289]\n- link \"Item 290\" [ref=e290]\n- link \"Item 291\" [ref=e291]\n- link \"Item 292\" [ref=e292]\n- link \"Item 293\" [ref=e293]\n- link \"Item 294\" [ref=e294]\n- link \"Item 295\" [ref=e295]\n- link \"Item 296\" [ref=e296]\n- link \"Item 297\" [ref=e297]\n- link \"Item 298\" [ref=e298]\n- link \"Item 299\" [ref=e299]\n- link \"Item 300\" [ref=e300]\n- link \"Item 301\" [ref=e301]\n- link \"Item 302\" [ref=e302]\n- link \"Item 303\" [ref=e303]\n- link \"Item 304\" [ref=e304]\n- link \"Item 305\" [ref=e305]\n- link \"Item 306\" [ref=e306]\n- link \"Item 307\" [ref=e307]\n- link \"Item 308\" [ref=e308]\n- link \"Item 309\" [ref=e309]\n- link \"Item 310\" [ref=e310]\n- link \"Item 311\" [ref=e311]\n- link \"Item 312\" [ref=e312]\n- link \"Item 313\" [ref=e313]\n- link \"Item 314\" [ref=e314]\n- link \"Item 315\" [ref=e315]\n- link \"Item 316\" [ref=e316]\n- link \"Item 317\" [ref=e317]\n- link \"Item 318\" [ref=e318]\n- link \"Item 319\" [ref=e319]\n- link \"Item 320\" [ref=e320]\n- link \"Item 321\" [ref=e321]\n- link \"Item 322\" [ref=e322]\n- link \"Item 323\" [ref=e323]\n- link \"Item 324\" [ref=e324]\n- link \"Item 325\" [ref=e325]\n- link \"Item 326\" [ref=e326]\n- link \"Item 327\" [ref=e327]\n- link \"Item 328\" [ref=e328]\n- link \"Item 329\" [ref=e329]\n- link \"Item 330\" [ref=e330]\n- link \"Item 331\" [ref=e331]\n- link \"Item 332\" [ref=e332]\n- link \"Item 333\" [ref=e333]\n- link \"Item 334\" [ref=e334]\n- link \"Item 335\" [ref=e335]\n- link \"Item 336\" [ref=e336]\n- link \"Item 337\" [ref=e337]\n- link \"Item 338\" [ref=e338]\n- link \"Item 339\" [ref=e339]\n- link \"Item 340\" [ref=e340]\n- link \"Item 341\" [ref=e341]\n- link \"Item 342\" [ref=e342]\n- link \"Item 343\" [ref=e343]\n- link \"Item 344\" [ref=e344]\n- link \"Item 345\" [ref=e345]\n- link \"Item 346\" [ref=e346]\n- link \"Item 347\" [ref=e347]\n- link \"Item 348\" [ref=e348]\n- link \"Item 349\" [ref=e349]\n- link \"Item 350\" [ref=e350]\n- link \"Item 351\" [ref=e351]\n- link \"Item 352\" [ref=e352]\n- link \"Item 353\" [ref=e353]\n- link \"Item 354\" [ref=e354]\n- link \"Item 355\" [ref=e355]\n- link \"Item 356\" [ref=e356]\n- link \"Item 357\" [ref=e357]\n- link \"Item 358\" [ref=e358]\n- link \"Item 359\" [ref=e359]\n- link \"Item 360\" [ref=e360]\n- link \"Item 361\" [ref=e361]\n- link \"Item 362\" [ref=e362]\n- link \"Item 363\" [ref=e363]\n- link \"Item 364\" [ref=e364]\n- link \"Item 365\" [ref=e365]\n- link \"Item 366\" [ref=e366]\n- link \"Item 367\" [ref=e367]\n- link \"Item 368\" [ref=e368]\n- link \"Item 369\" [ref=e369]\n- link \"Item 370\" [ref=e370]\n- link \"Item 371\" [ref=e371]\n- link \"Item 372\" [ref=e372]\n- link \"Item 373\" [ref=e373]\n- link \"Item 374\" [ref=e374]\n- link \"Item 375\" [ref=e375]\n- link \"Item 376\" [ref=e376]\n- link \"Item 377\" [ref=e377]\n- link \"Item 378\" [ref=e378]\n- link \"Item 379\" [ref=e379]\n- link \"Item 380\" [ref=e380]\n- link \"Item 381\" [ref=e381]\n- link \"Item 382\" [ref=e382]\n- link \"Item 383\" [ref=e383]\n- link \"Item 384\" [ref=e384]\n- link \"Item 385\" [ref=e385]\n- link \"Item 386\" [ref=e386]\n- link \"Item 387\" [ref=e387]\n- link \"Item 388\" [ref=e388]\n- link \"Item 389\" [ref=e389]\n- link \"Item 390\" [ref=e390]\n- link \"Item 391\" [ref=e391]\n- link \"Item 392\" [ref=e392]\n- link \"Item 393\" [ref=e393]\n- link \"Item 394\" [ref=e394]\n- link \"Item 395\" [ref=e395]\n- link \"Item 396\" [ref=e396]\n- link \"Item 397\" [ref=e397]\n- link \"Item 398\" [ref=e398]\n- link \"Item 399\" [ref=e399]\n\nProvide a concise summary that preserves actionable information and relevant content."
+      }
+     ]
+    }
+   ],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "snapshot-long-task-fails",
+   "calls": [
+    {
+     "tool": "browser_snapshot",
+     "args": {},
+     "ctx": {
+      "user_task": "find item 7"
+     }
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "snapshot": "- link \"Item 0\" [ref=e0]\n- link \"Item 1\" [ref=e1]\n- link \"Item 2\" [ref=e2]\n- link \"Item 3\" [ref=e3]\n- link \"Item 4\" [ref=e4]\n- link \"Item 5\" [ref=e5]\n- link \"Item 6\" [ref=e6]\n- link \"Item 7\" [ref=e7]\n- link \"Item 8\" [ref=e8]\n- link \"Item 9\" [ref=e9]\n- link \"Item 10\" [ref=e10]\n- link \"Item 11\" [ref=e11]\n- link \"Item 12\" [ref=e12]\n- link \"Item 13\" [ref=e13]\n- link \"Item 14\" [ref=e14]\n- link \"Item 15\" [ref=e15]\n- link \"Item 16\" [ref=e16]\n- link \"Item 17\" [ref=e17]\n- link \"Item 18\" [ref=e18]\n- link \"Item 19\" [ref=e19]\n- link \"Item 20\" [ref=e20]\n- link \"Item 21\" [ref=e21]\n- link \"Item 22\" [ref=e22]\n- link \"Item 23\" [ref=e23]\n- link \"Item 24\" [ref=e24]\n- link \"Item 25\" [ref=e25]\n- link \"Item 26\" [ref=e26]\n- link \"Item 27\" [ref=e27]\n- link \"Item 28\" [ref=e28]\n- link \"Item 29\" [ref=e29]\n- link \"Item 30\" [ref=e30]\n- link \"Item 31\" [ref=e31]\n- link \"Item 32\" [ref=e32]\n- link \"Item 33\" [ref=e33]\n- link \"Item 34\" [ref=e34]\n- link \"Item 35\" [ref=e35]\n- link \"Item 36\" [ref=e36]\n- link \"Item 37\" [ref=e37]\n- link \"Item 38\" [ref=e38]\n- link \"Item 39\" [ref=e39]\n- link \"Item 40\" [ref=e40]\n- link \"Item 41\" [ref=e41]\n- link \"Item 42\" [ref=e42]\n- link \"Item 43\" [ref=e43]\n- link \"Item 44\" [ref=e44]\n- link \"Item 45\" [ref=e45]\n- link \"Item 46\" [ref=e46]\n- link \"Item 47\" [ref=e47]\n- link \"Item 48\" [ref=e48]\n- link \"Item 49\" [ref=e49]\n- link \"Item 50\" [ref=e50]\n- link \"Item 51\" [ref=e51]\n- link \"Item 52\" [ref=e52]\n- link \"Item 53\" [ref=e53]\n- link \"Item 54\" [ref=e54]\n- link \"Item 55\" [ref=e55]\n- link \"Item 56\" [ref=e56]\n- link \"Item 57\" [ref=e57]\n- link \"Item 58\" [ref=e58]\n- link \"Item 59\" [ref=e59]\n- link \"Item 60\" [ref=e60]\n- link \"Item 61\" [ref=e61]\n- link \"Item 62\" [ref=e62]\n- link \"Item 63\" [ref=e63]\n- link \"Item 64\" [ref=e64]\n- link \"Item 65\" [ref=e65]\n- link \"Item 66\" [ref=e66]\n- link \"Item 67\" [ref=e67]\n- link \"Item 68\" [ref=e68]\n- link \"Item 69\" [ref=e69]\n- link \"Item 70\" [ref=e70]\n- link \"Item 71\" [ref=e71]\n- link \"Item 72\" [ref=e72]\n- link \"Item 73\" [ref=e73]\n- link \"Item 74\" [ref=e74]\n- link \"Item 75\" [ref=e75]\n- link \"Item 76\" [ref=e76]\n- link \"Item 77\" [ref=e77]\n- link \"Item 78\" [ref=e78]\n- link \"Item 79\" [ref=e79]\n- link \"Item 80\" [ref=e80]\n- link \"Item 81\" [ref=e81]\n- link \"Item 82\" [ref=e82]\n- link \"Item 83\" [ref=e83]\n- link \"Item 84\" [ref=e84]\n- link \"Item 85\" [ref=e85]\n- link \"Item 86\" [ref=e86]\n- link \"Item 87\" [ref=e87]\n- link \"Item 88\" [ref=e88]\n- link \"Item 89\" [ref=e89]\n- link \"Item 90\" [ref=e90]\n- link \"Item 91\" [ref=e91]\n- link \"Item 92\" [ref=e92]\n- link \"Item 93\" [ref=e93]\n- link \"Item 94\" [ref=e94]\n- link \"Item 95\" [ref=e95]\n- link \"Item 96\" [ref=e96]\n- link \"Item 97\" [ref=e97]\n- link \"Item 98\" [ref=e98]\n- link \"Item 99\" [ref=e99]\n- link \"Item 100\" [ref=e100]\n- link \"Item 101\" [ref=e101]\n- link \"Item 102\" [ref=e102]\n- link \"Item 103\" [ref=e103]\n- link \"Item 104\" [ref=e104]\n- link \"Item 105\" [ref=e105]\n- link \"Item 106\" [ref=e106]\n- link \"Item 107\" [ref=e107]\n- link \"Item 108\" [ref=e108]\n- link \"Item 109\" [ref=e109]\n- link \"Item 110\" [ref=e110]\n- link \"Item 111\" [ref=e111]\n- link \"Item 112\" [ref=e112]\n- link \"Item 113\" [ref=e113]\n- link \"Item 114\" [ref=e114]\n- link \"Item 115\" [ref=e115]\n- link \"Item 116\" [ref=e116]\n- link \"Item 117\" [ref=e117]\n- link \"Item 118\" [ref=e118]\n- link \"Item 119\" [ref=e119]\n- link \"Item 120\" [ref=e120]\n- link \"Item 121\" [ref=e121]\n- link \"Item 122\" [ref=e122]\n- link \"Item 123\" [ref=e123]\n- link \"Item 124\" [ref=e124]\n- link \"Item 125\" [ref=e125]\n- link \"Item 126\" [ref=e126]\n- link \"Item 127\" [ref=e127]\n- link \"Item 128\" [ref=e128]\n- link \"Item 129\" [ref=e129]\n- link \"Item 130\" [ref=e130]\n- link \"Item 131\" [ref=e131]\n- link \"Item 132\" [ref=e132]\n- link \"Item 133\" [ref=e133]\n- link \"Item 134\" [ref=e134]\n- link \"Item 135\" [ref=e135]\n- link \"Item 136\" [ref=e136]\n- link \"Item 137\" [ref=e137]\n- link \"Item 138\" [ref=e138]\n- link \"Item 139\" [ref=e139]\n- link \"Item 140\" [ref=e140]\n- link \"Item 141\" [ref=e141]\n- link \"Item 142\" [ref=e142]\n- link \"Item 143\" [ref=e143]\n- link \"Item 144\" [ref=e144]\n- link \"Item 145\" [ref=e145]\n- link \"Item 146\" [ref=e146]\n- link \"Item 147\" [ref=e147]\n- link \"Item 148\" [ref=e148]\n- link \"Item 149\" [ref=e149]\n- link \"Item 150\" [ref=e150]\n- link \"Item 151\" [ref=e151]\n- link \"Item 152\" [ref=e152]\n- link \"Item 153\" [ref=e153]\n- link \"Item 154\" [ref=e154]\n- link \"Item 155\" [ref=e155]\n- link \"Item 156\" [ref=e156]\n- link \"Item 157\" [ref=e157]\n- link \"Item 158\" [ref=e158]\n- link \"Item 159\" [ref=e159]\n- link \"Item 160\" [ref=e160]\n- link \"Item 161\" [ref=e161]\n- link \"Item 162\" [ref=e162]\n- link \"Item 163\" [ref=e163]\n- link \"Item 164\" [ref=e164]\n- link \"Item 165\" [ref=e165]\n- link \"Item 166\" [ref=e166]\n- link \"Item 167\" [ref=e167]\n- link \"Item 168\" [ref=e168]\n- link \"Item 169\" [ref=e169]\n- link \"Item 170\" [ref=e170]\n- link \"Item 171\" [ref=e171]\n- link \"Item 172\" [ref=e172]\n- link \"Item 173\" [ref=e173]\n- link \"Item 174\" [ref=e174]\n- link \"Item 175\" [ref=e175]\n- link \"Item 176\" [ref=e176]\n- link \"Item 177\" [ref=e177]\n- link \"Item 178\" [ref=e178]\n- link \"Item 179\" [ref=e179]\n- link \"Item 180\" [ref=e180]\n- link \"Item 181\" [ref=e181]\n- link \"Item 182\" [ref=e182]\n- link \"Item 183\" [ref=e183]\n- link \"Item 184\" [ref=e184]\n- link \"Item 185\" [ref=e185]\n- link \"Item 186\" [ref=e186]\n- link \"Item 187\" [ref=e187]\n- link \"Item 188\" [ref=e188]\n- link \"Item 189\" [ref=e189]\n- link \"Item 190\" [ref=e190]\n- link \"Item 191\" [ref=e191]\n- link \"Item 192\" [ref=e192]\n- link \"Item 193\" [ref=e193]\n- link \"Item 194\" [ref=e194]\n- link \"Item 195\" [ref=e195]\n- link \"Item 196\" [ref=e196]\n- link \"Item 197\" [ref=e197]\n- link \"Item 198\" [ref=e198]\n- link \"Item 199\" [ref=e199]\n- link \"Item 200\" [ref=e200]\n- link \"Item 201\" [ref=e201]\n- link \"Item 202\" [ref=e202]\n- link \"Item 203\" [ref=e203]\n- link \"Item 204\" [ref=e204]\n- link \"Item 205\" [ref=e205]\n- link \"Item 206\" [ref=e206]\n- link \"Item 207\" [ref=e207]\n- link \"Item 208\" [ref=e208]\n- link \"Item 209\" [ref=e209]\n- link \"Item 210\" [ref=e210]\n- link \"Item 211\" [ref=e211]\n- link \"Item 212\" [ref=e212]\n- link \"Item 213\" [ref=e213]\n- link \"Item 214\" [ref=e214]\n- link \"Item 215\" [ref=e215]\n- link \"Item 216\" [ref=e216]\n- link \"Item 217\" [ref=e217]\n- link \"Item 218\" [ref=e218]\n- link \"Item 219\" [ref=e219]\n- link \"Item 220\" [ref=e220]\n- link \"Item 221\" [ref=e221]\n- link \"Item 222\" [ref=e222]\n- link \"Item 223\" [ref=e223]\n- link \"Item 224\" [ref=e224]\n- link \"Item 225\" [ref=e225]\n- link \"Item 226\" [ref=e226]\n- link \"Item 227\" [ref=e227]\n- link \"Item 228\" [ref=e228]\n- link \"Item 229\" [ref=e229]\n- link \"Item 230\" [ref=e230]\n- link \"Item 231\" [ref=e231]\n- link \"Item 232\" [ref=e232]\n- link \"Item 233\" [ref=e233]\n- link \"Item 234\" [ref=e234]\n- link \"Item 235\" [ref=e235]\n- link \"Item 236\" [ref=e236]\n- link \"Item 237\" [ref=e237]\n- link \"Item 238\" [ref=e238]\n- link \"Item 239\" [ref=e239]\n- link \"Item 240\" [ref=e240]\n- link \"Item 241\" [ref=e241]\n- link \"Item 242\" [ref=e242]\n- link \"Item 243\" [ref=e243]\n- link \"Item 244\" [ref=e244]\n- link \"Item 245\" [ref=e245]\n- link \"Item 246\" [ref=e246]\n- link \"Item 247\" [ref=e247]\n- link \"Item 248\" [ref=e248]\n- link \"Item 249\" [ref=e249]\n- link \"Item 250\" [ref=e250]\n- link \"Item 251\" [ref=e251]\n- link \"Item 252\" [ref=e252]\n- link \"Item 253\" [ref=e253]\n- link \"Item 254\" [ref=e254]\n- link \"Item 255\" [ref=e255]\n- link \"Item 256\" [ref=e256]\n- link \"Item 257\" [ref=e257]\n- link \"Item 258\" [ref=e258]\n- link \"Item 259\" [ref=e259]\n- link \"Item 260\" [ref=e260]\n- link \"Item 261\" [ref=e261]\n- link \"Item 262\" [ref=e262]\n- link \"Item 263\" [ref=e263]\n- link \"Item 264\" [ref=e264]\n- link \"Item 265\" [ref=e265]\n- link \"Item 266\" [ref=e266]\n- link \"Item 267\" [ref=e267]\n- link \"Item 268\" [ref=e268]\n- link \"Item 269\" [ref=e269]\n- link \"Item 270\" [ref=e270]\n- link \"Item 271\" [ref=e271]\n- link \"Item 272\" [ref=e272]\n- link \"Item 273\" [ref=e273]\n- link \"Item 274\" [ref=e274]\n- link \"Item 275\" [ref=e275]\n- link \"Item 276\" [ref=e276]\n- link \"Item 277\" [ref=e277]\n- link \"Item 278\" [ref=e278]\n- link \"Item 279\" [ref=e279]\n- link \"Item 280\" [ref=e280]\n- link \"Item 281\" [ref=e281]\n- link \"Item 282\" [ref=e282]\n- link \"Item 283\" [ref=e283]\n- link \"Item 284\" [ref=e284]\n- link \"Item 285\" [ref=e285]\n- link \"Item 286\" [ref=e286]\n- link \"Item 287\" [ref=e287]\n- link \"Item 288\" [ref=e288]\n- link \"Item 289\" [ref=e289]\n- link \"Item 290\" [ref=e290]\n- link \"Item 291\" [ref=e291]\n- link \"Item 292\" [ref=e292]\n- link \"Item 293\" [ref=e293]\n- link \"Item 294\" [ref=e294]\n- link \"Item 295\" [ref=e295]\n- link \"Item 296\" [ref=e296]\n- link \"Item 297\" [ref=e297]\n- link \"Item 298\" [ref=e298]\n- link \"Item 299\" [ref=e299]\n- link \"Item 300\" [ref=e300]\n- link \"Item 301\" [ref=e301]\n- link \"Item 302\" [ref=e302]\n- link \"Item 303\" [ref=e303]\n- link \"Item 304\" [ref=e304]\n- link \"Item 305\" [ref=e305]\n- link \"Item 306\" [ref=e306]\n- link \"Item 307\" [ref=e307]\n- link \"Item 308\" [ref=e308]\n- link \"Item 309\" [ref=e309]\n- link \"Item 310\" [ref=e310]\n- link \"Item 311\" [ref=e311]\n- link \"Item 312\" [ref=e312]\n- link \"Item 313\" [ref=e313]\n- link \"Item 314\" [ref=e314]\n- link \"Item 315\" [ref=e315]\n- link \"Item 316\" [ref=e316]\n- link \"Item 317\" [ref=e317]\n- link \"Item 318\" [ref=e318]\n- link \"Item 319\" [ref=e319]\n- link \"Item 320\" [ref=e320]\n- link \"Item 321\" [ref=e321]\n- link \"Item 322\" [ref=e322]\n- link \"Item 323\" [ref=e323]\n- link \"Item 324\" [ref=e324]\n- link \"Item 325\" [ref=e325]\n- link \"Item 326\" [ref=e326]\n- link \"Item 327\" [ref=e327]\n- link \"Item 328\" [ref=e328]\n- link \"Item 329\" [ref=e329]\n- link \"Item 330\" [ref=e330]\n- link \"Item 331\" [ref=e331]\n- link \"Item 332\" [ref=e332]\n- link \"Item 333\" [ref=e333]\n- link \"Item 334\" [ref=e334]\n- link \"Item 335\" [ref=e335]\n- link \"Item 336\" [ref=e336]\n- link \"Item 337\" [ref=e337]\n- link \"Item 338\" [ref=e338]\n- link \"Item 339\" [ref=e339]\n- link \"Item 340\" [ref=e340]\n- link \"Item 341\" [ref=e341]\n- link \"Item 342\" [ref=e342]\n- link \"Item 343\" [ref=e343]\n- link \"Item 344\" [ref=e344]\n- link \"Item 345\" [ref=e345]\n- link \"Item 346\" [ref=e346]\n- link \"Item 347\" [ref=e347]\n- link \"Item 348\" [ref=e348]\n- link \"Item 349\" [ref=e349]\n- link \"Item 350\" [ref=e350]\n- link \"Item 351\" [ref=e351]\n- link \"Item 352\" [ref=e352]\n- link \"Item 353\" [ref=e353]\n- link \"Item 354\" [ref=e354]\n- link \"Item 355\" [ref=e355]\n- link \"Item 356\" [ref=e356]\n- link \"Item 357\" [ref=e357]\n- link \"Item 358\" [ref=e358]\n- link \"Item 359\" [ref=e359]\n- link \"Item 360\" [ref=e360]\n- link \"Item 361\" [ref=e361]\n- link \"Item 362\" [ref=e362]\n- link \"Item 363\" [ref=e363]\n- link \"Item 364\" [ref=e364]\n- link \"Item 365\" [ref=e365]\n- link \"Item 366\" [ref=e366]\n- link \"Item 367\" [ref=e367]\n- link \"Item 368\" [ref=e368]\n- link \"Item 369\" [ref=e369]\n- link \"Item 370\" [ref=e370]\n- link \"Item 371\" [ref=e371]\n- link \"Item 372\" [ref=e372]\n- link \"Item 373\" [ref=e373]\n- link \"Item 374\" [ref=e374]\n- link \"Item 375\" [ref=e375]\n- link \"Item 376\" [ref=e376]\n- link \"Item 377\" [ref=e377]\n- link \"Item 378\" [ref=e378]\n- link \"Item 379\" [ref=e379]\n- link \"Item 380\" [ref=e380]\n- link \"Item 381\" [ref=e381]\n- link \"Item 382\" [ref=e382]\n- link \"Item 383\" [ref=e383]\n- link \"Item 384\" [ref=e384]\n- link \"Item 385\" [ref=e385]\n- link \"Item 386\" [ref=e386]\n- link \"Item 387\" [ref=e387]\n- link \"Item 388\" [ref=e388]\n- link \"Item 389\" [ref=e389]\n- link \"Item 390\" [ref=e390]\n- link \"Item 391\" [ref=e391]\n- link \"Item 392\" [ref=e392]\n- link \"Item 393\" [ref=e393]\n- link \"Item 394\" [ref=e394]\n- link \"Item 395\" [ref=e395]\n- link \"Item 396\" [ref=e396]\n- link \"Item 397\" [ref=e397]\n- link \"Item 398\" [ref=e398]\n- link \"Item 399\" [ref=e399]",
+       "refs": {}
+      }
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [
+    {
+     "raise": "RuntimeError"
+    }
+   ],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"snapshot\": \"- link \\\"Item 0\\\" [ref=e0]\\n- link \\\"Item 1\\\" [ref=e1]\\n- link \\\"Item 2\\\" [ref=e2]\\n- link \\\"Item 3\\\" [ref=e3]\\n- link \\\"Item 4\\\" [ref=e4]\\n- link \\\"Item 5\\\" [ref=e5]\\n- link \\\"Item 6\\\" [ref=e6]\\n- link \\\"Item 7\\\" [ref=e7]\\n- link \\\"Item 8\\\" [ref=e8]\\n- link \\\"Item 9\\\" [ref=e9]\\n- link \\\"Item 10\\\" [ref=e10]\\n- link \\\"Item 11\\\" [ref=e11]\\n- link \\\"Item 12\\\" [ref=e12]\\n- link \\\"Item 13\\\" [ref=e13]\\n- link \\\"Item 14\\\" [ref=e14]\\n- link \\\"Item 15\\\" [ref=e15]\\n- link \\\"Item 16\\\" [ref=e16]\\n- link \\\"Item 17\\\" [ref=e17]\\n- link \\\"Item 18\\\" [ref=e18]\\n- link \\\"Item 19\\\" [ref=e19]\\n- link \\\"Item 20\\\" [ref=e20]\\n- link \\\"Item 21\\\" [ref=e21]\\n- link \\\"Item 22\\\" [ref=e22]\\n- link \\\"Item 23\\\" [ref=e23]\\n- link \\\"Item 24\\\" [ref=e24]\\n- link \\\"Item 25\\\" [ref=e25]\\n- link \\\"Item 26\\\" [ref=e26]\\n- link \\\"Item 27\\\" [ref=e27]\\n- link \\\"Item 28\\\" [ref=e28]\\n- link \\\"Item 29\\\" [ref=e29]\\n- link \\\"Item 30\\\" [ref=e30]\\n- link \\\"Item 31\\\" [ref=e31]\\n- link \\\"Item 32\\\" [ref=e32]\\n- link \\\"Item 33\\\" [ref=e33]\\n- link \\\"Item 34\\\" [ref=e34]\\n- link \\\"Item 35\\\" [ref=e35]\\n- link \\\"Item 36\\\" [ref=e36]\\n- link \\\"Item 37\\\" [ref=e37]\\n- link \\\"Item 38\\\" [ref=e38]\\n- link \\\"Item 39\\\" [ref=e39]\\n- link \\\"Item 40\\\" [ref=e40]\\n- link \\\"Item 41\\\" [ref=e41]\\n- link \\\"Item 42\\\" [ref=e42]\\n- link \\\"Item 43\\\" [ref=e43]\\n- link \\\"Item 44\\\" [ref=e44]\\n- link \\\"Item 45\\\" [ref=e45]\\n- link \\\"Item 46\\\" [ref=e46]\\n- link \\\"Item 47\\\" [ref=e47]\\n- link \\\"Item 48\\\" [ref=e48]\\n- link \\\"Item 49\\\" [ref=e49]\\n- link \\\"Item 50\\\" [ref=e50]\\n- link \\\"Item 51\\\" [ref=e51]\\n- link \\\"Item 52\\\" [ref=e52]\\n- link \\\"Item 53\\\" [ref=e53]\\n- link \\\"Item 54\\\" [ref=e54]\\n- link \\\"Item 55\\\" [ref=e55]\\n- link \\\"Item 56\\\" [ref=e56]\\n- link \\\"Item 57\\\" [ref=e57]\\n- link \\\"Item 58\\\" [ref=e58]\\n- link \\\"Item 59\\\" [ref=e59]\\n- link \\\"Item 60\\\" [ref=e60]\\n- link \\\"Item 61\\\" [ref=e61]\\n- link \\\"Item 62\\\" [ref=e62]\\n- link \\\"Item 63\\\" [ref=e63]\\n- link \\\"Item 64\\\" [ref=e64]\\n- link \\\"Item 65\\\" [ref=e65]\\n- link \\\"Item 66\\\" [ref=e66]\\n- link \\\"Item 67\\\" [ref=e67]\\n- link \\\"Item 68\\\" [ref=e68]\\n- link \\\"Item 69\\\" [ref=e69]\\n- link \\\"Item 70\\\" [ref=e70]\\n- link \\\"Item 71\\\" [ref=e71]\\n- link \\\"Item 72\\\" [ref=e72]\\n- link \\\"Item 73\\\" [ref=e73]\\n- link \\\"Item 74\\\" [ref=e74]\\n- link \\\"Item 75\\\" [ref=e75]\\n- link \\\"Item 76\\\" [ref=e76]\\n- link \\\"Item 77\\\" [ref=e77]\\n- link \\\"Item 78\\\" [ref=e78]\\n- link \\\"Item 79\\\" [ref=e79]\\n- link \\\"Item 80\\\" [ref=e80]\\n- link \\\"Item 81\\\" [ref=e81]\\n- link \\\"Item 82\\\" [ref=e82]\\n- link \\\"Item 83\\\" [ref=e83]\\n- link \\\"Item 84\\\" [ref=e84]\\n- link \\\"Item 85\\\" [ref=e85]\\n- link \\\"Item 86\\\" [ref=e86]\\n- link \\\"Item 87\\\" [ref=e87]\\n- link \\\"Item 88\\\" [ref=e88]\\n- link \\\"Item 89\\\" [ref=e89]\\n- link \\\"Item 90\\\" [ref=e90]\\n- link \\\"Item 91\\\" [ref=e91]\\n- link \\\"Item 92\\\" [ref=e92]\\n- link \\\"Item 93\\\" [ref=e93]\\n- link \\\"Item 94\\\" [ref=e94]\\n- link \\\"Item 95\\\" [ref=e95]\\n- link \\\"Item 96\\\" [ref=e96]\\n- link \\\"Item 97\\\" [ref=e97]\\n- link \\\"Item 98\\\" [ref=e98]\\n- link \\\"Item 99\\\" [ref=e99]\\n- link \\\"Item 100\\\" [ref=e100]\\n- link \\\"Item 101\\\" [ref=e101]\\n- link \\\"Item 102\\\" [ref=e102]\\n- link \\\"Item 103\\\" [ref=e103]\\n- link \\\"Item 104\\\" [ref=e104]\\n- link \\\"Item 105\\\" [ref=e105]\\n- link \\\"Item 106\\\" [ref=e106]\\n- link \\\"Item 107\\\" [ref=e107]\\n- link \\\"Item 108\\\" [ref=e108]\\n- link \\\"Item 109\\\" [ref=e109]\\n- link \\\"Item 110\\\" [ref=e110]\\n- link \\\"Item 111\\\" [ref=e111]\\n- link \\\"Item 112\\\" [ref=e112]\\n- link \\\"Item 113\\\" [ref=e113]\\n- link \\\"Item 114\\\" [ref=e114]\\n- link \\\"Item 115\\\" [ref=e115]\\n- link \\\"Item 116\\\" [ref=e116]\\n- link \\\"Item 117\\\" [ref=e117]\\n- link \\\"Item 118\\\" [ref=e118]\\n- link \\\"Item 119\\\" [ref=e119]\\n- link \\\"Item 120\\\" [ref=e120]\\n- link \\\"Item 121\\\" [ref=e121]\\n- link \\\"Item 122\\\" [ref=e122]\\n- link \\\"Item 123\\\" [ref=e123]\\n- link \\\"Item 124\\\" [ref=e124]\\n- link \\\"Item 125\\\" [ref=e125]\\n- link \\\"Item 126\\\" [ref=e126]\\n- link \\\"Item 127\\\" [ref=e127]\\n- link \\\"Item 128\\\" [ref=e128]\\n- link \\\"Item 129\\\" [ref=e129]\\n- link \\\"Item 130\\\" [ref=e130]\\n- link \\\"Item 131\\\" [ref=e131]\\n- link \\\"Item 132\\\" [ref=e132]\\n- link \\\"Item 133\\\" [ref=e133]\\n- link \\\"Item 134\\\" [ref=e134]\\n- link \\\"Item 135\\\" [ref=e135]\\n- link \\\"Item 136\\\" [ref=e136]\\n- link \\\"Item 137\\\" [ref=e137]\\n- link \\\"Item 138\\\" [ref=e138]\\n- link \\\"Item 139\\\" [ref=e139]\\n- link \\\"Item 140\\\" [ref=e140]\\n- link \\\"Item 141\\\" [ref=e141]\\n- link \\\"Item 142\\\" [ref=e142]\\n- link \\\"Item 143\\\" [ref=e143]\\n- link \\\"Item 144\\\" [ref=e144]\\n- link \\\"Item 145\\\" [ref=e145]\\n- link \\\"Item 146\\\" [ref=e146]\\n- link \\\"Item 147\\\" [ref=e147]\\n- link \\\"Item 148\\\" [ref=e148]\\n- link \\\"Item 149\\\" [ref=e149]\\n- link \\\"Item 150\\\" [ref=e150]\\n- link \\\"Item 151\\\" [ref=e151]\\n- link \\\"Item 152\\\" [ref=e152]\\n- link \\\"Item 153\\\" [ref=e153]\\n- link \\\"Item 154\\\" [ref=e154]\\n- link \\\"Item 155\\\" [ref=e155]\\n- link \\\"Item 156\\\" [ref=e156]\\n- link \\\"Item 157\\\" [ref=e157]\\n- link \\\"Item 158\\\" [ref=e158]\\n- link \\\"Item 159\\\" [ref=e159]\\n- link \\\"Item 160\\\" [ref=e160]\\n- link \\\"Item 161\\\" [ref=e161]\\n- link \\\"Item 162\\\" [ref=e162]\\n- link \\\"Item 163\\\" [ref=e163]\\n- link \\\"Item 164\\\" [ref=e164]\\n- link \\\"Item 165\\\" [ref=e165]\\n- link \\\"Item 166\\\" [ref=e166]\\n- link \\\"Item 167\\\" [ref=e167]\\n- link \\\"Item 168\\\" [ref=e168]\\n- link \\\"Item 169\\\" [ref=e169]\\n- link \\\"Item 170\\\" [ref=e170]\\n- link \\\"Item 171\\\" [ref=e171]\\n- link \\\"Item 172\\\" [ref=e172]\\n- link \\\"Item 173\\\" [ref=e173]\\n- link \\\"Item 174\\\" [ref=e174]\\n- link \\\"Item 175\\\" [ref=e175]\\n- link \\\"Item 176\\\" [ref=e176]\\n- link \\\"Item 177\\\" [ref=e177]\\n- link \\\"Item 178\\\" [ref=e178]\\n- link \\\"Item 179\\\" [ref=e179]\\n- link \\\"Item 180\\\" [ref=e180]\\n- link \\\"Item 181\\\" [ref=e181]\\n- link \\\"Item 182\\\" [ref=e182]\\n- link \\\"Item 183\\\" [ref=e183]\\n- link \\\"Item 184\\\" [ref=e184]\\n- link \\\"Item 185\\\" [ref=e185]\\n- link \\\"Item 186\\\" [ref=e186]\\n- link \\\"Item 187\\\" [ref=e187]\\n- link \\\"Item 188\\\" [ref=e188]\\n- link \\\"Item 189\\\" [ref=e189]\\n- link \\\"Item 190\\\" [ref=e190]\\n- link \\\"Item 191\\\" [ref=e191]\\n- link \\\"Item 192\\\" [ref=e192]\\n- link \\\"Item 193\\\" [ref=e193]\\n- link \\\"Item 194\\\" [ref=e194]\\n- link \\\"Item 195\\\" [ref=e195]\\n- link \\\"Item 196\\\" [ref=e196]\\n- link \\\"Item 197\\\" [ref=e197]\\n- link \\\"Item 198\\\" [ref=e198]\\n- link \\\"Item 199\\\" [ref=e199]\\n- link \\\"Item 200\\\" [ref=e200]\\n- link \\\"Item 201\\\" [ref=e201]\\n- link \\\"Item 202\\\" [ref=e202]\\n- link \\\"Item 203\\\" [ref=e203]\\n- link \\\"Item 204\\\" [ref=e204]\\n- link \\\"Item 205\\\" [ref=e205]\\n- link \\\"Item 206\\\" [ref=e206]\\n- link \\\"Item 207\\\" [ref=e207]\\n- link \\\"Item 208\\\" [ref=e208]\\n- link \\\"Item 209\\\" [ref=e209]\\n- link \\\"Item 210\\\" [ref=e210]\\n- link \\\"Item 211\\\" [ref=e211]\\n- link \\\"Item 212\\\" [ref=e212]\\n- link \\\"Item 213\\\" [ref=e213]\\n- link \\\"Item 214\\\" [ref=e214]\\n- link \\\"Item 215\\\" [ref=e215]\\n- link \\\"Item 216\\\" [ref=e216]\\n- link \\\"Item 217\\\" [ref=e217]\\n- link \\\"Item 218\\\" [ref=e218]\\n- link \\\"Item 219\\\" [ref=e219]\\n- link \\\"Item 220\\\" [ref=e220]\\n- link \\\"Item 221\\\" [ref=e221]\\n- link \\\"Item 222\\\" [ref=e222]\\n- link \\\"Item 223\\\" [ref=e223]\\n- link \\\"Item 224\\\" [ref=e224]\\n- link \\\"Item 225\\\" [ref=e225]\\n- link \\\"Item 226\\\" [ref=e226]\\n- link \\\"Item 227\\\" [ref=e227]\\n- link \\\"Item 228\\\" [ref=e228]\\n- link \\\"Item 229\\\" [ref=e229]\\n- link \\\"Item 230\\\" [ref=e230]\\n- link \\\"Item 231\\\" [ref=e231]\\n- link \\\"Item 232\\\" [ref=e232]\\n- link \\\"Item 233\\\" [ref=e233]\\n- link \\\"Item 234\\\" [ref=e234]\\n- link \\\"Item 235\\\" [ref=e235]\\n- link \\\"Item 236\\\" [ref=e236]\\n- link \\\"Item 237\\\" [ref=e237]\\n- link \\\"Item 238\\\" [ref=e238]\\n- link \\\"Item 239\\\" [ref=e239]\\n- link \\\"Item 240\\\" [ref=e240]\\n- link \\\"Item 241\\\" [ref=e241]\\n- link \\\"Item 242\\\" [ref=e242]\\n- link \\\"Item 243\\\" [ref=e243]\\n- link \\\"Item 244\\\" [ref=e244]\\n- link \\\"Item 245\\\" [ref=e245]\\n- link \\\"Item 246\\\" [ref=e246]\\n- link \\\"Item 247\\\" [ref=e247]\\n- link \\\"Item 248\\\" [ref=e248]\\n- link \\\"Item 249\\\" [ref=e249]\\n- link \\\"Item 250\\\" [ref=e250]\\n- link \\\"Item 251\\\" [ref=e251]\\n- link \\\"Item 252\\\" [ref=e252]\\n- link \\\"Item 253\\\" [ref=e253]\\n- link \\\"Item 254\\\" [ref=e254]\\n- link \\\"Item 255\\\" [ref=e255]\\n- link \\\"Item 256\\\" [ref=e256]\\n- link \\\"Item 257\\\" [ref=e257]\\n- link \\\"Item 258\\\" [ref=e258]\\n- link \\\"Item 259\\\" [ref=e259]\\n- link \\\"Item 260\\\" [ref=e260]\\n- link \\\"Item 261\\\" [ref=e261]\\n- link \\\"Item 262\\\" [ref=e262]\\n- link \\\"Item 263\\\" [ref=e263]\\n- link \\\"Item 264\\\" [ref=e264]\\n- link \\\"Item 265\\\" [ref=e265]\\n- link \\\"Item 266\\\" [ref=e266]\\n- link \\\"Item 267\\\" [ref=e267]\\n- link \\\"Item 268\\\" [ref=e268]\\n- link \\\"Item 269\\\" [ref=e269]\\n- link \\\"Item 270\\\" [ref=e270]\\n- link \\\"Item 271\\\" [ref=e271]\\n- link \\\"Item 272\\\" [ref=e272]\\n- link \\\"Item 273\\\" [ref=e273]\\n- link \\\"Item 274\\\" [ref=e274]\\n- link \\\"Item 275\\\" [ref=e275]\\n- link \\\"Item 276\\\" [ref=e276]\\n- link \\\"Item 277\\\" [ref=e277]\\n- link \\\"Item 278\\\" [ref=e278]\\n- link \\\"Item 279\\\" [ref=e279]\\n- link \\\"Item 280\\\" [ref=e280]\\n- link \\\"Item 281\\\" [ref=e281]\\n- link \\\"Item 282\\\" [ref=e282]\\n- link \\\"Item \\n\\n[... content truncated ...]\", \"element_count\": 0}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "snapshot",
+      "-c"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [
+    {
+     "task": "web_extract",
+     "max_tokens": 4000,
+     "temperature": 0.1,
+     "messages": [
+      {
+       "role": "user",
+       "content": "You are a content extractor for a browser automation agent.\n\nThe user's task is: find item 7\n\nGiven the following page snapshot (accessibility tree representation), extract and summarize the most relevant information for completing this task. Focus on:\n1. Interactive elements (buttons, links, inputs) that might be needed\n2. Text content relevant to the task (prices, descriptions, headings, important info)\n3. Navigation structure if relevant\n\nKeep ref IDs (like [ref=e5]) for interactive elements so the agent can use them.\n\nPage Snapshot:\n- link \"Item 0\" [ref=e0]\n- link \"Item 1\" [ref=e1]\n- link \"Item 2\" [ref=e2]\n- link \"Item 3\" [ref=e3]\n- link \"Item 4\" [ref=e4]\n- link \"Item 5\" [ref=e5]\n- link \"Item 6\" [ref=e6]\n- link \"Item 7\" [ref=e7]\n- link \"Item 8\" [ref=e8]\n- link \"Item 9\" [ref=e9]\n- link \"Item 10\" [ref=e10]\n- link \"Item 11\" [ref=e11]\n- link \"Item 12\" [ref=e12]\n- link \"Item 13\" [ref=e13]\n- link \"Item 14\" [ref=e14]\n- link \"Item 15\" [ref=e15]\n- link \"Item 16\" [ref=e16]\n- link \"Item 17\" [ref=e17]\n- link \"Item 18\" [ref=e18]\n- link \"Item 19\" [ref=e19]\n- link \"Item 20\" [ref=e20]\n- link \"Item 21\" [ref=e21]\n- link \"Item 22\" [ref=e22]\n- link \"Item 23\" [ref=e23]\n- link \"Item 24\" [ref=e24]\n- link \"Item 25\" [ref=e25]\n- link \"Item 26\" [ref=e26]\n- link \"Item 27\" [ref=e27]\n- link \"Item 28\" [ref=e28]\n- link \"Item 29\" [ref=e29]\n- link \"Item 30\" [ref=e30]\n- link \"Item 31\" [ref=e31]\n- link \"Item 32\" [ref=e32]\n- link \"Item 33\" [ref=e33]\n- link \"Item 34\" [ref=e34]\n- link \"Item 35\" [ref=e35]\n- link \"Item 36\" [ref=e36]\n- link \"Item 37\" [ref=e37]\n- link \"Item 38\" [ref=e38]\n- link \"Item 39\" [ref=e39]\n- link \"Item 40\" [ref=e40]\n- link \"Item 41\" [ref=e41]\n- link \"Item 42\" [ref=e42]\n- link \"Item 43\" [ref=e43]\n- link \"Item 44\" [ref=e44]\n- link \"Item 45\" [ref=e45]\n- link \"Item 46\" [ref=e46]\n- link \"Item 47\" [ref=e47]\n- link \"Item 48\" [ref=e48]\n- link \"Item 49\" [ref=e49]\n- link \"Item 50\" [ref=e50]\n- link \"Item 51\" [ref=e51]\n- link \"Item 52\" [ref=e52]\n- link \"Item 53\" [ref=e53]\n- link \"Item 54\" [ref=e54]\n- link \"Item 55\" [ref=e55]\n- link \"Item 56\" [ref=e56]\n- link \"Item 57\" [ref=e57]\n- link \"Item 58\" [ref=e58]\n- link \"Item 59\" [ref=e59]\n- link \"Item 60\" [ref=e60]\n- link \"Item 61\" [ref=e61]\n- link \"Item 62\" [ref=e62]\n- link \"Item 63\" [ref=e63]\n- link \"Item 64\" [ref=e64]\n- link \"Item 65\" [ref=e65]\n- link \"Item 66\" [ref=e66]\n- link \"Item 67\" [ref=e67]\n- link \"Item 68\" [ref=e68]\n- link \"Item 69\" [ref=e69]\n- link \"Item 70\" [ref=e70]\n- link \"Item 71\" [ref=e71]\n- link \"Item 72\" [ref=e72]\n- link \"Item 73\" [ref=e73]\n- link \"Item 74\" [ref=e74]\n- link \"Item 75\" [ref=e75]\n- link \"Item 76\" [ref=e76]\n- link \"Item 77\" [ref=e77]\n- link \"Item 78\" [ref=e78]\n- link \"Item 79\" [ref=e79]\n- link \"Item 80\" [ref=e80]\n- link \"Item 81\" [ref=e81]\n- link \"Item 82\" [ref=e82]\n- link \"Item 83\" [ref=e83]\n- link \"Item 84\" [ref=e84]\n- link \"Item 85\" [ref=e85]\n- link \"Item 86\" [ref=e86]\n- link \"Item 87\" [ref=e87]\n- link \"Item 88\" [ref=e88]\n- link \"Item 89\" [ref=e89]\n- link \"Item 90\" [ref=e90]\n- link \"Item 91\" [ref=e91]\n- link \"Item 92\" [ref=e92]\n- link \"Item 93\" [ref=e93]\n- link \"Item 94\" [ref=e94]\n- link \"Item 95\" [ref=e95]\n- link \"Item 96\" [ref=e96]\n- link \"Item 97\" [ref=e97]\n- link \"Item 98\" [ref=e98]\n- link \"Item 99\" [ref=e99]\n- link \"Item 100\" [ref=e100]\n- link \"Item 101\" [ref=e101]\n- link \"Item 102\" [ref=e102]\n- link \"Item 103\" [ref=e103]\n- link \"Item 104\" [ref=e104]\n- link \"Item 105\" [ref=e105]\n- link \"Item 106\" [ref=e106]\n- link \"Item 107\" [ref=e107]\n- link \"Item 108\" [ref=e108]\n- link \"Item 109\" [ref=e109]\n- link \"Item 110\" [ref=e110]\n- link \"Item 111\" [ref=e111]\n- link \"Item 112\" [ref=e112]\n- link \"Item 113\" [ref=e113]\n- link \"Item 114\" [ref=e114]\n- link \"Item 115\" [ref=e115]\n- link \"Item 116\" [ref=e116]\n- link \"Item 117\" [ref=e117]\n- link \"Item 118\" [ref=e118]\n- link \"Item 119\" [ref=e119]\n- link \"Item 120\" [ref=e120]\n- link \"Item 121\" [ref=e121]\n- link \"Item 122\" [ref=e122]\n- link \"Item 123\" [ref=e123]\n- link \"Item 124\" [ref=e124]\n- link \"Item 125\" [ref=e125]\n- link \"Item 126\" [ref=e126]\n- link \"Item 127\" [ref=e127]\n- link \"Item 128\" [ref=e128]\n- link \"Item 129\" [ref=e129]\n- link \"Item 130\" [ref=e130]\n- link \"Item 131\" [ref=e131]\n- link \"Item 132\" [ref=e132]\n- link \"Item 133\" [ref=e133]\n- link \"Item 134\" [ref=e134]\n- link \"Item 135\" [ref=e135]\n- link \"Item 136\" [ref=e136]\n- link \"Item 137\" [ref=e137]\n- link \"Item 138\" [ref=e138]\n- link \"Item 139\" [ref=e139]\n- link \"Item 140\" [ref=e140]\n- link \"Item 141\" [ref=e141]\n- link \"Item 142\" [ref=e142]\n- link \"Item 143\" [ref=e143]\n- link \"Item 144\" [ref=e144]\n- link \"Item 145\" [ref=e145]\n- link \"Item 146\" [ref=e146]\n- link \"Item 147\" [ref=e147]\n- link \"Item 148\" [ref=e148]\n- link \"Item 149\" [ref=e149]\n- link \"Item 150\" [ref=e150]\n- link \"Item 151\" [ref=e151]\n- link \"Item 152\" [ref=e152]\n- link \"Item 153\" [ref=e153]\n- link \"Item 154\" [ref=e154]\n- link \"Item 155\" [ref=e155]\n- link \"Item 156\" [ref=e156]\n- link \"Item 157\" [ref=e157]\n- link \"Item 158\" [ref=e158]\n- link \"Item 159\" [ref=e159]\n- link \"Item 160\" [ref=e160]\n- link \"Item 161\" [ref=e161]\n- link \"Item 162\" [ref=e162]\n- link \"Item 163\" [ref=e163]\n- link \"Item 164\" [ref=e164]\n- link \"Item 165\" [ref=e165]\n- link \"Item 166\" [ref=e166]\n- link \"Item 167\" [ref=e167]\n- link \"Item 168\" [ref=e168]\n- link \"Item 169\" [ref=e169]\n- link \"Item 170\" [ref=e170]\n- link \"Item 171\" [ref=e171]\n- link \"Item 172\" [ref=e172]\n- link \"Item 173\" [ref=e173]\n- link \"Item 174\" [ref=e174]\n- link \"Item 175\" [ref=e175]\n- link \"Item 176\" [ref=e176]\n- link \"Item 177\" [ref=e177]\n- link \"Item 178\" [ref=e178]\n- link \"Item 179\" [ref=e179]\n- link \"Item 180\" [ref=e180]\n- link \"Item 181\" [ref=e181]\n- link \"Item 182\" [ref=e182]\n- link \"Item 183\" [ref=e183]\n- link \"Item 184\" [ref=e184]\n- link \"Item 185\" [ref=e185]\n- link \"Item 186\" [ref=e186]\n- link \"Item 187\" [ref=e187]\n- link \"Item 188\" [ref=e188]\n- link \"Item 189\" [ref=e189]\n- link \"Item 190\" [ref=e190]\n- link \"Item 191\" [ref=e191]\n- link \"Item 192\" [ref=e192]\n- link \"Item 193\" [ref=e193]\n- link \"Item 194\" [ref=e194]\n- link \"Item 195\" [ref=e195]\n- link \"Item 196\" [ref=e196]\n- link \"Item 197\" [ref=e197]\n- link \"Item 198\" [ref=e198]\n- link \"Item 199\" [ref=e199]\n- link \"Item 200\" [ref=e200]\n- link \"Item 201\" [ref=e201]\n- link \"Item 202\" [ref=e202]\n- link \"Item 203\" [ref=e203]\n- link \"Item 204\" [ref=e204]\n- link \"Item 205\" [ref=e205]\n- link \"Item 206\" [ref=e206]\n- link \"Item 207\" [ref=e207]\n- link \"Item 208\" [ref=e208]\n- link \"Item 209\" [ref=e209]\n- link \"Item 210\" [ref=e210]\n- link \"Item 211\" [ref=e211]\n- link \"Item 212\" [ref=e212]\n- link \"Item 213\" [ref=e213]\n- link \"Item 214\" [ref=e214]\n- link \"Item 215\" [ref=e215]\n- link \"Item 216\" [ref=e216]\n- link \"Item 217\" [ref=e217]\n- link \"Item 218\" [ref=e218]\n- link \"Item 219\" [ref=e219]\n- link \"Item 220\" [ref=e220]\n- link \"Item 221\" [ref=e221]\n- link \"Item 222\" [ref=e222]\n- link \"Item 223\" [ref=e223]\n- link \"Item 224\" [ref=e224]\n- link \"Item 225\" [ref=e225]\n- link \"Item 226\" [ref=e226]\n- link \"Item 227\" [ref=e227]\n- link \"Item 228\" [ref=e228]\n- link \"Item 229\" [ref=e229]\n- link \"Item 230\" [ref=e230]\n- link \"Item 231\" [ref=e231]\n- link \"Item 232\" [ref=e232]\n- link \"Item 233\" [ref=e233]\n- link \"Item 234\" [ref=e234]\n- link \"Item 235\" [ref=e235]\n- link \"Item 236\" [ref=e236]\n- link \"Item 237\" [ref=e237]\n- link \"Item 238\" [ref=e238]\n- link \"Item 239\" [ref=e239]\n- link \"Item 240\" [ref=e240]\n- link \"Item 241\" [ref=e241]\n- link \"Item 242\" [ref=e242]\n- link \"Item 243\" [ref=e243]\n- link \"Item 244\" [ref=e244]\n- link \"Item 245\" [ref=e245]\n- link \"Item 246\" [ref=e246]\n- link \"Item 247\" [ref=e247]\n- link \"Item 248\" [ref=e248]\n- link \"Item 249\" [ref=e249]\n- link \"Item 250\" [ref=e250]\n- link \"Item 251\" [ref=e251]\n- link \"Item 252\" [ref=e252]\n- link \"Item 253\" [ref=e253]\n- link \"Item 254\" [ref=e254]\n- link \"Item 255\" [ref=e255]\n- link \"Item 256\" [ref=e256]\n- link \"Item 257\" [ref=e257]\n- link \"Item 258\" [ref=e258]\n- link \"Item 259\" [ref=e259]\n- link \"Item 260\" [ref=e260]\n- link \"Item 261\" [ref=e261]\n- link \"Item 262\" [ref=e262]\n- link \"Item 263\" [ref=e263]\n- link \"Item 264\" [ref=e264]\n- link \"Item 265\" [ref=e265]\n- link \"Item 266\" [ref=e266]\n- link \"Item 267\" [ref=e267]\n- link \"Item 268\" [ref=e268]\n- link \"Item 269\" [ref=e269]\n- link \"Item 270\" [ref=e270]\n- link \"Item 271\" [ref=e271]\n- link \"Item 272\" [ref=e272]\n- link \"Item 273\" [ref=e273]\n- link \"Item 274\" [ref=e274]\n- link \"Item 275\" [ref=e275]\n- link \"Item 276\" [ref=e276]\n- link \"Item 277\" [ref=e277]\n- link \"Item 278\" [ref=e278]\n- link \"Item 279\" [ref=e279]\n- link \"Item 280\" [ref=e280]\n- link \"Item 281\" [ref=e281]\n- link \"Item 282\" [ref=e282]\n- link \"Item 283\" [ref=e283]\n- link \"Item 284\" [ref=e284]\n- link \"Item 285\" [ref=e285]\n- link \"Item 286\" [ref=e286]\n- link \"Item 287\" [ref=e287]\n- link \"Item 288\" [ref=e288]\n- link \"Item 289\" [ref=e289]\n- link \"Item 290\" [ref=e290]\n- link \"Item 291\" [ref=e291]\n- link \"Item 292\" [ref=e292]\n- link \"Item 293\" [ref=e293]\n- link \"Item 294\" [ref=e294]\n- link \"Item 295\" [ref=e295]\n- link \"Item 296\" [ref=e296]\n- link \"Item 297\" [ref=e297]\n- link \"Item 298\" [ref=e298]\n- link \"Item 299\" [ref=e299]\n- link \"Item 300\" [ref=e300]\n- link \"Item 301\" [ref=e301]\n- link \"Item 302\" [ref=e302]\n- link \"Item 303\" [ref=e303]\n- link \"Item 304\" [ref=e304]\n- link \"Item 305\" [ref=e305]\n- link \"Item 306\" [ref=e306]\n- link \"Item 307\" [ref=e307]\n- link \"Item 308\" [ref=e308]\n- link \"Item 309\" [ref=e309]\n- link \"Item 310\" [ref=e310]\n- link \"Item 311\" [ref=e311]\n- link \"Item 312\" [ref=e312]\n- link \"Item 313\" [ref=e313]\n- link \"Item 314\" [ref=e314]\n- link \"Item 315\" [ref=e315]\n- link \"Item 316\" [ref=e316]\n- link \"Item 317\" [ref=e317]\n- link \"Item 318\" [ref=e318]\n- link \"Item 319\" [ref=e319]\n- link \"Item 320\" [ref=e320]\n- link \"Item 321\" [ref=e321]\n- link \"Item 322\" [ref=e322]\n- link \"Item 323\" [ref=e323]\n- link \"Item 324\" [ref=e324]\n- link \"Item 325\" [ref=e325]\n- link \"Item 326\" [ref=e326]\n- link \"Item 327\" [ref=e327]\n- link \"Item 328\" [ref=e328]\n- link \"Item 329\" [ref=e329]\n- link \"Item 330\" [ref=e330]\n- link \"Item 331\" [ref=e331]\n- link \"Item 332\" [ref=e332]\n- link \"Item 333\" [ref=e333]\n- link \"Item 334\" [ref=e334]\n- link \"Item 335\" [ref=e335]\n- link \"Item 336\" [ref=e336]\n- link \"Item 337\" [ref=e337]\n- link \"Item 338\" [ref=e338]\n- link \"Item 339\" [ref=e339]\n- link \"Item 340\" [ref=e340]\n- link \"Item 341\" [ref=e341]\n- link \"Item 342\" [ref=e342]\n- link \"Item 343\" [ref=e343]\n- link \"Item 344\" [ref=e344]\n- link \"Item 345\" [ref=e345]\n- link \"Item 346\" [ref=e346]\n- link \"Item 347\" [ref=e347]\n- link \"Item 348\" [ref=e348]\n- link \"Item 349\" [ref=e349]\n- link \"Item 350\" [ref=e350]\n- link \"Item 351\" [ref=e351]\n- link \"Item 352\" [ref=e352]\n- link \"Item 353\" [ref=e353]\n- link \"Item 354\" [ref=e354]\n- link \"Item 355\" [ref=e355]\n- link \"Item 356\" [ref=e356]\n- link \"Item 357\" [ref=e357]\n- link \"Item 358\" [ref=e358]\n- link \"Item 359\" [ref=e359]\n- link \"Item 360\" [ref=e360]\n- link \"Item 361\" [ref=e361]\n- link \"Item 362\" [ref=e362]\n- link \"Item 363\" [ref=e363]\n- link \"Item 364\" [ref=e364]\n- link \"Item 365\" [ref=e365]\n- link \"Item 366\" [ref=e366]\n- link \"Item 367\" [ref=e367]\n- link \"Item 368\" [ref=e368]\n- link \"Item 369\" [ref=e369]\n- link \"Item 370\" [ref=e370]\n- link \"Item 371\" [ref=e371]\n- link \"Item 372\" [ref=e372]\n- link \"Item 373\" [ref=e373]\n- link \"Item 374\" [ref=e374]\n- link \"Item 375\" [ref=e375]\n- link \"Item 376\" [ref=e376]\n- link \"Item 377\" [ref=e377]\n- link \"Item 378\" [ref=e378]\n- link \"Item 379\" [ref=e379]\n- link \"Item 380\" [ref=e380]\n- link \"Item 381\" [ref=e381]\n- link \"Item 382\" [ref=e382]\n- link \"Item 383\" [ref=e383]\n- link \"Item 384\" [ref=e384]\n- link \"Item 385\" [ref=e385]\n- link \"Item 386\" [ref=e386]\n- link \"Item 387\" [ref=e387]\n- link \"Item 388\" [ref=e388]\n- link \"Item 389\" [ref=e389]\n- link \"Item 390\" [ref=e390]\n- link \"Item 391\" [ref=e391]\n- link \"Item 392\" [ref=e392]\n- link \"Item 393\" [ref=e393]\n- link \"Item 394\" [ref=e394]\n- link \"Item 395\" [ref=e395]\n- link \"Item 396\" [ref=e396]\n- link \"Item 397\" [ref=e397]\n- link \"Item 398\" [ref=e398]\n- link \"Item 399\" [ref=e399]\n\nProvide a concise summary that preserves actionable information and relevant content."
+      }
+     ]
+    }
+   ],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "snapshot-error",
+   "calls": [
+    {
+     "tool": "browser_snapshot",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": false,
+      "error": "No page open"
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": false, \"error\": \"No page open\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "snapshot",
+      "-c"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "click",
+   "calls": [
+    {
+     "tool": "browser_click",
+     "args": {
+      "ref": "@e5"
+     },
+     "ctx": {}
+    },
+    {
+     "tool": "browser_click",
+     "args": {
+      "ref": "e6"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    },
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"clicked\": \"@e5\"}",
+    "{\"success\": true, \"clicked\": \"@e6\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "click",
+      "@e5"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "click",
+      "@e6"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "click-error",
+   "calls": [
+    {
+     "tool": "browser_click",
+     "args": {
+      "ref": "e9"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": false
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": false, \"error\": \"Failed to click @e9\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "click",
+      "@e9"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "click-missing-ref",
+   "calls": [
+    {
+     "tool": "browser_click",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"error\": \"Tool execution failed: TypeError: browser_click() missing 1 required positional argument: 'ref'\"}"
+   ],
+   "runs": [],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [],
+   "screenshots": []
+  },
+  {
+   "name": "click-extra-arg",
+   "calls": [
+    {
+     "tool": "browser_click",
+     "args": {
+      "ref": "e1",
+      "button": "left"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"error\": \"Tool execution failed: TypeError: browser_click() got an unexpected keyword argument 'button'\"}"
+   ],
+   "runs": [],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [],
+   "screenshots": []
+  },
+  {
+   "name": "type",
+   "calls": [
+    {
+     "tool": "browser_type",
+     "args": {
+      "ref": "e3",
+      "text": "hello wörld"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"typed\": \"hello wörld\", \"element\": \"@e3\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "fill",
+      "@e3",
+      "hello wörld"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "type-error",
+   "calls": [
+    {
+     "tool": "browser_type",
+     "args": {
+      "ref": "@e3",
+      "text": "x"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": false,
+      "error": "Element not found"
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": false, \"error\": \"Element not found\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "fill",
+      "@e3",
+      "x"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "scroll",
+   "calls": [
+    {
+     "tool": "browser_scroll",
+     "args": {
+      "direction": "down"
+     },
+     "ctx": {}
+    },
+    {
+     "tool": "browser_scroll",
+     "args": {
+      "direction": "up"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    },
+    {
+     "json": {
+      "success": false
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"scrolled\": \"down\"}",
+    "{\"success\": false, \"error\": \"Failed to scroll up\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "scroll",
+      "down"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "scroll",
+      "up"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "scroll-bad",
+   "calls": [
+    {
+     "tool": "browser_scroll",
+     "args": {
+      "direction": "left"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": false, \"error\": \"Invalid direction 'left'. Use 'up' or 'down'.\"}"
+   ],
+   "runs": [],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [],
+   "screenshots": []
+  },
+  {
+   "name": "back",
+   "calls": [
+    {
+     "tool": "browser_back",
+     "args": {},
+     "ctx": {}
+    },
+    {
+     "tool": "browser_back",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "url": "https://prev.example/"
+      }
+     }
+    },
+    {
+     "json": {
+      "success": false
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"url\": \"https://prev.example/\"}",
+    "{\"success\": false, \"error\": \"Failed to go back\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "back"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "back"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "press",
+   "calls": [
+    {
+     "tool": "browser_press",
+     "args": {
+      "key": "Enter"
+     },
+     "ctx": {}
+    },
+    {
+     "tool": "browser_press",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    },
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"pressed\": \"Enter\"}",
+    "{\"success\": true, \"pressed\": \"\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "press",
+      "Enter"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "press",
+      ""
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "close-active",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {}
+    },
+    {
+     "tool": "browser_close",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "E"
+      }
+     }
+    },
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"url\": \"https://example.com\", \"title\": \"E\", \"stealth_warning\": \"Running WITHOUT residential proxies. Bot detection may be more aggressive. Consider upgrading Browserbase plan for proxy support.\", \"stealth_features\": [\"local\"]}",
+    "{\"success\": true, \"closed\": true}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://example.com"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "close"
+     ],
+     "timeout": 10,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [],
+   "screenshots": []
+  },
+  {
+   "name": "close-inactive",
+   "calls": [
+    {
+     "tool": "browser_close",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"closed\": true, \"warning\": \"Session may not have been active\"}"
+   ],
+   "runs": [],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [],
+   "screenshots": []
+  },
+  {
+   "name": "close-pid",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {}
+    },
+    {
+     "tool": "browser_close",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "E"
+      }
+     }
+    },
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {
+    "pid": 4242
+   },
+   "results": [
+    "{\"success\": true, \"url\": \"https://example.com\", \"title\": \"E\", \"stealth_warning\": \"Running WITHOUT residential proxies. Bot detection may be more aggressive. Consider upgrading Browserbase plan for proxy support.\", \"stealth_features\": [\"local\"]}",
+    "{\"success\": true, \"closed\": true}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://example.com"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "close"
+     ],
+     "timeout": 10,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [
+    [
+     4242,
+     15
+    ]
+   ],
+   "available": true,
+   "socket_dirs_left": [],
+   "screenshots": []
+  },
+  {
+   "name": "close-pid-dead",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {}
+    },
+    {
+     "tool": "browser_close",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "E"
+      }
+     }
+    },
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {
+    "pid": 999999
+   },
+   "results": [
+    "{\"success\": true, \"url\": \"https://example.com\", \"title\": \"E\", \"stealth_warning\": \"Running WITHOUT residential proxies. Bot detection may be more aggressive. Consider upgrading Browserbase plan for proxy support.\", \"stealth_features\": [\"local\"]}",
+    "{\"success\": true, \"closed\": true}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://example.com"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "close"
+     ],
+     "timeout": 10,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [
+    [
+     999999,
+     15
+    ]
+   ],
+   "available": true,
+   "socket_dirs_left": [],
+   "screenshots": []
+  },
+  {
+   "name": "console",
+   "calls": [
+    {
+     "tool": "browser_console",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "messages": [
+        {
+         "type": "warn",
+         "text": "careful"
+        },
+        {
+         "text": "plain"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "errors": [
+        {
+         "message": "TypeError: x is undefined"
+        },
+        {}
+       ]
+      }
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"console_messages\": [{\"type\": \"warn\", \"text\": \"careful\", \"source\": \"console\"}, {\"type\": \"log\", \"text\": \"plain\", \"source\": \"console\"}], \"js_errors\": [{\"message\": \"TypeError: x is undefined\", \"source\": \"exception\"}, {\"message\": \"\", \"source\": \"exception\"}], \"total_messages\": 2, \"total_errors\": 2}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "console"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "errors"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "console-clear",
+   "calls": [
+    {
+     "tool": "browser_console",
+     "args": {
+      "clear": true
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "messages": []
+      }
+     }
+    },
+    {
+     "json": {
+      "success": false
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"console_messages\": [], \"js_errors\": [], \"total_messages\": 0, \"total_errors\": 0}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "console",
+      "--clear"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "errors",
+      "--clear"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "images",
+   "calls": [
+    {
+     "tool": "browser_get_images",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "result": "[{\"src\": \"https://example.com/a.png\", \"alt\": \"A\", \"width\": 10, \"height\": 20}]"
+      }
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"images\": [{\"src\": \"https://example.com/a.png\", \"alt\": \"A\", \"width\": 10, \"height\": 20}], \"count\": 1}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "eval",
+      "JSON.stringify(\n        [...document.images].map(img => ({\n            src: img.src,\n            alt: img.alt || '',\n            width: img.naturalWidth,\n            height: img.naturalHeight\n        })).filter(img => img.src && !img.src.startsWith('data:'))\n    )"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "images-list",
+   "calls": [
+    {
+     "tool": "browser_get_images",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "result": [
+        {
+         "src": "https://x/y.png",
+         "alt": ""
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"images\": [{\"src\": \"https://x/y.png\", \"alt\": \"\"}], \"count\": 1}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "eval",
+      "JSON.stringify(\n        [...document.images].map(img => ({\n            src: img.src,\n            alt: img.alt || '',\n            width: img.naturalWidth,\n            height: img.naturalHeight\n        })).filter(img => img.src && !img.src.startsWith('data:'))\n    )"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "images-bad-json",
+   "calls": [
+    {
+     "tool": "browser_get_images",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "result": "not json"
+      }
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"images\": [], \"count\": 0, \"warning\": \"Could not parse image data\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "eval",
+      "JSON.stringify(\n        [...document.images].map(img => ({\n            src: img.src,\n            alt: img.alt || '',\n            width: img.naturalWidth,\n            height: img.naturalHeight\n        })).filter(img => img.src && !img.src.startsWith('data:'))\n    )"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "images-none",
+   "calls": [
+    {
+     "tool": "browser_get_images",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"images\": [], \"count\": 0}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "eval",
+      "JSON.stringify(\n        [...document.images].map(img => ({\n            src: img.src,\n            alt: img.alt || '',\n            width: img.naturalWidth,\n            height: img.naturalHeight\n        })).filter(img => img.src && !img.src.startsWith('data:'))\n    )"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "images-error",
+   "calls": [
+    {
+     "tool": "browser_get_images",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": false,
+      "error": "eval failed"
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": false, \"error\": \"eval failed\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "eval",
+      "JSON.stringify(\n        [...document.images].map(img => ({\n            src: img.src,\n            alt: img.alt || '',\n            width: img.naturalWidth,\n            height: img.naturalHeight\n        })).filter(img => img.src && !img.src.startsWith('data:'))\n    )"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "vision",
+   "calls": [
+    {
+     "tool": "browser_vision",
+     "args": {
+      "question": "What is shown?"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     },
+     "write_last": true
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [
+    {
+     "content": "A page with a heading."
+    }
+   ],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"analysis\": \"A page with a heading.\", \"screenshot_path\": \"<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_3e5c7a0000",
+      "--json",
+      "screenshot",
+      "--full",
+      "<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_3e5c7a0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [
+    {
+     "task": "vision",
+     "max_tokens": 2000,
+     "temperature": 0.1,
+     "messages": [
+      {
+       "role": "user",
+       "content": [
+        {
+         "type": "text",
+         "text": "You are analyzing a screenshot of a web browser.\n\nUser's question: What is shown?\n\nProvide a detailed and helpful answer based on what you see in the screenshot. If there are interactive elements, describe them. If there are verification challenges or CAPTCHAs, describe what type they are and what action might be needed. Focus on answering the user's specific question."
+        },
+        {
+         "type": "image_url",
+         "url": "data:image/png;base64,iVBORyBmYWtl"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_3e5c7a0000"
+   ],
+   "screenshots": [
+    "browser_screenshot_1f2e3d00000000000000000000000000.png"
+   ]
+  },
+  {
+   "name": "vision-annotate",
+   "calls": [
+    {
+     "tool": "browser_vision",
+     "args": {
+      "question": "Where is the button?",
+      "annotate": true
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "annotations": [
+        {
+         "n": 1,
+         "ref": "e1"
+        }
+       ]
+      }
+     },
+     "write_last": true
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [
+    {
+     "content": "Button [1]."
+    }
+   ],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"analysis\": \"Button [1].\", \"screenshot_path\": \"<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png\", \"annotations\": [{\"n\": 1, \"ref\": \"e1\"}]}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_3e5c7a0000",
+      "--json",
+      "screenshot",
+      "--annotate",
+      "--full",
+      "<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_3e5c7a0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [
+    {
+     "task": "vision",
+     "max_tokens": 2000,
+     "temperature": 0.1,
+     "messages": [
+      {
+       "role": "user",
+       "content": [
+        {
+         "type": "text",
+         "text": "You are analyzing a screenshot of a web browser.\n\nUser's question: Where is the button?\n\nProvide a detailed and helpful answer based on what you see in the screenshot. If there are interactive elements, describe them. If there are verification challenges or CAPTCHAs, describe what type they are and what action might be needed. Focus on answering the user's specific question."
+        },
+        {
+         "type": "image_url",
+         "url": "data:image/png;base64,iVBORyBmYWtl"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_3e5c7a0000"
+   ],
+   "screenshots": [
+    "browser_screenshot_1f2e3d00000000000000000000000000.png"
+   ]
+  },
+  {
+   "name": "vision-other-path",
+   "calls": [
+    {
+     "tool": "browser_vision",
+     "args": {
+      "question": "q"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "path": "<ROOT>/elsewhere.png"
+      }
+     },
+     "write": "<ROOT>/elsewhere.png"
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [
+    {
+     "content": "ok"
+    }
+   ],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"analysis\": \"ok\", \"screenshot_path\": \"<ROOT>/elsewhere.png\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_3e5c7a0000",
+      "--json",
+      "screenshot",
+      "--full",
+      "<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_3e5c7a0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [
+    {
+     "task": "vision",
+     "max_tokens": 2000,
+     "temperature": 0.1,
+     "messages": [
+      {
+       "role": "user",
+       "content": [
+        {
+         "type": "text",
+         "text": "You are analyzing a screenshot of a web browser.\n\nUser's question: q\n\nProvide a detailed and helpful answer based on what you see in the screenshot. If there are interactive elements, describe them. If there are verification challenges or CAPTCHAs, describe what type they are and what action might be needed. Focus on answering the user's specific question."
+        },
+        {
+         "type": "image_url",
+         "url": "data:image/png;base64,iVBORyBvdGhlcg=="
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_3e5c7a0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "vision-no-file",
+   "calls": [
+    {
+     "tool": "browser_vision",
+     "args": {
+      "question": "q"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": false, \"error\": \"Screenshot file was not created at <GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png (local mode). This may indicate a socket path issue (macOS /var/folders/), a missing Chromium install ('agent-browser install'), or a stale daemon process.\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_3e5c7a0000",
+      "--json",
+      "screenshot",
+      "--full",
+      "<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_3e5c7a0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_3e5c7a0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "vision-fails",
+   "calls": [
+    {
+     "tool": "browser_vision",
+     "args": {
+      "question": "q"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": false,
+      "error": "screenshot failed"
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": false, \"error\": \"Failed to take screenshot (local mode): screenshot failed\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_3e5c7a0000",
+      "--json",
+      "screenshot",
+      "--full",
+      "<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_3e5c7a0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_3e5c7a0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "vision-llm-fails",
+   "calls": [
+    {
+     "tool": "browser_vision",
+     "args": {
+      "question": "q"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     },
+     "write_last": true
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [
+    {
+     "raise": "vision model down"
+    }
+   ],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": false, \"error\": \"Error during vision analysis: vision model down\", \"screenshot_path\": \"<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png\", \"note\": \"Screenshot was captured but vision analysis failed. You can still share it via MEDIA:<path>.\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_3e5c7a0000",
+      "--json",
+      "screenshot",
+      "--full",
+      "<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_3e5c7a0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [
+    {
+     "task": "vision",
+     "max_tokens": 2000,
+     "temperature": 0.1,
+     "messages": [
+      {
+       "role": "user",
+       "content": [
+        {
+         "type": "text",
+         "text": "You are analyzing a screenshot of a web browser.\n\nUser's question: q\n\nProvide a detailed and helpful answer based on what you see in the screenshot. If there are interactive elements, describe them. If there are verification challenges or CAPTCHAs, describe what type they are and what action might be needed. Focus on answering the user's specific question."
+        },
+        {
+         "type": "image_url",
+         "url": "data:image/png;base64,iVBORyBmYWtl"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_3e5c7a0000"
+   ],
+   "screenshots": [
+    "browser_screenshot_1f2e3d00000000000000000000000000.png"
+   ]
+  },
+  {
+   "name": "vision-recovered",
+   "calls": [
+    {
+     "tool": "browser_vision",
+     "args": {
+      "question": "q"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "stdout": "Screenshot saved to '<ROOT>/rec.png'",
+     "write": "<ROOT>/rec.png"
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [
+    {
+     "content": "seen"
+    }
+   ],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"analysis\": \"seen\", \"screenshot_path\": \"<ROOT>/rec.png\"}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_3e5c7a0000",
+      "--json",
+      "screenshot",
+      "--full",
+      "<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_3e5c7a0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [
+    {
+     "task": "vision",
+     "max_tokens": 2000,
+     "temperature": 0.1,
+     "messages": [
+      {
+       "role": "user",
+       "content": [
+        {
+         "type": "text",
+         "text": "You are analyzing a screenshot of a web browser.\n\nUser's question: q\n\nProvide a detailed and helpful answer based on what you see in the screenshot. If there are interactive elements, describe them. If there are verification challenges or CAPTCHAs, describe what type they are and what action might be needed. Focus on answering the user's specific question."
+        },
+        {
+         "type": "image_url",
+         "url": "data:image/png;base64,iVBORyBvdGhlcg=="
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_3e5c7a0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "no-agent-browser",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {}
+    },
+    {
+     "tool": "browser_snapshot",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {},
+   "extra": {},
+   "results": [
+    "{\"success\": false, \"error\": \"agent-browser CLI not found. Install it with: npm install -g agent-browser\\nOr run 'npm install' in the repo root to install locally.\\nOr ensure npx is available in your PATH.\"}",
+    "{\"success\": false, \"error\": \"agent-browser CLI not found. Install it with: npm install -g agent-browser\\nOr run 'npm install' in the repo root to install locally.\\nOr ensure npx is available in your PATH.\"}"
+   ],
+   "runs": [],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": false,
+   "socket_dirs_left": [],
+   "screenshots": []
+  },
+  {
+   "name": "npx",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "E"
+      }
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "npx": "/usr/local/bin/npx"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"url\": \"https://example.com\", \"title\": \"E\", \"stealth_warning\": \"Running WITHOUT residential proxies. Bot detection may be more aggressive. Consider upgrading Browserbase plan for proxy support.\", \"stealth_features\": [\"local\"]}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "npx",
+      "agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://example.com"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "interrupted",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {
+    "interrupted": true
+   },
+   "results": [
+    "{\"success\": false, \"error\": \"Interrupted\"}"
+   ],
+   "runs": [],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [],
+   "screenshots": []
+  },
+  {
+   "name": "cdp-override",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {}
+    },
+    {
+     "tool": "browser_close",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "E"
+      }
+     }
+    },
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {
+    "BROWSER_CDP_URL": " ws://127.0.0.1:9222/devtools/browser/abc "
+   },
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"url\": \"https://example.com\", \"title\": \"E\", \"stealth_warning\": \"Running WITHOUT residential proxies. Bot detection may be more aggressive. Consider upgrading Browserbase plan for proxy support.\", \"stealth_features\": [\"cdp_override\"]}",
+    "{\"success\": true, \"closed\": true}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--cdp",
+      "ws://127.0.0.1:9222/devtools/browser/abc",
+      "--json",
+      "open",
+      "https://example.com"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-cdp_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--cdp",
+      "ws://127.0.0.1:9222/devtools/browser/abc",
+      "--json",
+      "close"
+     ],
+     "timeout": 10,
+     "socket_dir": "<SOCK>/agent-browser-cdp_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": false,
+   "socket_dirs_left": [],
+   "screenshots": []
+  },
+  {
+   "name": "browserbase",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {}
+    },
+    {
+     "tool": "browser_close",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "E"
+      }
+     }
+    },
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    }
+   ],
+   "http_answers": [
+    {
+     "json": {
+      "id": "bb-1",
+      "connectUrl": "wss://connect.browserbase.com/?id=bb-1"
+     }
+    },
+    {
+     "status": 200
+    }
+   ],
+   "llm_answers": [],
+   "env": {
+    "BROWSERBASE_API_KEY": "bb_live_123",
+    "BROWSERBASE_PROJECT_ID": "proj-9"
+   },
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"url\": \"https://example.com\", \"title\": \"E\", \"stealth_features\": [\"basic_stealth\", \"proxies\", \"keep_alive\"]}",
+    "{\"success\": true, \"closed\": true}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--cdp",
+      "wss://connect.browserbase.com/?id=bb-1",
+      "--json",
+      "open",
+      "https://example.com"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--cdp",
+      "wss://connect.browserbase.com/?id=bb-1",
+      "--json",
+      "close"
+     ],
+     "timeout": 10,
+     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [
+    {
+     "url": "https://api.browserbase.com/v1/sessions",
+     "headers": {
+      "Content-Type": "application/json",
+      "X-BB-API-Key": "bb_live_123"
+     },
+     "body": "{\"projectId\": \"proj-9\", \"keepAlive\": true, \"proxies\": true}",
+     "timeout": 30
+    },
+    {
+     "url": "https://api.browserbase.com/v1/sessions/bb-1",
+     "headers": {
+      "X-BB-API-Key": "bb_live_123",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"projectId\": \"proj-9\", \"status\": \"REQUEST_RELEASE\"}",
+     "timeout": 10
+    }
+   ],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [],
+   "screenshots": []
+  },
+  {
+   "name": "browserbase-options",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "E"
+      }
+     }
+    }
+   ],
+   "http_answers": [
+    {
+     "json": {
+      "id": "bb-2",
+      "connectUrl": "wss://c/2"
+     }
+    }
+   ],
+   "llm_answers": [],
+   "env": {
+    "BROWSERBASE_API_KEY": "k",
+    "BROWSERBASE_PROJECT_ID": "p",
+    "BROWSERBASE_PROXIES": "false",
+    "BROWSERBASE_ADVANCED_STEALTH": "TRUE",
+    "BROWSERBASE_KEEP_ALIVE": "false",
+    "BROWSERBASE_SESSION_TIMEOUT": "600000"
+   },
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"url\": \"https://example.com\", \"title\": \"E\", \"stealth_warning\": \"Running WITHOUT residential proxies. Bot detection may be more aggressive. Consider upgrading Browserbase plan for proxy support.\", \"stealth_features\": [\"basic_stealth\", \"advanced_stealth\", \"custom_timeout\"]}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--cdp",
+      "wss://c/2",
+      "--json",
+      "open",
+      "https://example.com"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [
+    {
+     "url": "https://api.browserbase.com/v1/sessions",
+     "headers": {
+      "Content-Type": "application/json",
+      "X-BB-API-Key": "k"
+     },
+     "body": "{\"projectId\": \"p\", \"timeout\": 600000, \"browserSettings\": {\"advancedStealth\": true}}",
+     "timeout": 30
+    }
+   ],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-gauss_default_1f2e3d00"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "browserbase-bad-timeout",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "E"
+      }
+     }
+    }
+   ],
+   "http_answers": [
+    {
+     "json": {
+      "id": "bb-3",
+      "connectUrl": "wss://c/3"
+     }
+    }
+   ],
+   "llm_answers": [],
+   "env": {
+    "BROWSERBASE_API_KEY": "k",
+    "BROWSERBASE_PROJECT_ID": "p",
+    "BROWSERBASE_SESSION_TIMEOUT": "soon"
+   },
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"url\": \"https://example.com\", \"title\": \"E\", \"stealth_features\": [\"basic_stealth\", \"proxies\", \"keep_alive\"]}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--cdp",
+      "wss://c/3",
+      "--json",
+      "open",
+      "https://example.com"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [
+    {
+     "url": "https://api.browserbase.com/v1/sessions",
+     "headers": {
+      "Content-Type": "application/json",
+      "X-BB-API-Key": "k"
+     },
+     "body": "{\"projectId\": \"p\", \"keepAlive\": true, \"proxies\": true}",
+     "timeout": 30
+    }
+   ],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-gauss_default_1f2e3d00"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "browserbase-402",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "E"
+      }
+     }
+    }
+   ],
+   "http_answers": [
+    {
+     "status": 402,
+     "json": {}
+    },
+    {
+     "status": 402,
+     "json": {}
+    },
+    {
+     "json": {
+      "id": "bb-4",
+      "connectUrl": "wss://c/4"
+     }
+    }
+   ],
+   "llm_answers": [],
+   "env": {
+    "BROWSERBASE_API_KEY": "k",
+    "BROWSERBASE_PROJECT_ID": "p"
+   },
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"url\": \"https://example.com\", \"title\": \"E\", \"stealth_warning\": \"Running WITHOUT residential proxies. Bot detection may be more aggressive. Consider upgrading Browserbase plan for proxy support.\", \"stealth_features\": [\"basic_stealth\"]}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--cdp",
+      "wss://c/4",
+      "--json",
+      "open",
+      "https://example.com"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [
+    {
+     "url": "https://api.browserbase.com/v1/sessions",
+     "headers": {
+      "Content-Type": "application/json",
+      "X-BB-API-Key": "k"
+     },
+     "body": "{\"projectId\": \"p\", \"keepAlive\": true, \"proxies\": true}",
+     "timeout": 30
+    },
+    {
+     "url": "https://api.browserbase.com/v1/sessions",
+     "headers": {
+      "Content-Type": "application/json",
+      "X-BB-API-Key": "k"
+     },
+     "body": "{\"projectId\": \"p\", \"proxies\": true}",
+     "timeout": 30
+    },
+    {
+     "url": "https://api.browserbase.com/v1/sessions",
+     "headers": {
+      "Content-Type": "application/json",
+      "X-BB-API-Key": "k"
+     },
+     "body": "{\"projectId\": \"p\"}",
+     "timeout": 30
+    }
+   ],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-gauss_default_1f2e3d00"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "browserbase-402-once",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "E"
+      }
+     }
+    }
+   ],
+   "http_answers": [
+    {
+     "status": 402,
+     "json": {}
+    },
+    {
+     "json": {
+      "id": "bb-5",
+      "connectUrl": "wss://c/5"
+     }
+    }
+   ],
+   "llm_answers": [],
+   "env": {
+    "BROWSERBASE_API_KEY": "k",
+    "BROWSERBASE_PROJECT_ID": "p"
+   },
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"url\": \"https://example.com\", \"title\": \"E\", \"stealth_features\": [\"basic_stealth\", \"proxies\"]}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--cdp",
+      "wss://c/5",
+      "--json",
+      "open",
+      "https://example.com"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [
+    {
+     "url": "https://api.browserbase.com/v1/sessions",
+     "headers": {
+      "Content-Type": "application/json",
+      "X-BB-API-Key": "k"
+     },
+     "body": "{\"projectId\": \"p\", \"keepAlive\": true, \"proxies\": true}",
+     "timeout": 30
+    },
+    {
+     "url": "https://api.browserbase.com/v1/sessions",
+     "headers": {
+      "Content-Type": "application/json",
+      "X-BB-API-Key": "k"
+     },
+     "body": "{\"projectId\": \"p\", \"proxies\": true}",
+     "timeout": 30
+    }
+   ],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-gauss_default_1f2e3d00"
+   ],
+   "screenshots": []
+  },
+  {
+   "name": "browserbase-fails",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [],
+   "http_answers": [
+    {
+     "status": 500,
+     "body": "internal"
+    }
+   ],
+   "llm_answers": [],
+   "env": {
+    "BROWSERBASE_API_KEY": "k",
+    "BROWSERBASE_PROJECT_ID": "p"
+   },
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"error\": \"Tool execution failed: RuntimeError: Failed to create Browserbase session: 500 internal\"}"
+   ],
+   "runs": [],
+   "http": [
+    {
+     "url": "https://api.browserbase.com/v1/sessions",
+     "headers": {
+      "Content-Type": "application/json",
+      "X-BB-API-Key": "k"
+     },
+     "body": "{\"projectId\": \"p\", \"keepAlive\": true, \"proxies\": true}",
+     "timeout": 30
+    }
+   ],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [],
+   "screenshots": []
+  },
+  {
+   "name": "browserbase-close-fails",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {}
+    },
+    {
+     "tool": "browser_close",
+     "args": {},
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "E"
+      }
+     }
+    },
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    }
+   ],
+   "http_answers": [
+    {
+     "json": {
+      "id": "bb-6",
+      "connectUrl": "wss://c/6"
+     }
+    },
+    {
+     "status": 404,
+     "body": "gone"
+    }
+   ],
+   "llm_answers": [],
+   "env": {
+    "BROWSERBASE_API_KEY": "k",
+    "BROWSERBASE_PROJECT_ID": "p"
+   },
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {},
+   "results": [
+    "{\"success\": true, \"url\": \"https://example.com\", \"title\": \"E\", \"stealth_features\": [\"basic_stealth\", \"proxies\", \"keep_alive\"]}",
+    "{\"success\": true, \"closed\": true}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--cdp",
+      "wss://c/6",
+      "--json",
+      "open",
+      "https://example.com"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--cdp",
+      "wss://c/6",
+      "--json",
+      "close"
+     ],
+     "timeout": 10,
+     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [
+    {
+     "url": "https://api.browserbase.com/v1/sessions",
+     "headers": {
+      "Content-Type": "application/json",
+      "X-BB-API-Key": "k"
+     },
+     "body": "{\"projectId\": \"p\", \"keepAlive\": true, \"proxies\": true}",
+     "timeout": 30
+    },
+    {
+     "url": "https://api.browserbase.com/v1/sessions/bb-6",
+     "headers": {
+      "X-BB-API-Key": "k",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"projectId\": \"p\", \"status\": \"REQUEST_RELEASE\"}",
+     "timeout": 10
+    }
+   ],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [],
+   "screenshots": []
+  },
+  {
+   "name": "recording",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {
+      "task_id": "task-with-a-long-identifier-123"
+     }
+    },
+    {
+     "tool": "browser_close",
+     "args": {},
+     "ctx": {
+      "task_id": "task-with-a-long-identifier-123"
+     }
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    },
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "E"
+      }
+     }
+    },
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "path": "/rec.webm"
+      }
+     }
+    },
+    {
+     "json": {
+      "success": true,
+      "data": {}
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {
+    "record": true
+   },
+   "results": [
+    "{\"success\": true, \"url\": \"https://example.com\", \"title\": \"E\", \"stealth_warning\": \"Running WITHOUT residential proxies. Bot detection may be more aggressive. Consider upgrading Browserbase plan for proxy support.\", \"stealth_features\": [\"local\"]}",
+    "{\"success\": true, \"closed\": true}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "record",
+      "start",
+      "<GAUSS_HOME>/browser_recordings/session_20261002_045007_task-with-a-long.webm"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://example.com"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "record",
+      "stop"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "close"
+     ],
+     "timeout": 10,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [],
+   "screenshots": []
+  },
+  {
+   "name": "recording-fails",
+   "calls": [
+    {
+     "tool": "browser_navigate",
+     "args": {
+      "url": "https://example.com"
+     },
+     "ctx": {}
+    }
+   ],
+   "runs_answers": [
+    {
+     "json": {
+      "success": false,
+      "error": "no ffmpeg"
+     }
+    },
+    {
+     "json": {
+      "success": true,
+      "data": {
+       "title": "E"
+      }
+     }
+    }
+   ],
+   "http_answers": [],
+   "llm_answers": [],
+   "env": {},
+   "which": {
+    "agent-browser": "/opt/homebrew/bin/agent-browser"
+   },
+   "extra": {
+    "record": true
+   },
+   "results": [
+    "{\"success\": true, \"url\": \"https://example.com\", \"title\": \"E\", \"stealth_warning\": \"Running WITHOUT residential proxies. Bot detection may be more aggressive. Consider upgrading Browserbase plan for proxy support.\", \"stealth_features\": [\"local\"]}"
+   ],
+   "runs": [
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "record",
+      "start",
+      "<GAUSS_HOME>/browser_recordings/session_20261002_045007_default.webm"
+     ],
+     "timeout": 30,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    },
+    {
+     "argv": [
+      "/opt/homebrew/bin/agent-browser",
+      "--session",
+      "h_1f2e3d0000",
+      "--json",
+      "open",
+      "https://example.com"
+     ],
+     "timeout": 60,
+     "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
+     "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
+    }
+   ],
+   "http": [],
+   "llm_calls": [],
+   "kills": [],
+   "available": true,
+   "socket_dirs_left": [
+    "agent-browser-h_1f2e3d0000"
+   ],
+   "screenshots": []
+  }
+ ]
+}

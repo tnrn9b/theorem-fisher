@@ -1,0 +1,131 @@
+{
+  "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+  "cases": [
+    {
+      "name": "empty",
+      "input": {},
+      "saved": {
+        "agent": {
+          "max_turns": 90
+        }
+      },
+      "security_comment": true,
+      "fallback_comment": true
+    },
+    {
+      "name": "legacy-max-turns",
+      "input": {
+        "model": "test/custom-model",
+        "max_turns": 37
+      },
+      "saved": {
+        "model": "test/custom-model",
+        "agent": {
+          "max_turns": 37
+        }
+      },
+      "security_comment": true,
+      "fallback_comment": true
+    },
+    {
+      "name": "security-set",
+      "input": {
+        "security": {
+          "redact_secrets": false
+        }
+      },
+      "saved": {
+        "security": {
+          "redact_secrets": false
+        },
+        "agent": {
+          "max_turns": 90
+        }
+      },
+      "security_comment": false,
+      "fallback_comment": true
+    },
+    {
+      "name": "security-null",
+      "input": {
+        "security": {
+          "redact_secrets": null
+        }
+      },
+      "saved": {
+        "security": {
+          "redact_secrets": null
+        },
+        "agent": {
+          "max_turns": 90
+        }
+      },
+      "security_comment": true,
+      "fallback_comment": true
+    },
+    {
+      "name": "fallback-set",
+      "input": {
+        "fallback_model": {
+          "provider": "openrouter",
+          "model": "m"
+        }
+      },
+      "saved": {
+        "fallback_model": {
+          "provider": "openrouter",
+          "model": "m"
+        },
+        "agent": {
+          "max_turns": 90
+        }
+      },
+      "security_comment": true,
+      "fallback_comment": false
+    },
+    {
+      "name": "fallback-partial",
+      "input": {
+        "fallback_model": {
+          "provider": "openrouter"
+        }
+      },
+      "saved": {
+        "fallback_model": {
+          "provider": "openrouter"
+        },
+        "agent": {
+          "max_turns": 90
+        }
+      },
+      "security_comment": true,
+      "fallback_comment": true
+    },
+    {
+      "name": "both-set",
+      "input": {
+        "security": {
+          "redact_secrets": true
+        },
+        "fallback_model": {
+          "provider": "p",
+          "model": "m"
+        }
+      },
+      "saved": {
+        "security": {
+          "redact_secrets": true
+        },
+        "fallback_model": {
+          "provider": "p",
+          "model": "m"
+        },
+        "agent": {
+          "max_turns": 90
+        }
+      },
+      "security_comment": false,
+      "fallback_comment": false
+    }
+  ]
+}

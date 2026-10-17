@@ -1,0 +1,5 @@
+{"depth":0,"event":"node added","name":"Step.Relay.fireCand_third","node":1,"t":0}
+{"attempt":1,"event":"launched","node":1,"t":0}
+{"event":"cost","role":"worker","t":235.9,"usd":0.6018534}
+{"attempt":1,"event":"finished","node":1,"outcome":"closed","t":246.8}
+{"event":"node proved","node":1,"t":246.8}

@@ -1,0 +1,5 @@
+{"depth":0,"event":"node added","name":"Step.Concrete.fireRecv_wt","node":1,"t":0}
+{"attempt":1,"event":"launched","node":1,"t":0}
+{"event":"cost","role":"worker","t":119.1,"usd":0.311189}
+{"attempt":1,"event":"finished","node":1,"outcome":"closed","t":129.5}
+{"event":"node proved","node":1,"t":129.5}

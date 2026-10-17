@@ -1,0 +1,50 @@
+name:        fisher-lean
+version:     0.2.0.0
+synopsis:    A Lean 4 language-server client over `lake serve`, and the Lean tools on top of it (lean-lsp-mcp's, C1)
+license:     BSD-3-Clause
+author:      Tom Reynolds
+
+language: GHC2021
+
+default-extensions:
+- OverloadedStrings
+- LambdaCase
+
+ghc-options:
+- -Wall
+- -Wcompat
+
+dependencies:
+- base >= 4.14 && < 5
+- fisher-core
+- fisher-tools
+- async
+- bytestring
+- case-insensitive
+- containers
+- directory
+- filepath
+- http-client
+- http-client-tls
+- http-types
+- fsnotify
+- process
+- stm
+- text
+- time
+- unix
+
+library:
+  source-dirs: src
+
+tests:
+  fisher-lean-test:
+    main:        Spec.hs
+    source-dirs: test
+    build-tools: hspec-discover
+    ghc-options: -threaded
+    dependencies:
+    - fisher-lean
+    - hspec
+    - QuickCheck
+    - temporary

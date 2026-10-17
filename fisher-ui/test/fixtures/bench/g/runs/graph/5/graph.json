@@ -1,0 +1,24 @@
+{
+    "nodes": [
+        {
+            "attempts": 0,
+            "depth": 0,
+            "id": 1,
+            "key": "∀ {E : Step.Exec.Eval} {Dw : Step.Exec.Draw} {Sb : Step.Fuse.Subst} {n : Step.Network}\n  {relay upstream : Step.TAName} {inbound : Step.ChannelName} {pat : Step.Expr} {rest graft : List.{0} Step.BStmt}\n  {mr : Step.Machine} {ρ : Step.VarName → Step.VarName}\n  (H : Step.Relay.Setup E Dw Sb n relay upstream inbound pat rest graft mr ρ) {n' : Step.Network}\n  (hwf' : Step.Schedule.WellFormed n') (o' : Step.Store) {g : Step.GState}\n  (hpend : @Eq.{1} Step.Pending (Step.GState.pending g) (@List.nil.{0} Step.TAName)) {c c' : Step.Exec.Cand}\n  (hc :\n    @Membership.mem.{0, 0} Step.Exec.Cand (List.{0} Step.Exec.Cand) (@List.instMembership.{0} Step.Exec.Cand)\n      (Step.Exec.networkCands E g n) c)\n  (hc' :\n    @Membership.mem.{0, 0} Step.Exec.Cand (List.{0} Step.Exec.Cand) (@List.instMembership.{0} Step.Exec.Cand)\n      (Step.Exec.networkCands E (Step.Graft.fuseT ρ (Step.Graft.Masked inbound pat) o' g) n') c')\n  (hcc : Step.Relay.CandFu Sb (Step.Fuse.outbound relay upstream) inbound pat graft upstream c c')\n  (hta : @Ne.{1} Step.TAName (Step.Exec.Cand.ta c) relay) (hup : @Ne.{1} Step.TAName (Step.Exec.Cand.ta c) upstream)\n  {s s' : Step.Step} (hs : @Eq.{1} (Option.{0} Step.Step) (Step.Exec.Cand.step c) (@Option.some.{0} Step.Step s))\n  (hs' : @Eq.{1} (Option.{0} Step.Step) (Step.Exec.Cand.step c') (@Option.some.{0} Step.Step s')),\n  @Eq.{1} (PMF.{0} (Except.{0, 0} Step.ExecError (Prod.{0, 0} Step.GState Step.Change)))\n    (Step.Exec.fireCand E Dw c' s' (Step.Graft.fuseT ρ (Step.Graft.Masked inbound pat) o' g))\n    (@PMF.map.{0, 0} (Except.{0, 0} Step.ExecError (Prod.{0, 0} Step.GState Step.Change))\n      (Except.{0, 0} Step.ExecError (Prod.{0, 0} Step.GState Step.Change))\n      (@Except.map.{0, 0, 0} Step.ExecError (Prod.{0, 0} Step.GState Step.Change) (Prod.{0, 0} Step.GState Step.Change)\n        fun (x : Prod.{0, 0} Step.GState Step.Change) =>\n        @Prod.mk.{0, 0} Step.GState Step.Change\n          (Step.Graft.fuseT ρ (Step.Graft.Masked inbound pat) o' (@Prod.fst.{0, 0} Step.GState Step.Change x))\n          (have __src : Step.Change := @Prod.snd.{0, 0} Step.GState Step.Change x;\n          Step.Change.mk (Step.Change.machine __src) (Step.Change.time __src)\n            (Step.GState.store\n              (Step.Graft.fuseT ρ (Step.Graft.Masked inbound pat) o' (Step.GState.atTime g (Step.Exec.Cand.fire c))))\n            (Step.GState.store\n              (Step.Graft.fuseT ρ (Step.Graft.Masked inbound pat) o' (@Prod.fst.{0, 0} Step.GState Step.Change x)))\n            (Step.Relay.renameRecvd (Step.Fuse.outbound relay upstream)\n              (Step.Change.delta (@Prod.snd.{0, 0} Step.GState Step.Change x)))\n            (Step.Change.ref __src)))\n      (Step.Exec.fireCand E Dw c s g))",
+            "name": "Step.Relay.fireCand_third",
+            "root": 1,
+            "splits": [],
+            "status": "proved"
+        }
+    ],
+    "roots": [
+        1
+    ],
+    "splits": [],
+    "whiteboards": [
+        {
+            "root": 1,
+            "text": "# Plan for Step.Relay.fireCand_third\n- Step.Relay.fireCand_third (proved)"
+        }
+    ]
+}

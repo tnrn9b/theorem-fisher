@@ -1,0 +1,4 @@
+{"event":"auto missed","goal":"Step.Graft.runS_graft","seconds":26.8,"t":26.8}
+{"attempt":1,"backend":"gauss","event":"launched","goal":"Step.Graft.runS_graft","t":26.8}
+{"attempt":1,"backend":"gauss","event":"finished","goal":"Step.Graft.runS_graft","outcome":"closed (helpers: commEffect_bufLen_ge, runBody_bufLen_ge, flush_run_le, flush_run_comm, GraftCtx.reads_ok, runS_graft_core)","stats":{"cost_usd":1.1700381000000002,"exit":0,"input_tokens":3582259,"output_tokens":36115,"tools":{"mcp_lean_lsp_lean_diagnostic_messages":6,"mcp_lean_lsp_lean_verify":1,"patch":6,"read_file":13,"search_files":8,"terminal":3},"turns":28,"wall_s":374},"t":426.2}
+{"attempt":1,"event":"closed","goal":"Step.Graft.runS_graft","t":426.2}

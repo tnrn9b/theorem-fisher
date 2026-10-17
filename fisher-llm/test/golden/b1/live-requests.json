@@ -1,0 +1,458 @@
+{
+  "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+  "openai": "3.22.1",
+  "anthropic": "1.11.0",
+  "cases": [
+    {
+      "name": "openrouter-text",
+      "family": "openrouter",
+      "mode": "chat_completions",
+      "model": "anthropic/claude-haiku-4.5",
+      "request": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "headers": {
+          "accept": "application/json",
+          "content-type": "application/json",
+          "http-referer": "https://gauss-agent.nousresearch.com",
+          "x-openrouter-categories": "productivity,cli-agent",
+          "x-openrouter-title": "Gauss Agent"
+        },
+        "body": {
+          "messages": [
+            {
+              "role": "system",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "You are a terse assistant used for a connectivity test.",
+                  "cache_control": {
+                    "type": "ephemeral"
+                  }
+                }
+              ]
+            },
+            {
+              "role": "user",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Reply with the single word: pong",
+                  "cache_control": {
+                    "type": "ephemeral"
+                  }
+                }
+              ]
+            }
+          ],
+          "model": "anthropic/claude-haiku-4.5",
+          "max_tokens": 64,
+          "tools": null,
+          "reasoning": {
+            "enabled": true,
+            "effort": "medium"
+          }
+        }
+      }
+    },
+    {
+      "name": "openrouter-tool",
+      "family": "openrouter",
+      "mode": "chat_completions",
+      "model": "openai/gpt-4.1-mini",
+      "request": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "headers": {
+          "accept": "application/json",
+          "content-type": "application/json",
+          "http-referer": "https://gauss-agent.nousresearch.com",
+          "x-openrouter-categories": "productivity,cli-agent",
+          "x-openrouter-title": "Gauss Agent"
+        },
+        "body": {
+          "messages": [
+            {
+              "role": "system",
+              "content": "You are a terse assistant used for a connectivity test."
+            },
+            {
+              "role": "user",
+              "content": "What time is it? Call the get_time tool; do not answer from memory."
+            }
+          ],
+          "model": "openai/gpt-4.1-mini",
+          "max_tokens": 256,
+          "tools": [
+            {
+              "type": "function",
+              "function": {
+                "name": "get_time",
+                "description": "Return the current UTC time.",
+                "parameters": {
+                  "type": "object",
+                  "properties": {},
+                  "required": []
+                }
+              }
+            }
+          ],
+          "reasoning": {
+            "enabled": true,
+            "effort": "medium"
+          }
+        }
+      }
+    },
+    {
+      "name": "openrouter-tool-result",
+      "family": "openrouter",
+      "mode": "chat_completions",
+      "model": "openai/gpt-4.1-mini",
+      "request": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "headers": {
+          "accept": "application/json",
+          "content-type": "application/json",
+          "http-referer": "https://gauss-agent.nousresearch.com",
+          "x-openrouter-categories": "productivity,cli-agent",
+          "x-openrouter-title": "Gauss Agent"
+        },
+        "body": {
+          "messages": [
+            {
+              "role": "system",
+              "content": "You are a terse assistant used for a connectivity test."
+            },
+            {
+              "role": "user",
+              "content": "What time is it? Call the get_time tool; do not answer from memory."
+            },
+            {
+              "role": "assistant",
+              "content": "",
+              "tool_calls": [
+                {
+                  "id": "call_live1",
+                  "type": "function",
+                  "function": {
+                    "name": "get_time",
+                    "arguments": "{}"
+                  }
+                }
+              ]
+            },
+            {
+              "role": "tool",
+              "tool_call_id": "call_live1",
+              "content": "2026-10-01T12:00:00Z"
+            }
+          ],
+          "model": "openai/gpt-4.1-mini",
+          "max_tokens": 256,
+          "tools": [
+            {
+              "type": "function",
+              "function": {
+                "name": "get_time",
+                "description": "Return the current UTC time.",
+                "parameters": {
+                  "type": "object",
+                  "properties": {},
+                  "required": []
+                }
+              }
+            }
+          ],
+          "reasoning": {
+            "enabled": true,
+            "effort": "medium"
+          }
+        }
+      }
+    },
+    {
+      "name": "openrouter-reasoning",
+      "family": "openrouter",
+      "mode": "chat_completions",
+      "model": "openai/gpt-5-mini",
+      "request": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "headers": {
+          "accept": "application/json",
+          "content-type": "application/json",
+          "http-referer": "https://gauss-agent.nousresearch.com",
+          "x-openrouter-categories": "productivity,cli-agent",
+          "x-openrouter-title": "Gauss Agent"
+        },
+        "body": {
+          "messages": [
+            {
+              "role": "system",
+              "content": "You are a terse assistant used for a connectivity test."
+            },
+            {
+              "role": "user",
+              "content": "Is 221 prime? Answer yes or no, then one short sentence."
+            }
+          ],
+          "model": "openai/gpt-5-mini",
+          "max_tokens": 2048,
+          "tools": null,
+          "reasoning": {
+            "enabled": true,
+            "effort": "low"
+          }
+        }
+      }
+    },
+    {
+      "name": "anthropic-text",
+      "family": "anthropic",
+      "mode": "anthropic_messages",
+      "model": "claude-haiku-4-5-20251001",
+      "request": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "headers": {
+          "accept": "application/json",
+          "anthropic-beta": "interleaved-thinking-2025-05-14,fine-grained-tool-streaming-2025-05-14",
+          "anthropic-version": "2023-06-01",
+          "content-type": "application/json"
+        },
+        "body": {
+          "model": "claude-haiku-4-5-20251001",
+          "messages": [
+            {
+              "role": "user",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Reply with the single word: pong",
+                  "cache_control": {
+                    "type": "ephemeral"
+                  }
+                }
+              ]
+            }
+          ],
+          "max_tokens": 64,
+          "system": [
+            {
+              "type": "text",
+              "text": "You are a terse assistant used for a connectivity test.",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "anthropic-tool",
+      "family": "anthropic",
+      "mode": "anthropic_messages",
+      "model": "claude-haiku-4-5-20251001",
+      "request": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "headers": {
+          "accept": "application/json",
+          "anthropic-beta": "interleaved-thinking-2025-05-14,fine-grained-tool-streaming-2025-05-14",
+          "anthropic-version": "2023-06-01",
+          "content-type": "application/json"
+        },
+        "body": {
+          "model": "claude-haiku-4-5-20251001",
+          "messages": [
+            {
+              "role": "user",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "What time is it? Call the get_time tool; do not answer from memory.",
+                  "cache_control": {
+                    "type": "ephemeral"
+                  }
+                }
+              ]
+            }
+          ],
+          "max_tokens": 256,
+          "system": [
+            {
+              "type": "text",
+              "text": "You are a terse assistant used for a connectivity test.",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
+          "tools": [
+            {
+              "name": "get_time",
+              "description": "Return the current UTC time.",
+              "input_schema": {
+                "type": "object",
+                "properties": {},
+                "required": []
+              }
+            }
+          ],
+          "tool_choice": {
+            "type": "auto"
+          }
+        }
+      }
+    },
+    {
+      "name": "anthropic-thinking",
+      "family": "anthropic",
+      "mode": "anthropic_messages",
+      "model": "claude-sonnet-4-5",
+      "request": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "headers": {
+          "accept": "application/json",
+          "anthropic-beta": "interleaved-thinking-2025-05-14,fine-grained-tool-streaming-2025-05-14",
+          "anthropic-version": "2023-06-01",
+          "content-type": "application/json"
+        },
+        "body": {
+          "model": "claude-sonnet-4-5",
+          "messages": [
+            {
+              "role": "user",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Is 221 prime? Answer yes or no, then one short sentence.",
+                  "cache_control": {
+                    "type": "ephemeral"
+                  }
+                }
+              ]
+            }
+          ],
+          "max_tokens": 8096,
+          "system": [
+            {
+              "type": "text",
+              "text": "You are a terse assistant used for a connectivity test.",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
+          "thinking": {
+            "type": "enabled",
+            "budget_tokens": 4000
+          },
+          "temperature": 1
+        }
+      }
+    },
+    {
+      "name": "codex-text",
+      "family": "codex",
+      "mode": "codex_responses",
+      "model": "gpt-5.2-codex",
+      "request": {
+        "method": "POST",
+        "url": "https://chatgpt.com/backend-api/codex/responses",
+        "headers": {
+          "accept": "application/json",
+          "content-type": "application/json"
+        },
+        "body": {
+          "include": [
+            "reasoning.encrypted_content"
+          ],
+          "input": [
+            {
+              "role": "user",
+              "content": "Reply with the single word: pong"
+            }
+          ],
+          "instructions": "You are a terse assistant used for a connectivity test.",
+          "model": "gpt-5.2-codex",
+          "parallel_tool_calls": true,
+          "prompt_cache_key": "20261001_120000_abcdef",
+          "reasoning": {
+            "effort": "low",
+            "summary": "auto"
+          },
+          "store": false,
+          "stream": true,
+          "tool_choice": "auto",
+          "tools": [
+            {
+              "type": "function",
+              "name": "get_time",
+              "description": "Return the current UTC time.",
+              "strict": false,
+              "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "codex-tool",
+      "family": "codex",
+      "mode": "codex_responses",
+      "model": "gpt-5.2-codex",
+      "request": {
+        "method": "POST",
+        "url": "https://chatgpt.com/backend-api/codex/responses",
+        "headers": {
+          "accept": "application/json",
+          "content-type": "application/json"
+        },
+        "body": {
+          "include": [
+            "reasoning.encrypted_content"
+          ],
+          "input": [
+            {
+              "role": "user",
+              "content": "What time is it? Call the get_time tool; do not answer from memory."
+            }
+          ],
+          "instructions": "You are a terse assistant used for a connectivity test.",
+          "model": "gpt-5.2-codex",
+          "parallel_tool_calls": true,
+          "prompt_cache_key": "20261001_120000_abcdef",
+          "reasoning": {
+            "effort": "low",
+            "summary": "auto"
+          },
+          "store": false,
+          "stream": true,
+          "tool_choice": "auto",
+          "tools": [
+            {
+              "type": "function",
+              "name": "get_time",
+              "description": "Return the current UTC time.",
+              "strict": false,
+              "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

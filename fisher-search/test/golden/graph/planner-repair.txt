@@ -1,0 +1,36 @@
+[system]
+You plan Lean 4 proofs. You prove nothing directly.
+Given a goal, propose lemmas, each simpler than the goal, each ending in `:= by sorry`.
+Then give the goal's declaration with its statement unchanged and a proof that uses the lemmas.
+Every lemma must be plausibly true and must be stated with the names and types of the file.
+Reply with exactly two fenced blocks and no other text.
+The first is tagged blueprint: a short plain description of each lemma and how they combine.
+The second is tagged lean: the lemmas and then the goal's declaration.
+
+[user]
+The goal is the declaration `main`.
+
+The file so far:
+```lean
+theorem main : P := by sorry
+```
+
+The plan so far:
+# Plan for main
+
+- main (open)
+
+Besides the new lemmas and what the file already proves, the proof may use only these lemmas of the current plan, even where they still end in `sorry`: `aux`, `Foo.b`. It may use no other declaration that still ends in `sorry`.
+
+Direct attempts at this goal failed:
+- tried simp, stuck on the second case
+[assistant]
+```lean
+lemma x : foo := by sorry
+```
+[user]
+Lean reported:
+```
+error: unknown identifier 'foo'
+```
+Reply again with both blocks, fixing these errors.

@@ -1,0 +1,3429 @@
+{
+  "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+  "openai": "3.22.1",
+  "anthropic": "1.11.0",
+  "cases": [
+    {
+      "name": "retry/200/{}",
+      "kind": "retry",
+      "status": 200,
+      "headers": {},
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/200/{\"retry-after\": \"3\"}",
+      "kind": "retry",
+      "status": 200,
+      "headers": {
+        "retry-after": "3"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ]
+      ]
+    },
+    {
+      "name": "retry/200/{\"retry-after\": \"0\"}",
+      "kind": "retry",
+      "status": 200,
+      "headers": {
+        "retry-after": "0"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/200/{\"retry-after\": \"121\"}",
+      "kind": "retry",
+      "status": 200,
+      "headers": {
+        "retry-after": "121"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/200/{\"retry-after-ms\": \"1500\"}",
+      "kind": "retry",
+      "status": 200,
+      "headers": {
+        "retry-after-ms": "1500"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/200/{\"retry-after\": \"Wed, 21 Oct 2015 07:28:00 GMT\"}",
+      "kind": "retry",
+      "status": 200,
+      "headers": {
+        "retry-after": "Wed, 21 Oct 2015 07:28:00 GMT"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/200/{\"x-should-retry\": \"true\"}",
+      "kind": "retry",
+      "status": 200,
+      "headers": {
+        "x-should-retry": "true"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/200/{\"x-should-retry\": \"false\"}",
+      "kind": "retry",
+      "status": 200,
+      "headers": {
+        "x-should-retry": "false"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/200/{\"retry-after\": \"abc\"}",
+      "kind": "retry",
+      "status": 200,
+      "headers": {
+        "retry-after": "abc"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/400/{}",
+      "kind": "retry",
+      "status": 400,
+      "headers": {},
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/400/{\"retry-after\": \"3\"}",
+      "kind": "retry",
+      "status": 400,
+      "headers": {
+        "retry-after": "3"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ]
+      ]
+    },
+    {
+      "name": "retry/400/{\"retry-after\": \"0\"}",
+      "kind": "retry",
+      "status": 400,
+      "headers": {
+        "retry-after": "0"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/400/{\"retry-after\": \"121\"}",
+      "kind": "retry",
+      "status": 400,
+      "headers": {
+        "retry-after": "121"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/400/{\"retry-after-ms\": \"1500\"}",
+      "kind": "retry",
+      "status": 400,
+      "headers": {
+        "retry-after-ms": "1500"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/400/{\"retry-after\": \"Wed, 21 Oct 2015 07:28:00 GMT\"}",
+      "kind": "retry",
+      "status": 400,
+      "headers": {
+        "retry-after": "Wed, 21 Oct 2015 07:28:00 GMT"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/400/{\"x-should-retry\": \"true\"}",
+      "kind": "retry",
+      "status": 400,
+      "headers": {
+        "x-should-retry": "true"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/400/{\"x-should-retry\": \"false\"}",
+      "kind": "retry",
+      "status": 400,
+      "headers": {
+        "x-should-retry": "false"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/400/{\"retry-after\": \"abc\"}",
+      "kind": "retry",
+      "status": 400,
+      "headers": {
+        "retry-after": "abc"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/401/{}",
+      "kind": "retry",
+      "status": 401,
+      "headers": {},
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/401/{\"retry-after\": \"3\"}",
+      "kind": "retry",
+      "status": 401,
+      "headers": {
+        "retry-after": "3"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ]
+      ]
+    },
+    {
+      "name": "retry/401/{\"retry-after\": \"0\"}",
+      "kind": "retry",
+      "status": 401,
+      "headers": {
+        "retry-after": "0"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/401/{\"retry-after\": \"121\"}",
+      "kind": "retry",
+      "status": 401,
+      "headers": {
+        "retry-after": "121"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/401/{\"retry-after-ms\": \"1500\"}",
+      "kind": "retry",
+      "status": 401,
+      "headers": {
+        "retry-after-ms": "1500"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/401/{\"retry-after\": \"Wed, 21 Oct 2015 07:28:00 GMT\"}",
+      "kind": "retry",
+      "status": 401,
+      "headers": {
+        "retry-after": "Wed, 21 Oct 2015 07:28:00 GMT"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/401/{\"x-should-retry\": \"true\"}",
+      "kind": "retry",
+      "status": 401,
+      "headers": {
+        "x-should-retry": "true"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/401/{\"x-should-retry\": \"false\"}",
+      "kind": "retry",
+      "status": 401,
+      "headers": {
+        "x-should-retry": "false"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/401/{\"retry-after\": \"abc\"}",
+      "kind": "retry",
+      "status": 401,
+      "headers": {
+        "retry-after": "abc"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/403/{}",
+      "kind": "retry",
+      "status": 403,
+      "headers": {},
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/403/{\"retry-after\": \"3\"}",
+      "kind": "retry",
+      "status": 403,
+      "headers": {
+        "retry-after": "3"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ]
+      ]
+    },
+    {
+      "name": "retry/403/{\"retry-after\": \"0\"}",
+      "kind": "retry",
+      "status": 403,
+      "headers": {
+        "retry-after": "0"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/403/{\"retry-after\": \"121\"}",
+      "kind": "retry",
+      "status": 403,
+      "headers": {
+        "retry-after": "121"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/403/{\"retry-after-ms\": \"1500\"}",
+      "kind": "retry",
+      "status": 403,
+      "headers": {
+        "retry-after-ms": "1500"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/403/{\"retry-after\": \"Wed, 21 Oct 2015 07:28:00 GMT\"}",
+      "kind": "retry",
+      "status": 403,
+      "headers": {
+        "retry-after": "Wed, 21 Oct 2015 07:28:00 GMT"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/403/{\"x-should-retry\": \"true\"}",
+      "kind": "retry",
+      "status": 403,
+      "headers": {
+        "x-should-retry": "true"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/403/{\"x-should-retry\": \"false\"}",
+      "kind": "retry",
+      "status": 403,
+      "headers": {
+        "x-should-retry": "false"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/403/{\"retry-after\": \"abc\"}",
+      "kind": "retry",
+      "status": 403,
+      "headers": {
+        "retry-after": "abc"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/404/{}",
+      "kind": "retry",
+      "status": 404,
+      "headers": {},
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/404/{\"retry-after\": \"3\"}",
+      "kind": "retry",
+      "status": 404,
+      "headers": {
+        "retry-after": "3"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ]
+      ]
+    },
+    {
+      "name": "retry/404/{\"retry-after\": \"0\"}",
+      "kind": "retry",
+      "status": 404,
+      "headers": {
+        "retry-after": "0"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/404/{\"retry-after\": \"121\"}",
+      "kind": "retry",
+      "status": 404,
+      "headers": {
+        "retry-after": "121"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/404/{\"retry-after-ms\": \"1500\"}",
+      "kind": "retry",
+      "status": 404,
+      "headers": {
+        "retry-after-ms": "1500"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/404/{\"retry-after\": \"Wed, 21 Oct 2015 07:28:00 GMT\"}",
+      "kind": "retry",
+      "status": 404,
+      "headers": {
+        "retry-after": "Wed, 21 Oct 2015 07:28:00 GMT"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/404/{\"x-should-retry\": \"true\"}",
+      "kind": "retry",
+      "status": 404,
+      "headers": {
+        "x-should-retry": "true"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/404/{\"x-should-retry\": \"false\"}",
+      "kind": "retry",
+      "status": 404,
+      "headers": {
+        "x-should-retry": "false"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/404/{\"retry-after\": \"abc\"}",
+      "kind": "retry",
+      "status": 404,
+      "headers": {
+        "retry-after": "abc"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/408/{}",
+      "kind": "retry",
+      "status": 408,
+      "headers": {},
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/408/{\"retry-after\": \"3\"}",
+      "kind": "retry",
+      "status": 408,
+      "headers": {
+        "retry-after": "3"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ]
+      ]
+    },
+    {
+      "name": "retry/408/{\"retry-after\": \"0\"}",
+      "kind": "retry",
+      "status": 408,
+      "headers": {
+        "retry-after": "0"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/408/{\"retry-after\": \"121\"}",
+      "kind": "retry",
+      "status": 408,
+      "headers": {
+        "retry-after": "121"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/408/{\"retry-after-ms\": \"1500\"}",
+      "kind": "retry",
+      "status": 408,
+      "headers": {
+        "retry-after-ms": "1500"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/408/{\"retry-after\": \"Wed, 21 Oct 2015 07:28:00 GMT\"}",
+      "kind": "retry",
+      "status": 408,
+      "headers": {
+        "retry-after": "Wed, 21 Oct 2015 07:28:00 GMT"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/408/{\"x-should-retry\": \"true\"}",
+      "kind": "retry",
+      "status": 408,
+      "headers": {
+        "x-should-retry": "true"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/408/{\"x-should-retry\": \"false\"}",
+      "kind": "retry",
+      "status": 408,
+      "headers": {
+        "x-should-retry": "false"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/408/{\"retry-after\": \"abc\"}",
+      "kind": "retry",
+      "status": 408,
+      "headers": {
+        "retry-after": "abc"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/409/{}",
+      "kind": "retry",
+      "status": 409,
+      "headers": {},
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/409/{\"retry-after\": \"3\"}",
+      "kind": "retry",
+      "status": 409,
+      "headers": {
+        "retry-after": "3"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ]
+      ]
+    },
+    {
+      "name": "retry/409/{\"retry-after\": \"0\"}",
+      "kind": "retry",
+      "status": 409,
+      "headers": {
+        "retry-after": "0"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/409/{\"retry-after\": \"121\"}",
+      "kind": "retry",
+      "status": 409,
+      "headers": {
+        "retry-after": "121"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/409/{\"retry-after-ms\": \"1500\"}",
+      "kind": "retry",
+      "status": 409,
+      "headers": {
+        "retry-after-ms": "1500"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/409/{\"retry-after\": \"Wed, 21 Oct 2015 07:28:00 GMT\"}",
+      "kind": "retry",
+      "status": 409,
+      "headers": {
+        "retry-after": "Wed, 21 Oct 2015 07:28:00 GMT"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/409/{\"x-should-retry\": \"true\"}",
+      "kind": "retry",
+      "status": 409,
+      "headers": {
+        "x-should-retry": "true"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/409/{\"x-should-retry\": \"false\"}",
+      "kind": "retry",
+      "status": 409,
+      "headers": {
+        "x-should-retry": "false"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/409/{\"retry-after\": \"abc\"}",
+      "kind": "retry",
+      "status": 409,
+      "headers": {
+        "retry-after": "abc"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/413/{}",
+      "kind": "retry",
+      "status": 413,
+      "headers": {},
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/413/{\"retry-after\": \"3\"}",
+      "kind": "retry",
+      "status": 413,
+      "headers": {
+        "retry-after": "3"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ]
+      ]
+    },
+    {
+      "name": "retry/413/{\"retry-after\": \"0\"}",
+      "kind": "retry",
+      "status": 413,
+      "headers": {
+        "retry-after": "0"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/413/{\"retry-after\": \"121\"}",
+      "kind": "retry",
+      "status": 413,
+      "headers": {
+        "retry-after": "121"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/413/{\"retry-after-ms\": \"1500\"}",
+      "kind": "retry",
+      "status": 413,
+      "headers": {
+        "retry-after-ms": "1500"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/413/{\"retry-after\": \"Wed, 21 Oct 2015 07:28:00 GMT\"}",
+      "kind": "retry",
+      "status": 413,
+      "headers": {
+        "retry-after": "Wed, 21 Oct 2015 07:28:00 GMT"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/413/{\"x-should-retry\": \"true\"}",
+      "kind": "retry",
+      "status": 413,
+      "headers": {
+        "x-should-retry": "true"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/413/{\"x-should-retry\": \"false\"}",
+      "kind": "retry",
+      "status": 413,
+      "headers": {
+        "x-should-retry": "false"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/413/{\"retry-after\": \"abc\"}",
+      "kind": "retry",
+      "status": 413,
+      "headers": {
+        "retry-after": "abc"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/422/{}",
+      "kind": "retry",
+      "status": 422,
+      "headers": {},
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/422/{\"retry-after\": \"3\"}",
+      "kind": "retry",
+      "status": 422,
+      "headers": {
+        "retry-after": "3"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ]
+      ]
+    },
+    {
+      "name": "retry/422/{\"retry-after\": \"0\"}",
+      "kind": "retry",
+      "status": 422,
+      "headers": {
+        "retry-after": "0"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/422/{\"retry-after\": \"121\"}",
+      "kind": "retry",
+      "status": 422,
+      "headers": {
+        "retry-after": "121"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/422/{\"retry-after-ms\": \"1500\"}",
+      "kind": "retry",
+      "status": 422,
+      "headers": {
+        "retry-after-ms": "1500"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/422/{\"retry-after\": \"Wed, 21 Oct 2015 07:28:00 GMT\"}",
+      "kind": "retry",
+      "status": 422,
+      "headers": {
+        "retry-after": "Wed, 21 Oct 2015 07:28:00 GMT"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/422/{\"x-should-retry\": \"true\"}",
+      "kind": "retry",
+      "status": 422,
+      "headers": {
+        "x-should-retry": "true"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/422/{\"x-should-retry\": \"false\"}",
+      "kind": "retry",
+      "status": 422,
+      "headers": {
+        "x-should-retry": "false"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/422/{\"retry-after\": \"abc\"}",
+      "kind": "retry",
+      "status": 422,
+      "headers": {
+        "retry-after": "abc"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/429/{}",
+      "kind": "retry",
+      "status": 429,
+      "headers": {},
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/429/{\"retry-after\": \"3\"}",
+      "kind": "retry",
+      "status": 429,
+      "headers": {
+        "retry-after": "3"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ]
+      ]
+    },
+    {
+      "name": "retry/429/{\"retry-after\": \"0\"}",
+      "kind": "retry",
+      "status": 429,
+      "headers": {
+        "retry-after": "0"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/429/{\"retry-after\": \"121\"}",
+      "kind": "retry",
+      "status": 429,
+      "headers": {
+        "retry-after": "121"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/429/{\"retry-after-ms\": \"1500\"}",
+      "kind": "retry",
+      "status": 429,
+      "headers": {
+        "retry-after-ms": "1500"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/429/{\"retry-after\": \"Wed, 21 Oct 2015 07:28:00 GMT\"}",
+      "kind": "retry",
+      "status": 429,
+      "headers": {
+        "retry-after": "Wed, 21 Oct 2015 07:28:00 GMT"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/429/{\"x-should-retry\": \"true\"}",
+      "kind": "retry",
+      "status": 429,
+      "headers": {
+        "x-should-retry": "true"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/429/{\"x-should-retry\": \"false\"}",
+      "kind": "retry",
+      "status": 429,
+      "headers": {
+        "x-should-retry": "false"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/429/{\"retry-after\": \"abc\"}",
+      "kind": "retry",
+      "status": 429,
+      "headers": {
+        "retry-after": "abc"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/500/{}",
+      "kind": "retry",
+      "status": 500,
+      "headers": {},
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/500/{\"retry-after\": \"3\"}",
+      "kind": "retry",
+      "status": 500,
+      "headers": {
+        "retry-after": "3"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ]
+      ]
+    },
+    {
+      "name": "retry/500/{\"retry-after\": \"0\"}",
+      "kind": "retry",
+      "status": 500,
+      "headers": {
+        "retry-after": "0"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/500/{\"retry-after\": \"121\"}",
+      "kind": "retry",
+      "status": 500,
+      "headers": {
+        "retry-after": "121"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/500/{\"retry-after-ms\": \"1500\"}",
+      "kind": "retry",
+      "status": 500,
+      "headers": {
+        "retry-after-ms": "1500"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/500/{\"retry-after\": \"Wed, 21 Oct 2015 07:28:00 GMT\"}",
+      "kind": "retry",
+      "status": 500,
+      "headers": {
+        "retry-after": "Wed, 21 Oct 2015 07:28:00 GMT"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/500/{\"x-should-retry\": \"true\"}",
+      "kind": "retry",
+      "status": 500,
+      "headers": {
+        "x-should-retry": "true"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/500/{\"x-should-retry\": \"false\"}",
+      "kind": "retry",
+      "status": 500,
+      "headers": {
+        "x-should-retry": "false"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/500/{\"retry-after\": \"abc\"}",
+      "kind": "retry",
+      "status": 500,
+      "headers": {
+        "retry-after": "abc"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/502/{}",
+      "kind": "retry",
+      "status": 502,
+      "headers": {},
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/502/{\"retry-after\": \"3\"}",
+      "kind": "retry",
+      "status": 502,
+      "headers": {
+        "retry-after": "3"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ]
+      ]
+    },
+    {
+      "name": "retry/502/{\"retry-after\": \"0\"}",
+      "kind": "retry",
+      "status": 502,
+      "headers": {
+        "retry-after": "0"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/502/{\"retry-after\": \"121\"}",
+      "kind": "retry",
+      "status": 502,
+      "headers": {
+        "retry-after": "121"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/502/{\"retry-after-ms\": \"1500\"}",
+      "kind": "retry",
+      "status": 502,
+      "headers": {
+        "retry-after-ms": "1500"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/502/{\"retry-after\": \"Wed, 21 Oct 2015 07:28:00 GMT\"}",
+      "kind": "retry",
+      "status": 502,
+      "headers": {
+        "retry-after": "Wed, 21 Oct 2015 07:28:00 GMT"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/502/{\"x-should-retry\": \"true\"}",
+      "kind": "retry",
+      "status": 502,
+      "headers": {
+        "x-should-retry": "true"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/502/{\"x-should-retry\": \"false\"}",
+      "kind": "retry",
+      "status": 502,
+      "headers": {
+        "x-should-retry": "false"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/502/{\"retry-after\": \"abc\"}",
+      "kind": "retry",
+      "status": 502,
+      "headers": {
+        "retry-after": "abc"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/503/{}",
+      "kind": "retry",
+      "status": 503,
+      "headers": {},
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/503/{\"retry-after\": \"3\"}",
+      "kind": "retry",
+      "status": 503,
+      "headers": {
+        "retry-after": "3"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ]
+      ]
+    },
+    {
+      "name": "retry/503/{\"retry-after\": \"0\"}",
+      "kind": "retry",
+      "status": 503,
+      "headers": {
+        "retry-after": "0"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/503/{\"retry-after\": \"121\"}",
+      "kind": "retry",
+      "status": 503,
+      "headers": {
+        "retry-after": "121"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/503/{\"retry-after-ms\": \"1500\"}",
+      "kind": "retry",
+      "status": 503,
+      "headers": {
+        "retry-after-ms": "1500"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/503/{\"retry-after\": \"Wed, 21 Oct 2015 07:28:00 GMT\"}",
+      "kind": "retry",
+      "status": 503,
+      "headers": {
+        "retry-after": "Wed, 21 Oct 2015 07:28:00 GMT"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/503/{\"x-should-retry\": \"true\"}",
+      "kind": "retry",
+      "status": 503,
+      "headers": {
+        "x-should-retry": "true"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/503/{\"x-should-retry\": \"false\"}",
+      "kind": "retry",
+      "status": 503,
+      "headers": {
+        "x-should-retry": "false"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/503/{\"retry-after\": \"abc\"}",
+      "kind": "retry",
+      "status": 503,
+      "headers": {
+        "retry-after": "abc"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/529/{}",
+      "kind": "retry",
+      "status": 529,
+      "headers": {},
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/529/{\"retry-after\": \"3\"}",
+      "kind": "retry",
+      "status": 529,
+      "headers": {
+        "retry-after": "3"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ],
+        [
+          3.0,
+          3.0
+        ]
+      ]
+    },
+    {
+      "name": "retry/529/{\"retry-after\": \"0\"}",
+      "kind": "retry",
+      "status": 529,
+      "headers": {
+        "retry-after": "0"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/529/{\"retry-after\": \"121\"}",
+      "kind": "retry",
+      "status": 529,
+      "headers": {
+        "retry-after": "121"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/529/{\"retry-after-ms\": \"1500\"}",
+      "kind": "retry",
+      "status": 529,
+      "headers": {
+        "retry-after-ms": "1500"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ],
+        [
+          1.5,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/529/{\"retry-after\": \"Wed, 21 Oct 2015 07:28:00 GMT\"}",
+      "kind": "retry",
+      "status": 529,
+      "headers": {
+        "retry-after": "Wed, 21 Oct 2015 07:28:00 GMT"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/529/{\"x-should-retry\": \"true\"}",
+      "kind": "retry",
+      "status": 529,
+      "headers": {
+        "x-should-retry": "true"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/529/{\"x-should-retry\": \"false\"}",
+      "kind": "retry",
+      "status": 529,
+      "headers": {
+        "x-should-retry": "false"
+      },
+      "should_retry": false,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "retry/529/{\"retry-after\": \"abc\"}",
+      "kind": "retry",
+      "status": 529,
+      "headers": {
+        "retry-after": "abc"
+      },
+      "should_retry": true,
+      "delays": [
+        [
+          0.5,
+          0.375
+        ],
+        [
+          1.0,
+          0.75
+        ],
+        [
+          2.0,
+          1.5
+        ]
+      ]
+    },
+    {
+      "name": "error/400/0",
+      "kind": "error",
+      "status": 400,
+      "body": "{\"error\":{\"message\":\"Prompt is too long\",\"type\":\"invalid_request_error\"}}",
+      "class": "BadRequestError",
+      "str": "Error code: 400 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}",
+      "message": "Error code: 400 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}"
+    },
+    {
+      "name": "error/400/1",
+      "kind": "error",
+      "status": 400,
+      "body": "plain text body",
+      "class": "BadRequestError",
+      "str": "plain text body",
+      "message": "plain text body"
+    },
+    {
+      "name": "error/400/2",
+      "kind": "error",
+      "status": 400,
+      "body": "",
+      "class": "BadRequestError",
+      "str": "Error code: 400",
+      "message": "Error code: 400"
+    },
+    {
+      "name": "error/400/3",
+      "kind": "error",
+      "status": 400,
+      "body": "{\"error\":\"string error\"}",
+      "class": "BadRequestError",
+      "str": "Error code: 400 - {'error': 'string error'}",
+      "message": "Error code: 400 - {'error': 'string error'}"
+    },
+    {
+      "name": "error/400/4",
+      "kind": "error",
+      "status": 400,
+      "body": "{\"message\":\"top-level message\"}",
+      "class": "BadRequestError",
+      "str": "Error code: 400 - {'message': 'top-level message'}",
+      "message": "Error code: 400 - {'message': 'top-level message'}"
+    },
+    {
+      "name": "error/400/5",
+      "kind": "error",
+      "status": 400,
+      "body": "{\"error\":{\"code\":\"x\"}}",
+      "class": "BadRequestError",
+      "str": "Error code: 400 - {'error': {'code': 'x'}}",
+      "message": "Error code: 400 - {'error': {'code': 'x'}}"
+    },
+    {
+      "name": "error/401/0",
+      "kind": "error",
+      "status": 401,
+      "body": "{\"error\":{\"message\":\"Prompt is too long\",\"type\":\"invalid_request_error\"}}",
+      "class": "AuthenticationError",
+      "str": "Error code: 401 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}",
+      "message": "Error code: 401 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}"
+    },
+    {
+      "name": "error/401/1",
+      "kind": "error",
+      "status": 401,
+      "body": "plain text body",
+      "class": "AuthenticationError",
+      "str": "plain text body",
+      "message": "plain text body"
+    },
+    {
+      "name": "error/401/2",
+      "kind": "error",
+      "status": 401,
+      "body": "",
+      "class": "AuthenticationError",
+      "str": "Error code: 401",
+      "message": "Error code: 401"
+    },
+    {
+      "name": "error/401/3",
+      "kind": "error",
+      "status": 401,
+      "body": "{\"error\":\"string error\"}",
+      "class": "AuthenticationError",
+      "str": "Error code: 401 - {'error': 'string error'}",
+      "message": "Error code: 401 - {'error': 'string error'}"
+    },
+    {
+      "name": "error/401/4",
+      "kind": "error",
+      "status": 401,
+      "body": "{\"message\":\"top-level message\"}",
+      "class": "AuthenticationError",
+      "str": "Error code: 401 - {'message': 'top-level message'}",
+      "message": "Error code: 401 - {'message': 'top-level message'}"
+    },
+    {
+      "name": "error/401/5",
+      "kind": "error",
+      "status": 401,
+      "body": "{\"error\":{\"code\":\"x\"}}",
+      "class": "AuthenticationError",
+      "str": "Error code: 401 - {'error': {'code': 'x'}}",
+      "message": "Error code: 401 - {'error': {'code': 'x'}}"
+    },
+    {
+      "name": "error/403/0",
+      "kind": "error",
+      "status": 403,
+      "body": "{\"error\":{\"message\":\"Prompt is too long\",\"type\":\"invalid_request_error\"}}",
+      "class": "PermissionDeniedError",
+      "str": "Error code: 403 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}",
+      "message": "Error code: 403 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}"
+    },
+    {
+      "name": "error/403/1",
+      "kind": "error",
+      "status": 403,
+      "body": "plain text body",
+      "class": "PermissionDeniedError",
+      "str": "plain text body",
+      "message": "plain text body"
+    },
+    {
+      "name": "error/403/2",
+      "kind": "error",
+      "status": 403,
+      "body": "",
+      "class": "PermissionDeniedError",
+      "str": "Error code: 403",
+      "message": "Error code: 403"
+    },
+    {
+      "name": "error/403/3",
+      "kind": "error",
+      "status": 403,
+      "body": "{\"error\":\"string error\"}",
+      "class": "PermissionDeniedError",
+      "str": "Error code: 403 - {'error': 'string error'}",
+      "message": "Error code: 403 - {'error': 'string error'}"
+    },
+    {
+      "name": "error/403/4",
+      "kind": "error",
+      "status": 403,
+      "body": "{\"message\":\"top-level message\"}",
+      "class": "PermissionDeniedError",
+      "str": "Error code: 403 - {'message': 'top-level message'}",
+      "message": "Error code: 403 - {'message': 'top-level message'}"
+    },
+    {
+      "name": "error/403/5",
+      "kind": "error",
+      "status": 403,
+      "body": "{\"error\":{\"code\":\"x\"}}",
+      "class": "PermissionDeniedError",
+      "str": "Error code: 403 - {'error': {'code': 'x'}}",
+      "message": "Error code: 403 - {'error': {'code': 'x'}}"
+    },
+    {
+      "name": "error/404/0",
+      "kind": "error",
+      "status": 404,
+      "body": "{\"error\":{\"message\":\"Prompt is too long\",\"type\":\"invalid_request_error\"}}",
+      "class": "NotFoundError",
+      "str": "Error code: 404 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}",
+      "message": "Error code: 404 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}"
+    },
+    {
+      "name": "error/404/1",
+      "kind": "error",
+      "status": 404,
+      "body": "plain text body",
+      "class": "NotFoundError",
+      "str": "plain text body",
+      "message": "plain text body"
+    },
+    {
+      "name": "error/404/2",
+      "kind": "error",
+      "status": 404,
+      "body": "",
+      "class": "NotFoundError",
+      "str": "Error code: 404",
+      "message": "Error code: 404"
+    },
+    {
+      "name": "error/404/3",
+      "kind": "error",
+      "status": 404,
+      "body": "{\"error\":\"string error\"}",
+      "class": "NotFoundError",
+      "str": "Error code: 404 - {'error': 'string error'}",
+      "message": "Error code: 404 - {'error': 'string error'}"
+    },
+    {
+      "name": "error/404/4",
+      "kind": "error",
+      "status": 404,
+      "body": "{\"message\":\"top-level message\"}",
+      "class": "NotFoundError",
+      "str": "Error code: 404 - {'message': 'top-level message'}",
+      "message": "Error code: 404 - {'message': 'top-level message'}"
+    },
+    {
+      "name": "error/404/5",
+      "kind": "error",
+      "status": 404,
+      "body": "{\"error\":{\"code\":\"x\"}}",
+      "class": "NotFoundError",
+      "str": "Error code: 404 - {'error': {'code': 'x'}}",
+      "message": "Error code: 404 - {'error': {'code': 'x'}}"
+    },
+    {
+      "name": "error/409/0",
+      "kind": "error",
+      "status": 409,
+      "body": "{\"error\":{\"message\":\"Prompt is too long\",\"type\":\"invalid_request_error\"}}",
+      "class": "ConflictError",
+      "str": "Error code: 409 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}",
+      "message": "Error code: 409 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}"
+    },
+    {
+      "name": "error/409/1",
+      "kind": "error",
+      "status": 409,
+      "body": "plain text body",
+      "class": "ConflictError",
+      "str": "plain text body",
+      "message": "plain text body"
+    },
+    {
+      "name": "error/409/2",
+      "kind": "error",
+      "status": 409,
+      "body": "",
+      "class": "ConflictError",
+      "str": "Error code: 409",
+      "message": "Error code: 409"
+    },
+    {
+      "name": "error/409/3",
+      "kind": "error",
+      "status": 409,
+      "body": "{\"error\":\"string error\"}",
+      "class": "ConflictError",
+      "str": "Error code: 409 - {'error': 'string error'}",
+      "message": "Error code: 409 - {'error': 'string error'}"
+    },
+    {
+      "name": "error/409/4",
+      "kind": "error",
+      "status": 409,
+      "body": "{\"message\":\"top-level message\"}",
+      "class": "ConflictError",
+      "str": "Error code: 409 - {'message': 'top-level message'}",
+      "message": "Error code: 409 - {'message': 'top-level message'}"
+    },
+    {
+      "name": "error/409/5",
+      "kind": "error",
+      "status": 409,
+      "body": "{\"error\":{\"code\":\"x\"}}",
+      "class": "ConflictError",
+      "str": "Error code: 409 - {'error': {'code': 'x'}}",
+      "message": "Error code: 409 - {'error': {'code': 'x'}}"
+    },
+    {
+      "name": "error/413/0",
+      "kind": "error",
+      "status": 413,
+      "body": "{\"error\":{\"message\":\"Prompt is too long\",\"type\":\"invalid_request_error\"}}",
+      "class": "APIStatusError",
+      "str": "Error code: 413 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}",
+      "message": "Error code: 413 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}"
+    },
+    {
+      "name": "error/413/1",
+      "kind": "error",
+      "status": 413,
+      "body": "plain text body",
+      "class": "APIStatusError",
+      "str": "plain text body",
+      "message": "plain text body"
+    },
+    {
+      "name": "error/413/2",
+      "kind": "error",
+      "status": 413,
+      "body": "",
+      "class": "APIStatusError",
+      "str": "Error code: 413",
+      "message": "Error code: 413"
+    },
+    {
+      "name": "error/413/3",
+      "kind": "error",
+      "status": 413,
+      "body": "{\"error\":\"string error\"}",
+      "class": "APIStatusError",
+      "str": "Error code: 413 - {'error': 'string error'}",
+      "message": "Error code: 413 - {'error': 'string error'}"
+    },
+    {
+      "name": "error/413/4",
+      "kind": "error",
+      "status": 413,
+      "body": "{\"message\":\"top-level message\"}",
+      "class": "APIStatusError",
+      "str": "Error code: 413 - {'message': 'top-level message'}",
+      "message": "Error code: 413 - {'message': 'top-level message'}"
+    },
+    {
+      "name": "error/413/5",
+      "kind": "error",
+      "status": 413,
+      "body": "{\"error\":{\"code\":\"x\"}}",
+      "class": "APIStatusError",
+      "str": "Error code: 413 - {'error': {'code': 'x'}}",
+      "message": "Error code: 413 - {'error': {'code': 'x'}}"
+    },
+    {
+      "name": "error/422/0",
+      "kind": "error",
+      "status": 422,
+      "body": "{\"error\":{\"message\":\"Prompt is too long\",\"type\":\"invalid_request_error\"}}",
+      "class": "UnprocessableEntityError",
+      "str": "Error code: 422 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}",
+      "message": "Error code: 422 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}"
+    },
+    {
+      "name": "error/422/1",
+      "kind": "error",
+      "status": 422,
+      "body": "plain text body",
+      "class": "UnprocessableEntityError",
+      "str": "plain text body",
+      "message": "plain text body"
+    },
+    {
+      "name": "error/422/2",
+      "kind": "error",
+      "status": 422,
+      "body": "",
+      "class": "UnprocessableEntityError",
+      "str": "Error code: 422",
+      "message": "Error code: 422"
+    },
+    {
+      "name": "error/422/3",
+      "kind": "error",
+      "status": 422,
+      "body": "{\"error\":\"string error\"}",
+      "class": "UnprocessableEntityError",
+      "str": "Error code: 422 - {'error': 'string error'}",
+      "message": "Error code: 422 - {'error': 'string error'}"
+    },
+    {
+      "name": "error/422/4",
+      "kind": "error",
+      "status": 422,
+      "body": "{\"message\":\"top-level message\"}",
+      "class": "UnprocessableEntityError",
+      "str": "Error code: 422 - {'message': 'top-level message'}",
+      "message": "Error code: 422 - {'message': 'top-level message'}"
+    },
+    {
+      "name": "error/422/5",
+      "kind": "error",
+      "status": 422,
+      "body": "{\"error\":{\"code\":\"x\"}}",
+      "class": "UnprocessableEntityError",
+      "str": "Error code: 422 - {'error': {'code': 'x'}}",
+      "message": "Error code: 422 - {'error': {'code': 'x'}}"
+    },
+    {
+      "name": "error/429/0",
+      "kind": "error",
+      "status": 429,
+      "body": "{\"error\":{\"message\":\"Prompt is too long\",\"type\":\"invalid_request_error\"}}",
+      "class": "RateLimitError",
+      "str": "Error code: 429 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}",
+      "message": "Error code: 429 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}"
+    },
+    {
+      "name": "error/429/1",
+      "kind": "error",
+      "status": 429,
+      "body": "plain text body",
+      "class": "RateLimitError",
+      "str": "plain text body",
+      "message": "plain text body"
+    },
+    {
+      "name": "error/429/2",
+      "kind": "error",
+      "status": 429,
+      "body": "",
+      "class": "RateLimitError",
+      "str": "Error code: 429",
+      "message": "Error code: 429"
+    },
+    {
+      "name": "error/429/3",
+      "kind": "error",
+      "status": 429,
+      "body": "{\"error\":\"string error\"}",
+      "class": "RateLimitError",
+      "str": "Error code: 429 - {'error': 'string error'}",
+      "message": "Error code: 429 - {'error': 'string error'}"
+    },
+    {
+      "name": "error/429/4",
+      "kind": "error",
+      "status": 429,
+      "body": "{\"message\":\"top-level message\"}",
+      "class": "RateLimitError",
+      "str": "Error code: 429 - {'message': 'top-level message'}",
+      "message": "Error code: 429 - {'message': 'top-level message'}"
+    },
+    {
+      "name": "error/429/5",
+      "kind": "error",
+      "status": 429,
+      "body": "{\"error\":{\"code\":\"x\"}}",
+      "class": "RateLimitError",
+      "str": "Error code: 429 - {'error': {'code': 'x'}}",
+      "message": "Error code: 429 - {'error': {'code': 'x'}}"
+    },
+    {
+      "name": "error/500/0",
+      "kind": "error",
+      "status": 500,
+      "body": "{\"error\":{\"message\":\"Prompt is too long\",\"type\":\"invalid_request_error\"}}",
+      "class": "InternalServerError",
+      "str": "Error code: 500 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}",
+      "message": "Error code: 500 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}"
+    },
+    {
+      "name": "error/500/1",
+      "kind": "error",
+      "status": 500,
+      "body": "plain text body",
+      "class": "InternalServerError",
+      "str": "plain text body",
+      "message": "plain text body"
+    },
+    {
+      "name": "error/500/2",
+      "kind": "error",
+      "status": 500,
+      "body": "",
+      "class": "InternalServerError",
+      "str": "Error code: 500",
+      "message": "Error code: 500"
+    },
+    {
+      "name": "error/500/3",
+      "kind": "error",
+      "status": 500,
+      "body": "{\"error\":\"string error\"}",
+      "class": "InternalServerError",
+      "str": "Error code: 500 - {'error': 'string error'}",
+      "message": "Error code: 500 - {'error': 'string error'}"
+    },
+    {
+      "name": "error/500/4",
+      "kind": "error",
+      "status": 500,
+      "body": "{\"message\":\"top-level message\"}",
+      "class": "InternalServerError",
+      "str": "Error code: 500 - {'message': 'top-level message'}",
+      "message": "Error code: 500 - {'message': 'top-level message'}"
+    },
+    {
+      "name": "error/500/5",
+      "kind": "error",
+      "status": 500,
+      "body": "{\"error\":{\"code\":\"x\"}}",
+      "class": "InternalServerError",
+      "str": "Error code: 500 - {'error': {'code': 'x'}}",
+      "message": "Error code: 500 - {'error': {'code': 'x'}}"
+    },
+    {
+      "name": "error/503/0",
+      "kind": "error",
+      "status": 503,
+      "body": "{\"error\":{\"message\":\"Prompt is too long\",\"type\":\"invalid_request_error\"}}",
+      "class": "InternalServerError",
+      "str": "Error code: 503 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}",
+      "message": "Error code: 503 - {'error': {'message': 'Prompt is too long', 'type': 'invalid_request_error'}}"
+    },
+    {
+      "name": "error/503/1",
+      "kind": "error",
+      "status": 503,
+      "body": "plain text body",
+      "class": "InternalServerError",
+      "str": "plain text body",
+      "message": "plain text body"
+    },
+    {
+      "name": "error/503/2",
+      "kind": "error",
+      "status": 503,
+      "body": "",
+      "class": "InternalServerError",
+      "str": "Error code: 503",
+      "message": "Error code: 503"
+    },
+    {
+      "name": "error/503/3",
+      "kind": "error",
+      "status": 503,
+      "body": "{\"error\":\"string error\"}",
+      "class": "InternalServerError",
+      "str": "Error code: 503 - {'error': 'string error'}",
+      "message": "Error code: 503 - {'error': 'string error'}"
+    },
+    {
+      "name": "error/503/4",
+      "kind": "error",
+      "status": 503,
+      "body": "{\"message\":\"top-level message\"}",
+      "class": "InternalServerError",
+      "str": "Error code: 503 - {'message': 'top-level message'}",
+      "message": "Error code: 503 - {'message': 'top-level message'}"
+    },
+    {
+      "name": "error/503/5",
+      "kind": "error",
+      "status": 503,
+      "body": "{\"error\":{\"code\":\"x\"}}",
+      "class": "InternalServerError",
+      "str": "Error code: 503 - {'error': {'code': 'x'}}",
+      "message": "Error code: 503 - {'error': {'code': 'x'}}"
+    },
+    {
+      "name": "error/connection",
+      "kind": "transport",
+      "class": "APIConnectionError",
+      "str": "Connection error."
+    },
+    {
+      "name": "error/timeout",
+      "kind": "transport",
+      "class": "APITimeoutError",
+      "str": "Request timed out."
+    }
+  ]
+}
