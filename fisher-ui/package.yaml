@@ -1,0 +1,77 @@
+name:        fisher-ui
+version:     0.2.0.0
+synopsis:    fisher ui - a local web app over Fisher's sessions, runs and benchmarks
+license:     BSD-3-Clause
+author:      Tom Reynolds
+
+language: GHC2021
+
+default-extensions:
+- OverloadedStrings
+- LambdaCase
+
+ghc-options:
+- -Wall
+- -Wcompat
+
+dependencies:
+- base >= 4.14 && < 5
+- aeson
+- bytestring
+- containers
+- deepseq
+- directory
+- file-embed
+- filepath
+- http-types
+- mime-types
+- network
+- process
+- scientific
+- sqlite-simple
+- template-haskell
+- streaming-commons
+- text
+- time
+- unix
+- vector
+- fisher-core
+- fisher-agent
+- fisher-search
+- array
+- wai
+- warp
+- yaml
+
+library:
+  source-dirs: src
+
+tests:
+  fisher-ui-test:
+    main:        Spec.hs
+    source-dirs: test
+    build-tools: hspec-discover
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-T
+    dependencies:
+    - fisher-ui
+    - hspec
+    - temporary
+    - wai-extra
+  fisher-ui-fixture-server:
+    main:        FixtureServer.hs
+    source-dirs:
+    - test-server
+    - test
+    other-modules:
+    - Fisher.UI.FakeFisher
+    - Fisher.UI.Fixture
+    - Fisher.UI.TestDirs
+    ghc-options:
+    - -threaded
+    dependencies:
+    - fisher-ui
+    - temporary
+    - wai-extra

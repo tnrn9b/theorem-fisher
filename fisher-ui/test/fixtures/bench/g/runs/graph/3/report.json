@@ -1,0 +1,63 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 129.5,
+            "goal": "Step.Concrete.fireRecv_wt",
+            "outcome": "closed",
+            "started_s": 0,
+            "stats": {
+                "cost_usd": 0.311189,
+                "exit": 0,
+                "input_tokens": 819604,
+                "output_tokens": 6487,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 5,
+                    "read_file": 8,
+                    "search_files": 1,
+                    "terminal": 6
+                },
+                "turns": 14,
+                "wall_s": 106.2
+            }
+        }
+    ],
+    "backends": [
+        "gauss"
+    ],
+    "budget_s": 3600,
+    "cap_usd": 6,
+    "dollars": {
+        "planner": 0,
+        "total": 0.3112,
+        "verifier": 0,
+        "worker": 0.3112
+    },
+    "elapsed_s": 129.5,
+    "file": "Step/Concrete.lean",
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_depth": 3,
+    "max_splits": 2,
+    "max_turns": 40,
+    "mode": "graph",
+    "model": "example/model-a",
+    "nodes_proved": 1,
+    "nodes_total": 1,
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/g/3/lean",
+    "slots": 4,
+    "splits_total": 0,
+    "stopped": null,
+    "tree": [
+        {
+            "attempts": 0,
+            "depth": 0,
+            "id": 1,
+            "name": "Step.Concrete.fireRecv_wt",
+            "splits": [],
+            "status": "proved"
+        }
+    ]
+}

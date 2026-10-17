@@ -1,0 +1,512 @@
+[
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Compile a finished .v file via coqc.\n\nFor *scratch iteration* on a single proof, prefer the interactive tools:\n\n- ``rocq_start`` opens a held session (imports stay warm across\n  attempts).\n- ``rocq_check`` runs a candidate proof body against a held state.\n- ``rocq_step_multi`` tries several tactics at once against a held\n  state and reports which succeeded.\n\nUse ``rocq_compile`` for finished proofs, axiom audits, and final\nverification \u2014 coqc reloads all imports per call (often several\nseconds on heavy library imports).\n\nOn failure, the result includes ``error_positions`` and a ``hint``.\nWhen coq-lsp is available in the active MCP session, the result\nalso includes ``state_capture_status``:\n\n  - ``\"ok\"``: proof state was captured at the error position; the\n    result also includes ``state_id``, ``goals``, ``file``,\n    ``theorem``, and ``proof_finished``.  Recover via\n    ``rocq_check(from_state=state_id)`` or\n    ``rocq_step_multi(from_state=state_id)``.\n  - ``\"outside_proof\"``: error is outside any open proof; no\n    ``state_id`` is returned.  Follow the original ``hint``.\n  - ``\"timeout\"`` / ``\"crashed\"`` / ``\"lock_contended\"`` /\n    ``\"unavailable\"`` / ``\"memory_exhausted\"`` /\n    ``\"no_position\"``: enrichment did not\n    succeed; follow the original ``hint`` (typically\n    ``rocq_start(file=..., line=..., character=...)``).\n\nArgs:\n    source: Complete Rocq (.v) file content to compile.\n    workspace: Directory to use as workspace (default: ROCQ_WORKSPACE env var).\n    timeout: Compilation timeout in seconds (default: ROCQ_COQC_TIMEOUT env var).\n    include_warnings: If True (default), include deduplicated warnings\n        before the error in the output.  Set to False to get only the\n        error diagnostic, which keeps context compact.\n\nOn ``pet_restarted: True`` (state-capture path crashed pet), call\n``rocq_diag`` for memory headroom and recent error history.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "include_warnings": {
+          "default": true,
+          "type": "boolean"
+        },
+        "source": {
+          "type": "string"
+        },
+        "timeout": {
+          "default": 0,
+          "type": "integer"
+        },
+        "workspace": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source"
+      ],
+      "type": "object"
+    },
+    "name": "rocq_compile",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Compile a finished .v file on disk via coqc.\n\nFor *scratch iteration* on a single proof, prefer the interactive tools:\n\n- ``rocq_start`` opens a held session (imports stay warm across\n  attempts).\n- ``rocq_check`` runs a candidate proof body against a held state.\n- ``rocq_step_multi`` tries several tactics at once against a held\n  state and reports which succeeded.\n\nUse ``rocq_compile_file`` for whole-file verification, axiom audits,\nand final compile \u2014 coqc reloads all imports per call (often several\nseconds on heavy library imports).  Preferred over ``rocq_compile``\nfor large files because the source stays on disk (avoids transmitting\nthe full text through the MCP transport).\n\nOn failure, the result includes ``error_positions`` and a ``hint``.\nWhen coq-lsp is available in the active MCP session, the result\nalso includes ``state_capture_status``:\n\n  - ``\"ok\"``: proof state was captured at the error position; the\n    result also includes ``state_id``, ``goals``, ``file``,\n    ``theorem``, and ``proof_finished``.  Recover via\n    ``rocq_check(from_state=state_id)`` or\n    ``rocq_step_multi(from_state=state_id)``.\n  - ``\"outside_proof\"``: error is outside any open proof; no\n    ``state_id`` is returned.  Follow the original ``hint``.\n  - ``\"timeout\"`` / ``\"crashed\"`` / ``\"lock_contended\"`` /\n    ``\"unavailable\"`` / ``\"memory_exhausted\"`` /\n    ``\"no_position\"``: enrichment did not\n    succeed; follow the original ``hint`` (typically\n    ``rocq_start(file=..., line=..., character=...)``).\n\nOn a ``compile_error`` failure with coq-lsp available, the result\nmay also include ``errors``: a list of per-proof errors discovered\nby walking the file through pet (one entry per failing chunk).\nEach entry is ``{proof_name, kind, start_line, end_line, code,\nmessage}``.  Complements ``error_positions`` \u2014 the latter is\ncoqc's raw parse of the first diagnostic, while ``errors`` is\npet's structured walk of the whole file.  The walk stops at the\nfirst top-level / inter-chunk error (a broken ``Require`` /\n``Import`` / ``Notation``) rather than emitting the downstream\n\"reference/library not found\" cascade it would otherwise poison every\nlater declaration with; errors in independent named declarations still\naccumulate.\nThe field may be\n*present and empty* (``errors: []``) when the walker ran but pet\ndid not reproduce the coqc-reported failure \u2014 treat this as \"no\nadditional errors found\" rather than \"no errors at all.\"  Absent\non success, when coq-lsp is unavailable, when the walker could\nnot run, and when ``ROCQ_COMPILE_MULTI_ERROR_CAP=0`` (feature\ndisabled).  Tune via ``ROCQ_COMPILE_MULTI_ERROR_CAP`` (default 20,\nmax entries) and ``ROCQ_COMPILE_MULTI_ERROR_TIMEOUT`` (default\n5.0s, per-``pet.run`` budget inside the walker).\n\n**In a dune project** (a ``dune-project`` ancestor is found), the\ncompiled ``.vo``/``.vos`` is written to dune's ``_build/default/\u2026``\ninstead of next to the source, so it never shadows a pre-built artifact\nin the source tree.  Full-mode files that are part of a\nstanza build via ``dune build``; scratch files and ``vos``/``timing``\nmodes compile with coqc redirected (``-o``) into the same\n``_build/default`` path.  In this mode the ``.vo`` is always retained in\n``_build`` (usable by sibling ``Require``s once the workspace's load\npath points there \u2014 see the dune load-path note under *Prerequisites*),\nso ``keep_vo`` has no effect.  When ``dune build`` cannot build a file\n(it is not part of a stanza), the response carries a\n``dune_build_warning`` string noting that coqc was used instead.  Set\n``ROCQ_DUNE_BUILD=0`` to force the legacy coqc-into-source-tree behavior.\n\nOutside a dune project, compilation artifacts\n(``.vo``/``.vok``/``.vos``/``.glob``/``.aux``) are cleaned up by\ndefault and the source file is preserved.  Set ``keep_vo=True`` to\nretain the compiled-artifact family (``.vo``/``.vok``/``.vos``) while\nstill cleaning the diagnostic artifacts\n(``.glob``/``.aux``/``.vio``/``.timing``/``.coqaux``).  Typical use:\ncompiling a file whose ``.vo`` will be imported by a sibling ``.v`` in\nthe same workspace, or incremental compile loops that want to avoid\nrebuilding unchanged dependencies.\n\nWhen the call rewrites ``.vo`` files in a workspace that has active\ninteractive sessions, the result also includes ``vo_rebuild_warning``:\na soft advisory naming the workspace and the count of potentially\naffected sessions, with a hint to call ``rocq_start`` again to refresh\nheld dependency state.  Quiet when no ``.vo`` changed, when no\ninteractive session in this workspace exists, or when the workspace\nexceeds ``_VO_SCAN_FILE_CAP`` (.vo paths).  Setting ``keep_vo=True``\nmakes this warning *more likely to fire* on subsequent\n``rocq_compile_file`` calls in the same workspace: the produced\n``.vo`` now persists between calls, so any later compile that\nrewrites it is observable as a fresh mtime delta.\n\nArgs:\n    file: Path to the .v file (relative to workspace).\n    workspace: Workspace directory.  If omitted, auto-detected by walking\n        up from *file* looking for ``_RocqProject`` / ``_CoqProject`` /\n        ``dune-project``; falls back to the ``ROCQ_WORKSPACE`` env var\n        (default: cwd).\n    timeout: Compilation timeout in seconds (default: ROCQ_COQC_TIMEOUT env var).\n    include_warnings: If True (default), include deduplicated warnings\n        before the error in the output.  Set to False to get only the\n        error diagnostic, which keeps context compact.\n    keep_vo: If True, preserve the ``.vo``/``.vok``/``.vos`` outputs\n        after coqc returns (diagnostic artifacts are still cleaned).\n        Default False matches today's \"clean everything but the\n        source\" behavior.  Useful when a sibling file in the same\n        workspace will ``Require Import`` the result.  **No-op in a\n        dune project** \u2014 there the artifact always lives in\n        ``_build/default`` (never the source tree), so nothing is\n        cleaned regardless; see the dune paragraph above.  **Note**:\n        combining ``keep_vo=True`` with ``mode=\"vos\"`` produces\n        only a ``.vos`` artifact; downstream files compiled in\n        ``mode=\"full\"`` will fail with ``\"Unable to locate\n        library ... (while searching for a .vos file)\"`` \u2014 use\n        ``mode=\"full\" keep_vo=True`` when the sibling consumer\n        expects a ``.vo``.\n    mode: Which coqc pass to run.  ``\"full\"`` (default) is today's\n        behavior \u2014 coqc fully elaborates every proof body.  ``\"vos\"``\n        adds ``-vos`` so coqc *skips proof bodies entirely* \u2014 it\n        does NOT execute them.  ``\"vos\"`` is fast and catches\n        missing imports, statement type errors, holes left in\n        statements, and notation conflicts.  It does NOT validate\n        proofs: a ``Theorem t : False. Proof. exact I. Qed.``\n        passes under ``\"vos\"``.  Use it as a cheap pre-pass during\n        iteration, then run ``\"full\"`` for the real check.\n        ``\"vos\"`` produces a ``.vos`` artifact rather than a ``.vo``.\n    timing: If True, invoke coqc with ``-time`` and attach a\n        ``timing`` field to the response with per-sentence\n        diagnostics \u2014 ``{\"total_sentences\": int, \"top_slowest\":\n        list[{line, characters, name, duration_seconds}],\n        \"last_completed\": {...} | None}``.  ``top_slowest`` holds\n        up to 5 entries sorted by descending duration.  On\n        timeout, ``last_completed`` is the final sentence coqc\n        finished and the ``error`` string names it so \"timed out\n        after 590s\" becomes \"Last completed sentence: line 221\n        [Theorem.foo] (15.3s).\"  On a successful compile,\n        ``last_completed`` is the file's literal final sentence\n        (not a failure marker).  Default False is zero-overhead.\n\nThe response envelope additionally carries several optional fields\ndepending on flags / failure mode: ``error_positions`` and\n``state_capture_status`` on ``reason=\"compile_error\"`` (see the\n``state_capture_status`` paragraph above) \u2014 **except** when a dune build\nfails inside a *dependency* rather than the requested file: that case\nstill returns ``reason=\"compile_error\"`` but omits ``error_positions``\n(they carry no filename and would point into the wrong file) and instead\ncarries a ``hint`` naming the dependency to fix first; read the file name\nfrom the ``error`` text.  Also: ``errors`` per-declaration\nlist when ``pet`` is available (see the Multi-error callout in the\nREADME); ``vo_rebuild_warning`` when the call rewrites ``.vo``\nartifacts in a workspace with active sessions; ``dune_build_warning``\nwhen a dune project file could not be built by ``dune build`` and coqc\nwas used instead (see the dune paragraph above); ``clamped_timeout``\nwhen the per-call timeout was clamped by ``ROCQ_QUERY_TIMEOUT_CAP``;\n``timing`` when ``timing=True``.\n\nOn ``pet_restarted: True`` (state-capture path crashed pet), call\n``rocq_diag`` for memory headroom and recent error history.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "include_warnings": {
+          "default": true,
+          "type": "boolean"
+        },
+        "keep_vo": {
+          "default": false,
+          "type": "boolean"
+        },
+        "mode": {
+          "default": "full",
+          "type": "string"
+        },
+        "timeout": {
+          "default": 0,
+          "type": "integer"
+        },
+        "timing": {
+          "default": false,
+          "type": "boolean"
+        },
+        "workspace": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file"
+      ],
+      "type": "object"
+    },
+    "name": "rocq_compile_file",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Verify that a proof actually proves the original statement.\n\nWraps the proof in a Module M sandbox and checks that the theorem\nmatches the original problem_statement. Catches type redefinition,\nAdmitted/Abort, custom axioms, and statement mismatches. Standard\nmathematical axioms (classical logic, Reals, etc.) are accepted.\n\nRun this after rocq_compile succeeds to confirm correctness.\n\nArgs:\n    proof: The complete proof file content (including imports).\n    problem_name: The unqualified theorem name (e.g., \"add_comm\", not \"Nat.add_comm\").\n    problem_statement: The original problem file content (with Admitted/Abort).\n    workspace: Directory to use as workspace (default: ROCQ_WORKSPACE env var).\n    timeout: Verification timeout in seconds (default: ROCQ_VERIFY_TIMEOUT env var).\n    include_warnings: If True (default), include deduplicated warnings\n        before the error in the output.  Set to False for compact errors.\n\nReturns the unified envelope ``{success, error, reason, ...}``.\nOn failure, ``reason`` is one of:\n    - ``\"validation\"``: invalid identifier, oversize source, malformed input.\n    - ``\"compile_error\"``: the proof failed to compile.\n    - ``\"axiom_dependency\"``: the proof relies on Admitted, ``admit``, or\n      a custom (non-standard) axiom.\n    - ``\"type_mismatch\"``: Phase 3 found that the proof's type differs\n      from the problem's type.\n    - ``\"timeout\"``: verification exceeded the budget across all phases.\n\nOn success, ``assumptions`` and ``verification_method`` describe how\nthe verdict was reached (``module_m``, ``shared_defs``, ``direct``).\n\nOn ``pet_restarted: True`` (Phase 2 ``rocq_query`` path crashed pet\nwhile extracting shared definitions), call ``rocq_diag`` for memory\nheadroom and recent error history.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "include_warnings": {
+          "default": true,
+          "type": "boolean"
+        },
+        "problem_name": {
+          "type": "string"
+        },
+        "problem_statement": {
+          "type": "string"
+        },
+        "proof": {
+          "type": "string"
+        },
+        "timeout": {
+          "default": 0,
+          "type": "integer"
+        },
+        "workspace": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "proof",
+        "problem_name",
+        "problem_statement"
+      ],
+      "type": "object"
+    },
+    "name": "rocq_verify",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Search the Rocq environment \u2014 find lemmas, check types, inspect definitions.\n\nDoes NOT modify any proof state. Use this to explore before proving:\n  command=\"Search (nat -> nat -> nat).\"  \u2014 find relevant lemmas\n  command=\"Check Nat.add.\"               \u2014 check a term's type\n  command=\"Print Nat.add.\"               \u2014 see a definition\n  command=\"About plus.\"                  \u2014 summary of a name\n\nThree context modes (mutually exclusive in practice):\n- **preamble mode** (default): pass import / scope commands as a\n  string.  Scope and import statements like ``Require Import``,\n  ``From X Require Y``, ``Open Scope``, ``Set``, ``Unset``,\n  ``Local``, and ``Section`` belong here \u2014 NOT inside ``command=``.\n  ``command=`` runs each statement in isolation, so e.g. an\n  ``Open Scope`` placed in ``command`` would not propagate to a\n  following ``Search``.  See README \"Recommended usage patterns \u2192\n  Imports and scopes in rocq_query\".\n- **file mode**: pass a ``.v`` file path; the query runs with all\n  definitions from that file in scope.  More reliable than preamble\n  because it captures ``Open Scope``, ``Set`` options, etc., in the\n  exact order the file declares them.\n- **from_state mode**: pass a ``state_id`` from a live ``rocq_check``\n  session to query against the live proof context \u2014 opened scopes,\n  hypotheses, and local definitions are all visible to ``Search`` /\n  ``Print`` / ``About`` / ``Locate``.  The query runs against a\n  transient child state which is discarded; the parent state is\n  unchanged.  Canonical pattern::\n\n      state_id = (await rocq_check(body=..., from_state=...))[\"state_id\"]\n      await rocq_query(command=\"Search _.\", from_state=state_id)\n\n  Prefer this over ``rocq_check(from_state=N, body=\"Search ...\")``\n  for pure queries \u2014 no new ``state_id`` is allocated and the\n  state-table is not polluted.\n\nArgs:\n    command: The Rocq query command to execute.\n    preamble: Optional import lines needed for the query context\n              (e.g., \"Require Import Reals.\\nOpen Scope R_scope.\").\n    file: Path to a .v file (relative to workspace) whose definitions\n        should be in scope. Mutually exclusive with preamble and\n        from_state.\n    workspace: Workspace directory.  If omitted, auto-detected by walking\n        up from *file* looking for ``_RocqProject`` / ``_CoqProject`` /\n        ``dune-project``; falls back to the ``ROCQ_WORKSPACE`` env var\n        (default: cwd).\n    max_results: Optional maximum number of results to return.\n        Useful for broad Search patterns. If omitted, all results are\n        returned (subject to character limit).\n    include_warnings: If True (default), include all feedback returned\n        by the query.  If False, drop entries at LSP Warning severity\n        so warning noise does not crowd out tool output.\n    timeout: Per-call timeout in seconds for expensive computations\n        like ``Time Eval vm_compute in ...``.  ``0`` (default) means\n        use ``ROCQ_PET_TIMEOUT``.  Clamped to ``ROCQ_QUERY_TIMEOUT_CAP``\n        (default 300s); when clamping fires the response includes\n        ``clamped_timeout: <cap>`` so the caller can diagnose unexpected\n        timeouts.\n    from_state: A live state_id (from ``rocq_start`` / ``rocq_check`` /\n        ``rocq_step_multi``) to query against.  Mutually exclusive with\n        *file*.  When set, *preamble* is ignored.\n\nOn ``pet_restarted: True``, call ``rocq_diag`` for memory headroom and\nrecent error history.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "file": {
+          "default": "",
+          "type": "string"
+        },
+        "from_state": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "include_warnings": {
+          "default": true,
+          "type": "boolean"
+        },
+        "max_results": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "preamble": {
+          "default": "",
+          "type": "string"
+        },
+        "timeout": {
+          "default": 0,
+          "type": "integer"
+        },
+        "workspace": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "command"
+      ],
+      "type": "object"
+    },
+    "name": "rocq_query",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "List the axioms a theorem depends on.\n\nRuns ``Print Assumptions`` on the given theorem/lemma name and returns\nthe resulting assumption list verbatim.  No classification is performed\n\u2014 this tool is pure introspection; the agent decides what's safe to\ntrust.  Use ``rocq_verify`` for an admit-free / sandboxed trust\ndecision on a candidate proof.\n\nThe theorem must be defined in the given file.  The tool reads the file\nto set up the full Rocq environment (imports, scopes, definitions),\nensuring the correct theorem is resolved even when names are reused\nacross sections.\n\nArgs:\n    name: The theorem/lemma name to check (e.g., \"add_comm\").\n    file: Path to the .v file where the theorem is defined (relative to workspace).\n    workspace: Workspace directory.  If omitted, auto-detected by walking\n        up from *file* looking for ``_RocqProject`` / ``_CoqProject`` /\n        ``dune-project``; falls back to the ``ROCQ_WORKSPACE`` env var\n        (default: cwd).\n    timeout: Per-call timeout in seconds for the ``Print Assumptions``\n        query.  Default 0 uses ``ROCQ_PET_TIMEOUT`` (env var, default\n        30).  Raise this when the theorem's opaque-proof fetch from\n        ``.vo`` files is slow.  Clamped to ``ROCQ_QUERY_TIMEOUT_CAP``\n        (default 300s) so a stray large value cannot park the pet\n        lock indefinitely; when clamping fires the response includes\n        ``clamped_timeout: <cap>`` so the caller can diagnose\n        unexpected timeouts.\n\n        **Tip:** ``Print Assumptions`` triggers ``.vo`` opaque-proof\n        fetching on first call (often 40+ modules on heavy library\n        imports).  A pet restart from a timeout wipes Fleche, so a\n        retry with the *same* timeout pays the same opaque-fetch\n        cost from scratch and will time out again \u2014 the cost\n        survives ``pet_restarted: True``.  Set ``timeout=`` high on\n        the *first* call rather than relying on a retry after\n        restart.\n\nReturns (key fields):\n    success:     bool.\n    theorem:     the cleaned theorem name.\n    assumptions: list[str] of ``\"name : type\"`` pairs from\n                 ``Print Assumptions``.  Empty when the theorem is closed\n                 under the global context.  ``Print Assumptions`` does\n                 not distinguish ``Admitted`` from ``Axiom`` / ``Parameter``\n                 / ``Conjecture``, so admits and user axioms appear here\n                 side-by-side.\n    raw_output:  full raw ``Print Assumptions`` output.\n\nOn theorem-not-found errors: response includes ``available_in_file:\nlist[str]`` with the file's defined names (sorted, capped \u2014 see\n``available_in_file_limit`` in the response when truncated).  When the\nfile has more names than the cap, ``available_in_file_truncated:\ntrue``, ``available_in_file_total: <int>`` (uncapped count), and\n``available_in_file_limit: <int>`` (the active cap) are also\nincluded; call ``rocq_toc`` for the full list.  Agents can fuzzy-\nmatch the requested name against this list to recover from typos.\n\nOn ``pet_restarted: True``, call ``rocq_diag`` for memory headroom and\nrecent error history.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "timeout": {
+          "default": 0,
+          "type": "integer"
+        },
+        "workspace": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "file"
+      ],
+      "type": "object"
+    },
+    "name": "rocq_assumptions",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Get the structure of a Rocq file: all definitions, lemmas, theorems, and sections.\n\nReturns a hierarchical outline showing what is defined in the file.\nUseful for understanding a file before working with it, or finding\nthe name of a theorem to prove.\n\nDoes NOT require a rocq_start session.\n\nArgs:\n    file: Path to the .v file (relative to workspace).\n    workspace: Workspace directory.  If omitted, auto-detected by walking\n        up from *file* looking for ``_RocqProject`` / ``_CoqProject`` /\n        ``dune-project``; falls back to the ``ROCQ_WORKSPACE`` env var\n        (default: cwd).\n    timeout: Per-call timeout in seconds for the ``pet.toc`` lookup.\n        Default 0 uses ``ROCQ_PET_TIMEOUT`` (env var, default 30).\n        Raise this for very large files with heavy library imports.\n        Clamped to ``ROCQ_QUERY_TIMEOUT_CAP`` (default 300s) so a\n        stray large value cannot park the pet lock indefinitely;\n        when clamping fires the response includes ``clamped_timeout:\n        <cap>`` so the caller can diagnose unexpected timeouts.\n\nOn ``pet_restarted: True``, call ``rocq_diag`` for memory headroom and\nrecent error history.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "timeout": {
+          "default": 0,
+          "type": "integer"
+        },
+        "workspace": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file"
+      ],
+      "type": "object"
+    },
+    "name": "rocq_toc",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "List all notations in a Rocq statement and how they resolve.\n\nHelps debug notation ambiguity (e.g., which scope does \"+\" resolve to?\nIs \"=\" Leibniz equality or Qeq?).\n\nPass the statement part of a Lemma/Theorem declaration (after the colon).\nFor example, for \"Lemma foo : forall n, n + 0 = n\", pass\nstatement=\"forall n, n + 0 = n\".\n\nNOTE: Only works on statements (propositions/types), not arbitrary terms.\n\nArgs:\n    statement: The proposition/type to analyze.\n    preamble: Import lines for context (e.g., \"Require Import QArith.\").\n    workspace: Workspace directory (default: ROCQ_WORKSPACE env var).\n    timeout: Per-call timeout in seconds for the notation lookup.\n        Default 0 uses ``ROCQ_PET_TIMEOUT`` (env var, default 30).\n        Raise this for statements that require heavy library imports.\n        Clamped to ``ROCQ_QUERY_TIMEOUT_CAP`` (default 300s) so a\n        stray large value cannot park the pet lock indefinitely;\n        when clamping fires the response includes ``clamped_timeout:\n        <cap>`` so the caller can diagnose unexpected timeouts.\n\nOn ``pet_restarted: True``, call ``rocq_diag`` for memory headroom and\nrecent error history.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "preamble": {
+          "default": "",
+          "type": "string"
+        },
+        "statement": {
+          "type": "string"
+        },
+        "timeout": {
+          "default": 0,
+          "type": "integer"
+        },
+        "workspace": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "statement"
+      ],
+      "type": "object"
+    },
+    "name": "rocq_notations",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Start an interactive proof session \u2014 see goals, explore tactics.\n\nReturns a state_id for use with rocq_check and rocq_step_multi.\nAlso returns the current proof goals at the starting position,\nso this tool can be used to inspect goals at any point in a file.\nFor a position inside a proof, the response also carries\n``focus_depth`` \u2014 how many ``{...}`` / bullet focus frames are open\nabove the goal (0 at the top level) \u2014 so a session resumed mid-proof\nknows its bullet nesting (omitted for preamble-only starts).\n\nThree start modes (precedence: theorem > position > preamble):\n1. By theorem: file + theorem \u2014 start proving a specific theorem.\n   Tip: for a scratch file under ``/tmp`` that needs the project's\n   load path, keep the file name stable across iterations (e.g.\n   ``/tmp/probe.v``) \u2014 Fleche caches per file path, so rotating\n   probe names defeats the warmth.\n2. By position: file + line + character \u2014 jump to any position in\n   a file and see the proof goals there.  Useful for inspecting\n   proof state at a specific point, or recovering from an error\n   position returned by rocq_compile.\n3. From imports: preamble \u2014 set up an import context only.\n   **Preferred for scratch iteration** (no project files needed,\n   preferred over ``coqc /tmp/foo.v``): call\n   ``rocq_start(preamble='Require Import ...')`` once, then iterate\n   with rocq_check / rocq_step_multi against the returned state_id.\n   The import set is content-hashed and warm across iterations even\n   if you change the lemma body (see\n   ``interactive.py:_get_or_create_import_state``).\n\n**Position semantics (mode 2):** ``line`` and ``character`` are\n0-indexed.  Petanque resolves the cursor to a sentence boundary by\n*rounding forward* through the sentence that contains the cursor:\n\n- Cursor on any character of a sentence \u2014 its first letter, any\n  character inside, or its terminating period \u2014 yields the state\n  **after** that whole sentence has executed.\n- Cursor in the whitespace **before** a sentence's first\n  non-whitespace character yields the state **before** that\n  sentence (= after the previous sentence).\n- Cursor in the whitespace **after** a sentence's terminating\n  period yields the state **after** that sentence.\n\nSo to inspect goals **before** a tactic, point at the whitespace\njust before its first character.  To inspect goals **after** a\ntactic, point at any character of the tactic (including its\nperiod) or at the whitespace immediately following the period.\n\n**Important:** The interactive session reads the file at start time and\ndoes not track subsequent edits. If another process or agent modifies the\nfile while a session is active, the proof state becomes stale and tactics\nmay fail or produce wrong results. To avoid this, work on a **copy** of\nthe file for interactive proving, or restart the session after edits.\n\nArgs:\n    file: Path to the .v file (relative to workspace).\n    theorem: Name of the theorem to prove.\n    workspace: Workspace directory.  If omitted, auto-detected by walking\n        up from *file* looking for ``_RocqProject`` / ``_CoqProject`` /\n        ``dune-project``; falls back to the ``ROCQ_WORKSPACE`` env var\n        (default: cwd).\n    line: 0-based line number for position-based start.  See\n        \"Position semantics\" above for how the cursor is resolved\n        to a sentence boundary.\n    character: 0-based character offset for position-based start.\n        See \"Position semantics\" above.\n    preamble: Import commands for preamble mode (e.g., \"Require Import Lia.\").\n    force_restart: If True, kill pet, clear the state table, and\n        respawn before starting.  Recovery primitive for the rare\n        cases where the shared pet is in a bad state: accumulated\n        RAM bloat after long shared use, indexing corruption, or a\n        \"State N expired\" that repeats after a plain ``rocq_start``\n        retry (suggesting a peer caller is also force-restarting).\n        Actively-used states survive peer churn via LRU eviction \u2014\n        ``force_restart=True`` is *not* needed as routine insurance\n        and is unhelpful when a recent response already carried\n        ``pet_restarted: True`` (pet is already fresh).  See README\n        \"Concurrency model\".  Default: False.\n    timeout: Per-call timeout in seconds for opening the session.\n        Default 0 uses ``ROCQ_PET_TIMEOUT`` (env var, default 30).\n        Raise this for files with heavy library imports.\n        Clamped to ``ROCQ_QUERY_TIMEOUT_CAP`` (default 300s) so a stray\n        large value cannot park the pet lock indefinitely; when\n        clamping fires the response includes ``clamped_timeout:\n        <cap>`` so the caller can diagnose unexpected timeouts.\n\nOn theorem-not-found errors: response includes ``available_in_file:\nlist[str]`` with the file's defined names (sorted, capped \u2014 see\n``available_in_file_limit`` in the response when truncated).  When the\nfile has more names than the cap, ``available_in_file_truncated:\ntrue``, ``available_in_file_total: <int>`` (uncapped count), and\n``available_in_file_limit: <int>`` (the active cap) are also\nincluded; call ``rocq_toc`` for the full list.  Agents can fuzzy-\nmatch the requested name against this list to recover from typos.\n\nOn ``pet_restarted: True``, call ``rocq_diag`` for memory headroom and\nrecent error history.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "character": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "file": {
+          "default": "",
+          "type": "string"
+        },
+        "force_restart": {
+          "default": false,
+          "type": "boolean"
+        },
+        "line": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "preamble": {
+          "default": "",
+          "type": "string"
+        },
+        "theorem": {
+          "default": "",
+          "type": "string"
+        },
+        "timeout": {
+          "default": 0,
+          "type": "integer"
+        },
+        "workspace": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "name": "rocq_start",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Try multiple tactics at once \u2014 find what works without guessing.\n\nTests each tactic against a specific proof state and returns all\nresults. Does NOT advance the state \u2014 commit the winner with\nrocq_check.\n\nUse this whenever you're unsure which tactic to apply:\n  tactics=[\"auto.\", \"lia.\", \"lra.\", \"ring.\", \"tauto.\", \"firstorder.\"]\n\nOr to auto-solve a subgoal, try the standard automation battery:\n  tactics=[\"trivial.\", \"reflexivity.\", \"assumption.\", \"exact I.\",\n           \"auto.\", \"eauto.\", \"tauto.\", \"intuition.\", \"lia.\", \"lra.\",\n           \"nia.\", \"nra.\", \"ring.\", \"field.\", \"decide equality.\",\n           \"firstorder.\"]\nNote: lia/lra/ring/field require the .v file to import Lia/Lra/Ring/Field.\n\nOr to explore proof structure:\n  tactics=[\"destruct n.\", \"induction n.\", \"case_eq n.\"]\n\nEach result entry includes a ``feedback`` field (truncated string)\nwhen the tactic produces visible output (e.g., ``Print``, ``Search``).\nEach *successful* entry also carries a ``focus_depth`` field \u2014 how\nmany ``{...}`` / bullet focus frames that tactic leaves open above\nthe goal (0 at the top level).\n\n**Canonical exploration pattern:** if the first few steps of a proof\nare a confident prefix, advance with ``rocq_check`` first and pass\nthe resulting ``state_id`` as ``from_state`` here \u2014 don't repeat the\nprefix inside every entry of ``tactics``.  See README\n\"Recommended usage patterns \u2192 Multi-tactic exploration\".\n\nArgs:\n    tactics: List of tactics to try (max 20).\n    from_state: State ID to try the tactics from.  Required \u2014 use the\n        ``state_id`` returned by ``rocq_start`` or a previous\n        ``rocq_check``.  There is no implicit \"current state\"\n        fallback (avoids cross-agent state confusion when peers\n        share this rocq-mcp process).\n    include_warnings: If True (default), per-tactic ``feedback`` includes\n        all severities.  If False, drop entries at LSP Warning severity.\n    timeout: Per-call timeout in seconds for the whole batch.  The\n        per-tactic budget is ``timeout / len(tactics)`` (subject to the\n        usual ``Timeout`` eligibility rules).  Default 0 uses\n        ``ROCQ_PET_TIMEOUT`` (env var, default 30).  Raise this when\n        individual tactics in the batch are expensive.  Clamped to\n        ``ROCQ_QUERY_TIMEOUT_CAP``\n        (default 300s) so a stray large value cannot park the pet\n        lock indefinitely; when clamping fires the response includes\n        ``clamped_timeout: <cap>`` so the caller can diagnose\n        unexpected timeouts.\n\nOn ``pet_restarted: True``, call ``rocq_diag`` for memory headroom and\nrecent error history.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "from_state": {
+          "type": "integer"
+        },
+        "include_warnings": {
+          "default": true,
+          "type": "boolean"
+        },
+        "tactics": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "timeout": {
+          "default": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "tactics",
+        "from_state"
+      ],
+      "type": "object"
+    },
+    "name": "rocq_step_multi",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Run proof commands from cached imports \u2014 fast iterative checking.\n\nMuch faster than rocq_compile for iterative proof development:\nimports are cached (first call processes them, subsequent calls skip), and on error\nreturns the last valid state for immediate interactive recovery\nvia rocq_check(from_state=...) or rocq_step_multi(from_state=...).\n\nWhen proof_finished=True, also returns proof_tactics (ordered list of\nall tactics from root to current state) and proof_hint (instructions\nfor assembling the final .v file).  On a broken walk (an ancestor\nstate was LRU-evicted, or a cycle was detected), proof_tactics and\nproof_hint are omitted; the response carries ``proof_tactics_status``\n(``\"ancestor_evicted\"`` or ``\"cycle\"``), ``proof_tactics_broken_at``\n(the state id where the walk gave up), and ``proof_tactics_hint``\ninstead \u2014 clients that ignore these keys see no half-chain at all.\n\nRecommended workflow (each step threads ``state_id`` explicitly):\n1. ``s0 = rocq_start(file=..., theorem=...)[\"state_id\"]``\n2. ``s1 = rocq_check(from_state=s0, body=\"intros. simpl.\")[\"state_id\"]``\n3. If stuck: ``rocq_step_multi(from_state=s1, tactics=[...])`` to explore\n4. ``rocq_check(from_state=s1, body=\"winning_tactic.\")`` to commit\n\nWhen commands produce visible output (e.g., ``Print``, ``Check``,\n``vm_compute``, ``native_compute``), a ``feedback`` field is included\nas a list of ``[command, output]`` pairs (truncated per step at 50K\nchars).  Omitted when no command produces output.\n\nWhen proof goals are available, the success response carries\n``focus_depth`` \u2014 how many ``{...}`` / bullet focus frames are\ncurrently open above the goal (0 at the top level) \u2014 so an agent\nstepping through nested subgoals can tell how deep its focus nesting\nis.  (Omitted on empty-body checks and when goal state cannot be\nretrieved, like the other goal-derived fields.)\n\n**Note:** A held ``state_id`` freezes its Rocq environment at session\nstart.  A ``stale_warning`` field is returned when that environment may\nno longer match disk: either the underlying ``.v`` file was modified\nafter ``rocq_start``, or a dependency ``.vo`` in the workspace was\nrebuilt through this server since the session began (in which case\n``proof_finished`` can diverge from a clean compile \u2014 re-verify with\n``rocq_compile_file``).  Restart with ``rocq_start`` for a fresh session.\n\nArgs:\n    body: Commands to execute (one or more Rocq sentences).\n    from_state: State ID to execute from.  Required \u2014 use the\n        ``state_id`` returned by ``rocq_start`` or a previous\n        ``rocq_check``.  There is no implicit \"current state\"\n        fallback (avoids cross-agent state confusion when peers\n        share this rocq-mcp process).\n    workspace: Accepted for API compatibility but unused; the\n        active workspace comes from the state entry set by\n        ``rocq_start``.\n    timeout: Per-call timeout in seconds for the batch of commands.\n        Default 0 uses ``ROCQ_PET_TIMEOUT`` (env var, default 30).\n        Raise this for compute-heavy tactics (``vm_compute``,\n        ``native_compute``).  Clamped to ``ROCQ_QUERY_TIMEOUT_CAP``\n        (default 300s) so a stray large value cannot park the pet\n        lock indefinitely; when clamping fires the response includes\n        ``clamped_timeout: <cap>`` so the caller can diagnose\n        unexpected timeouts.\n    include_warnings: If True (default), per-step ``feedback`` includes\n        all severities.  If False, drop entries at LSP Warning severity.\n\nOn ``pet_restarted: True``, call ``rocq_diag`` for memory headroom and\nrecent error history.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "type": "string"
+        },
+        "from_state": {
+          "type": "integer"
+        },
+        "include_warnings": {
+          "default": true,
+          "type": "boolean"
+        },
+        "timeout": {
+          "default": 0,
+          "type": "integer"
+        },
+        "workspace": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "body",
+        "from_state"
+      ],
+      "type": "object"
+    },
+    "name": "rocq_check",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Operational diagnostics: pet health, memory headroom, recent errors.\n\nUse this when:\n- A tool returned ``pet_restarted: True`` and you want to see what\n  happened.\n- You're considering a long ``vm_compute`` and want to check memory\n  headroom against ``max_rss_mb_threshold``.\n- You want to know which proof states are currently live in pet's\n  state table.\n- You suspect another agent is sharing this rocq-mcp process.\n  Heuristic: compare ``live_states[*].file`` against the files you\n  opened this session \u2014 entries you did not create signal a foreign\n  caller (works only when agents are on disjoint files).  Actively\n  used states are LRU-protected against peer churn, so sharing is\n  mostly a latency and RAM concern; if repeated state expiries\n  survive that floor, ``rocq_start(..., force_restart=True)`` is\n  the recovery \u2014 see README \"Concurrency model\".\n\nDoes NOT spawn pet if it's not running; just reports state.\n\nResponse shape:\n\n- ``server_version``: the rocq-mcp package version (from\n  ``importlib.metadata``).  Include in bug reports.\n- ``pet``: ``{pid, uptime_seconds, restarts, generation}``\n- ``memory``: ``{pet_rss_mb, peak_pet_rss_mb, max_rss_mb_threshold,\n  sample_status}`` where ``sample_status`` is one of ``\"ok\"`` /\n  ``\"no_pet\"`` / ``\"psutil_error\"`` and disambiguates a ``None``\n  ``pet_rss_mb``.\n- ``load_average``: ``{\"1m\": float, \"5m\": float, \"15m\": float}`` \u2014\n  kernel-tracked system load averages over the last 1, 5, and 15\n  minutes (from ``os.getloadavg()``).  ``None`` on platforms without\n  an equivalent (e.g. Windows).  Use this to disambiguate CPU\n  contention from tactic divergence when a timeout fires.\n- ``live_states``: capped at 50 most-recent entries (by\n  ``created_at``) to keep the payload bounded.  Each entry has\n  ``{state_id, parent, file, theorem, age_seconds}``.\n- ``live_states_total``: full count of entries in the state table\n  (use this to detect that ``live_states`` was truncated).\n- ``recent_errors``: ring buffer of the last 20 errors, each\n  ``{tool, message, reason, ago_seconds}``.  ``reason`` is one of:\n\n  - **Pet-side** (set by ``_run_with_pet``): ``\"timeout\"``,\n    ``\"crashed\"``, ``\"memory_exhausted\"``, ``\"lock_contended\"``,\n    ``\"unavailable\"``.\n  - **Validation / lookup** (set by tools before pet): ``\"validation\"``,\n    ``\"not_found\"`` (rocq_start / rocq_assumptions on a typo).\n  - **rocq_check mid-batch**: ``\"tactic_failed\"`` (a tactic was\n    rejected by Coq \u2014 distinct from a transport-level ``\"crashed\"``).\n  - **rocq_verify-specific**: ``\"compile_error\"``,\n    ``\"axiom_dependency\"``, ``\"type_mismatch\"``.\n\n  The full set is :data:`_RECENT_ERROR_REASONS`.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "name": "rocq_diag",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Health check: is the server OK, and which Rocq/opam switch is it on?\n\nCall this first when something looks wrong (e.g. a proof that built\nyesterday now fails, or ``coqc`` behaves like a different version than\nyour shell) \u2014 an MCP server inherits its ``PATH`` / opam environment\nfrom whatever launched it, which can differ from your interactive\nshell.  This tool reports the toolchain the server *actually* resolves.\n\nRead-only: does NOT spawn pet (mirrors ``rocq_diag``).  Use\n``rocq_diag`` for runtime health (memory, live states, recent errors);\nuse this for *toolchain* health (which binaries / which switch).\n\nResponse shape:\n\n- ``ok``: ``True`` when ``coqc`` resolves on ``PATH`` (the server can\n  do its core job).  Interactive capability is reported separately under\n  ``toolchain.pet`` so a coqc-only deployment still reads as healthy.\n- ``server_version``: the rocq-mcp package version.\n- ``switch``: the active switch name (e.g. ``\"rocq9\"``), or the project\n  path for a local ``_opam`` switch, or ``None`` for a non-opam install.\n- ``switch_prefix``: the resolved ``OPAM_SWITCH_PREFIX``-style path\n  (``None`` when no switch was identified).\n- ``switch_is_local``: ``True`` for a project-local (``_opam``) switch.\n- ``switch_source``: how the switch was determined \u2014 ``\"opam_env\"``\n  (from ``$OPAM_SWITCH_PREFIX``, authoritative), ``\"binary_path\"``\n  (inferred from the resolved ``coqc`` path), or ``\"unknown\"``\n  (non-opam / unrecognised layout).\n- ``toolchain``: ``{coqc: {path, version}, pet: {path, version,\n  pytanque_importable}}`` \u2014 the binaries the server resolves and their\n  versions (``None`` when a binary is missing).\n- ``pet``: ``{running, pid}`` \u2014 whether the pet subprocess is currently\n  live (not spawned by this call).\n- ``warnings``: human-readable notes (missing ``coqc`` / ``pet`` /\n  pytanque, or a switch that could not be identified).\n\nTo change switch, see ``rocq_switch`` \u2014 and note the caveats there:\nlive ``state_id``s and previously-built ``.vo`` artifacts do not carry\nacross a switch change.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "name": "rocq_health",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    },
+    "description": "Switch the running server to a different opam switch, in-session.\n\nResolves *name* via ``opam env --switch <name> --set-switch``, applies\nthe resulting environment to the live server process, and kills the pet\nsubprocess so the next pet-routed call respawns under the new switch.\nSubsequent ``coqc`` invocations resolve the new switch's binary too.\n\n**This is a sharp tool \u2014 read before use:**\n\n- **All live ``state_id``s are discarded.** The pet state table is\n  cleared (a state from the old switch is meaningless under the new\n  one). Any in-flight ``rocq_start`` / ``rocq_check`` session must be\n  restarted with ``rocq_start`` after switching.\n- **``.vo`` artifacts may be ABI-incompatible.** Files compiled under\n  the old switch may fail to ``Require`` under the new one\n  (``Compiled library ... makes inconsistent assumptions``). Recompile\n  dependencies after switching.\n- **Process-global.** The change affects the whole server process, so\n  *every* agent sharing this rocq-mcp instance is moved to the new\n  switch. Do not use in a shared multi-agent setup without coordination:\n  call ``rocq_diag`` first and check its ``live_states`` to confirm no\n  peer has an in-flight session before switching.\n- For a stable per-deployment switch, prefer pinning it at launch in the\n  MCP client config (e.g. ``opam exec --switch=<name> -- ...`` as the\n  server ``command``) rather than switching at runtime.\n\nArgs:\n    name: The opam switch to activate (e.g. ``\"rocq9\"``). Must be an\n        installed switch; see ``rocq_health`` / ``opam switch list``.\n\nOn success returns the post-switch ``rocq_health`` snapshot, augmented\nwith ``switched: True``, ``previous_switch``, and a ``note`` describing\nthe invalidation. Failure envelopes (``{success: False, reason, error}``):\n\n- ``reason=\"not_found\"`` \u2014 ``name`` is not an installed switch; the\n  response carries ``available_switches: list[str]`` for typo recovery.\n- ``reason=\"validation\"`` \u2014 empty ``name``, or opam is unavailable /\n  its ``opam env`` output could not be parsed (the installed-switch\n  list was unavailable, so the name could not be classified).\n- ``reason=\"lock_contended\"`` \u2014 pet was busy and the switch was not\n  applied; retry once in-flight calls settle.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "name": "rocq_switch",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  }
+]

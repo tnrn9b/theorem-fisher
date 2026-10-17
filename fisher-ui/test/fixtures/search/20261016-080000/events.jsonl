@@ -1,0 +1,11 @@
+{"event":"auto closed","goal":"Demo.a","seconds":3.2,"snippets":"simp","t":3.2}
+{"event":"auto missed","goal":"Demo.b","seconds":5,"t":8.2}
+{"event":"disproved","goal":"Demo.c","result":"false","t":9,"tactic":"decide"}
+{"event":"auto missed","goal":"Demo.d","seconds":5,"t":14}
+{"attempt":1,"backend":"gauss","event":"launched","goal":"Demo.b","t":14}
+{"attempt":2,"backend":"gauss","event":"launched","goal":"Demo.d","t":14}
+{"attempt":1,"auto_closed":1,"event":"repaired","goal":"Demo.b","holes_after":0,"holes_before":1,"t":50}
+{"attempt":1,"backend":"gauss","event":"finished","goal":"Demo.b","outcome":"closed","stats":{"cost_usd":0.25,"exit":0,"input_tokens":1000,"output_tokens":100,"tools":{"patch":2},"turns":10,"wall_s":36},"t":50.5}
+{"attempt":1,"event":"closed","goal":"Demo.b","t":50.5}
+{"attempt":2,"backend":"gauss","event":"finished","goal":"Demo.d","outcome":"exit 0","stats":{"cost_usd":0.4,"exit":0,"input_tokens":1000,"output_tokens":100,"tools":{"patch":2},"turns":20,"wall_s":56},"t":70}
+{"event":"gave up","goal":"Demo.d","t":70}

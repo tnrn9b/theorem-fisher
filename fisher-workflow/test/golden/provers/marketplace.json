@@ -1,0 +1,51 @@
+{
+  "files": [
+    ".claude-plugin/marketplace.json",
+    "isabelle/.claude-plugin/plugin.json",
+    "isabelle/commands/draft.md",
+    "isabelle/commands/prove.md",
+    "isabelle/skills/isabelle/SKILL.md",
+    "rocq/.claude-plugin/plugin.json",
+    "rocq/commands/draft.md",
+    "rocq/commands/prove.md",
+    "rocq/skills/rocq/SKILL.md"
+  ],
+  "isabelle/plugin.json": {
+    "author": {
+      "name": "Fisher"
+    },
+    "description": "Prove and draft Isabelle theorems with the isabelle MCP server",
+    "name": "isabelle",
+    "version": "0.2.0"
+  },
+  "marketplace.json": {
+    "metadata": {
+      "description": "Fisher's skills for Rocq and Isabelle projects",
+      "version": "0.2.0"
+    },
+    "name": "fisher-provers",
+    "owner": {
+      "name": "Fisher"
+    },
+    "plugins": [
+      {
+        "description": "Prove and draft Rocq theorems with the rocq MCP server",
+        "name": "rocq",
+        "source": "./rocq"
+      },
+      {
+        "description": "Prove and draft Isabelle theorems with the isabelle MCP server",
+        "name": "isabelle",
+        "source": "./isabelle"
+      }
+    ]
+  },
+  "rocq/plugin.json": {
+    "author": {
+      "name": "Fisher"
+    },
+    "description": "Prove and draft Rocq theorems with the rocq MCP server",
+    "name": "rocq",
+    "version": "0.2.0"
+  }
+}

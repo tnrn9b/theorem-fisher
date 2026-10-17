@@ -1,0 +1,293 @@
+{
+  "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+  "machine": {
+    "is_root": true,
+    "strict_unavailable": "strict mode requires a controlling TTY (No such device or address)"
+  },
+  "cases": [
+    {
+      "name": "not-json",
+      "lines": [
+        "{oops"
+      ],
+      "states": [
+        {
+          "progress": "Waiting",
+          "result": null,
+          "error": null,
+          "lean_status": null
+        }
+      ]
+    },
+    {
+      "name": "assistant-end-turn",
+      "lines": [
+        "{\"type\":\"assistant\",\"message\":{\"stop_reason\":\"end_turn\"}}"
+      ],
+      "states": [
+        {
+          "progress": "Agent finished turn",
+          "result": null,
+          "error": null,
+          "lean_status": null
+        }
+      ]
+    },
+    {
+      "name": "assistant-camel",
+      "lines": [
+        "{\"type\":\"assistant\",\"message\":{\"stopReason\":\"end_turn\"}}"
+      ],
+      "states": [
+        {
+          "progress": "Agent finished turn",
+          "result": null,
+          "error": null,
+          "lean_status": null
+        }
+      ]
+    },
+    {
+      "name": "assistant-other",
+      "lines": [
+        "{\"type\":\"assistant\",\"message\":{\"stop_reason\":\"tool_use\"}}"
+      ],
+      "states": [
+        {
+          "progress": "Waiting",
+          "result": null,
+          "error": null,
+          "lean_status": null
+        }
+      ]
+    },
+    {
+      "name": "tool-lean",
+      "lines": [
+        "{\"type\":\"content_block_start\",\"content_block\":{\"type\":\"tool_use\",\"name\":\"mcp__lean-lsp__goal\"}}"
+      ],
+      "states": [
+        {
+          "progress": "Tool: mcp__lean-lsp__goal",
+          "result": null,
+          "error": null,
+          "lean_status": "active"
+        }
+      ]
+    },
+    {
+      "name": "tool-LSP-case",
+      "lines": [
+        "{\"type\":\"content_block_start\",\"content_block\":{\"type\":\"tool_use\",\"name\":\"SomeLSPTool\"}}"
+      ],
+      "states": [
+        {
+          "progress": "Tool: SomeLSPTool",
+          "result": null,
+          "error": null,
+          "lean_status": "active"
+        }
+      ]
+    },
+    {
+      "name": "tool-plain",
+      "lines": [
+        "{\"type\":\"content_block_start\",\"content_block\":{\"type\":\"tool_use\",\"name\":\"Bash\"}}"
+      ],
+      "states": [
+        {
+          "progress": "Tool: Bash",
+          "result": null,
+          "error": null,
+          "lean_status": null
+        }
+      ]
+    },
+    {
+      "name": "block-text",
+      "lines": [
+        "{\"type\":\"content_block_start\",\"content_block\":{\"type\":\"text\"}}"
+      ],
+      "states": [
+        {
+          "progress": "Waiting",
+          "result": null,
+          "error": null,
+          "lean_status": null
+        }
+      ]
+    },
+    {
+      "name": "result-ok",
+      "lines": [
+        "{\"type\":\"result\",\"subtype\":\"success\",\"result\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"}"
+      ],
+      "states": [
+        {
+          "progress": "Session complete",
+          "result": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "error": null,
+          "lean_status": null
+        }
+      ]
+    },
+    {
+      "name": "result-max-turns",
+      "lines": [
+        "{\"type\":\"result\",\"subtype\":\"error_max_turns\"}"
+      ],
+      "states": [
+        {
+          "progress": "Hit max turns",
+          "result": null,
+          "error": null,
+          "lean_status": null
+        }
+      ]
+    },
+    {
+      "name": "result-api-error",
+      "lines": [
+        "{\"type\":\"result\",\"subtype\":\"error_api\",\"error\":\"overloaded\"}"
+      ],
+      "states": [
+        {
+          "progress": "Session complete",
+          "result": null,
+          "error": "overloaded",
+          "lean_status": null
+        }
+      ]
+    },
+    {
+      "name": "result-api-default",
+      "lines": [
+        "{\"type\":\"result\",\"subtype\":\"error_api\"}"
+      ],
+      "states": [
+        {
+          "progress": "Session complete",
+          "result": null,
+          "error": "API error",
+          "lean_status": null
+        }
+      ]
+    },
+    {
+      "name": "tool-result-sorry",
+      "lines": [
+        "{\"type\":\"tool_result\",\"content\":\"declaration uses SORRY\"}"
+      ],
+      "states": [
+        {
+          "progress": "Waiting",
+          "result": null,
+          "error": null,
+          "lean_status": "has sorry"
+        }
+      ]
+    },
+    {
+      "name": "tool-result-verified",
+      "lines": [
+        "{\"type\":\"tool_result\",\"content\":\"Goals accomplished\"}"
+      ],
+      "states": [
+        {
+          "progress": "Waiting",
+          "result": null,
+          "error": null,
+          "lean_status": "verified"
+        }
+      ]
+    },
+    {
+      "name": "tool-result-no-errors",
+      "lines": [
+        "{\"type\":\"tool_result\",\"content\":\"No errors found\"}"
+      ],
+      "states": [
+        {
+          "progress": "Waiting",
+          "result": null,
+          "error": null,
+          "lean_status": "verified"
+        }
+      ]
+    },
+    {
+      "name": "tool-result-list",
+      "lines": [
+        "{\"type\":\"tool_result\",\"content\":[{\"text\":\"sorry\"}]}"
+      ],
+      "states": [
+        {
+          "progress": "Waiting",
+          "result": null,
+          "error": null,
+          "lean_status": null
+        }
+      ]
+    },
+    {
+      "name": "sequence",
+      "lines": [
+        "{\"type\":\"content_block_start\",\"content_block\":{\"type\":\"tool_use\",\"name\":\"lean_build\"}}",
+        "{\"type\":\"tool_result\",\"content\":\"has sorry\"}",
+        "{\"type\":\"tool_result\",\"content\":\"no errors\"}",
+        "{\"type\":\"result\",\"result\":\"\"}"
+      ],
+      "states": [
+        {
+          "progress": "Tool: lean_build",
+          "result": null,
+          "error": null,
+          "lean_status": "active"
+        },
+        {
+          "progress": "Tool: lean_build",
+          "result": null,
+          "error": null,
+          "lean_status": "has sorry"
+        },
+        {
+          "progress": "Tool: lean_build",
+          "result": null,
+          "error": null,
+          "lean_status": "verified"
+        },
+        {
+          "progress": "Session complete",
+          "result": null,
+          "error": null,
+          "lean_status": "verified"
+        }
+      ]
+    },
+    {
+      "name": "array-line",
+      "lines": [
+        "[1,2]"
+      ],
+      "states": [
+        {
+          "raised": "AttributeError"
+        }
+      ]
+    },
+    {
+      "name": "type-missing",
+      "lines": [
+        "{\"message\":{}}"
+      ],
+      "states": [
+        {
+          "progress": "Waiting",
+          "result": null,
+          "error": null,
+          "lean_status": null
+        }
+      ]
+    }
+  ]
+}

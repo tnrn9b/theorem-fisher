@@ -1,0 +1,149 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.39.1.
+--
+-- see: https://github.com/sol/hpack
+
+name:           fisher-core
+version:        0.2.0.0
+synopsis:       Config, project model and paths shared by every Fisher package
+author:         Tom Reynolds
+maintainer:     Tom Reynolds
+license:        BSD-3-Clause
+build-type:     Simple
+extra-source-files:
+    data/cell-widths.json
+    data/default-config.yaml
+    data/default-soul.md
+    data/env-vars.json
+    data/fallback-comment.txt
+    data/security-comment.txt
+
+library
+  exposed-modules:
+      Fisher.Atomic
+      Fisher.Config
+      Fisher.Config.Migrate
+      Fisher.Config.Set
+      Fisher.Cron.Croniter
+      Fisher.Cron.Dt
+      Fisher.Cron.Jobs
+      Fisher.Cron.Tool
+      Fisher.Cron.Zone
+      Fisher.Difflib
+      Fisher.Env
+      Fisher.EnvVars
+      Fisher.Paths
+      Fisher.Project
+      Fisher.ProjectCommand
+      Fisher.Prover
+      Fisher.Prover.Check
+      Fisher.Prover.Holes
+      Fisher.Prover.Kind
+      Fisher.Py
+      Fisher.Py.Difflib
+      Fisher.Py.Json
+      Fisher.Py.JsonError
+      Fisher.Py.Re
+      Fisher.Py.Value
+      Fisher.Rich.Cells
+      Fisher.Rich.Render
+      Fisher.Rich.Style
+      Fisher.Rich.Text
+      Fisher.Shlex
+      Fisher.Store
+      Fisher.Term
+      Fisher.Which
+      Fisher.Yaml.Ordered
+  other-modules:
+      Paths_fisher_core
+  autogen-modules:
+      Paths_fisher_core
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat
+  build-depends:
+      aeson
+    , attoparsec
+    , base >=4.14 && <5
+    , bytestring
+    , conduit
+    , containers
+    , directory
+    , file-embed
+    , filepath
+    , libyaml
+    , resourcet
+    , scientific
+    , sqlite-simple
+    , text
+    , time
+    , typed-process
+    , unicode-transforms
+    , unix
+    , vector
+    , yaml
+  default-language: GHC2021
+
+test-suite fisher-core-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Fisher.ConfigSetSpec
+      Fisher.ConfigSpec
+      Fisher.CronSpec
+      Fisher.DifflibSpec
+      Fisher.EnvSpec
+      Fisher.Golden
+      Fisher.GoldenCoreSpec
+      Fisher.MigrateSpec
+      Fisher.ProjectSpec
+      Fisher.Prover.CheckSpec
+      Fisher.Prover.HolesSpec
+      Fisher.ProverSpec
+      Fisher.PyJsonSpec
+      Fisher.PyLibSpec
+      Fisher.PyValueSpec
+      Fisher.RichSpec
+      Fisher.ShlexTermSpec
+      Fisher.TestUtil
+      Paths_fisher_core
+  autogen-modules:
+      Paths_fisher_core
+  hs-source-dirs:
+      test
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat
+  build-tool-depends:
+      hspec-discover:hspec-discover
+  build-depends:
+      QuickCheck
+    , aeson
+    , attoparsec
+    , base >=4.14 && <5
+    , bytestring
+    , conduit
+    , containers
+    , directory
+    , file-embed
+    , filepath
+    , fisher-core
+    , hspec
+    , libyaml
+    , resourcet
+    , scientific
+    , sqlite-simple
+    , temporary
+    , text
+    , time
+    , typed-process
+    , unicode-transforms
+    , unix
+    , vector
+    , yaml
+  default-language: GHC2021

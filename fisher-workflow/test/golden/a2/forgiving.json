@@ -1,0 +1,57 @@
+{
+  "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+  "machine": {
+    "is_root": true,
+    "strict_unavailable": "strict mode requires a controlling TTY (No such device or address)"
+  },
+  "cases": [
+    {
+      "input": "prove x",
+      "output": "/prove x"
+    },
+    {
+      "input": "Prove",
+      "output": "/prove"
+    },
+    {
+      "input": "auto_proof  a b",
+      "output": "/autoprove a b"
+    },
+    {
+      "input": "auto-formalize",
+      "output": "/autoformalize"
+    },
+    {
+      "input": "formalize\tthe thing",
+      "output": "/formalize the thing"
+    },
+    {
+      "input": "/prove x",
+      "output": null
+    },
+    {
+      "input": "  review  ",
+      "output": "/review"
+    },
+    {
+      "input": "golfing",
+      "output": null
+    },
+    {
+      "input": "",
+      "output": null
+    },
+    {
+      "input": "checkpoint ",
+      "output": "/checkpoint"
+    },
+    {
+      "input": "autoprove",
+      "output": "/autoprove"
+    },
+    {
+      "input": "draft  topology ",
+      "output": "/draft topology"
+    }
+  ]
+}

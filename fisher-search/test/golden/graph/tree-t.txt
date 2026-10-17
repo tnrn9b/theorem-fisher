@@ -1,0 +1,5 @@
+t: open
+  split 1: accepted
+    l1: proved
+    l2: open
+      split 2: rejected: too hard

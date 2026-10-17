@@ -1,0 +1,17 @@
+{
+    "attempt_s": 1200,
+    "attempts": [],
+    "backends": {},
+    "budget_s": 3600,
+    "budget_spent": false,
+    "closed_per_hour": 0,
+    "elapsed_s": 0,
+    "file": "Step/Relay.lean",
+    "goals": [],
+    "goals_closed": 0,
+    "goals_total": 0,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/g/5/lean",
+    "slots": 4
+}

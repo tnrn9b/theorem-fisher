@@ -1,0 +1,257 @@
+{
+ "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+ "python": "3.11.15",
+ "cases": [
+  {
+   "patch": "*** Begin Patch\n*** Update File: a.py\n@@ def foo @@\n def foo():\n-    return 1\n+    return 2\n*** End Patch",
+   "ops": [
+    {
+     "op": "update",
+     "path": "a.py",
+     "new_path": null,
+     "content": null,
+     "hunks": [
+      {
+       "hint": "def foo",
+       "lines": [
+        [
+         " ",
+         "def foo():"
+        ],
+        [
+         "-",
+         "    return 1"
+        ],
+        [
+         "+",
+         "    return 2"
+        ]
+       ]
+      }
+     ]
+    }
+   ],
+   "error": null
+  },
+  {
+   "patch": "*** Begin Patch\n*** Add File: new.txt\n+line one\n+line two\n*** Delete File: old.txt\n*** Move File: x.py -> y/x.py\n*** End Patch",
+   "ops": [
+    {
+     "op": "add",
+     "path": "new.txt",
+     "new_path": null,
+     "content": null,
+     "hunks": [
+      {
+       "hint": null,
+       "lines": [
+        [
+         "+",
+         "line one"
+        ],
+        [
+         "+",
+         "line two"
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "op": "delete",
+     "path": "old.txt",
+     "new_path": null,
+     "content": null,
+     "hunks": []
+    },
+    {
+     "op": "move",
+     "path": "x.py",
+     "new_path": "y/x.py",
+     "content": null,
+     "hunks": []
+    }
+   ],
+   "error": null
+  },
+  {
+   "patch": "*** Update File: noheader.py\n-a\n+b\n context\nimplicit context\n\\ No newline at end of file\n",
+   "ops": [
+    {
+     "op": "update",
+     "path": "noheader.py",
+     "new_path": null,
+     "content": null,
+     "hunks": [
+      {
+       "hint": null,
+       "lines": [
+        [
+         "-",
+         "a"
+        ],
+        [
+         "+",
+         "b"
+        ],
+        [
+         " ",
+         "context"
+        ],
+        [
+         " ",
+         "implicit context"
+        ]
+       ]
+      }
+     ]
+    }
+   ],
+   "error": null
+  },
+  {
+   "patch": "junk before\n*** Begin Patch\n*** Update File: a\n@@\n-x\n+y\n@@ second @@\n-p\n+q\n*** End Patch\n*** Update File: after-end",
+   "ops": [
+    {
+     "op": "update",
+     "path": "a",
+     "new_path": null,
+     "content": null,
+     "hunks": [
+      {
+       "hint": null,
+       "lines": [
+        [
+         "-",
+         "x"
+        ],
+        [
+         "+",
+         "y"
+        ]
+       ]
+      },
+      {
+       "hint": "second",
+       "lines": [
+        [
+         "-",
+         "p"
+        ],
+        [
+         "+",
+         "q"
+        ]
+       ]
+      }
+     ]
+    }
+   ],
+   "error": null
+  },
+  {
+   "patch": "*** Begin Patch\n*** End Patch",
+   "ops": [],
+   "error": null
+  },
+  {
+   "patch": "*** Begin Patch\n+orphan add line\n*** Update File: z\n\n\n-a\n*** End Patch",
+   "ops": [
+    {
+     "op": "update",
+     "path": "z",
+     "new_path": null,
+     "content": null,
+     "hunks": [
+      {
+       "hint": null,
+       "lines": [
+        [
+         "-",
+         "a"
+        ]
+       ]
+      }
+     ]
+    }
+   ],
+   "error": null
+  },
+  {
+   "patch": "*** Begin Patch\n*** Update File: a.py\n@@ class A @@\n@@ def b @@\n context\n*** End Patch",
+   "ops": [
+    {
+     "op": "update",
+     "path": "a.py",
+     "new_path": null,
+     "content": null,
+     "hunks": [
+      {
+       "hint": "def b",
+       "lines": [
+        [
+         " ",
+         "context"
+        ]
+       ]
+      }
+     ]
+    }
+   ],
+   "error": null
+  },
+  {
+   "patch": "***Begin Patch\n***Update File:tight.py\n-x\n+y\n***End Patch",
+   "ops": [
+    {
+     "op": "update",
+     "path": "tight.py",
+     "new_path": null,
+     "content": null,
+     "hunks": [
+      {
+       "hint": null,
+       "lines": [
+        [
+         "-",
+         "x"
+        ],
+        [
+         "+",
+         "y"
+        ]
+       ]
+      }
+     ]
+    }
+   ],
+   "error": null
+  },
+  {
+   "patch": "*** Begin Patch\n*** Add File: empty.txt\n*** End Patch",
+   "ops": [
+    {
+     "op": "add",
+     "path": "empty.txt",
+     "new_path": null,
+     "content": null,
+     "hunks": []
+    }
+   ],
+   "error": null
+  },
+  {
+   "patch": "*** Begin Patch\n*** Move File: a b.py   ->   c d.py\n*** End Patch",
+   "ops": [
+    {
+     "op": "move",
+     "path": "a b.py",
+     "new_path": "c d.py",
+     "content": null,
+     "hunks": []
+    }
+   ],
+   "error": null
+  }
+ ]
+}

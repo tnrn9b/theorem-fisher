@@ -1,0 +1,7 @@
+Cleaned Probe
+Running Probe ...
+Probe FAILED (see also "isabelle build_log -H Error Probe")
+*** Cheating requires quick_and_dirty mode!
+*** At command "sorry" (line 3 of "~/IdeaProjects/Fisher/.build/probe/isa/Probe.thy")
+Unfinished session(s): Probe
+0:00:03 elapsed time

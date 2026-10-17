@@ -1,0 +1,83 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 1363.8,
+            "goal": "Channels.ObfsSummary.good_eq",
+            "outcome": "rejected: does not compile: Channels/_fisher_search_ObfsSummary.lean:299:62: error: (deterministic) timeout at `whnf`, maximum number of heartbeats (1000000) has been reached",
+            "started_s": 0,
+            "stats": {
+                "cost_usd": null,
+                "exit": null,
+                "input_tokens": null,
+                "output_tokens": null,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 9,
+                    "mcp_lean_lsp_lean_goal": 1,
+                    "patch": 14,
+                    "read_file": 5,
+                    "search_files": 1,
+                    "terminal": 11
+                },
+                "turns": null,
+                "wall_s": 1200
+            }
+        },
+        {
+            "attempt": 2,
+            "backend": "gauss",
+            "ended_s": 1565,
+            "goal": "Channels.ObfsSummary.good_eq",
+            "outcome": "closed",
+            "started_s": 1363.8,
+            "stats": {
+                "cost_usd": 0.5342946000000001,
+                "exit": 0,
+                "input_tokens": 1667354,
+                "output_tokens": 13312,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 4,
+                    "mcp_lean_lsp_lean_goal": 5,
+                    "mcp_lean_lsp_lean_verify": 1,
+                    "patch": 5,
+                    "read_file": 5,
+                    "search_files": 6
+                },
+                "turns": 23,
+                "wall_s": 175
+            }
+        }
+    ],
+    "backends": {
+        "gauss": [
+            2,
+            1
+        ]
+    },
+    "budget_s": 3600,
+    "budget_spent": false,
+    "closed_per_hour": 2.3,
+    "elapsed_s": 1565,
+    "file": "Channels/ObfsSummary.lean",
+    "goals": [
+        {
+            "attempts": [
+                "gauss",
+                "gauss"
+            ],
+            "by_attempt": 2,
+            "by_backend": "gauss",
+            "closed_at_s": 1565,
+            "goal": "Channels.ObfsSummary.good_eq",
+            "status": "closed"
+        }
+    ],
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/g/7/lean",
+    "slots": 4
+}

@@ -1,0 +1,115 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.39.1.
+--
+-- see: https://github.com/sol/hpack
+
+name:           fisher-lean
+version:        0.2.0.0
+synopsis:       A Lean 4 language-server client over `lake serve`, and the Lean tools on top of it (lean-lsp-mcp's, C1)
+author:         Tom Reynolds
+maintainer:     Tom Reynolds
+license:        BSD-3-Clause
+build-type:     Simple
+
+library
+  exposed-modules:
+      Fisher.Lean.Client
+      Fisher.Lean.Error
+      Fisher.Lean.Http
+      Fisher.Lean.HttpReal
+      Fisher.Lean.Mcp
+      Fisher.Lean.McpData
+      Fisher.Lean.Process
+      Fisher.Lean.Ref
+      Fisher.Lean.Scratch
+      Fisher.Lean.Session
+      Fisher.Lean.Text
+      Fisher.Lean.Tool
+      Fisher.Lean.Tools
+      Fisher.Lean.Tools.Analysis
+      Fisher.Lean.Tools.Build
+      Fisher.Lean.Tools.Common
+      Fisher.Lean.Tools.Diagnostics
+      Fisher.Lean.Tools.Goals
+      Fisher.Lean.Tools.Navigation
+      Fisher.Lean.Tools.Outline
+      Fisher.Lean.Tools.Profile
+      Fisher.Lean.Tools.Search
+      Fisher.Lean.Transport
+      Fisher.Lean.Utf16
+      Fisher.Lean.Watch
+  other-modules:
+      Paths_fisher_lean
+  autogen-modules:
+      Paths_fisher_lean
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat
+  build-depends:
+      async
+    , base >=4.14 && <5
+    , bytestring
+    , case-insensitive
+    , containers
+    , directory
+    , filepath
+    , fisher-core
+    , fisher-tools
+    , fsnotify
+    , http-client
+    , http-client-tls
+    , http-types
+    , process
+    , stm
+    , text
+    , time
+    , unix
+  default-language: GHC2021
+
+test-suite fisher-lean-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Fisher.Lean.FakeLake
+      Fisher.Lean.McpSpec
+      Fisher.Lean.ReplaySpec
+      Fisher.Lean.WatchSpec
+      Paths_fisher_lean
+  autogen-modules:
+      Paths_fisher_lean
+  hs-source-dirs:
+      test
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat -threaded
+  build-tool-depends:
+      hspec-discover:hspec-discover
+  build-depends:
+      QuickCheck
+    , async
+    , base >=4.14 && <5
+    , bytestring
+    , case-insensitive
+    , containers
+    , directory
+    , filepath
+    , fisher-core
+    , fisher-lean
+    , fisher-tools
+    , fsnotify
+    , hspec
+    , http-client
+    , http-client-tls
+    , http-types
+    , process
+    , stm
+    , temporary
+    , text
+    , time
+    , unix
+  default-language: GHC2021

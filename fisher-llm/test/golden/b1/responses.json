@@ -1,0 +1,1500 @@
+{
+  "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+  "openai": "3.22.1",
+  "anthropic": "1.11.0",
+  "cases": [
+    {
+      "name": "chat/text",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"Hello.\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 5, \"total_tokens\": 15}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "Hello.",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "chat/null-content",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": null}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 5, \"total_tokens\": 15}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "chat/content-list",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": [{\"type\": \"text\", \"text\": \"a\"}, \"b\", {\"text\": \"c\"}, {\"type\": \"image\"}]}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 5, \"total_tokens\": 15}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "a\nb\nc",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "chat/content-dict",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": {\"text\": \"from dict\"}}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 5, \"total_tokens\": 15}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "from dict",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "chat/content-dict-other",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": {\"value\": 1}}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 5, \"total_tokens\": 15}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "{\"value\": 1}",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "chat/tool-calls",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"call_1\", \"type\": \"function\", \"function\": {\"name\": \"terminal\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\"}}, {\"id\": \"fc_77\", \"type\": \"function\", \"function\": {\"name\": \"read_file\", \"arguments\": \"\"}}]}, \"finish_reason\": \"tool_calls\"}], \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 5, \"total_tokens\": 15}}",
+      "result": {
+        "pre_finish_reason": "tool_calls",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "",
+          "reasoning": null,
+          "finish_reason": "tool_calls",
+          "tool_calls": [
+            {
+              "id": "call_1",
+              "call_id": "call_1",
+              "response_item_id": "fc_1",
+              "type": "function",
+              "function": {
+                "name": "terminal",
+                "arguments": "{\"command\":\"ls\"}"
+              }
+            },
+            {
+              "id": "fc_77",
+              "call_id": "fc_77",
+              "response_item_id": "fc_77",
+              "type": "function",
+              "function": {
+                "name": "read_file",
+                "arguments": ""
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "chat/tool-call-extra",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"\", \"tool_calls\": [{\"id\": \"x|fc_2\", \"type\": \"function\", \"function\": {\"name\": \"t\", \"arguments\": \"{}\"}, \"extra_content\": {\"google\": {\"thought_signature\": \"abc\"}}}]}, \"finish_reason\": \"tool_calls\"}], \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 5, \"total_tokens\": 15}}",
+      "result": {
+        "pre_finish_reason": "tool_calls",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "",
+          "reasoning": null,
+          "finish_reason": "tool_calls",
+          "tool_calls": [
+            {
+              "id": "x",
+              "call_id": "x",
+              "response_item_id": "fc_2",
+              "type": "function",
+              "function": {
+                "name": "t",
+                "arguments": "{}"
+              },
+              "extra_content": {
+                "google": {
+                  "thought_signature": "abc"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "chat/reasoning-field",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"A\", \"reasoning\": \"R1\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 5, \"total_tokens\": 15}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "A",
+          "reasoning": "R1",
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "chat/reasoning-content",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"A\", \"reasoning_content\": \"R2\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 5, \"total_tokens\": 15}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "A",
+          "reasoning": "R2",
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "chat/reasoning-both",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"A\", \"reasoning\": \"R\", \"reasoning_content\": \"R\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 5, \"total_tokens\": 15}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "A",
+          "reasoning": "R",
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "chat/reasoning-details",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"A\", \"reasoning_details\": [{\"type\": \"reasoning.summary\", \"summary\": \"S\"}, {\"type\": \"reasoning.text\", \"text\": \"T\", \"signature\": \"g\"}, {\"type\": \"reasoning.encrypted\", \"data\": \"zz\"}]}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 5, \"total_tokens\": 15}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "A",
+          "reasoning": "S\n\nT",
+          "finish_reason": "stop",
+          "reasoning_details": [
+            {
+              "type": "reasoning.summary",
+              "summary": "S"
+            },
+            {
+              "type": "reasoning.text",
+              "text": "T",
+              "signature": "g"
+            },
+            {
+              "type": "reasoning.encrypted",
+              "data": "zz"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "chat/think-tags",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"<think> inner one </think>Answer<think>two</think>\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 5, \"total_tokens\": 15}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "<think> inner one </think>Answer<think>two</think>",
+          "reasoning": "inner one\n\ntwo",
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "chat/think-empty",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"<think>  </think>Answer\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 5, \"total_tokens\": 15}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "<think>  </think>Answer",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "chat/length",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"cut\"}, \"finish_reason\": \"length\"}], \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 5, \"total_tokens\": 15}}",
+      "result": {
+        "pre_finish_reason": "length",
+        "finish_reason": "length",
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "cut",
+          "reasoning": null,
+          "finish_reason": "length"
+        }
+      }
+    },
+    {
+      "name": "chat/no-usage",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"x\"}, \"finish_reason\": \"stop\"}]}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": null,
+        "message": {
+          "role": "assistant",
+          "content": "x",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "chat/cache-usage",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"x\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 100, \"completion_tokens\": 3, \"total_tokens\": 103, \"prompt_tokens_details\": {\"cached_tokens\": 80, \"cache_write_tokens\": 20}}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 100,
+          "completion_tokens": 3,
+          "total_tokens": 103,
+          "cache": {
+            "cache_read": 80,
+            "cache_write": 20
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "x",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "chat/partial-usage",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"x\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 7}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 7,
+          "completion_tokens": 0,
+          "total_tokens": 0,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "x",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "chat/empty-choices",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"g\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": []}",
+      "result": {
+        "invalid": true
+      }
+    },
+    {
+      "name": "chat/no-choices",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"g\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\"}",
+      "result": {
+        "invalid": true
+      }
+    },
+    {
+      "name": "chat/null-finish",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"gen-1\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"x\"}, \"finish_reason\": null}], \"usage\": {\"prompt_tokens\": 10, \"completion_tokens\": 5, \"total_tokens\": 15}}",
+      "result": {
+        "pre_finish_reason": null,
+        "finish_reason": null,
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 5,
+          "total_tokens": 15,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "x",
+          "reasoning": null,
+          "finish_reason": null
+        }
+      }
+    },
+    {
+      "name": "chat/openrouter-error-200",
+      "mode": "chat_completions",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"g\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [], \"error\": {\"message\": \"Provider returned error\", \"code\": 502, \"metadata\": {\"provider_name\": \"Anthropic\"}}}",
+      "result": {
+        "invalid": true
+      }
+    },
+    {
+      "name": "codex/text",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 1, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"in_progress\", \"content\": [{\"type\": \"output_text\", \"text\": \"Hello there.\", \"annotations\": []}]}}\n\nevent: response.content_part.added\ndata: {\"type\": \"response.content_part.added\", \"sequence_number\": 2, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"part\": {\"type\": \"output_text\", \"text\": \"\", \"annotations\": []}}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 3, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"Hello \", \"logprobs\": []}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 4, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"there.\", \"logprobs\": []}\n\nevent: response.output_text.done\ndata: {\"type\": \"response.output_text.done\", \"sequence_number\": 5, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"text\": \"Hello there.\", \"logprobs\": []}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 6, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"Hello there.\", \"annotations\": []}]}}\n\nevent: response.completed\ndata: {\"type\": \"response.completed\", \"sequence_number\": 7, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"completed\", \"output\": [{\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"Hello there.\", \"annotations\": []}]}], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 3,
+          "completion_tokens": 2,
+          "total_tokens": 5,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "Hello there.",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "codex/function-call",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 1, \"output_index\": 0, \"item\": {\"type\": \"function_call\", \"id\": \"fc_123\", \"call_id\": \"call_123\", \"name\": \"terminal\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\", \"status\": \"in_progress\"}}\n\nevent: response.function_call_arguments.delta\ndata: {\"type\": \"response.function_call_arguments.delta\", \"sequence_number\": 2, \"output_index\": 0, \"item_id\": \"fc_123\", \"delta\": \"{\\\"command\\\":\\\"ls\\\"}\"}\n\nevent: response.function_call_arguments.done\ndata: {\"type\": \"response.function_call_arguments.done\", \"sequence_number\": 3, \"output_index\": 0, \"item_id\": \"fc_123\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\", \"name\": \"terminal\"}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 4, \"output_index\": 0, \"item\": {\"type\": \"function_call\", \"id\": \"fc_123\", \"call_id\": \"call_123\", \"name\": \"terminal\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\", \"status\": \"completed\"}}\n\nevent: response.completed\ndata: {\"type\": \"response.completed\", \"sequence_number\": 5, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"completed\", \"output\": [{\"type\": \"function_call\", \"id\": \"fc_123\", \"call_id\": \"call_123\", \"name\": \"terminal\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\", \"status\": \"completed\"}], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "prompt_tokens": 3,
+          "completion_tokens": 2,
+          "total_tokens": 5,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "",
+          "reasoning": null,
+          "finish_reason": "tool_calls",
+          "tool_calls": [
+            {
+              "id": "call_123",
+              "call_id": "call_123",
+              "response_item_id": "fc_123",
+              "type": "function",
+              "function": {
+                "name": "terminal",
+                "arguments": "{\"command\":\"ls\"}"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "codex/reasoning-and-call",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 1, \"output_index\": 0, \"item\": {\"type\": \"reasoning\", \"id\": \"rs_1\", \"encrypted_content\": \"gAAAAB\", \"summary\": [{\"type\": \"summary_text\", \"text\": \"First.\"}, {\"type\": \"summary_text\", \"text\": \"Second.\"}], \"status\": \"in_progress\"}}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 2, \"output_index\": 0, \"item\": {\"type\": \"reasoning\", \"id\": \"rs_1\", \"encrypted_content\": \"gAAAAB\", \"summary\": [{\"type\": \"summary_text\", \"text\": \"First.\"}, {\"type\": \"summary_text\", \"text\": \"Second.\"}]}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 3, \"output_index\": 1, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"in_progress\", \"content\": [{\"type\": \"output_text\", \"text\": \"Running.\", \"annotations\": []}]}}\n\nevent: response.content_part.added\ndata: {\"type\": \"response.content_part.added\", \"sequence_number\": 4, \"output_index\": 1, \"item_id\": \"msg_1\", \"content_index\": 0, \"part\": {\"type\": \"output_text\", \"text\": \"\", \"annotations\": []}}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 5, \"output_index\": 1, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"Runn\", \"logprobs\": []}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 6, \"output_index\": 1, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"ing.\", \"logprobs\": []}\n\nevent: response.output_text.done\ndata: {\"type\": \"response.output_text.done\", \"sequence_number\": 7, \"output_index\": 1, \"item_id\": \"msg_1\", \"content_index\": 0, \"text\": \"Running.\", \"logprobs\": []}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 8, \"output_index\": 1, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"Running.\", \"annotations\": []}]}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 9, \"output_index\": 2, \"item\": {\"type\": \"function_call\", \"id\": \"fc_123\", \"call_id\": \"call_123\", \"name\": \"terminal\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\", \"status\": \"in_progress\"}}\n\nevent: response.function_call_arguments.delta\ndata: {\"type\": \"response.function_call_arguments.delta\", \"sequence_number\": 10, \"output_index\": 2, \"item_id\": \"fc_123\", \"delta\": \"{\\\"command\\\":\\\"ls\\\"}\"}\n\nevent: response.function_call_arguments.done\ndata: {\"type\": \"response.function_call_arguments.done\", \"sequence_number\": 11, \"output_index\": 2, \"item_id\": \"fc_123\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\", \"name\": \"terminal\"}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 12, \"output_index\": 2, \"item\": {\"type\": \"function_call\", \"id\": \"fc_123\", \"call_id\": \"call_123\", \"name\": \"terminal\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\", \"status\": \"completed\"}}\n\nevent: response.completed\ndata: {\"type\": \"response.completed\", \"sequence_number\": 13, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"completed\", \"output\": [{\"type\": \"reasoning\", \"id\": \"rs_1\", \"encrypted_content\": \"gAAAAB\", \"summary\": [{\"type\": \"summary_text\", \"text\": \"First.\"}, {\"type\": \"summary_text\", \"text\": \"Second.\"}]}, {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"Running.\", \"annotations\": []}]}, {\"type\": \"function_call\", \"id\": \"fc_123\", \"call_id\": \"call_123\", \"name\": \"terminal\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\", \"status\": \"completed\"}], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "prompt_tokens": 3,
+          "completion_tokens": 2,
+          "total_tokens": 5,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "Running.",
+          "reasoning": "First.\nSecond.",
+          "finish_reason": "tool_calls",
+          "codex_reasoning_items": [
+            {
+              "type": "reasoning",
+              "encrypted_content": "gAAAAB",
+              "id": "rs_1",
+              "summary": [
+                {
+                  "type": "summary_text",
+                  "text": "First."
+                },
+                {
+                  "type": "summary_text",
+                  "text": "Second."
+                }
+              ]
+            }
+          ],
+          "tool_calls": [
+            {
+              "id": "call_123",
+              "call_id": "call_123",
+              "response_item_id": "fc_123",
+              "type": "function",
+              "function": {
+                "name": "terminal",
+                "arguments": "{\"command\":\"ls\"}"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "codex/reasoning-no-encrypted",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 1, \"output_index\": 0, \"item\": {\"type\": \"reasoning\", \"id\": \"rs_2\", \"summary\": [], \"text\": \"raw\", \"status\": \"in_progress\"}}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 2, \"output_index\": 0, \"item\": {\"type\": \"reasoning\", \"id\": \"rs_2\", \"summary\": [], \"text\": \"raw\"}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 3, \"output_index\": 1, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"in_progress\", \"content\": [{\"type\": \"output_text\", \"text\": \"x\", \"annotations\": []}]}}\n\nevent: response.content_part.added\ndata: {\"type\": \"response.content_part.added\", \"sequence_number\": 4, \"output_index\": 1, \"item_id\": \"msg_1\", \"content_index\": 0, \"part\": {\"type\": \"output_text\", \"text\": \"\", \"annotations\": []}}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 5, \"output_index\": 1, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"\", \"logprobs\": []}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 6, \"output_index\": 1, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"x\", \"logprobs\": []}\n\nevent: response.output_text.done\ndata: {\"type\": \"response.output_text.done\", \"sequence_number\": 7, \"output_index\": 1, \"item_id\": \"msg_1\", \"content_index\": 0, \"text\": \"x\", \"logprobs\": []}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 8, \"output_index\": 1, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"x\", \"annotations\": []}]}}\n\nevent: response.completed\ndata: {\"type\": \"response.completed\", \"sequence_number\": 9, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"completed\", \"output\": [{\"type\": \"reasoning\", \"id\": \"rs_2\", \"summary\": [], \"text\": \"raw\"}, {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"x\", \"annotations\": []}]}], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 3,
+          "completion_tokens": 2,
+          "total_tokens": 5,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "x",
+          "reasoning": "raw",
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "codex/call-id-only-id",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 1, \"output_index\": 0, \"item\": {\"type\": \"function_call\", \"id\": \"fc_only\", \"call_id\": null, \"name\": \"terminal\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\", \"status\": \"in_progress\"}}\n\nevent: response.function_call_arguments.delta\ndata: {\"type\": \"response.function_call_arguments.delta\", \"sequence_number\": 2, \"output_index\": 0, \"item_id\": \"fc_only\", \"delta\": \"{\\\"command\\\":\\\"ls\\\"}\"}\n\nevent: response.function_call_arguments.done\ndata: {\"type\": \"response.function_call_arguments.done\", \"sequence_number\": 3, \"output_index\": 0, \"item_id\": \"fc_only\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\", \"name\": \"terminal\"}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 4, \"output_index\": 0, \"item\": {\"type\": \"function_call\", \"id\": \"fc_only\", \"call_id\": null, \"name\": \"terminal\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\", \"status\": \"completed\"}}\n\nevent: response.completed\ndata: {\"type\": \"response.completed\", \"sequence_number\": 5, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"completed\", \"output\": [{\"type\": \"function_call\", \"id\": \"fc_only\", \"call_id\": null, \"name\": \"terminal\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\", \"status\": \"completed\"}], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "prompt_tokens": 3,
+          "completion_tokens": 2,
+          "total_tokens": 5,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "",
+          "reasoning": null,
+          "finish_reason": "tool_calls",
+          "tool_calls": [
+            {
+              "id": "call_000000000000",
+              "call_id": "call_000000000000",
+              "response_item_id": "fc_only",
+              "type": "function",
+              "function": {
+                "name": "terminal",
+                "arguments": "{\"command\":\"ls\"}"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "codex/call-weird-id",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 1, \"output_index\": 0, \"item\": {\"type\": \"function_call\", \"id\": \"item-9\", \"call_id\": \"tool.1/x\", \"name\": \"terminal\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\", \"status\": \"in_progress\"}}\n\nevent: response.function_call_arguments.delta\ndata: {\"type\": \"response.function_call_arguments.delta\", \"sequence_number\": 2, \"output_index\": 0, \"item_id\": \"item-9\", \"delta\": \"{\\\"command\\\":\\\"ls\\\"}\"}\n\nevent: response.function_call_arguments.done\ndata: {\"type\": \"response.function_call_arguments.done\", \"sequence_number\": 3, \"output_index\": 0, \"item_id\": \"item-9\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\", \"name\": \"terminal\"}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 4, \"output_index\": 0, \"item\": {\"type\": \"function_call\", \"id\": \"item-9\", \"call_id\": \"tool.1/x\", \"name\": \"terminal\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\", \"status\": \"completed\"}}\n\nevent: response.completed\ndata: {\"type\": \"response.completed\", \"sequence_number\": 5, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"completed\", \"output\": [{\"type\": \"function_call\", \"id\": \"item-9\", \"call_id\": \"tool.1/x\", \"name\": \"terminal\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\", \"status\": \"completed\"}], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "prompt_tokens": 3,
+          "completion_tokens": 2,
+          "total_tokens": 5,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "",
+          "reasoning": null,
+          "finish_reason": "tool_calls",
+          "tool_calls": [
+            {
+              "id": "tool.1/x",
+              "call_id": "tool.1/x",
+              "response_item_id": "fc_tool1x",
+              "type": "function",
+              "function": {
+                "name": "terminal",
+                "arguments": "{\"command\":\"ls\"}"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "codex/call-dict-args",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 1, \"output_index\": 0, \"item\": {\"type\": \"function_call\", \"id\": \"fc_123\", \"call_id\": \"call_123\", \"name\": \"terminal\", \"arguments\": \"{}\", \"status\": \"in_progress\"}}\n\nevent: response.function_call_arguments.delta\ndata: {\"type\": \"response.function_call_arguments.delta\", \"sequence_number\": 2, \"output_index\": 0, \"item_id\": \"fc_123\", \"delta\": \"{}\"}\n\nevent: response.function_call_arguments.done\ndata: {\"type\": \"response.function_call_arguments.done\", \"sequence_number\": 3, \"output_index\": 0, \"item_id\": \"fc_123\", \"arguments\": \"{}\", \"name\": \"terminal\"}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 4, \"output_index\": 0, \"item\": {\"type\": \"function_call\", \"id\": \"fc_123\", \"call_id\": \"call_123\", \"name\": \"terminal\", \"arguments\": \"{}\", \"status\": \"completed\"}}\n\nevent: response.completed\ndata: {\"type\": \"response.completed\", \"sequence_number\": 5, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"completed\", \"output\": [{\"type\": \"function_call\", \"id\": \"fc_123\", \"call_id\": \"call_123\", \"name\": \"terminal\", \"arguments\": \"{}\", \"status\": \"completed\"}], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "prompt_tokens": 3,
+          "completion_tokens": 2,
+          "total_tokens": 5,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "",
+          "reasoning": null,
+          "finish_reason": "tool_calls",
+          "tool_calls": [
+            {
+              "id": "call_123",
+              "call_id": "call_123",
+              "response_item_id": "fc_123",
+              "type": "function",
+              "function": {
+                "name": "terminal",
+                "arguments": "{}"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "codex/custom-tool",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.completed\ndata: {\"type\": \"response.completed\", \"sequence_number\": 1, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"completed\", \"output\": [{\"type\": \"custom_tool_call\", \"id\": \"ctc_1\", \"call_id\": \"call_c\", \"name\": \"apply_patch\", \"input\": \"*** Begin Patch\", \"status\": \"completed\"}], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "prompt_tokens": 3,
+          "completion_tokens": 2,
+          "total_tokens": 5,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "",
+          "reasoning": null,
+          "finish_reason": "tool_calls",
+          "tool_calls": [
+            {
+              "id": "call_c",
+              "call_id": "call_c",
+              "response_item_id": "fc_c",
+              "type": "function",
+              "function": {
+                "name": "apply_patch",
+                "arguments": "*** Begin Patch"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "codex/in-progress-call",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.completed\ndata: {\"type\": \"response.completed\", \"sequence_number\": 1, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"completed\", \"output\": [{\"type\": \"function_call\", \"id\": \"fc_123\", \"call_id\": \"call_123\", \"name\": \"terminal\", \"arguments\": \"{\\\"command\\\":\\\"ls\\\"}\", \"status\": \"in_progress\"}, {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"wait\", \"annotations\": []}]}], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "incomplete",
+        "usage": {
+          "prompt_tokens": 3,
+          "completion_tokens": 2,
+          "total_tokens": 5,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "wait",
+          "reasoning": null,
+          "finish_reason": "incomplete"
+        }
+      }
+    },
+    {
+      "name": "codex/incomplete-max-tokens",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 1, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"in_progress\", \"content\": [{\"type\": \"output_text\", \"text\": \"trunc\", \"annotations\": []}]}}\n\nevent: response.content_part.added\ndata: {\"type\": \"response.content_part.added\", \"sequence_number\": 2, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"part\": {\"type\": \"output_text\", \"text\": \"\", \"annotations\": []}}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 3, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"tr\", \"logprobs\": []}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 4, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"unc\", \"logprobs\": []}\n\nevent: response.output_text.done\ndata: {\"type\": \"response.output_text.done\", \"sequence_number\": 5, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"text\": \"trunc\", \"logprobs\": []}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 6, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"trunc\", \"annotations\": []}]}}\n\nevent: response.completed\ndata: {\"type\": \"response.completed\", \"sequence_number\": 7, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"incomplete\", \"output\": [{\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"trunc\", \"annotations\": []}]}], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}, \"incomplete_details\": {\"reason\": \"max_output_tokens\"}}}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "pre_finish_reason": "length",
+        "finish_reason": "incomplete",
+        "usage": {
+          "prompt_tokens": 3,
+          "completion_tokens": 2,
+          "total_tokens": 5,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "trunc",
+          "reasoning": null,
+          "finish_reason": "incomplete"
+        }
+      }
+    },
+    {
+      "name": "codex/commentary-only",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 1, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"in_progress\", \"content\": [{\"type\": \"output_text\", \"text\": \"thinking aloud\", \"annotations\": []}], \"phase\": \"commentary\"}}\n\nevent: response.content_part.added\ndata: {\"type\": \"response.content_part.added\", \"sequence_number\": 2, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"part\": {\"type\": \"output_text\", \"text\": \"\", \"annotations\": []}}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 3, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"thinkin\", \"logprobs\": []}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 4, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"g aloud\", \"logprobs\": []}\n\nevent: response.output_text.done\ndata: {\"type\": \"response.output_text.done\", \"sequence_number\": 5, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"text\": \"thinking aloud\", \"logprobs\": []}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 6, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"thinking aloud\", \"annotations\": []}], \"phase\": \"commentary\"}}\n\nevent: response.completed\ndata: {\"type\": \"response.completed\", \"sequence_number\": 7, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"completed\", \"output\": [{\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"thinking aloud\", \"annotations\": []}], \"phase\": \"commentary\"}], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "incomplete",
+        "usage": {
+          "prompt_tokens": 3,
+          "completion_tokens": 2,
+          "total_tokens": 5,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "thinking aloud",
+          "reasoning": null,
+          "finish_reason": "incomplete"
+        }
+      }
+    },
+    {
+      "name": "codex/commentary-and-final",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 1, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"m1\", \"role\": \"assistant\", \"status\": \"in_progress\", \"content\": [{\"type\": \"output_text\", \"text\": \"c\", \"annotations\": []}], \"phase\": \"commentary\"}}\n\nevent: response.content_part.added\ndata: {\"type\": \"response.content_part.added\", \"sequence_number\": 2, \"output_index\": 0, \"item_id\": \"m1\", \"content_index\": 0, \"part\": {\"type\": \"output_text\", \"text\": \"\", \"annotations\": []}}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 3, \"output_index\": 0, \"item_id\": \"m1\", \"content_index\": 0, \"delta\": \"\", \"logprobs\": []}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 4, \"output_index\": 0, \"item_id\": \"m1\", \"content_index\": 0, \"delta\": \"c\", \"logprobs\": []}\n\nevent: response.output_text.done\ndata: {\"type\": \"response.output_text.done\", \"sequence_number\": 5, \"output_index\": 0, \"item_id\": \"m1\", \"content_index\": 0, \"text\": \"c\", \"logprobs\": []}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 6, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"m1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"c\", \"annotations\": []}], \"phase\": \"commentary\"}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 7, \"output_index\": 1, \"item\": {\"type\": \"message\", \"id\": \"m2\", \"role\": \"assistant\", \"status\": \"in_progress\", \"content\": [{\"type\": \"output_text\", \"text\": \"done\", \"annotations\": []}], \"phase\": \"final_answer\"}}\n\nevent: response.content_part.added\ndata: {\"type\": \"response.content_part.added\", \"sequence_number\": 8, \"output_index\": 1, \"item_id\": \"m2\", \"content_index\": 0, \"part\": {\"type\": \"output_text\", \"text\": \"\", \"annotations\": []}}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 9, \"output_index\": 1, \"item_id\": \"m2\", \"content_index\": 0, \"delta\": \"do\", \"logprobs\": []}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 10, \"output_index\": 1, \"item_id\": \"m2\", \"content_index\": 0, \"delta\": \"ne\", \"logprobs\": []}\n\nevent: response.output_text.done\ndata: {\"type\": \"response.output_text.done\", \"sequence_number\": 11, \"output_index\": 1, \"item_id\": \"m2\", \"content_index\": 0, \"text\": \"done\", \"logprobs\": []}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 12, \"output_index\": 1, \"item\": {\"type\": \"message\", \"id\": \"m2\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"done\", \"annotations\": []}], \"phase\": \"final_answer\"}}\n\nevent: response.completed\ndata: {\"type\": \"response.completed\", \"sequence_number\": 13, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"completed\", \"output\": [{\"type\": \"message\", \"id\": \"m1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"c\", \"annotations\": []}], \"phase\": \"commentary\"}, {\"type\": \"message\", \"id\": \"m2\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"done\", \"annotations\": []}], \"phase\": \"final_answer\"}], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 3,
+          "completion_tokens": 2,
+          "total_tokens": 5,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "c\ndone",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "codex/output-null-rebuilt",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 1, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"in_progress\", \"content\": [{\"type\": \"output_text\", \"text\": \"rebuilt\", \"annotations\": []}]}}\n\nevent: response.content_part.added\ndata: {\"type\": \"response.content_part.added\", \"sequence_number\": 2, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"part\": {\"type\": \"output_text\", \"text\": \"\", \"annotations\": []}}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 3, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"reb\", \"logprobs\": []}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 4, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"uilt\", \"logprobs\": []}\n\nevent: response.output_text.done\ndata: {\"type\": \"response.output_text.done\", \"sequence_number\": 5, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"text\": \"rebuilt\", \"logprobs\": []}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 6, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"rebuilt\", \"annotations\": []}]}}\n\nevent: response.completed\ndata: {\"type\": \"response.completed\", \"sequence_number\": 7, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"completed\", \"output\": null, \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 3,
+          "completion_tokens": 2,
+          "total_tokens": 5,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "rebuilt",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "codex/failed",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.failed\ndata: {\"type\": \"response.failed\", \"sequence_number\": 1, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"failed\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}, \"error\": {\"code\": \"server_error\", \"message\": \"boom\"}}}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        },
+        {
+          "stream": true
+        },
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "invalid": true
+      }
+    },
+    {
+      "name": "codex/empty-output",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.completed\ndata: {\"type\": \"response.completed\", \"sequence_number\": 1, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"completed\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "invalid": true
+      }
+    },
+    {
+      "name": "codex/two-messages",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 1, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"m1\", \"role\": \"assistant\", \"status\": \"in_progress\", \"content\": [{\"type\": \"output_text\", \"text\": \" one \", \"annotations\": []}]}}\n\nevent: response.content_part.added\ndata: {\"type\": \"response.content_part.added\", \"sequence_number\": 2, \"output_index\": 0, \"item_id\": \"m1\", \"content_index\": 0, \"part\": {\"type\": \"output_text\", \"text\": \"\", \"annotations\": []}}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 3, \"output_index\": 0, \"item_id\": \"m1\", \"content_index\": 0, \"delta\": \" o\", \"logprobs\": []}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 4, \"output_index\": 0, \"item_id\": \"m1\", \"content_index\": 0, \"delta\": \"ne \", \"logprobs\": []}\n\nevent: response.output_text.done\ndata: {\"type\": \"response.output_text.done\", \"sequence_number\": 5, \"output_index\": 0, \"item_id\": \"m1\", \"content_index\": 0, \"text\": \" one \", \"logprobs\": []}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 6, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"m1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \" one \", \"annotations\": []}]}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 7, \"output_index\": 1, \"item\": {\"type\": \"message\", \"id\": \"m2\", \"role\": \"assistant\", \"status\": \"in_progress\", \"content\": [{\"type\": \"output_text\", \"text\": \"two\", \"annotations\": []}]}}\n\nevent: response.content_part.added\ndata: {\"type\": \"response.content_part.added\", \"sequence_number\": 8, \"output_index\": 1, \"item_id\": \"m2\", \"content_index\": 0, \"part\": {\"type\": \"output_text\", \"text\": \"\", \"annotations\": []}}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 9, \"output_index\": 1, \"item_id\": \"m2\", \"content_index\": 0, \"delta\": \"t\", \"logprobs\": []}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 10, \"output_index\": 1, \"item_id\": \"m2\", \"content_index\": 0, \"delta\": \"wo\", \"logprobs\": []}\n\nevent: response.output_text.done\ndata: {\"type\": \"response.output_text.done\", \"sequence_number\": 11, \"output_index\": 1, \"item_id\": \"m2\", \"content_index\": 0, \"text\": \"two\", \"logprobs\": []}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 12, \"output_index\": 1, \"item\": {\"type\": \"message\", \"id\": \"m2\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"two\", \"annotations\": []}]}}\n\nevent: response.completed\ndata: {\"type\": \"response.completed\", \"sequence_number\": 13, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"completed\", \"output\": [{\"type\": \"message\", \"id\": \"m1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \" one \", \"annotations\": []}]}, {\"type\": \"message\", \"id\": \"m2\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"two\", \"annotations\": []}]}], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 3,
+          "completion_tokens": 2,
+          "total_tokens": 5,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "one\ntwo",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "codex/error-event",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: error\ndata: {\"type\": \"error\", \"sequence_number\": 1, \"code\": \"rate_limit\", \"message\": \"Too many requests\", \"param\": null}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        },
+        {
+          "stream": true
+        },
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "raised": {
+          "type": "RuntimeError",
+          "message": "Responses create(stream=True) fallback did not emit a terminal response."
+        }
+      }
+    },
+    {
+      "name": "codex/no-completed-then-fallback",
+      "mode": "codex_responses",
+      "status": 200,
+      "content_type": "text/event-stream",
+      "bodies": [
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 1, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"in_progress\", \"content\": [{\"type\": \"output_text\", \"text\": \"late\", \"annotations\": []}]}}\n\nevent: response.content_part.added\ndata: {\"type\": \"response.content_part.added\", \"sequence_number\": 2, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"part\": {\"type\": \"output_text\", \"text\": \"\", \"annotations\": []}}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 3, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"la\", \"logprobs\": []}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 4, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"te\", \"logprobs\": []}\n\nevent: response.output_text.done\ndata: {\"type\": \"response.output_text.done\", \"sequence_number\": 5, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"text\": \"late\", \"logprobs\": []}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 6, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"late\", \"annotations\": []}]}}\n\n",
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 1, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"in_progress\", \"content\": [{\"type\": \"output_text\", \"text\": \"late\", \"annotations\": []}]}}\n\nevent: response.content_part.added\ndata: {\"type\": \"response.content_part.added\", \"sequence_number\": 2, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"part\": {\"type\": \"output_text\", \"text\": \"\", \"annotations\": []}}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 3, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"la\", \"logprobs\": []}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 4, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"te\", \"logprobs\": []}\n\nevent: response.output_text.done\ndata: {\"type\": \"response.output_text.done\", \"sequence_number\": 5, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"text\": \"late\", \"logprobs\": []}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 6, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"late\", \"annotations\": []}]}}\n\n",
+        "event: response.created\ndata: {\"type\": \"response.created\", \"sequence_number\": 0, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"in_progress\", \"output\": [], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\nevent: response.output_item.added\ndata: {\"type\": \"response.output_item.added\", \"sequence_number\": 1, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"in_progress\", \"content\": [{\"type\": \"output_text\", \"text\": \"from fallback\", \"annotations\": []}]}}\n\nevent: response.content_part.added\ndata: {\"type\": \"response.content_part.added\", \"sequence_number\": 2, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"part\": {\"type\": \"output_text\", \"text\": \"\", \"annotations\": []}}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 3, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"from f\", \"logprobs\": []}\n\nevent: response.output_text.delta\ndata: {\"type\": \"response.output_text.delta\", \"sequence_number\": 4, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"delta\": \"allback\", \"logprobs\": []}\n\nevent: response.output_text.done\ndata: {\"type\": \"response.output_text.done\", \"sequence_number\": 5, \"output_index\": 0, \"item_id\": \"msg_1\", \"content_index\": 0, \"text\": \"from fallback\", \"logprobs\": []}\n\nevent: response.output_item.done\ndata: {\"type\": \"response.output_item.done\", \"sequence_number\": 6, \"output_index\": 0, \"item\": {\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"from fallback\", \"annotations\": []}]}}\n\nevent: response.completed\ndata: {\"type\": \"response.completed\", \"sequence_number\": 7, \"response\": {\"id\": \"resp_1\", \"object\": \"response\", \"created_at\": 0, \"model\": \"gpt-5.2-codex\", \"status\": \"completed\", \"output\": [{\"type\": \"message\", \"id\": \"msg_1\", \"role\": \"assistant\", \"status\": \"completed\", \"content\": [{\"type\": \"output_text\", \"text\": \"from fallback\", \"annotations\": []}]}], \"parallel_tool_calls\": true, \"tool_choice\": \"auto\", \"tools\": [], \"usage\": {\"input_tokens\": 3, \"output_tokens\": 2, \"total_tokens\": 5, \"input_tokens_details\": {\"cached_tokens\": 0}, \"output_tokens_details\": {\"reasoning_tokens\": 0}}}}\n\n"
+      ],
+      "requests": [
+        {
+          "stream": true
+        },
+        {
+          "stream": true
+        },
+        {
+          "stream": true
+        }
+      ],
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 3,
+          "completion_tokens": 2,
+          "total_tokens": 5,
+          "cache": {}
+        },
+        "message": {
+          "role": "assistant",
+          "content": "from fallback",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "anthropic/text",
+      "mode": "anthropic_messages",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"msg_1\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"claude-opus-4-6\", \"content\": [{\"type\": \"text\", \"text\": \"Hi.\"}], \"stop_reason\": \"end_turn\", \"stop_sequence\": null, \"usage\": {\"input_tokens\": 12, \"output_tokens\": 4}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 12,
+          "completion_tokens": 4,
+          "total_tokens": 16,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "Hi.",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "anthropic/two-texts",
+      "mode": "anthropic_messages",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"msg_1\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"claude-opus-4-6\", \"content\": [{\"type\": \"text\", \"text\": \"a\"}, {\"type\": \"text\", \"text\": \"b\"}], \"stop_reason\": \"end_turn\", \"stop_sequence\": null, \"usage\": {\"input_tokens\": 12, \"output_tokens\": 4}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 12,
+          "completion_tokens": 4,
+          "total_tokens": 16,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "a\nb",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "anthropic/thinking",
+      "mode": "anthropic_messages",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"msg_1\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"claude-opus-4-6\", \"content\": [{\"type\": \"thinking\", \"thinking\": \"hmm\", \"signature\": \"sig\"}, {\"type\": \"text\", \"text\": \"ans\"}], \"stop_reason\": \"end_turn\", \"stop_sequence\": null, \"usage\": {\"input_tokens\": 12, \"output_tokens\": 4}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 12,
+          "completion_tokens": 4,
+          "total_tokens": 16,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "ans",
+          "reasoning": "hmm",
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "anthropic/two-thinking",
+      "mode": "anthropic_messages",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"msg_1\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"claude-opus-4-6\", \"content\": [{\"type\": \"thinking\", \"thinking\": \"one\", \"signature\": \"s\"}, {\"type\": \"thinking\", \"thinking\": \"two\", \"signature\": \"t\"}, {\"type\": \"text\", \"text\": \"x\"}], \"stop_reason\": \"end_turn\", \"stop_sequence\": null, \"usage\": {\"input_tokens\": 12, \"output_tokens\": 4}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 12,
+          "completion_tokens": 4,
+          "total_tokens": 16,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "x",
+          "reasoning": "one\n\ntwo",
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "anthropic/redacted",
+      "mode": "anthropic_messages",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"msg_1\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"claude-opus-4-6\", \"content\": [{\"type\": \"redacted_thinking\", \"data\": \"xx\"}, {\"type\": \"text\", \"text\": \"y\"}], \"stop_reason\": \"end_turn\", \"stop_sequence\": null, \"usage\": {\"input_tokens\": 12, \"output_tokens\": 4}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 12,
+          "completion_tokens": 4,
+          "total_tokens": 16,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "y",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "anthropic/tool-use",
+      "mode": "anthropic_messages",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"msg_1\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"claude-opus-4-6\", \"content\": [{\"type\": \"text\", \"text\": \"Let me look.\"}, {\"type\": \"tool_use\", \"id\": \"toolu_01\", \"name\": \"terminal\", \"input\": {\"command\": \"ls -la\", \"n\": 1.5}}], \"stop_reason\": \"tool_use\", \"stop_sequence\": null, \"usage\": {\"input_tokens\": 12, \"output_tokens\": 4}}",
+      "result": {
+        "pre_finish_reason": "tool_calls",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "prompt_tokens": 12,
+          "completion_tokens": 4,
+          "total_tokens": 16,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "Let me look.",
+          "reasoning": null,
+          "finish_reason": "tool_calls",
+          "tool_calls": [
+            {
+              "id": "toolu_01",
+              "call_id": "toolu_01",
+              "response_item_id": "fc_toolu_01",
+              "type": "function",
+              "function": {
+                "name": "terminal",
+                "arguments": "{\"command\": \"ls -la\", \"n\": 1.5}"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "anthropic/tool-use-empty-input",
+      "mode": "anthropic_messages",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"msg_1\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"claude-opus-4-6\", \"content\": [{\"type\": \"tool_use\", \"id\": \"toolu_02\", \"name\": \"now\", \"input\": {}}], \"stop_reason\": \"tool_use\", \"stop_sequence\": null, \"usage\": {\"input_tokens\": 12, \"output_tokens\": 4}}",
+      "result": {
+        "pre_finish_reason": "tool_calls",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "prompt_tokens": 12,
+          "completion_tokens": 4,
+          "total_tokens": 16,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "",
+          "reasoning": null,
+          "finish_reason": "tool_calls",
+          "tool_calls": [
+            {
+              "id": "toolu_02",
+              "call_id": "toolu_02",
+              "response_item_id": "fc_toolu_02",
+              "type": "function",
+              "function": {
+                "name": "now",
+                "arguments": "{}"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "anthropic/tool-use-unicode",
+      "mode": "anthropic_messages",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"msg_1\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"claude-opus-4-6\", \"content\": [{\"type\": \"tool_use\", \"id\": \"toolu_03\", \"name\": \"write\", \"input\": {\"text\": \"\\u2200 \\u00e9 \\\"q\\\"\"}}], \"stop_reason\": \"tool_use\", \"stop_sequence\": null, \"usage\": {\"input_tokens\": 12, \"output_tokens\": 4}}",
+      "result": {
+        "pre_finish_reason": "tool_calls",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "prompt_tokens": 12,
+          "completion_tokens": 4,
+          "total_tokens": 16,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "",
+          "reasoning": null,
+          "finish_reason": "tool_calls",
+          "tool_calls": [
+            {
+              "id": "toolu_03",
+              "call_id": "toolu_03",
+              "response_item_id": "fc_toolu_03",
+              "type": "function",
+              "function": {
+                "name": "write",
+                "arguments": "{\"text\": \"\\u2200 \\u00e9 \\\"q\\\"\"}"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "anthropic/max-tokens",
+      "mode": "anthropic_messages",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"msg_1\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"claude-opus-4-6\", \"content\": [{\"type\": \"text\", \"text\": \"cut\"}], \"stop_reason\": \"max_tokens\", \"stop_sequence\": null, \"usage\": {\"input_tokens\": 12, \"output_tokens\": 4}}",
+      "result": {
+        "pre_finish_reason": "length",
+        "finish_reason": "length",
+        "usage": {
+          "prompt_tokens": 12,
+          "completion_tokens": 4,
+          "total_tokens": 16,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "cut",
+          "reasoning": null,
+          "finish_reason": "length"
+        }
+      }
+    },
+    {
+      "name": "anthropic/stop-sequence",
+      "mode": "anthropic_messages",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"msg_1\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"claude-opus-4-6\", \"content\": [{\"type\": \"text\", \"text\": \"s\"}], \"stop_reason\": \"stop_sequence\", \"stop_sequence\": null, \"usage\": {\"input_tokens\": 12, \"output_tokens\": 4}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 12,
+          "completion_tokens": 4,
+          "total_tokens": 16,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "s",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "anthropic/refusal",
+      "mode": "anthropic_messages",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"msg_1\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"claude-opus-4-6\", \"content\": [{\"type\": \"text\", \"text\": \"r\"}], \"stop_reason\": \"refusal\", \"stop_sequence\": null, \"usage\": {\"input_tokens\": 12, \"output_tokens\": 4}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 12,
+          "completion_tokens": 4,
+          "total_tokens": 16,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "r",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "anthropic/cache-usage",
+      "mode": "anthropic_messages",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"msg_1\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"claude-opus-4-6\", \"content\": [{\"type\": \"text\", \"text\": \"c\"}], \"stop_reason\": \"end_turn\", \"stop_sequence\": null, \"usage\": {\"input_tokens\": 5, \"output_tokens\": 2, \"cache_read_input_tokens\": 900, \"cache_creation_input_tokens\": 100}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 5,
+          "completion_tokens": 2,
+          "total_tokens": 7,
+          "cache": {
+            "cache_read": 900,
+            "cache_write": 100
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "c",
+          "reasoning": null,
+          "finish_reason": "stop"
+        }
+      }
+    },
+    {
+      "name": "anthropic/empty-content",
+      "mode": "anthropic_messages",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"msg_1\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"claude-opus-4-6\", \"content\": [], \"stop_reason\": \"end_turn\", \"stop_sequence\": null, \"usage\": {\"input_tokens\": 12, \"output_tokens\": 4}}",
+      "result": {
+        "invalid": true
+      }
+    },
+    {
+      "name": "anthropic/think-tags-in-text",
+      "mode": "anthropic_messages",
+      "status": 200,
+      "content_type": "application/json",
+      "body": "{\"id\": \"msg_1\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"claude-opus-4-6\", \"content\": [{\"type\": \"text\", \"text\": \"<think>t</think>body\"}], \"stop_reason\": \"end_turn\", \"stop_sequence\": null, \"usage\": {\"input_tokens\": 12, \"output_tokens\": 4}}",
+      "result": {
+        "pre_finish_reason": "stop",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 12,
+          "completion_tokens": 4,
+          "total_tokens": 16,
+          "cache": {
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "message": {
+          "role": "assistant",
+          "content": "<think>t</think>body",
+          "reasoning": "t",
+          "finish_reason": "stop"
+        }
+      }
+    }
+  ]
+}

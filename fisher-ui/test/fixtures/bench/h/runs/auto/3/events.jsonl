@@ -1,0 +1,4 @@
+{"event":"auto missed","goal":"Step.Graft.runBody_subst","seconds":6.9,"t":6.9}
+{"attempt":1,"backend":"gauss","event":"launched","goal":"Step.Graft.runBody_subst","t":6.9}
+{"attempt":1,"backend":"gauss","event":"finished","goal":"Step.Graft.runBody_subst","outcome":"closed","stats":{"cost_usd":0.8108757999999999,"exit":0,"input_tokens":2335768,"output_tokens":27998,"tools":{"mcp_lean_lsp_lean_diagnostic_messages":12,"mcp_lean_lsp_lean_verify":1,"patch":14,"read_file":8,"terminal":8},"turns":28,"wall_s":381},"t":413.9}
+{"attempt":1,"event":"closed","goal":"Step.Graft.runBody_subst","t":413.9}

@@ -1,0 +1,7 @@
+Running Chk ...
+Chk: theory Chk.Chk
+Chk: theory Chk.Chk 100% (0.089s cumulated time)
+Chk FAILED (see also "isabelle build_log -H Error Chk")
+*** Undefined fact: "nothere" (line 4 of "~/IdeaProjects/Fisher/.build/probe/isa2/Chk.thy")
+*** At command "thm_oracles" (line 4 of "~/IdeaProjects/Fisher/.build/probe/isa2/Chk.thy")
+Unfinished session(s): Chk

@@ -1,0 +1,51 @@
+name:        fisher-rlm
+version:     0.2.0.0
+synopsis:    "Recursive language models (a port of alexzhang13/rlm)"
+license:     BSD-3-Clause
+author:      Tom Reynolds
+
+language: GHC2021
+
+default-extensions:
+- OverloadedStrings
+- LambdaCase
+
+ghc-options:
+- -Wall
+- -Wcompat
+
+extra-source-files:
+- data/*
+- test/golden/*
+
+dependencies:
+- base >= 4.14 && < 5
+- fisher-core
+- fisher-llm
+- aeson
+- async
+- bytestring
+- containers
+- directory
+- file-embed
+- filepath
+- process
+- stm
+- temporary
+- text
+- time
+- unix
+
+library:
+  source-dirs: src
+
+tests:
+  fisher-rlm-test:
+    main:        Spec.hs
+    source-dirs: test
+    build-tools: hspec-discover
+    ghc-options: -threaded
+    dependencies:
+    - fisher-rlm
+    - hspec
+    - QuickCheck

@@ -1,0 +1,5931 @@
+{
+ "spec": "docs/clm.md",
+ "session_id": "20261006_101500_ab12cd",
+ "fixtures": {
+  "A": {
+   "editable": [
+    {
+     "id": 1,
+     "message": {
+      "role": "assistant",
+      "content": "I'll read the file.",
+      "reasoning": null,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+       {
+        "id": "call_1",
+        "call_id": "call_1",
+        "response_item_id": "fc_1",
+        "type": "function",
+        "function": {
+         "name": "read_file",
+         "arguments": "{\"path\": \"Math/Foo.lean\"}"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "id": 2,
+     "message": {
+      "role": "tool",
+      "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+      "tool_call_id": "call_1"
+     }
+    },
+    {
+     "id": 3,
+     "message": {
+      "role": "assistant",
+      "content": "The goal is closed by norm_num.",
+      "reasoning": null,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+       {
+        "id": "call_2",
+        "call_id": "call_2",
+        "response_item_id": "fc_2",
+        "type": "function",
+        "function": {
+         "name": "write_file",
+         "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "id": 4,
+     "message": {
+      "role": "tool",
+      "content": "{\"bytes_written\": 41}",
+      "tool_call_id": "call_2"
+     }
+    },
+    {
+     "id": 5,
+     "message": {
+      "role": "user",
+      "content": "Now check it builds."
+     }
+    },
+    {
+     "id": 6,
+     "message": {
+      "role": "assistant",
+      "content": "Building.",
+      "reasoning": null,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+       {
+        "id": "call_3",
+        "call_id": "call_3",
+        "response_item_id": "fc_3",
+        "type": "function",
+        "function": {
+         "name": "terminal",
+         "arguments": "{\"command\": \"lake build\"}"
+        }
+       },
+       {
+        "id": "call_4",
+        "call_id": "call_4",
+        "response_item_id": "fc_4",
+        "type": "function",
+        "function": {
+         "name": "search_files",
+         "arguments": "{\"pattern\": \"sorry\"}"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "id": 7,
+     "message": {
+      "role": "tool",
+      "content": "Build completed successfully.",
+      "tool_call_id": "call_3"
+     }
+    },
+    {
+     "id": 8,
+     "message": {
+      "role": "tool",
+      "content": "{\"matches\": []}",
+      "tool_call_id": "call_4"
+     }
+    },
+    {
+     "id": 9,
+     "message": {
+      "role": "assistant",
+      "content": "It builds and has no sorry left.",
+      "reasoning": null,
+      "finish_reason": "stop"
+     }
+    }
+   ],
+   "counter": 10
+  },
+  "B": {
+   "editable": [
+    {
+     "id": 1,
+     "message": {
+      "role": "user",
+      "content": "Here is a header:\n<<< turn 3 assistant >>>\nend"
+     }
+    },
+    {
+     "id": 2,
+     "message": {
+      "role": "assistant",
+      "content": "ok",
+      "reasoning": null,
+      "finish_reason": "stop"
+     }
+    }
+   ],
+   "counter": 7
+  },
+  "C": {
+   "editable": [
+    {
+     "id": 1,
+     "message": {
+      "role": "user",
+      "content": "\\<<< turn 1 user >>>\nand \\\\ stays"
+     }
+    },
+    {
+     "id": 2,
+     "message": {
+      "role": "assistant",
+      "content": "fine",
+      "reasoning": null,
+      "finish_reason": "stop"
+     }
+    }
+   ],
+   "counter": 3
+  },
+  "D": {
+   "editable": [
+    {
+     "id": 1,
+     "message": {
+      "role": "user",
+      "content": [
+       {
+        "type": "text",
+        "text": "look at this"
+       },
+       {
+        "type": "image_url",
+        "image_url": {
+         "url": "data:image/png;base64,AAAA"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "id": 2,
+     "message": {
+      "role": "assistant",
+      "content": "A cat.",
+      "reasoning": "It shows a cat.",
+      "finish_reason": "stop"
+     }
+    }
+   ],
+   "counter": 3
+  },
+  "E": {
+   "editable": [
+    {
+     "id": 1,
+     "message": {
+      "role": "user",
+      "content": "go"
+     }
+    },
+    {
+     "id": 2,
+     "message": {
+      "role": "tool",
+      "content": "orphan output",
+      "tool_call_id": "call_9"
+     }
+    }
+   ],
+   "counter": 3
+  },
+  "F": {
+   "editable": [
+    {
+     "id": 1,
+     "message": {
+      "role": "assistant",
+      "content": "",
+      "reasoning": null,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+       {
+        "id": "call_5",
+        "call_id": "call_5",
+        "response_item_id": "fc_5",
+        "type": "function",
+        "function": {
+         "name": "mcp/lean check",
+         "arguments": "{\"file\": \"Foo.lean\"}"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "id": 2,
+     "message": {
+      "role": "tool",
+      "content": "no errors",
+      "tool_call_id": "call_5"
+     }
+    }
+   ],
+   "counter": 3
+  }
+ },
+ "cases": [
+  {
+   "name": "unedited",
+   "why": "the file as written reads back to the same turns",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": false,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "banner-deleted",
+   "why": "banner lines are ignored, so deleting them is no edit",
+   "fixture": "A",
+   "text": "<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": false,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "banner-altered",
+   "why": "a changed banner line is text before the first header: a new user turn",
+   "fixture": "A",
+   "text": "# my notes\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 10,
+      "message": {
+       "role": "user",
+       "content": "# my notes"
+      }
+     },
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 11
+   }
+  },
+  {
+   "name": "prose-only",
+   "why": "a file rewritten as prose with no headers becomes one user turn",
+   "fixture": "A",
+   "text": "Summary: proved foo with norm_num; it builds.\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 10,
+      "message": {
+       "role": "user",
+       "content": "Summary: proved foo with norm_num; it builds."
+      }
+     }
+    ],
+    "counter": 11
+   }
+  },
+  {
+   "name": "drop-group",
+   "why": "deleting a whole group keeps every other turn as it was",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "drop-tool-result",
+   "why": "deleting a tool result flattens its group; the flattened assistant then sits before the next group's assistant, so its text goes into that message, which keeps its tool calls",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\nThe goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "drop-assistant",
+   "why": "deleting a group's assistant leaves its result as a user turn",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 2,
+      "message": {
+       "role": "user",
+       "content": "Result of read_file:\ntheorem foo : 1 + 1 = 2 := by\n  sorry"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "shorten-result",
+   "why": "a shortened tool result flattens its own group only",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]"
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "user",
+       "content": "Result of read_file:\ntheorem foo : 1 + 1 = 2 := by"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "empty-result",
+   "why": "an emptied turn is dropped, with the same effect as deleting it",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\nThe goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "empty-user",
+   "why": "an emptied user turn is dropped",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "drop-all",
+   "why": "deleting every block leaves no editable turns",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [],
+    "counter": 10
+   }
+  },
+  {
+   "name": "empty-file",
+   "why": "an empty file leaves no editable turns",
+   "fixture": "A",
+   "text": "",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [],
+    "counter": 10
+   }
+  },
+  {
+   "name": "missing-file",
+   "why": "a missing file is no edit",
+   "fixture": "A",
+   "text": null,
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": false,
+    "rejected": false,
+    "missing": true,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "not-utf8",
+   "why": "a file that is not UTF-8 is rejected",
+   "fixture": "A",
+   "text": null,
+   "bytes_hex": "232046697368657220636f6e746578742066696c6520666f722073657373696f6e2032303236313030365f3130313530305f6162313263642e0a232045616368207475726e207374617274732077697468206120686561646572206c696e652e20456469742c2073686f7274656e206f722064656c657465207475726e7320746f206672656520636f6e746578742e0a23205468652073797374656d2070726f6d707420616e6420746865207461736b206172652070696e6e656420616e6420617265206e6f742073686f776e20686572652e0a3c3c3c207475726e203120617373697374616e74203e3e3e0a49276c6c2072656164207468652066696c652e0a5b63616c6c20726561645f66696c65207b2270617468223a20224d6174682f466f6f2e6c65616e227d5d0a0a3c3c3c207475726e203220746f6f6c20726561645f66696c65203e3e3e0a7468656f72656d20666f6f203a2031202b2031203d2032203a3d2062790a2020736f7272790a0a3c3c3c207475726e203320617373697374616e74203e3e3e0a54686520676f616c20697320636c6f736564206279206e6f726d5f6e756d2e0a5b63616c6c2077726974655f66696c65207b2270617468223a20224d6174682f466f6f2e6c65616e222c2022636f6e74656e74223a20227468656f72656d20666f6f203a2031202b2031203d2032203a3d2062795c6e20206e6f726d5f6e756d227d5d0a0a3c3c3c207475726e203420746f6f6c2077726974655f66696c65203e3e3e0a7b2262797465735f7772697474656e223a2034317d0a0a3c3c3c207475726e20352075736572203e3e3e0a4e6f7720636865636b206974206275696c64732e0a0a3c3c3c207475726e203620617373697374616e74203e3e3e0a4275696c64696e672e0a5b63616c6c207465726d696e616c207b22636f6d6d616e64223a20226c616b65206275696c64227d5d0a5b63616c6c207365617263685f66696c6573207b227061747465726e223a2022736f727279227d5d0a0a3c3c3c207475726e203720746f6f6c207465726d696e616c203e3e3e0a4275696c6420636f6d706c65746564207375636365737366756c6c792e0a0a3c3c3c207475726e203820746f6f6c207365617263685f66696c6573203e3e3e0a7b226d617463686573223a205b5d7d0a0a3c3c3c207475726e203920617373697374616e74203e3e3e0a4974206275696c647320616e6420686173206e6f20736f727279206c6566742e0a0afffe",
+   "seen": null,
+   "expect": {
+    "edited": false,
+    "rejected": true,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "broken-header",
+   "why": "a header that does not match is body text of the block before it",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]"
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "user",
+       "content": "Result of write_file:\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>\nNow check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "role-changed",
+   "why": "a header with the wrong role makes a changed turn; a flattened assistant before a group's assistant goes into it and gives up its id",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 assistant >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Now check it builds.\n\nBuilding.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "user-line-added",
+   "why": "a changed user turn keeps its id",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\nAlso run the tests.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds.\nAlso run the tests."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "new-block",
+   "why": "a block with an unknown id is a new turn with a fresh id",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n<<< turn 42 user >>>\nNote: foo is done.\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     },
+     {
+      "id": 10,
+      "message": {
+       "role": "user",
+       "content": "Note: foo is done."
+      }
+     }
+    ],
+    "counter": 11
+   }
+  },
+  {
+   "name": "duplicate-block",
+   "why": "a second block with the same id is a new turn, flattened; an answer that is newly last will go into the live turn's assistant",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": true,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     },
+     {
+      "id": 10,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left."
+      }
+     }
+    ],
+    "counter": 11
+   }
+  },
+  {
+   "name": "reorder-turns",
+   "why": "moving whole turns keeps them structured, in the new order",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "swap-results",
+   "why": "tool results out of order break their group",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "user",
+       "content": "Result of search_files:\n{\"matches\": []}\n\nResult of terminal:\nBuild completed successfully."
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "tool-renamed",
+   "why": "the name on a tool header is not compared",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool lean_check >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": false,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "tool-no-name",
+   "why": "a changed tool turn with no name in its header",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool >>>\nshort\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]"
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "user",
+       "content": "Tool result:\nshort"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "trailing-space",
+   "why": "trailing whitespace is trimmed before comparing",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.   \n\n\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": false,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "leading-blank",
+   "why": "leading blank lines are trimmed before comparing",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\n\n  \nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": false,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "indented",
+   "why": "leading spaces on the first line are not trimmed",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\n  theorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]"
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "user",
+       "content": "Result of read_file:\n  theorem foo : 1 + 1 = 2 := by\n  sorry"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "merge-users",
+   "why": "adjacent flattened users merge; the merged block takes no id",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nCheck the build.\n<<< turn 77 user >>>\nThen stop.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Check the build.\n\nThen stop."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "header-id-zero",
+   "why": "turn ids start at 1, so a header with id 0 is body text",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n<<< turn 0 user >>>\nZero.\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.\n\n<<< turn 0 user >>>\nZero."
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "header-indented",
+   "why": "a header with a leading space is body text",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n <<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]"
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "user",
+       "content": "Result of write_file:\n{\"bytes_written\": 41}\n\n <<< turn 5 user >>>\nNow check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "crlf",
+   "why": "a file rewritten with CRLF line ends is read as if it had LF ones",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\r\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\r\n# The system prompt and the task are pinned and are not shown here.\r\n<<< turn 1 assistant >>>\r\nI'll read the file.\r\n[call read_file {\"path\": \"Math/Foo.lean\"}]\r\n\r\n<<< turn 2 tool read_file >>>\r\ntheorem foo : 1 + 1 = 2 := by\r\n  sorry\r\n\r\n<<< turn 3 assistant >>>\r\nThe goal is closed by norm_num.\r\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\r\n\r\n<<< turn 4 tool write_file >>>\r\n{\"bytes_written\": 41}\r\n\r\n<<< turn 5 user >>>\r\nNow check it builds.\r\n\r\n<<< turn 6 assistant >>>\r\nBuilding.\r\n[call terminal {\"command\": \"lake build\"}]\r\n[call search_files {\"pattern\": \"sorry\"}]\r\n\r\n<<< turn 7 tool terminal >>>\r\nBuild completed successfully.\r\n\r\n<<< turn 8 tool search_files >>>\r\n{\"matches\": []}\r\n\r\n<<< turn 9 assistant >>>\r\nIt builds and has no sorry left.\r\n\r\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": false,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "crlf-partly",
+   "why": "with only some lines ending in \\r, headers still match and the \\r stays in the text",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\r\nAnd test.\r\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\r\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds.\r\nAnd test."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "summary-known-id",
+   "why": "a summary under a known id with a new role keeps that id",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 user >>>\nSummary: read Foo.lean, closed foo with norm_num, the build passes.\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "user",
+       "content": "Summary: read Foo.lean, closed foo with norm_num, the build passes."
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "insert-in-group",
+   "why": "a block inside a group breaks it; the new block merges with the result after it",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 50 user >>>\nnote\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]"
+      }
+     },
+     {
+      "id": 10,
+      "message": {
+       "role": "user",
+       "content": "note\n\nResult of read_file:\ntheorem foo : 1 + 1 = 2 := by\n  sorry"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 11
+   }
+  },
+  {
+   "name": "result-moved",
+   "why": "a result moved away from its call flattens its group; the flattened assistant goes into the next group's assistant, and the result is a user turn where it now stands",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\nThe goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "user",
+       "content": "Result of read_file:\ntheorem foo : 1 + 1 = 2 := by\n  sorry"
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "escape-unedited",
+   "why": "a body line that looks like a header is escaped and reads back",
+   "fixture": "B",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 user >>>\nHere is a header:\n\\<<< turn 3 assistant >>>\nend\n\n<<< turn 2 assistant >>>\nok\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": false,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "user",
+       "content": "Here is a header:\n<<< turn 3 assistant >>>\nend"
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "assistant",
+       "content": "ok",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 7
+   }
+  },
+  {
+   "name": "escape-removed",
+   "why": "removing the escape makes the line a header; its unknown id is a new turn",
+   "fixture": "B",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 user >>>\nHere is a header:\n<<< turn 3 assistant >>>\nend\n\n<<< turn 2 assistant >>>\nok\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "user",
+       "content": "Here is a header:"
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "assistant",
+       "content": "end"
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "assistant",
+       "content": "ok",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 8
+   }
+  },
+  {
+   "name": "escape-backslashes",
+   "why": "lines that already start with backslashes round-trip",
+   "fixture": "C",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 user >>>\n\\\\<<< turn 1 user >>>\nand \\\\ stays\n\n<<< turn 2 assistant >>>\nfine\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": false,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "user",
+       "content": "\\<<< turn 1 user >>>\nand \\\\ stays"
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "assistant",
+       "content": "fine",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 3
+   }
+  },
+  {
+   "name": "image-unedited",
+   "why": "image parts show as [image] and an untouched turn keeps them",
+   "fixture": "D",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 user >>>\nlook at this\n[image]\n\n<<< turn 2 assistant >>>\nA cat.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": false,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "user",
+       "content": [
+        {
+         "type": "text",
+         "text": "look at this"
+        },
+        {
+         "type": "image_url",
+         "image_url": {
+          "url": "data:image/png;base64,AAAA"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "assistant",
+       "content": "A cat.",
+       "reasoning": "It shows a cat.",
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 3
+   }
+  },
+  {
+   "name": "image-dropped",
+   "why": "editing a turn with an image makes it plain text",
+   "fixture": "D",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 user >>>\nlook at this\n\n<<< turn 2 assistant >>>\nA cat.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "user",
+       "content": "look at this"
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "assistant",
+       "content": "A cat.",
+       "reasoning": "It shows a cat.",
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 3
+   }
+  },
+  {
+   "name": "reasoning-dropped",
+   "why": "a changed assistant turn loses its reasoning",
+   "fixture": "D",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 user >>>\nlook at this\n[image]\n\n<<< turn 2 assistant >>>\nA small cat.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "user",
+       "content": [
+        {
+         "type": "text",
+         "text": "look at this"
+        },
+        {
+         "type": "image_url",
+         "image_url": {
+          "url": "data:image/png;base64,AAAA"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "assistant",
+       "content": "A small cat."
+      }
+     }
+    ],
+    "counter": 3
+   }
+  },
+  {
+   "name": "user-name",
+   "why": "a name on a user header is ignored",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user note >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": false,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "duplicate-id",
+   "why": "the first block with an id is the turn; a later one with the same id is new, and here merges into it",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nCheck the build.\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Check the build.\n\nNow check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "reorder-groups",
+   "why": "a whole group moved earlier stays structured",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "role-to-tool",
+   "why": "a known id under the tool role is a changed tool turn",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 tool >>>\nIt builds and has no sorry left.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "user",
+       "content": "Tool result:\nIt builds and has no sorry left."
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "keep-one",
+   "why": "keeping a single turn",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 5 user >>>\nNow check it builds.\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "unseen-kept",
+   "why": "whole turns the model has not read in the file are kept when it leaves them out, at the end, structure and all",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 5 user >>>\nNow check it builds.\n\n",
+   "bytes_hex": null,
+   "seen": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 4,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "unseen-only",
+   "why": "leaving out only unread turns is no edit, but the loop says they were kept",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n",
+   "bytes_hex": null,
+   "seen": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "expect": {
+    "edited": false,
+    "rejected": false,
+    "missing": false,
+    "kept": 1,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "answer-before-call",
+   "why": "an unchanged answer moved directly before an assistant with tool calls goes into it",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.\n\nBuilding.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "id-too-long",
+   "why": "a header id of more than nine digits is an unknown id",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\nI'll read the file.\n[call read_file {\"path\": \"Math/Foo.lean\"}]\n\n<<< turn 2 tool read_file >>>\ntheorem foo : 1 + 1 = 2 := by\n  sorry\n\n<<< turn 3 assistant >>>\nThe goal is closed by norm_num.\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\n\n<<< turn 4 tool write_file >>>\n{\"bytes_written\": 41}\n\n<<< turn 5 user >>>\nNow check it builds.\n\n<<< turn 6 assistant >>>\nBuilding.\n[call terminal {\"command\": \"lake build\"}]\n[call search_files {\"pattern\": \"sorry\"}]\n\n<<< turn 7 tool terminal >>>\nBuild completed successfully.\n\n<<< turn 8 tool search_files >>>\n{\"matches\": []}\n\n<<< turn 9 assistant >>>\nIt builds and has no sorry left.\n\n<<< turn 1234567890 user >>>\nBig id.\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     },
+     {
+      "id": 10,
+      "message": {
+       "role": "user",
+       "content": "Big id."
+      }
+     }
+    ],
+    "counter": 11
+   }
+  },
+  {
+   "name": "crlf-no-final-newline",
+   "why": "a CRLF file without a final line end is still read as LF",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\r\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\r\n# The system prompt and the task are pinned and are not shown here.\r\n<<< turn 1 assistant >>>\r\nI'll read the file.\r\n[call read_file {\"path\": \"Math/Foo.lean\"}]\r\n\r\n<<< turn 2 tool read_file >>>\r\ntheorem foo : 1 + 1 = 2 := by\r\n  sorry\r\n\r\n<<< turn 3 assistant >>>\r\nThe goal is closed by norm_num.\r\n[call write_file {\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}]\r\n\r\n<<< turn 4 tool write_file >>>\r\n{\"bytes_written\": 41}\r\n\r\n<<< turn 5 user >>>\r\nNow check it builds.\r\n\r\n<<< turn 6 assistant >>>\r\nBuilding.\r\n[call terminal {\"command\": \"lake build\"}]\r\n[call search_files {\"pattern\": \"sorry\"}]\r\n\r\n<<< turn 7 tool terminal >>>\r\nBuild completed successfully.\r\n\r\n<<< turn 8 tool search_files >>>\r\n{\"matches\": []}\r\n\r\n<<< turn 9 assistant >>>\r\nIt builds and has no sorry left.\r\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": false,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "nothing-read",
+   "why": "before any read of the file, leaving every turn out keeps them all",
+   "fixture": "A",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n",
+   "bytes_hex": null,
+   "seen": [],
+   "expect": {
+    "edited": false,
+    "rejected": false,
+    "missing": false,
+    "kept": 9,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "I'll read the file.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_1",
+         "call_id": "call_1",
+         "response_item_id": "fc_1",
+         "type": "function",
+         "function": {
+          "name": "read_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "theorem foo : 1 + 1 = 2 := by\n  sorry",
+       "tool_call_id": "call_1"
+      }
+     },
+     {
+      "id": 3,
+      "message": {
+       "role": "assistant",
+       "content": "The goal is closed by norm_num.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_2",
+         "call_id": "call_2",
+         "response_item_id": "fc_2",
+         "type": "function",
+         "function": {
+          "name": "write_file",
+          "arguments": "{\"path\": \"Math/Foo.lean\", \"content\": \"theorem foo : 1 + 1 = 2 := by\\n  norm_num\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 4,
+      "message": {
+       "role": "tool",
+       "content": "{\"bytes_written\": 41}",
+       "tool_call_id": "call_2"
+      }
+     },
+     {
+      "id": 5,
+      "message": {
+       "role": "user",
+       "content": "Now check it builds."
+      }
+     },
+     {
+      "id": 6,
+      "message": {
+       "role": "assistant",
+       "content": "Building.",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_3",
+         "call_id": "call_3",
+         "response_item_id": "fc_3",
+         "type": "function",
+         "function": {
+          "name": "terminal",
+          "arguments": "{\"command\": \"lake build\"}"
+         }
+        },
+        {
+         "id": "call_4",
+         "call_id": "call_4",
+         "response_item_id": "fc_4",
+         "type": "function",
+         "function": {
+          "name": "search_files",
+          "arguments": "{\"pattern\": \"sorry\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 7,
+      "message": {
+       "role": "tool",
+       "content": "Build completed successfully.",
+       "tool_call_id": "call_3"
+      }
+     },
+     {
+      "id": 8,
+      "message": {
+       "role": "tool",
+       "content": "{\"matches\": []}",
+       "tool_call_id": "call_4"
+      }
+     },
+     {
+      "id": 9,
+      "message": {
+       "role": "assistant",
+       "content": "It builds and has no sorry left.",
+       "reasoning": null,
+       "finish_reason": "stop"
+      }
+     }
+    ],
+    "counter": 10
+   }
+  },
+  {
+   "name": "loose-tool",
+   "why": "a tool message with no call before it is always a user turn",
+   "fixture": "E",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 user >>>\ngo\n\n<<< turn 2 tool >>>\norphan output\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": true,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "user",
+       "content": "go"
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "user",
+       "content": "Tool result:\norphan output"
+      }
+     }
+    ],
+    "counter": 3
+   }
+  },
+  {
+   "name": "tool-name-sanitized",
+   "why": "a tool name outside the header's characters is written with underscores",
+   "fixture": "F",
+   "text": "# Fisher context file for session 20261006_101500_ab12cd.\n# Each turn starts with a header line. Edit, shorten or delete turns to free context.\n# The system prompt and the task are pinned and are not shown here.\n<<< turn 1 assistant >>>\n[call mcp/lean check {\"file\": \"Foo.lean\"}]\n\n<<< turn 2 tool mcp_lean_check >>>\nno errors\n\n",
+   "bytes_hex": null,
+   "seen": null,
+   "expect": {
+    "edited": false,
+    "rejected": false,
+    "missing": false,
+    "kept": 0,
+    "merge_into_live": false,
+    "messages": [
+     {
+      "id": 1,
+      "message": {
+       "role": "assistant",
+       "content": "",
+       "reasoning": null,
+       "finish_reason": "tool_calls",
+       "tool_calls": [
+        {
+         "id": "call_5",
+         "call_id": "call_5",
+         "response_item_id": "fc_5",
+         "type": "function",
+         "function": {
+          "name": "mcp/lean check",
+          "arguments": "{\"file\": \"Foo.lean\"}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "message": {
+       "role": "tool",
+       "content": "no errors",
+       "tool_call_id": "call_5"
+      }
+     }
+    ],
+    "counter": 3
+   }
+  }
+ ]
+}

@@ -1,0 +1,94 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.39.1.
+--
+-- see: https://github.com/sol/hpack
+
+name:           fisher-mcp
+version:        0.2.0.0
+synopsis:       The MCP client (stdio and streamable HTTP servers, their tools in the registry, sampling)
+author:         Tom Reynolds
+maintainer:     Tom Reynolds
+license:        BSD-3-Clause
+build-type:     Simple
+
+library
+  exposed-modules:
+      Fisher.Mcp.Client
+      Fisher.Mcp.Http
+      Fisher.Mcp.HttpClient
+      Fisher.Mcp.Sampling
+      Fisher.Mcp.Schema
+      Fisher.Mcp.Session
+      Fisher.Mcp.Stdio
+  other-modules:
+      Paths_fisher_mcp
+  autogen-modules:
+      Paths_fisher_mcp
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat
+  build-depends:
+      async
+    , base >=4.14 && <5
+    , bytestring
+    , case-insensitive
+    , containers
+    , directory
+    , filepath
+    , fisher-core
+    , fisher-llm
+    , fisher-tools
+    , http-client
+    , http-client-tls
+    , http-types
+    , process
+    , stm
+    , text
+    , time
+    , unix
+  default-language: GHC2021
+
+test-suite fisher-mcp-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Fisher.Mcp.GoldenSpec
+      Fisher.Mcp.StdioSpec
+      Paths_fisher_mcp
+  autogen-modules:
+      Paths_fisher_mcp
+  hs-source-dirs:
+      test
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat -threaded
+  build-tool-depends:
+      hspec-discover:hspec-discover
+  build-depends:
+      async
+    , base >=4.14 && <5
+    , bytestring
+    , case-insensitive
+    , containers
+    , directory
+    , filepath
+    , fisher-core
+    , fisher-llm
+    , fisher-mcp
+    , fisher-tools
+    , hspec
+    , http-client
+    , http-client-tls
+    , http-types
+    , process
+    , stm
+    , temporary
+    , text
+    , time
+    , unix
+  default-language: GHC2021

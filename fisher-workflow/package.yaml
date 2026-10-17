@@ -1,0 +1,50 @@
+name:        fisher-workflow
+version:     0.2.0.0
+synopsis:    Managed Lean workflows - backend and auth resolution, staging, launch plans
+license:     BSD-3-Clause
+author:      Tom Reynolds
+
+language: GHC2021
+
+default-extensions:
+- OverloadedStrings
+- LambdaCase
+
+ghc-options:
+- -Wall
+- -Wcompat
+
+dependencies:
+- base >= 4.14 && < 5
+- fisher-core
+- aeson
+- bytestring
+- containers
+- directory
+- filepath
+- text
+- typed-process
+- aeson-pretty
+- file-embed
+- time
+- unix
+- vector
+
+extra-source-files:
+- data/*
+- data/provers/*
+- data/provers/*/*
+
+library:
+  source-dirs: src
+
+tests:
+  fisher-workflow-test:
+    main:        Spec.hs
+    source-dirs: test
+    build-tools: hspec-discover
+    dependencies:
+    - fisher-workflow
+    - hspec
+    - temporary
+    - yaml

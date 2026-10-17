@@ -1,0 +1,64 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 139.9,
+            "goal": "Step.Graft.runBody_append",
+            "outcome": "closed",
+            "started_s": 0,
+            "stats": {
+                "cost_usd": 0.3134096,
+                "exit": 0,
+                "input_tokens": 615142,
+                "output_tokens": 8861,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 2,
+                    "patch": 5,
+                    "read_file": 6,
+                    "search_files": 5,
+                    "terminal": 1
+                },
+                "turns": 12,
+                "wall_s": 114.5
+            }
+        }
+    ],
+    "backends": [
+        "gauss"
+    ],
+    "budget_s": 3600,
+    "cap_usd": 6,
+    "dollars": {
+        "planner": 0,
+        "total": 0.3134,
+        "verifier": 0,
+        "worker": 0.3134
+    },
+    "elapsed_s": 139.9,
+    "file": "Step/Graft.lean",
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_depth": 3,
+    "max_splits": 2,
+    "max_turns": 40,
+    "mode": "graph",
+    "model": "example/model-a",
+    "nodes_proved": 1,
+    "nodes_total": 1,
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/g/2/lean",
+    "slots": 4,
+    "splits_total": 0,
+    "stopped": null,
+    "tree": [
+        {
+            "attempts": 0,
+            "depth": 0,
+            "id": 1,
+            "name": "Step.Graft.runBody_append",
+            "splits": [],
+            "status": "proved"
+        }
+    ]
+}

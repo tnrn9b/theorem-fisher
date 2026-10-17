@@ -1,0 +1,3 @@
+{"attempt":1,"backend":"gauss","event":"launched","goal":"Step.Cone.rel_kept","t":0}
+{"attempt":1,"backend":"gauss","event":"finished","goal":"Step.Cone.rel_kept","outcome":"closed (helpers: fireCand_prepost, not_withClock_dead_buf, bodyCtx_kept, stepWrite_kept, fireCand_frame_step)","stats":{"cost_usd":0.8933558000000001,"exit":0,"input_tokens":2420494,"output_tokens":27275,"tools":{"read_file":18,"search_files":1,"terminal":13},"turns":21,"wall_s":322.5},"t":349.7}
+{"attempt":1,"event":"closed","goal":"Step.Cone.rel_kept","t":349.7}

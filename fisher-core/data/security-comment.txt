@@ -1,0 +1,14 @@
+
+# ── Security ──────────────────────────────────────────────────────────
+# API keys, tokens, and passwords are redacted from tool output by default.
+# Set to false to see full values (useful for debugging auth issues).
+# tirith pre-exec scanning is enabled by default when the tirith binary
+# is available. Configure via security.tirith_* keys or env vars
+# (TIRITH_ENABLED, TIRITH_BIN, TIRITH_TIMEOUT, TIRITH_FAIL_OPEN).
+#
+# security:
+#   redact_secrets: false
+#   tirith_enabled: true
+#   tirith_path: "tirith"
+#   tirith_timeout: 5
+#   tirith_fail_open: true

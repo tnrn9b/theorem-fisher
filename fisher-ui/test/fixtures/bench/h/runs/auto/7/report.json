@@ -1,0 +1,66 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 339.2,
+            "goal": "Step.SymExpr.evalPure_typed",
+            "outcome": "closed",
+            "started_s": 27.4,
+            "stats": {
+                "cost_usd": 0.4440062,
+                "exit": 0,
+                "input_tokens": 983180,
+                "output_tokens": 13061,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 6,
+                    "mcp_lean_lsp_lean_verify": 1,
+                    "patch": 6,
+                    "read_file": 5,
+                    "terminal": 5
+                },
+                "turns": 16,
+                "wall_s": 265.4
+            }
+        }
+    ],
+    "auto_closed": 0,
+    "auto_off": null,
+    "auto_ran": true,
+    "auto_requested": true,
+    "auto_warmup_s": 100.4,
+    "backends": {
+        "gauss": [
+            1,
+            1
+        ]
+    },
+    "budget_s": 7200,
+    "budget_spent": false,
+    "closed_per_hour": 10.6,
+    "disproved": 0,
+    "elapsed_s": 339.2,
+    "file": "Step/SymExpr.lean",
+    "goals": [
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": 1,
+            "by_backend": "gauss",
+            "closedBy": "model",
+            "closed_at_s": 339.2,
+            "goal": "Step.SymExpr.evalPure_typed",
+            "status": "closed"
+        }
+    ],
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/h/7/lean",
+    "repaired_then_closed": 0,
+    "repairs_kept": 0,
+    "slots": 4
+}

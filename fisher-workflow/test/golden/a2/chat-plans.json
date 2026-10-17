@@ -1,0 +1,674 @@
+{
+  "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+  "machine": {
+    "is_root": true,
+    "strict_unavailable": "strict mode requires a controlling TTY (No such device or address)"
+  },
+  "cases": [
+    {
+      "name": "claude-chat-prewarmed",
+      "backend": "claude-code",
+      "auth_mode": "auto",
+      "command": "help me start",
+      "extras": {
+        "home": {
+          ".claude/.credentials.json": {
+            "claudeAiOauth": {
+              "accessToken": "tok"
+            }
+          },
+          ".claude.json": {
+            "userID": "u1",
+            "projects": {}
+          }
+        },
+        "prewarmed": true
+      },
+      "plan": {
+        "request": {
+          "argv": [
+            "<TMP>/bin/claude",
+            "You are Claude Code in a Fisher-managed interactive chat session. The user launched `/chat` from the main Fisher CLI and will return there when this session exits. Current working directory: <TMP>/project. Use this session for onboarding, planning, repository questions, and general discussion before a specific Lean workflow is selected. Use any skills and MCP tools that are already configured in this backend session when they are helpful. If the user is ready to work in Lean, tell them to return to the main Fisher session and use `/project init`, `/project use`, or `/project create`, then `/prove`, `/review`, `/draft`, `/autoprove`, `/formalize`, or `/autoformalize`. Initial user request: help me start"
+          ],
+          "cwd": "<TMP>/project",
+          "env": {
+            "set": {
+              "HOME": "<TMP>/gauss-home/autoformalize/claude-code/chat/claude-home",
+              "GAUSS_MANAGED_CHAT": "1",
+              "GAUSS_MANAGED_CHAT_BACKEND": "claude-code",
+              "GAUSS_CHAT_CWD": "<TMP>/project",
+              "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/chat",
+              "GAUSS_REAL_HOME": "<TMP>/home",
+              "GAUSS_YOLO_MODE": "1",
+              "CLAUDE_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/chat/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
+              "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/chat/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
+              "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/claude-code/chat/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/lib/scripts",
+              "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/claude-code/chat/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4/references"
+            },
+            "removed": []
+          },
+          "mode": "helper",
+          "requested_mode": "auto",
+          "mode_note": "auto fallback from strict: strict mode requires a controlling TTY (No such device or address)",
+          "source": "fisher:chat",
+          "label": "Fisher chat session"
+        },
+        "staged_paths": {
+          "backend_name": "claude-code",
+          "cwd": "<TMP>/project",
+          "argv0": "<TMP>/bin/claude"
+        },
+        "user_instruction": "help me start"
+      },
+      "files": {
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude/.credentials.json": {
+          "json": {
+            "claudeAiOauth": {
+              "accessToken": "tok"
+            }
+          }
+        },
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3": {
+          "symlink": "<TMP>/home/.claude/plugins/cache/lean4-skills/lean4/1.2.3"
+        },
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude/plugins/installed_plugins.json": {
+          "json": {
+            "version": 2,
+            "plugins": {
+              "lean4@lean4-skills": [
+                {
+                  "scope": "user",
+                  "installPath": "<TMP>/gauss-home/autoformalize/claude-code/chat/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
+                  "version": "1.2.3",
+                  "installedAt": "<ISO>",
+                  "lastUpdated": "<ISO>"
+                }
+              ]
+            }
+          }
+        },
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude/plugins/known_marketplaces.json": {
+          "json": {
+            "lean4-skills": {
+              "source": {
+                "source": "github",
+                "repo": "cameronfreer/lean4-skills"
+              },
+              "installLocation": "<TMP>/gauss-home/autoformalize/claude-code/chat/claude-home/.claude/plugins/marketplaces/lean4-skills",
+              "lastUpdated": "<ISO>",
+              "autoUpdate": true
+            }
+          }
+        },
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude/plugins/marketplaces/lean4-skills": {
+          "symlink": "<TMP>/home/.claude/plugins/marketplaces/lean4-skills"
+        },
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude/settings.json": {
+          "json": {
+            "theme": "light",
+            "enabledPlugins": {
+              "other@x": true,
+              "lean4@lean4-skills": true
+            },
+            "extraKnownMarketplaces": {
+              "lean4-skills": {
+                "source": {
+                  "source": "github",
+                  "repo": "cameronfreer/lean4-skills"
+                },
+                "autoUpdate": true
+              }
+            }
+          }
+        },
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude/settings.local.json": {
+          "json": {
+            "permissions": {
+              "allow": [
+                "Read",
+                "Write",
+                "Edit",
+                "Bash(*)",
+                "WebSearch",
+                "WebFetch",
+                "mcp__*",
+                "Bash"
+              ]
+            }
+          }
+        },
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude.json": {
+          "json": {
+            "userID": "u1",
+            "projects": {},
+            "theme": "dark",
+            "hasCompletedOnboarding": true
+          }
+        }
+      },
+      "calls": []
+    },
+    {
+      "name": "claude-chat-install",
+      "backend": "claude-code",
+      "auth_mode": "auto",
+      "command": "",
+      "extras": {
+        "home": {
+          ".claude/.credentials.json": {
+            "claudeAiOauth": {
+              "accessToken": "tok"
+            }
+          },
+          ".claude.json": {
+            "userID": "u1",
+            "projects": {}
+          }
+        }
+      },
+      "plan": {
+        "request": {
+          "argv": [
+            "<TMP>/bin/claude",
+            "You are Claude Code in a Fisher-managed interactive chat session. The user launched `/chat` from the main Fisher CLI and will return there when this session exits. Current working directory: <TMP>/project. Use this session for onboarding, planning, repository questions, and general discussion before a specific Lean workflow is selected. Use any skills and MCP tools that are already configured in this backend session when they are helpful. If the user is ready to work in Lean, tell them to return to the main Fisher session and use `/project init`, `/project use`, or `/project create`, then `/prove`, `/review`, `/draft`, `/autoprove`, `/formalize`, or `/autoformalize`. Start by asking what the user wants to do in Fisher."
+          ],
+          "cwd": "<TMP>/project",
+          "env": {
+            "set": {
+              "HOME": "<TMP>/gauss-home/autoformalize/claude-code/chat/claude-home",
+              "GAUSS_MANAGED_CHAT": "1",
+              "GAUSS_MANAGED_CHAT_BACKEND": "claude-code",
+              "GAUSS_CHAT_CWD": "<TMP>/project",
+              "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/chat",
+              "GAUSS_REAL_HOME": "<TMP>/home",
+              "GAUSS_YOLO_MODE": "1",
+              "CLAUDE_PLUGIN_ROOT": "<TMP>/fake-plugin",
+              "LEAN4_PLUGIN_ROOT": "<TMP>/fake-plugin",
+              "LEAN4_SCRIPTS": "<TMP>/fake-plugin/lib/scripts",
+              "LEAN4_REFS": "<TMP>/fake-plugin/skills/lean4/references"
+            },
+            "removed": []
+          },
+          "mode": "helper",
+          "requested_mode": "auto",
+          "mode_note": "auto fallback from strict: strict mode requires a controlling TTY (No such device or address)",
+          "source": "fisher:chat",
+          "label": "Fisher chat session"
+        },
+        "staged_paths": {
+          "backend_name": "claude-code",
+          "cwd": "<TMP>/project",
+          "argv0": "<TMP>/bin/claude"
+        },
+        "user_instruction": ""
+      },
+      "files": {
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude/.credentials.json": {
+          "json": {
+            "claudeAiOauth": {
+              "accessToken": "tok"
+            }
+          }
+        },
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude/plugins/installed_plugins.json": {
+          "json": {
+            "version": 2,
+            "plugins": {
+              "lean4@lean4-skills": [
+                {
+                  "installPath": "<TMP>/fake-plugin",
+                  "version": "9.9.9"
+                }
+              ]
+            }
+          }
+        },
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude/settings.local.json": {
+          "json": {
+            "permissions": {
+              "allow": [
+                "Read",
+                "Write",
+                "Edit",
+                "Bash(*)",
+                "WebSearch",
+                "WebFetch",
+                "mcp__*",
+                "Bash"
+              ]
+            }
+          }
+        },
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude.json": {
+          "json": {
+            "userID": "u1",
+            "projects": {},
+            "theme": "dark",
+            "hasCompletedOnboarding": true
+          }
+        }
+      },
+      "calls": [
+        "claude [plugin] [marketplace] [add] [<TMP>/gauss-home/autoformalize/assets/lean4-skills]",
+        "claude [plugin] [install] [lean4]",
+        "claude [plugin] [list] [--json]"
+      ]
+    },
+    {
+      "name": "claude-chat-no-assets",
+      "backend": "claude-code",
+      "auth_mode": "auto",
+      "command": "hi",
+      "extras": {
+        "home": {
+          ".claude/.credentials.json": {
+            "claudeAiOauth": {
+              "accessToken": "tok"
+            }
+          },
+          ".claude.json": {
+            "userID": "u1",
+            "projects": {}
+          }
+        },
+        "checkout": "none",
+        "env": {
+          "FAKE_GIT_FAIL": "1"
+        }
+      },
+      "plan": {
+        "request": {
+          "argv": [
+            "<TMP>/bin/claude",
+            "You are Claude Code in a Fisher-managed interactive chat session. The user launched `/chat` from the main Fisher CLI and will return there when this session exits. Current working directory: <TMP>/project. Use this session for onboarding, planning, repository questions, and general discussion before a specific Lean workflow is selected. Use any skills and MCP tools that are already configured in this backend session when they are helpful. If the user is ready to work in Lean, tell them to return to the main Fisher session and use `/project init`, `/project use`, or `/project create`, then `/prove`, `/review`, `/draft`, `/autoprove`, `/formalize`, or `/autoformalize`. Initial user request: hi"
+          ],
+          "cwd": "<TMP>/project",
+          "env": {
+            "set": {
+              "HOME": "<TMP>/gauss-home/autoformalize/claude-code/chat/claude-home",
+              "GAUSS_MANAGED_CHAT": "1",
+              "GAUSS_MANAGED_CHAT_BACKEND": "claude-code",
+              "GAUSS_CHAT_CWD": "<TMP>/project",
+              "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/chat",
+              "GAUSS_REAL_HOME": "<TMP>/home",
+              "GAUSS_YOLO_MODE": "1"
+            },
+            "removed": []
+          },
+          "mode": "helper",
+          "requested_mode": "auto",
+          "mode_note": "auto fallback from strict: strict mode requires a controlling TTY (No such device or address)",
+          "source": "fisher:chat",
+          "label": "Fisher chat session"
+        },
+        "staged_paths": {
+          "backend_name": "claude-code",
+          "cwd": "<TMP>/project",
+          "argv0": "<TMP>/bin/claude"
+        },
+        "user_instruction": "hi"
+      },
+      "files": {
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude/.credentials.json": {
+          "json": {
+            "claudeAiOauth": {
+              "accessToken": "tok"
+            }
+          }
+        },
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude/settings.local.json": {
+          "json": {
+            "permissions": {
+              "allow": [
+                "Read",
+                "Write",
+                "Edit",
+                "Bash(*)",
+                "WebSearch",
+                "WebFetch",
+                "mcp__*",
+                "Bash"
+              ]
+            }
+          }
+        },
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude.json": {
+          "json": {
+            "userID": "u1",
+            "projects": {},
+            "theme": "dark",
+            "hasCompletedOnboarding": true
+          }
+        }
+      },
+      "calls": [
+        "git [clone] [--depth] [1] [--filter=blob:none] [https://github.com/cameronfreer/lean4-skills.git] [<TMP>/gauss-home/autoformalize/assets/lean4-skills]"
+      ]
+    },
+    {
+      "name": "claude-chat-no-git",
+      "backend": "claude-code",
+      "auth_mode": "auto",
+      "command": "hi",
+      "extras": {
+        "home": {
+          ".claude/.credentials.json": {
+            "claudeAiOauth": {
+              "accessToken": "tok"
+            }
+          },
+          ".claude.json": {
+            "userID": "u1",
+            "projects": {}
+          }
+        },
+        "checkout": "none",
+        "bins": [
+          "uvx",
+          "rg",
+          "claude"
+        ]
+      },
+      "plan": {
+        "request": {
+          "argv": [
+            "<TMP>/bin/claude",
+            "You are Claude Code in a Fisher-managed interactive chat session. The user launched `/chat` from the main Fisher CLI and will return there when this session exits. Current working directory: <TMP>/project. Use this session for onboarding, planning, repository questions, and general discussion before a specific Lean workflow is selected. Use any skills and MCP tools that are already configured in this backend session when they are helpful. If the user is ready to work in Lean, tell them to return to the main Fisher session and use `/project init`, `/project use`, or `/project create`, then `/prove`, `/review`, `/draft`, `/autoprove`, `/formalize`, or `/autoformalize`. Initial user request: hi"
+          ],
+          "cwd": "<TMP>/project",
+          "env": {
+            "set": {
+              "HOME": "<TMP>/gauss-home/autoformalize/claude-code/chat/claude-home",
+              "GAUSS_MANAGED_CHAT": "1",
+              "GAUSS_MANAGED_CHAT_BACKEND": "claude-code",
+              "GAUSS_CHAT_CWD": "<TMP>/project",
+              "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/chat",
+              "GAUSS_REAL_HOME": "<TMP>/home",
+              "GAUSS_YOLO_MODE": "1"
+            },
+            "removed": []
+          },
+          "mode": "helper",
+          "requested_mode": "auto",
+          "mode_note": "auto fallback from strict: strict mode requires a controlling TTY (No such device or address)",
+          "source": "fisher:chat",
+          "label": "Fisher chat session"
+        },
+        "staged_paths": {
+          "backend_name": "claude-code",
+          "cwd": "<TMP>/project",
+          "argv0": "<TMP>/bin/claude"
+        },
+        "user_instruction": "hi"
+      },
+      "files": {
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude/.credentials.json": {
+          "json": {
+            "claudeAiOauth": {
+              "accessToken": "tok"
+            }
+          }
+        },
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude/settings.local.json": {
+          "json": {
+            "permissions": {
+              "allow": [
+                "Read",
+                "Write",
+                "Edit",
+                "Bash(*)",
+                "WebSearch",
+                "WebFetch",
+                "mcp__*",
+                "Bash"
+              ]
+            }
+          }
+        },
+        "gauss-home/autoformalize/claude-code/chat/claude-home/.claude.json": {
+          "json": {
+            "userID": "u1",
+            "projects": {},
+            "theme": "dark",
+            "hasCompletedOnboarding": true
+          }
+        }
+      },
+      "calls": []
+    },
+    {
+      "name": "claude-chat-no-auth",
+      "backend": "claude-code",
+      "auth_mode": "auto",
+      "command": "hi",
+      "extras": {},
+      "error": {
+        "class": "AutoformalizePreflightError",
+        "message": "Claude Code auth not found. Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `gauss.autoformalize.auth_mode: login` (or `GAUSS_AUTOFORMALIZE_AUTH_MODE=login`) to launch the normal Claude login flow."
+      },
+      "files": {},
+      "calls": []
+    },
+    {
+      "name": "codex-chat-copy",
+      "backend": "codex",
+      "auth_mode": "auto",
+      "command": "plan",
+      "extras": {
+        "home": {
+          ".codex/auth.json": {
+            "tokens": {
+              "access_token": "a",
+              "refresh_token": "r",
+              "id_token": "i"
+            }
+          },
+          ".codex/config.toml": "model = \"o3\"\n",
+          ".codex/skills/mine/SKILL.md": "# mine\n",
+          ".agents/skills/other/SKILL.md": "# other\n",
+          ".agents/plugins/p/x.txt": "x\n",
+          ".codex/.tmp/plugins/q.txt": "q\n"
+        },
+        "bins": [
+          "git",
+          "uvx",
+          "rg",
+          "codex"
+        ]
+      },
+      "plan": {
+        "request": {
+          "argv": [
+            "<TMP>/bin/codex",
+            "--dangerously-bypass-approvals-and-sandbox",
+            "You are Codex in a Fisher-managed interactive chat session. The user launched `/chat` from the main Fisher CLI and will return there when this session exits. Current working directory: <TMP>/project. Use this session for onboarding, planning, repository questions, and general discussion before a specific Lean workflow is selected. Use any skills and MCP tools that are already configured in this backend session when they are helpful. If the user is ready to work in Lean, tell them to return to the main Fisher session and use `/project init`, `/project use`, or `/project create`, then `/prove`, `/review`, `/draft`, `/autoprove`, `/formalize`, or `/autoformalize`. Initial user request: plan"
+          ],
+          "cwd": "<TMP>/project",
+          "env": {
+            "set": {
+              "HOME": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home",
+              "GAUSS_MANAGED_CHAT": "1",
+              "GAUSS_MANAGED_CHAT_BACKEND": "codex",
+              "GAUSS_CHAT_CWD": "<TMP>/project",
+              "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/chat",
+              "GAUSS_REAL_HOME": "<TMP>/home",
+              "CODEX_HOME": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home/.codex",
+              "GAUSS_YOLO_MODE": "1",
+              "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4",
+              "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/lib/scripts",
+              "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home/.agents/skills/lean4",
+              "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home/.agents/skills/lean4/references"
+            },
+            "removed": []
+          },
+          "mode": "helper",
+          "requested_mode": "auto",
+          "mode_note": "auto fallback from strict: strict mode requires a controlling TTY (No such device or address)",
+          "source": "fisher:chat",
+          "label": "Fisher chat session"
+        },
+        "staged_paths": {
+          "backend_name": "codex",
+          "cwd": "<TMP>/project",
+          "argv0": "<TMP>/bin/codex"
+        },
+        "user_instruction": "plan"
+      },
+      "files": {
+        "gauss-home/autoformalize/codex/chat/codex-home/.agents/plugins/p/x.txt": {
+          "text": "x\n"
+        },
+        "gauss-home/autoformalize/codex/chat/codex-home/.agents/skills/lean4/.gauss-managed-revision": {
+          "text": "abc123\n"
+        },
+        "gauss-home/autoformalize/codex/chat/codex-home/.agents/skills/lean4/SKILL.md": {
+          "text": "# lean4 skill\n"
+        },
+        "gauss-home/autoformalize/codex/chat/codex-home/.agents/skills/lean4/references/tactics.md": {
+          "text": "tactics\n"
+        },
+        "gauss-home/autoformalize/codex/chat/codex-home/.agents/skills/other/SKILL.md": {
+          "text": "# other\n"
+        },
+        "gauss-home/autoformalize/codex/chat/codex-home/.codex/.tmp/plugins/q.txt": {
+          "text": "q\n"
+        },
+        "gauss-home/autoformalize/codex/chat/codex-home/.codex/auth.json": {
+          "json": {
+            "tokens": {
+              "access_token": "a",
+              "refresh_token": "r",
+              "id_token": "i"
+            }
+          }
+        },
+        "gauss-home/autoformalize/codex/chat/codex-home/.codex/config.toml": {
+          "text": "model = \"o3\"\n"
+        },
+        "gauss-home/autoformalize/codex/chat/codex-home/.codex/skills/lean4/.gauss-managed-revision": {
+          "text": "abc123\n"
+        },
+        "gauss-home/autoformalize/codex/chat/codex-home/.codex/skills/lean4/SKILL.md": {
+          "text": "# lean4 skill\n"
+        },
+        "gauss-home/autoformalize/codex/chat/codex-home/.codex/skills/lean4/references/tactics.md": {
+          "text": "tactics\n"
+        },
+        "gauss-home/autoformalize/codex/chat/codex-home/.codex/skills/mine/SKILL.md": {
+          "text": "# mine\n"
+        }
+      },
+      "calls": []
+    },
+    {
+      "name": "codex-chat-api-key",
+      "backend": "codex",
+      "auth_mode": "api-key",
+      "command": "",
+      "extras": {
+        "env": {
+          "OPENAI_API_KEY": "sk"
+        },
+        "bins": [
+          "git",
+          "uvx",
+          "rg",
+          "codex"
+        ]
+      },
+      "plan": {
+        "request": {
+          "argv": [
+            "<TMP>/bin/codex",
+            "--dangerously-bypass-approvals-and-sandbox",
+            "You are Codex in a Fisher-managed interactive chat session. The user launched `/chat` from the main Fisher CLI and will return there when this session exits. Current working directory: <TMP>/project. Use this session for onboarding, planning, repository questions, and general discussion before a specific Lean workflow is selected. Use any skills and MCP tools that are already configured in this backend session when they are helpful. If the user is ready to work in Lean, tell them to return to the main Fisher session and use `/project init`, `/project use`, or `/project create`, then `/prove`, `/review`, `/draft`, `/autoprove`, `/formalize`, or `/autoformalize`. Start by asking what the user wants to do in Fisher."
+          ],
+          "cwd": "<TMP>/project",
+          "env": {
+            "set": {
+              "HOME": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home",
+              "GAUSS_MANAGED_CHAT": "1",
+              "GAUSS_MANAGED_CHAT_BACKEND": "codex",
+              "GAUSS_CHAT_CWD": "<TMP>/project",
+              "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/chat",
+              "GAUSS_REAL_HOME": "<TMP>/home",
+              "CODEX_HOME": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home/.codex",
+              "GAUSS_YOLO_MODE": "1",
+              "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4",
+              "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/lib/scripts",
+              "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home/.agents/skills/lean4",
+              "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home/.agents/skills/lean4/references"
+            },
+            "removed": [
+              "OPENAI_API_KEY"
+            ]
+          },
+          "mode": "helper",
+          "requested_mode": "auto",
+          "mode_note": "auto fallback from strict: strict mode requires a controlling TTY (No such device or address)",
+          "source": "fisher:chat",
+          "label": "Fisher chat session"
+        },
+        "staged_paths": {
+          "backend_name": "codex",
+          "cwd": "<TMP>/project",
+          "argv0": "<TMP>/bin/codex"
+        },
+        "user_instruction": ""
+      },
+      "files": {
+        "gauss-home/autoformalize/codex/chat/codex-home/.agents/skills/lean4/.gauss-managed-revision": {
+          "text": "abc123\n"
+        },
+        "gauss-home/autoformalize/codex/chat/codex-home/.agents/skills/lean4/SKILL.md": {
+          "text": "# lean4 skill\n"
+        },
+        "gauss-home/autoformalize/codex/chat/codex-home/.agents/skills/lean4/references/tactics.md": {
+          "text": "tactics\n"
+        },
+        "gauss-home/autoformalize/codex/chat/codex-home/.codex/auth.json": {
+          "json": {
+            "auth_mode": "apikey",
+            "OPENAI_API_KEY": "sk"
+          }
+        },
+        "gauss-home/autoformalize/codex/chat/codex-home/.codex/skills/lean4/.gauss-managed-revision": {
+          "text": "abc123\n"
+        },
+        "gauss-home/autoformalize/codex/chat/codex-home/.codex/skills/lean4/SKILL.md": {
+          "text": "# lean4 skill\n"
+        },
+        "gauss-home/autoformalize/codex/chat/codex-home/.codex/skills/lean4/references/tactics.md": {
+          "text": "tactics\n"
+        }
+      },
+      "calls": []
+    },
+    {
+      "name": "chat-cwd-missing",
+      "backend": "claude-code",
+      "auth_mode": "auto",
+      "command": "",
+      "extras": {
+        "home": {
+          ".claude/.credentials.json": {
+            "claudeAiOauth": {
+              "accessToken": "tok"
+            }
+          },
+          ".claude.json": {
+            "userID": "u1",
+            "projects": {}
+          }
+        },
+        "cwd": "nowhere"
+      },
+      "error": {
+        "class": "AutoformalizePreflightError",
+        "message": "Active working directory does not exist: <TMP>/nowhere"
+      },
+      "files": {},
+      "calls": []
+    }
+  ]
+}

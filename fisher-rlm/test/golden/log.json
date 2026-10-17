@@ -1,0 +1,82 @@
+{
+  "metadata": {
+    "type": "metadata",
+    "timestamp": "",
+    "root_model": "test/root",
+    "max_depth": 1,
+    "max_iterations": 30,
+    "backend": "openrouter",
+    "backend_kwargs": {
+      "model_name": "test/root"
+    },
+    "environment_type": "local",
+    "environment_kwargs": {},
+    "other_backends": [
+      "openrouter"
+    ]
+  },
+  "iteration": {
+    "type": "iteration",
+    "iteration": 1,
+    "timestamp": "",
+    "prompt": [
+      {
+        "role": "system",
+        "content": "sys"
+      },
+      {
+        "role": "user",
+        "content": "go 世界"
+      }
+    ],
+    "response": "Trying.\n```repl\nx = 1\n```",
+    "code_blocks": [
+      {
+        "code": "x = llm_query('hi')\nprint(x)",
+        "result": {
+          "stdout": "hello\n",
+          "stderr": "",
+          "locals": {
+            "x": "str",
+            "n": "int"
+          },
+          "execution_time": 0.0,
+          "rlm_calls": [
+            {
+              "root_model": "test/sub",
+              "prompt": "hi",
+              "response": "hello",
+              "usage_summary": {
+                "model_usage_summaries": {}
+              },
+              "execution_time": 0.0
+            },
+            {
+              "root_model": "test/root",
+              "prompt": "why? café",
+              "response": "because",
+              "usage_summary": {
+                "model_usage_summaries": {}
+              },
+              "execution_time": 0.0
+            }
+          ],
+          "final_answer": null
+        }
+      },
+      {
+        "code": "1/0",
+        "result": {
+          "stdout": "",
+          "stderr": "\nZeroDivisionError: division by zero",
+          "locals": {},
+          "execution_time": 0.0,
+          "rlm_calls": [],
+          "final_answer": "42"
+        }
+      }
+    ],
+    "final_answer": "42",
+    "iteration_time": 1.5
+  }
+}

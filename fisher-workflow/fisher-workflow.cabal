@@ -1,0 +1,111 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.39.1.
+--
+-- see: https://github.com/sol/hpack
+
+name:           fisher-workflow
+version:        0.2.0.0
+synopsis:       Managed Lean workflows - backend and auth resolution, staging, launch plans
+author:         Tom Reynolds
+maintainer:     Tom Reynolds
+license:        BSD-3-Clause
+build-type:     Simple
+extra-source-files:
+    data/search_arxiv.py
+    data/provers/marketplace.json
+    data/provers/isabelle/draft.md
+    data/provers/isabelle/isabelle_mcp_shim.py
+    data/provers/isabelle/plugin.json
+    data/provers/isabelle/prove.md
+    data/provers/isabelle/SKILL.md
+    data/provers/rocq/draft.md
+    data/provers/rocq/plugin.json
+    data/provers/rocq/prove.md
+    data/provers/rocq/SKILL.md
+
+library
+  exposed-modules:
+      Fisher.Workflow.Arxiv
+      Fisher.Workflow.Assets
+      Fisher.Workflow.ClaudePlugin
+      Fisher.Workflow.Command
+      Fisher.Workflow.Handoff
+      Fisher.Workflow.Json
+      Fisher.Workflow.LocalAuth
+      Fisher.Workflow.Plan
+      Fisher.Workflow.Provers
+      Fisher.Workflow.Run
+      Fisher.Workflow.Settings
+      Fisher.Workflow.Stage
+      Fisher.Workflow.Types
+  other-modules:
+      Paths_fisher_workflow
+  autogen-modules:
+      Paths_fisher_workflow
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat
+  build-depends:
+      aeson
+    , aeson-pretty
+    , base >=4.14 && <5
+    , bytestring
+    , containers
+    , directory
+    , file-embed
+    , filepath
+    , fisher-core
+    , text
+    , time
+    , typed-process
+    , unix
+    , vector
+  default-language: GHC2021
+
+test-suite fisher-workflow-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Fisher.A2Fixture
+      Fisher.FisherBackendSpec
+      Fisher.Golden
+      Fisher.HeadlessLaunchSpec
+      Fisher.LaunchModelSpec
+      Fisher.LeanMcpRunnerSpec
+      Fisher.PlanGoldenSpec
+      Fisher.ProversSpec
+      Paths_fisher_workflow
+  autogen-modules:
+      Paths_fisher_workflow
+  hs-source-dirs:
+      test
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat
+  build-tool-depends:
+      hspec-discover:hspec-discover
+  build-depends:
+      aeson
+    , aeson-pretty
+    , base >=4.14 && <5
+    , bytestring
+    , containers
+    , directory
+    , file-embed
+    , filepath
+    , fisher-core
+    , fisher-workflow
+    , hspec
+    , temporary
+    , text
+    , time
+    , typed-process
+    , unix
+    , vector
+    , yaml
+  default-language: GHC2021

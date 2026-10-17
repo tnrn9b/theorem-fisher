@@ -1,0 +1,230 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.39.1.
+--
+-- see: https://github.com/sol/hpack
+
+name:           fisher-cli
+version:        0.2.0.0
+synopsis:       The fisher executable, and the commands behind it
+author:         Tom Reynolds
+maintainer:     Tom Reynolds
+license:        BSD-3-Clause
+build-type:     Simple
+extra-source-files:
+    data/banner.json
+    data/skins.json
+
+library
+  exposed-modules:
+      Fisher.Cli.Acp
+      Fisher.Cli.AgentChat
+      Fisher.Cli.AuthArgs
+      Fisher.Cli.Check
+      Fisher.Cli.Clm
+      Fisher.Cli.ConfigCmd
+      Fisher.Cli.ConfigShow
+      Fisher.Cli.Cron
+      Fisher.Cli.Launch
+      Fisher.Cli.LlmCheck
+      Fisher.Cli.Login
+      Fisher.Cli.Logout
+      Fisher.Cli.Model
+      Fisher.Cli.Native
+      Fisher.Cli.NetTools
+      Fisher.Cli.Prompt
+      Fisher.Cli.ProverChat
+      Fisher.Cli.Rlm
+      Fisher.Cli.Search
+      Fisher.Cli.SearchLsp
+      Fisher.Cli.Session
+      Fisher.Cli.Sessions
+      Fisher.Cli.Setup
+      Fisher.Cli.SetupCommon
+      Fisher.Cli.SetupTools
+      Fisher.Cli.Status
+      Fisher.Cli.Subcommands
+      Fisher.Cli.ToolsCheck
+      Fisher.Cli.Watch
+      Fisher.Doctor
+      Fisher.Shell
+      Fisher.Shell.Banner
+      Fisher.Shell.CliConfig
+      Fisher.Shell.Commands
+      Fisher.Shell.Data
+      Fisher.Shell.Rewrite
+      Fisher.Skin
+  other-modules:
+      Paths_fisher_cli
+  autogen-modules:
+      Paths_fisher_cli
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat
+  build-depends:
+      aeson
+    , aeson-pretty
+    , async
+    , base >=4.14 && <5
+    , bytestring
+    , containers
+    , directory
+    , file-embed
+    , filelock
+    , filepath
+    , fisher-agent
+    , fisher-core
+    , fisher-lean
+    , fisher-llm
+    , fisher-mcp
+    , fisher-rlm
+    , fisher-search
+    , fisher-swarm
+    , fisher-tools
+    , fisher-ui
+    , fisher-workflow
+    , haskeline
+    , optparse-applicative
+    , process
+    , scientific
+    , sqlite-simple
+    , text
+    , time
+    , unix
+    , vector
+    , yaml
+  default-language: GHC2021
+
+executable fisher
+  main-is: Main.hs
+  other-modules:
+      Paths_fisher_cli
+  autogen-modules:
+      Paths_fisher_cli
+  hs-source-dirs:
+      app
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat -threaded
+  build-depends:
+      aeson
+    , aeson-pretty
+    , async
+    , base >=4.14 && <5
+    , bytestring
+    , containers
+    , directory
+    , file-embed
+    , filelock
+    , filepath
+    , fisher-agent
+    , fisher-cli
+    , fisher-core
+    , fisher-lean
+    , fisher-llm
+    , fisher-mcp
+    , fisher-rlm
+    , fisher-search
+    , fisher-swarm
+    , fisher-tools
+    , fisher-ui
+    , fisher-workflow
+    , haskeline
+    , optparse-applicative
+    , process
+    , scientific
+    , sqlite-simple
+    , text
+    , time
+    , unix
+    , vector
+    , yaml
+  default-language: GHC2021
+
+test-suite fisher-cli-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Fisher.A3Golden
+      Fisher.A3World
+      Fisher.AcpSpec
+      Fisher.AgentChatSpec
+      Fisher.AuthCliSpec
+      Fisher.AutoTimingSpec
+      Fisher.BannerSpec
+      Fisher.ChatStreamSpec
+      Fisher.Cli.CheckLiveSpec
+      Fisher.Cli.LaunchSpec
+      Fisher.Cli.ProverChatSpec
+      Fisher.Cli.SearchSpec
+      Fisher.Cli.WatchSpec
+      Fisher.ClmCliSpec
+      Fisher.ClmSetupSpec
+      Fisher.CronCliSpec
+      Fisher.DispatchSpec
+      Fisher.DoctorSpec
+      Fisher.Golden
+      Fisher.GoldenCliSpec
+      Fisher.ModelSpec
+      Fisher.ReplSpec
+      Fisher.RlmCliSpec
+      Fisher.RlmContextSpec
+      Fisher.RlmSetupSpec
+      Fisher.SearchAutoLiveSpec
+      Fisher.SearchLspSpec
+      Fisher.SetupSpec
+      Fisher.SkinSpec
+      Fisher.SubcommandsSpec
+      Fisher.TestUtil
+      Fisher.UiHooksCliSpec
+      Paths_fisher_cli
+  autogen-modules:
+      Paths_fisher_cli
+  hs-source-dirs:
+      test
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat -threaded
+  build-tool-depends:
+      hspec-discover:hspec-discover
+  build-depends:
+      aeson
+    , aeson-pretty
+    , async
+    , base >=4.14 && <5
+    , bytestring
+    , containers
+    , directory
+    , file-embed
+    , filelock
+    , filepath
+    , fisher-agent
+    , fisher-cli
+    , fisher-core
+    , fisher-lean
+    , fisher-llm
+    , fisher-mcp
+    , fisher-rlm
+    , fisher-search
+    , fisher-swarm
+    , fisher-tools
+    , fisher-ui
+    , fisher-workflow
+    , haskeline
+    , hspec
+    , optparse-applicative
+    , process
+    , scientific
+    , sqlite-simple
+    , temporary
+    , text
+    , time
+    , unix
+    , vector
+    , yaml
+  default-language: GHC2021

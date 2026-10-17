@@ -1,0 +1,163 @@
+{
+  "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+  "machine": {
+    "is_root": true,
+    "strict_unavailable": "strict mode requires a controlling TTY (No such device or address)"
+  },
+  "cases": [
+    {
+      "name": "not-claude",
+      "argv": [
+        "/usr/bin/codex",
+        "--x"
+      ],
+      "env": {},
+      "out_argv": [
+        "/usr/bin/codex",
+        "--x"
+      ],
+      "out_env": {}
+    },
+    {
+      "name": "plain",
+      "argv": [
+        "/opt/bin/claude",
+        "--model",
+        "m",
+        "prompt"
+      ],
+      "env": {},
+      "out_argv": [
+        "/opt/bin/claude",
+        "--permission-mode",
+        "bypassPermissions",
+        "--model",
+        "m",
+        "prompt"
+      ],
+      "out_env": {
+        "GAUSS_YOLO_MODE": "1"
+      }
+    },
+    {
+      "name": "strip-dangerous",
+      "argv": [
+        "claude",
+        "--dangerously-skip-permissions",
+        "--model",
+        "m"
+      ],
+      "env": {},
+      "out_argv": [
+        "claude",
+        "--permission-mode",
+        "bypassPermissions",
+        "--model",
+        "m"
+      ],
+      "out_env": {
+        "GAUSS_YOLO_MODE": "1"
+      }
+    },
+    {
+      "name": "strip-mode-pair",
+      "argv": [
+        "claude",
+        "--permission-mode",
+        "default",
+        "p"
+      ],
+      "env": {},
+      "out_argv": [
+        "claude",
+        "--permission-mode",
+        "bypassPermissions",
+        "p"
+      ],
+      "out_env": {
+        "GAUSS_YOLO_MODE": "1"
+      }
+    },
+    {
+      "name": "strip-mode-eq",
+      "argv": [
+        "claude",
+        "--permission-mode=plan",
+        "p"
+      ],
+      "env": {},
+      "out_argv": [
+        "claude",
+        "--permission-mode",
+        "bypassPermissions",
+        "p"
+      ],
+      "out_env": {
+        "GAUSS_YOLO_MODE": "1"
+      }
+    },
+    {
+      "name": "mode-at-end",
+      "argv": [
+        "claude",
+        "p",
+        "--permission-mode"
+      ],
+      "env": {},
+      "out_argv": [
+        "claude",
+        "--permission-mode",
+        "bypassPermissions",
+        "p"
+      ],
+      "out_env": {
+        "GAUSS_YOLO_MODE": "1"
+      }
+    },
+    {
+      "name": "only-exe",
+      "argv": [
+        "claude"
+      ],
+      "env": {
+        "A": "1"
+      },
+      "out_argv": [
+        "claude",
+        "--permission-mode",
+        "bypassPermissions"
+      ],
+      "out_env": {
+        "A": "1",
+        "GAUSS_YOLO_MODE": "1"
+      }
+    },
+    {
+      "name": "empty",
+      "argv": [],
+      "env": {},
+      "out_argv": [],
+      "out_env": {}
+    },
+    {
+      "name": "trust-file",
+      "claude_json": {
+        "projects": {
+          "<TMP>/proj": {
+            "allowedTools": [
+              "x"
+            ],
+            "hasTrustDialogAccepted": true,
+            "hasTrustDialogHooksAccepted": true
+          },
+          "<TMP>/fresh": {
+            "allowedTools": [],
+            "hasTrustDialogAccepted": true,
+            "hasTrustDialogHooksAccepted": true
+          }
+        },
+        "k": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+u: open
+  split 3: failed: the sketch did not compile
+  split 4: accepted
+    l2: open
+      split 2: rejected: too hard

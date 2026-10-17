@@ -1,0 +1,40 @@
+.graph { height: 34rem; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); }
+.goalNode { width: 250px; box-sizing: border-box; padding: 0.4rem 0.55rem; border: 1px solid var(--line); border-left: 4px solid var(--muted); border-radius: 6px; background: var(--panel); color: var(--fg); font-size: 0.78rem; }
+.splitNode { width: 170px; box-sizing: border-box; padding: 0.3rem 0.5rem; border: 1px dashed var(--line); border-radius: 999px; background: var(--bg); color: var(--muted); font-size: 0.75rem; text-align: center; }
+.sp_accepted, .sp_done { border-style: solid; color: var(--fg); }
+.sp_rejected, .sp_failed { color: var(--bad); }
+.nodeName { font-family: ui-monospace, Menlo, monospace; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nodeMeta { display: flex; gap: 0.5rem; color: var(--muted); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin: 0.15rem 0; }
+.status { font-weight: 600; }
+.st_proved, .st_closed { border-left-color: var(--good); color: var(--good); }
+.st_failed, .st_disproved, .st_gave_up { border-left-color: var(--bad); color: var(--bad); }
+.st_running { border-left-color: var(--accent); color: var(--accent); }
+.goalNode.st_proved, .goalNode.st_failed, .goalNode.st_running, .goalNode.st_open { color: var(--fg); }
+.marks { display: inline-flex; flex-wrap: wrap; gap: 0.25rem; }
+.mark { display: inline-block; padding: 0 0.4rem; border: 1px solid var(--line); border-radius: 999px; font-size: 0.72rem; white-space: nowrap; max-width: 14rem; overflow: hidden; text-overflow: ellipsis; }
+.auto_closed { border-color: var(--good); color: var(--good); }
+.repaired { border-color: var(--accent); color: var(--accent); }
+.disproved, .claimed_false { border-color: var(--bad); color: var(--bad); }
+.suspect, .auto_timeout { border-color: var(--bad); }
+.tier, .escalated { border-color: var(--accent); color: var(--accent); }
+.attempt_stopped { border-color: var(--bad); }
+.auto_missed { color: var(--muted); }
+.board { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); padding: 0.5rem 0.75rem; margin: 0.5rem 0; }
+.board h3 { margin: 0 0 0.3rem; font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+.boardText { font-family: ui-monospace, Menlo, monospace; font-size: 0.8rem; overflow-wrap: anywhere; }
+.boardHead { font-weight: 700; margin: 0.2rem 0; }
+.boardItem { position: relative; }
+.goalName { font-family: ui-monospace, Menlo, monospace; font-size: 0.85rem; overflow-wrap: anywhere; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; margin: 0.75rem 0; }
+.controls button, .goalTable button, .startSearch button { font: inherit; font-size: 0.85rem; padding: 0.25rem 0.7rem; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--fg); cursor: pointer; }
+.controls button:disabled, .goalTable button:disabled, .startSearch button:disabled { opacity: 0.6; cursor: default; }
+.note { font-size: 0.8rem; color: var(--muted); }
+.error { color: var(--bad); }
+.startSearch { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.5rem 1rem; margin: 0.5rem 0 1rem; padding: 0.6rem 0.9rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.startSearch label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.8rem; color: var(--muted); }
+.startSearch label.grow { flex: 1 1 14rem; }
+.startSearch label.check { flex-direction: row; align-items: center; gap: 0.3rem; }
+.startSearch input[type="text"] { font: inherit; font-size: 0.9rem; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 0.3rem 0.4rem; min-width: 0; }
+.events { max-height: 16rem; overflow: auto; font-family: ui-monospace, Menlo, monospace; font-size: 0.75rem; margin: 0; padding: 0.4rem 0.6rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); list-style: none; }
+.events li { white-space: pre-wrap; overflow-wrap: anywhere; }

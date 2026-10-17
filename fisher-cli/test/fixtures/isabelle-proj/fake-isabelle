@@ -1,0 +1,12 @@
+#!/bin/sh
+# Stands in for isabelle: replays the outputs recorded on the Mac with
+# Isabelle2025-2 (fisher-core/test/fixtures/check/) and logs its calls.
+echo "$PWD $*" >> "$FAKE_ISABELLE_LOG"
+case "$*" in
+  *quick_and_dirty=false*Probe)
+    cat "$FAKE_ISABELLE_FIXTURES/isabelle-build-sorry-strict.txt"; exit 1;;
+  *quick_and_dirty=true*Fisher_Check)
+    cat Fisher_Check.thy >> "$FAKE_ISABELLE_LOG"
+    cat "$FAKE_ISABELLE_FIXTURES/isabelle-check-session.txt"; exit 1;;
+esac
+echo "unexpected: $*"; exit 2

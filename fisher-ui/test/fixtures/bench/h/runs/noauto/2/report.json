@@ -1,0 +1,59 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 461.3,
+            "goal": "Step.Graft.spliced_run",
+            "outcome": "closed",
+            "started_s": 0,
+            "stats": {
+                "cost_usd": 1.0884246,
+                "exit": 0,
+                "input_tokens": 3301712,
+                "output_tokens": 32598,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 13,
+                    "mcp_lean_lsp_lean_goal": 2,
+                    "mcp_lean_lsp_lean_verify": 1,
+                    "patch": 15,
+                    "read_file": 8,
+                    "search_files": 1,
+                    "terminal": 6
+                },
+                "turns": 28,
+                "wall_s": 438
+            }
+        }
+    ],
+    "backends": {
+        "gauss": [
+            1,
+            1
+        ]
+    },
+    "budget_s": 7200,
+    "budget_spent": false,
+    "closed_per_hour": 7.8,
+    "elapsed_s": 461.3,
+    "file": "Step/Graft.lean",
+    "goals": [
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": 1,
+            "by_backend": "gauss",
+            "closed_at_s": 461.3,
+            "goal": "Step.Graft.spliced_run",
+            "status": "closed"
+        }
+    ],
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/h/2/lean",
+    "slots": 4
+}

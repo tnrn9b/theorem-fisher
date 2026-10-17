@@ -1,0 +1,18 @@
+# Same snapshot as formal-encoding-prototype (GHC 9.6.7), so the toolchain
+# and package cache on this machine are shared.
+snapshot:
+  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/22/44.yaml
+
+packages:
+- fisher-core
+- fisher-workflow
+- fisher-swarm
+- fisher-llm
+- fisher-tools
+- fisher-lean
+- fisher-mcp
+- fisher-agent
+- fisher-search
+- fisher-rlm
+- fisher-cli
+- fisher-ui

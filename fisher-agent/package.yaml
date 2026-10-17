@@ -1,0 +1,53 @@
+name:        fisher-agent
+version:     0.2.0.0
+synopsis:    "The agent loop (upstream's run_agent.py) and what it leans on"
+license:     BSD-3-Clause
+author:      Tom Reynolds
+
+language: GHC2021
+
+default-extensions:
+- OverloadedStrings
+- LambdaCase
+
+ghc-options:
+- -Wall
+- -Wcompat
+
+extra-source-files:
+- data/*
+
+dependencies:
+- base >= 4.14 && < 5
+- fisher-core
+- fisher-llm
+- fisher-tools
+- fisher-rlm
+- aeson
+- async
+- bytestring
+- containers
+- directory
+- file-embed
+- filepath
+- process
+- sqlite-simple
+- text
+- time
+- unix
+- vector
+
+library:
+  source-dirs: src
+
+tests:
+  fisher-agent-test:
+    main:        Spec.hs
+    source-dirs: test
+    build-tools: hspec-discover
+    ghc-options: -threaded
+    dependencies:
+    - fisher-agent
+    - hspec
+    - QuickCheck
+    - temporary

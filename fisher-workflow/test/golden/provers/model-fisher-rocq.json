@@ -1,0 +1,35 @@
+{
+  "argv": [
+    "<EXE>",
+    "chat",
+    "--provider",
+    "openrouter",
+    "-m",
+    "from-flag",
+    "-t",
+    "fisher-rocq",
+    "--system-prompt-file",
+    "<TMP>/gauss-home/autoformalize/fisher/managed/startup/<STAMP>-prove.md.system.md",
+    "--mcp-config",
+    "<TMP>/gauss-home/autoformalize/fisher/managed/mcp/rocq.mcp.json",
+    "-q",
+    "You are in a Fisher-managed Rocq workflow session. Read the startup context at <TMP>/gauss-home/autoformalize/fisher/managed/startup/<STAMP>-prove.md first. Then run this workflow inside the active project as your first workflow action: /rocq:prove Main. Its command and the rocq skill are in your system prompt."
+  ],
+  "backend_command": "/rocq:prove Main",
+  "print_argv": [
+    "<EXE>",
+    "chat",
+    "--provider",
+    "openrouter",
+    "-m",
+    "from-flag",
+    "-t",
+    "fisher-rocq",
+    "--system-prompt-file",
+    "<TMP>/gauss-home/autoformalize/fisher/managed/startup/<STAMP>-prove.md.system.md",
+    "--mcp-config",
+    "<TMP>/gauss-home/autoformalize/fisher/managed/mcp/rocq.mcp.json",
+    "-p",
+    "You are in a Fisher-managed Rocq workflow session. Read the startup context at <TMP>/gauss-home/autoformalize/fisher/managed/startup/<STAMP>-prove.md first. Then run this workflow inside the active project as your first workflow action: /rocq:prove Main. Its command and the rocq skill are in your system prompt."
+  ]
+}

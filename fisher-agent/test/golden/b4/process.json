@@ -1,0 +1,752 @@
+{
+ "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+ "python": "3.11.15",
+ "checkpoint_path": "<GAUSS_HOME>/processes.json",
+ "cases": [
+  {
+   "name": "spawn-wait",
+   "calls": [
+    [
+     "terminal",
+     {
+      "command": "echo start; sleep 0.3; echo done",
+      "background": true
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "wait",
+      "session_id": "$1"
+     }
+    ]
+   ],
+   "opts": {},
+   "results": [
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_1f2e3d000000\", \"pid\": <PID>, \"exit_code\": 0, \"error\": null}",
+    "{\"status\": \"exited\", \"exit_code\": 0, \"output\": \"start\\ndone\\n\"}"
+   ],
+   "execs": [],
+   "watchers": [],
+   "checkpoint_after": []
+  },
+  {
+   "name": "spawn-poll-log",
+   "calls": [
+    [
+     "terminal",
+     {
+      "command": "for i in 1 2 3; do echo line $i; done; sleep 0.2",
+      "background": true
+     }
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "process",
+     {
+      "action": "poll",
+      "session_id": "$1"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "log",
+      "session_id": "$1"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "log",
+      "session_id": "$1",
+      "offset": 1,
+      "limit": 1
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "log",
+      "session_id": "$1",
+      "limit": 2
+     }
+    ]
+   ],
+   "opts": {},
+   "results": [
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_1f2e3d000000\", \"pid\": <PID>, \"exit_code\": 0, \"error\": null}",
+    "{\"session_id\": \"proc_1f2e3d000000\", \"command\": \"for i in 1 2 3; do echo line $i; done; sleep 0.2\", \"status\": \"exited\", \"pid\": <PID>, \"uptime_seconds\": 1, \"output_preview\": \"line 1\\nline 2\\nline 3\\n\", \"exit_code\": 0}",
+    "{\"session_id\": \"proc_1f2e3d000000\", \"status\": \"exited\", \"output\": \"line 1\\nline 2\\nline 3\", \"total_lines\": 3, \"showing\": \"3 lines\"}",
+    "{\"session_id\": \"proc_1f2e3d000000\", \"status\": \"exited\", \"output\": \"line 2\", \"total_lines\": 3, \"showing\": \"1 lines\"}",
+    "{\"session_id\": \"proc_1f2e3d000000\", \"status\": \"exited\", \"output\": \"line 2\\nline 3\", \"total_lines\": 3, \"showing\": \"2 lines\"}"
+   ],
+   "execs": [],
+   "watchers": [],
+   "checkpoint_after": []
+  },
+  {
+   "name": "exit-code",
+   "calls": [
+    [
+     "terminal",
+     {
+      "command": "echo oops >&2; exit 3",
+      "background": true
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "wait",
+      "session_id": "$1",
+      "timeout": 5
+     }
+    ]
+   ],
+   "opts": {},
+   "results": [
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_1f2e3d000000\", \"pid\": <PID>, \"exit_code\": 0, \"error\": null}",
+    "{\"status\": \"exited\", \"exit_code\": 3, \"output\": \"oops\\nlogout\\n\"}"
+   ],
+   "execs": [],
+   "watchers": [],
+   "checkpoint_after": []
+  },
+  {
+   "name": "kill",
+   "calls": [
+    [
+     "terminal",
+     {
+      "command": "sleep 30",
+      "background": true
+     }
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "process",
+     {
+      "action": "kill",
+      "session_id": "$1"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "kill",
+      "session_id": "$1"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "poll",
+      "session_id": "$1"
+     }
+    ]
+   ],
+   "opts": {},
+   "results": [
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_1f2e3d000000\", \"pid\": <PID>, \"exit_code\": 0, \"error\": null}",
+    "{\"status\": \"killed\", \"session_id\": \"proc_1f2e3d000000\"}",
+    "{\"status\": \"already_exited\", \"exit_code\": -15}",
+    "{\"session_id\": \"proc_1f2e3d000000\", \"command\": \"sleep 30\", \"status\": \"exited\", \"pid\": <PID>, \"uptime_seconds\": 0, \"output_preview\": \"\", \"exit_code\": -15}"
+   ],
+   "execs": [],
+   "watchers": [],
+   "checkpoint_after": []
+  },
+  {
+   "name": "wait-timeout",
+   "calls": [
+    [
+     "terminal",
+     {
+      "command": "sleep 30",
+      "background": true
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "wait",
+      "session_id": "$1",
+      "timeout": 1
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "kill",
+      "session_id": "$1"
+     }
+    ]
+   ],
+   "opts": {},
+   "results": [
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_1f2e3d000000\", \"pid\": <PID>, \"exit_code\": 0, \"error\": null}",
+    "{\"status\": \"timeout\", \"output\": \"\", \"timeout_note\": \"Waited 1s, process still running\"}",
+    "{\"status\": \"killed\", \"session_id\": \"proc_1f2e3d000000\"}"
+   ],
+   "execs": [],
+   "watchers": [],
+   "checkpoint_after": []
+  },
+  {
+   "name": "wait-clamped",
+   "calls": [
+    [
+     "terminal",
+     {
+      "command": "echo hi",
+      "background": true
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "wait",
+      "session_id": "$1",
+      "timeout": 500
+     }
+    ]
+   ],
+   "opts": {},
+   "results": [
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_1f2e3d000000\", \"pid\": <PID>, \"exit_code\": 0, \"error\": null}",
+    "{\"status\": \"exited\", \"exit_code\": 0, \"output\": \"hi\\n\", \"timeout_note\": \"Requested wait of 500s was clamped to configured limit of 180s\"}"
+   ],
+   "execs": [],
+   "watchers": [],
+   "checkpoint_after": []
+  },
+  {
+   "name": "stdin-submit",
+   "calls": [
+    [
+     "terminal",
+     {
+      "command": "read a; echo got:$a; read b; echo got2:$b",
+      "background": true
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "submit",
+      "session_id": "$1",
+      "data": "first"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "write",
+      "session_id": "$1",
+      "data": "sec"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "submit",
+      "session_id": "$1",
+      "data": "ond"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "wait",
+      "session_id": "$1",
+      "timeout": 5
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "write",
+      "session_id": "$1",
+      "data": "late"
+     }
+    ]
+   ],
+   "opts": {},
+   "results": [
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_1f2e3d000000\", \"pid\": <PID>, \"exit_code\": 0, \"error\": null}",
+    "{\"status\": \"ok\", \"bytes_written\": 6}",
+    "{\"status\": \"ok\", \"bytes_written\": 3}",
+    "{\"status\": \"ok\", \"bytes_written\": 4}",
+    "{\"status\": \"exited\", \"exit_code\": 0, \"output\": \"got:first\\ngot2:second\\n\"}",
+    "{\"status\": \"already_exited\", \"error\": \"Process has already finished\"}"
+   ],
+   "execs": [],
+   "watchers": [],
+   "checkpoint_after": []
+  },
+  {
+   "name": "list",
+   "calls": [
+    [
+     "terminal",
+     {
+      "command": "echo one",
+      "background": true,
+      "workdir": "<WORK>"
+     }
+    ],
+    [
+     "terminal",
+     {
+      "command": "sleep 30",
+      "background": true
+     }
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "process",
+     {
+      "action": "list"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "kill",
+      "session_id": "$2"
+     }
+    ]
+   ],
+   "opts": {},
+   "results": [
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_1f2e3d000000\", \"pid\": <PID>, \"exit_code\": 0, \"error\": null}",
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_3e5c7a000000\", \"pid\": <PID>, \"exit_code\": 0, \"error\": null}",
+    "{\"processes\": [{\"session_id\": \"proc_3e5c7a000000\", \"command\": \"sleep 30\", \"cwd\": \"<WORK>\", \"pid\": <PID>, \"started_at\": \"2026-10-02T09:08:43\", \"uptime_seconds\": 0, \"status\": \"running\", \"output_preview\": \"\"}, {\"session_id\": \"proc_1f2e3d000000\", \"command\": \"echo one\", \"cwd\": \"<WORK>\", \"pid\": <PID>, \"started_at\": \"2026-10-02T09:08:43\", \"uptime_seconds\": 0, \"status\": \"exited\", \"output_preview\": \"one\\n\", \"exit_code\": 0}]}",
+    "{\"status\": \"killed\", \"session_id\": \"proc_3e5c7a000000\"}"
+   ],
+   "execs": [],
+   "watchers": [],
+   "checkpoint_after": []
+  },
+  {
+   "name": "list-task",
+   "calls": [
+    [
+     "terminal",
+     {
+      "command": "echo t",
+      "background": true
+     },
+     "tA"
+    ],
+    [
+     "terminal",
+     {
+      "command": "echo u",
+      "background": true
+     },
+     "tB"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "process",
+     {
+      "action": "list"
+     },
+     "tA"
+    ]
+   ],
+   "opts": {},
+   "results": [
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_1f2e3d000000\", \"pid\": <PID>, \"exit_code\": 0, \"error\": null}",
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_3e5c7a000000\", \"pid\": <PID>, \"exit_code\": 0, \"error\": null}",
+    "{\"processes\": [{\"session_id\": \"proc_1f2e3d000000\", \"command\": \"echo t\", \"cwd\": \"<WORK>\", \"pid\": <PID>, \"started_at\": \"2026-10-02T09:08:44\", \"uptime_seconds\": 0, \"status\": \"exited\", \"output_preview\": \"t\\n\", \"exit_code\": 0}]}"
+   ],
+   "execs": [],
+   "watchers": [],
+   "checkpoint_after": []
+  },
+  {
+   "name": "not-found",
+   "calls": [
+    [
+     "process",
+     {
+      "action": "poll",
+      "session_id": "proc_nope"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "log",
+      "session_id": "proc_nope"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "wait",
+      "session_id": "proc_nope"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "kill",
+      "session_id": "proc_nope"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "write",
+      "session_id": "proc_nope",
+      "data": "x"
+     }
+    ]
+   ],
+   "opts": {},
+   "results": [
+    "{\"status\": \"not_found\", \"error\": \"No process with ID proc_nope\"}",
+    "{\"status\": \"not_found\", \"error\": \"No process with ID proc_nope\"}",
+    "{\"status\": \"not_found\", \"error\": \"No process with ID proc_nope\"}",
+    "{\"status\": \"not_found\", \"error\": \"No process with ID proc_nope\"}",
+    "{\"status\": \"not_found\", \"error\": \"No process with ID proc_nope\"}"
+   ],
+   "execs": [],
+   "watchers": [],
+   "checkpoint_after": []
+  },
+  {
+   "name": "missing-id",
+   "calls": [
+    [
+     "process",
+     {
+      "action": "poll"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "wait"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "kill"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "log"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "submit"
+     }
+    ]
+   ],
+   "opts": {},
+   "results": [
+    "{\"error\": \"session_id is required for poll\"}",
+    "{\"error\": \"session_id is required for wait\"}",
+    "{\"error\": \"session_id is required for kill\"}",
+    "{\"error\": \"session_id is required for log\"}",
+    "{\"error\": \"session_id is required for submit\"}"
+   ],
+   "execs": [],
+   "watchers": [],
+   "checkpoint_after": []
+  },
+  {
+   "name": "int-id",
+   "calls": [
+    [
+     "process",
+     {
+      "action": "poll",
+      "session_id": 42
+     }
+    ]
+   ],
+   "opts": {},
+   "results": [
+    "{\"status\": \"not_found\", \"error\": \"No process with ID 42\"}"
+   ],
+   "execs": [],
+   "watchers": [],
+   "checkpoint_after": []
+  },
+  {
+   "name": "unknown-action",
+   "calls": [
+    [
+     "process",
+     {
+      "action": "frobnicate"
+     }
+    ],
+    [
+     "process",
+     {},
+     null
+    ]
+   ],
+   "opts": {},
+   "results": [
+    "{\"error\": \"Unknown process action: frobnicate. Use: list, poll, log, wait, kill, write, submit\"}",
+    "{\"error\": \"Unknown process action: . Use: list, poll, log, wait, kill, write, submit\"}"
+   ],
+   "execs": [],
+   "watchers": [],
+   "checkpoint_after": []
+  },
+  {
+   "name": "check-interval",
+   "calls": [
+    [
+     "terminal",
+     {
+      "command": "echo hi",
+      "background": true,
+      "check_interval": 10
+     }
+    ],
+    [
+     "terminal",
+     {
+      "command": "echo hi",
+      "background": true,
+      "check_interval": 60
+     }
+    ]
+   ],
+   "opts": {},
+   "results": [
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_1f2e3d000000\", \"pid\": <PID>, \"exit_code\": 0, \"error\": null, \"check_interval_note\": \"Requested 10s raised to minimum 30s\"}",
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_3e5c7a000000\", \"pid\": <PID>, \"exit_code\": 0, \"error\": null}"
+   ],
+   "execs": [],
+   "watchers": [
+    {
+     "session_id": "proc_1f2e3d000000",
+     "check_interval": 30,
+     "session_key": "",
+     "platform": "",
+     "chat_id": "",
+     "thread_id": ""
+    },
+    {
+     "session_id": "proc_3e5c7a000000",
+     "check_interval": 60,
+     "session_key": "",
+     "platform": "",
+     "chat_id": "",
+     "thread_id": ""
+    }
+   ],
+   "checkpoint_after": []
+  },
+  {
+   "name": "timeout-note",
+   "calls": [
+    [
+     "terminal",
+     {
+      "command": "echo hi",
+      "background": true,
+      "timeout": 999
+     }
+    ]
+   ],
+   "opts": {},
+   "results": [
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_1f2e3d000000\", \"pid\": <PID>, \"exit_code\": 0, \"error\": null}"
+   ],
+   "execs": [],
+   "watchers": [],
+   "checkpoint_after": []
+  },
+  {
+   "name": "shell-noise",
+   "calls": [
+    [
+     "terminal",
+     {
+      "command": "echo visible",
+      "background": true
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "wait",
+      "session_id": "$1"
+     }
+    ]
+   ],
+   "opts": {},
+   "results": [
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_1f2e3d000000\", \"pid\": <PID>, \"exit_code\": 0, \"error\": null}",
+    "{\"status\": \"exited\", \"exit_code\": 0, \"output\": \"visible\\n\"}"
+   ],
+   "execs": [],
+   "watchers": [],
+   "checkpoint_after": []
+  },
+  {
+   "name": "big-output",
+   "calls": [
+    [
+     "terminal",
+     {
+      "command": "python3 -c \"print('x'*250000)\"",
+      "background": true
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "wait",
+      "session_id": "$1"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "poll",
+      "session_id": "$1"
+     }
+    ]
+   ],
+   "opts": {},
+   "results": [
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_1f2e3d000000\", \"pid\": <PID>, \"exit_code\": 0, \"error\": null}",
+    "{\"status\": \"exited\", \"exit_code\": 0, \"output\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\\n\"}",
+    "{\"session_id\": \"proc_1f2e3d000000\", \"command\": \"python3 -c \\\"print('x'*250000)\\\"\", \"status\": \"exited\", \"pid\": <PID>, \"uptime_seconds\": 1, \"output_preview\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\\n\", \"exit_code\": 0}"
+   ],
+   "execs": [],
+   "watchers": [],
+   "checkpoint_after": []
+  },
+  {
+   "name": "remote-spawn",
+   "calls": [
+    [
+     "terminal",
+     {
+      "command": "python server.py",
+      "background": true
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "poll",
+      "session_id": "$1"
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "kill",
+      "session_id": "$1"
+     }
+    ]
+   ],
+   "opts": {
+    "env": {
+     "TERMINAL_ENV": "docker"
+    },
+    "execs": [
+     {
+      "output": "<PID>\n"
+     },
+     {
+      "output": ""
+     }
+    ]
+   },
+   "results": [
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_1f2e3d000000\", \"pid\": <PID>, \"exit_code\": 0, \"error\": null}",
+    "{\"session_id\": \"proc_1f2e3d000000\", \"command\": \"python server.py\", \"status\": \"running\", \"pid\": <PID>, \"uptime_seconds\": 0, \"output_preview\": \"\"}",
+    "{\"status\": \"killed\", \"session_id\": \"proc_1f2e3d000000\"}"
+   ],
+   "execs": [
+    {
+     "command": "nohup bash -c 'python server.py' > /tmp/gauss_bg_proc_1f2e3d000000.log 2>&1 & echo $! > /tmp/gauss_bg_proc_1f2e3d000000.pid && cat /tmp/gauss_bg_proc_1f2e3d000000.pid",
+     "cwd": null,
+     "timeout": 10
+    },
+    {
+     "command": "kill <PID> 2>/dev/null",
+     "cwd": null,
+     "timeout": 5
+    }
+   ],
+   "watchers": [],
+   "checkpoint_after": []
+  },
+  {
+   "name": "remote-spawn-fails",
+   "calls": [
+    [
+     "terminal",
+     {
+      "command": "python server.py",
+      "background": true
+     }
+    ],
+    [
+     "process",
+     {
+      "action": "poll",
+      "session_id": "$1"
+     }
+    ]
+   ],
+   "opts": {
+    "env": {
+     "TERMINAL_ENV": "docker"
+    },
+    "execs": [
+     {
+      "raise": "container gone"
+     }
+    ]
+   },
+   "results": [
+    "{\"output\": \"Background process started\", \"session_id\": \"proc_1f2e3d000000\", \"pid\": null, \"exit_code\": 0, \"error\": null}",
+    "{\"session_id\": \"proc_1f2e3d000000\", \"command\": \"python server.py\", \"status\": \"exited\", \"pid\": null, \"uptime_seconds\": 0, \"output_preview\": \"Failed to start: container gone\", \"exit_code\": -1}"
+   ],
+   "execs": [
+    {
+     "command": "nohup bash -c 'python server.py' > /tmp/gauss_bg_proc_1f2e3d000000.log 2>&1 & echo $! > /tmp/gauss_bg_proc_1f2e3d000000.pid && cat /tmp/gauss_bg_proc_1f2e3d000000.pid",
+     "cwd": null,
+     "timeout": 10
+    }
+   ],
+   "watchers": [],
+   "checkpoint_after": []
+  }
+ ]
+}

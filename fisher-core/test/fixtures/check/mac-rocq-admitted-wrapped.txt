@@ -1,0 +1,3 @@
+Axioms:
+Lists.rev_involutive' :
+  forall (A : Type) (l : list A), List.rev (List.rev l) = l

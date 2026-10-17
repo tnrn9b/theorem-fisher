@@ -1,0 +1,58 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 271.2,
+            "goal": "Step.Graft.runBody_append",
+            "outcome": "closed",
+            "started_s": 0,
+            "stats": {
+                "cost_usd": 0.4960266,
+                "exit": 0,
+                "input_tokens": 1431802,
+                "output_tokens": 12130,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 7,
+                    "patch": 1,
+                    "read_file": 5,
+                    "search_files": 3,
+                    "terminal": 9,
+                    "write_file": 3
+                },
+                "turns": 19,
+                "wall_s": 242.4
+            }
+        }
+    ],
+    "backends": {
+        "gauss": [
+            1,
+            1
+        ]
+    },
+    "budget_s": 3600,
+    "budget_spent": false,
+    "closed_per_hour": 13.3,
+    "elapsed_s": 271.2,
+    "file": "Step/Graft.lean",
+    "goals": [
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": 1,
+            "by_backend": "gauss",
+            "closed_at_s": 271.2,
+            "goal": "Step.Graft.runBody_append",
+            "status": "closed"
+        }
+    ],
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/g/2/lean",
+    "slots": 4
+}

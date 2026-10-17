@@ -1,0 +1,121 @@
+{
+  "argv": [
+    "<TMP>/bin/claude",
+    "--model",
+    "claude-opus-4-6",
+    "--permission-mode",
+    "bypassPermissions",
+    "You are in a Fisher-managed Rocq workflow session. Read the startup context at <TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md first. Then run this command inside the active project as your first workflow action: /rocq:prove Main"
+  ],
+  "backend_command": "/rocq:prove Main",
+  "claude_calls": [
+    "claude [plugin] [marketplace] [add] [<TMP>/gauss-home/autoformalize/assets/fisher-provers]",
+    "claude [plugin] [install] [rocq]",
+    "claude [plugin] [list] [--json]"
+  ],
+  "claude_json_mcp_servers": {
+    "rocq": {
+      "args": [
+        "--from",
+        "git+https://github.com/LLM4Rocq/rocq-mcp@6983113d0844c0b7f987c79dab13988445109bfb",
+        "rocq-mcp"
+      ],
+      "command": "<TMP>/bin/uvx",
+      "env": {
+        "ROCQ_PROJECT_PATH": "<TMP>/rocqproj",
+        "ROCQ_WORKSPACE": "<TMP>/rocqproj"
+      },
+      "type": "stdio"
+    }
+  },
+  "cwd": "<TMP>/rocqproj",
+  "env": {
+    "CLAUDE_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/assets/fisher-provers/rocq",
+    "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+    "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/assets/fisher-provers/rocq/skills/rocq",
+    "GAUSS_PROJECT_ROOT": "<TMP>/rocqproj",
+    "HOME": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+    "ISABELLE_PROJECT_PATH": null,
+    "LEAN_PROJECT_PATH": null,
+    "ROCQ_PROJECT_PATH": "<TMP>/rocqproj",
+    "ROCQ_WORKSPACE": "<TMP>/rocqproj"
+  },
+  "marketplace_files": [
+    ".claude-plugin/marketplace.json",
+    "isabelle/.claude-plugin/plugin.json",
+    "isabelle/commands/draft.md",
+    "isabelle/commands/prove.md",
+    "isabelle/skills/isabelle/SKILL.md",
+    "rocq/.claude-plugin/plugin.json",
+    "rocq/commands/draft.md",
+    "rocq/commands/prove.md",
+    "rocq/skills/rocq/SKILL.md"
+  ],
+  "mcp_config": {
+    "mcpServers": {
+      "rocq": {
+        "args": [
+          "--from",
+          "git+https://github.com/LLM4Rocq/rocq-mcp@6983113d0844c0b7f987c79dab13988445109bfb",
+          "rocq-mcp"
+        ],
+        "command": "<TMP>/bin/uvx",
+        "env": {
+          "ROCQ_PROJECT_PATH": "<TMP>/rocqproj",
+          "ROCQ_WORKSPACE": "<TMP>/rocqproj"
+        },
+        "type": "stdio"
+      }
+    }
+  },
+  "staged_paths": {
+    "backend_command": "/rocq:prove Main",
+    "backend_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude.json",
+    "backend_home": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+    "backend_name": "claude-code",
+    "claude_home": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+    "frontend_command": "/prove",
+    "instructions_path": "",
+    "lean_root": "<TMP>/rocqproj",
+    "managed_root": "<TMP>/gauss-home/autoformalize/claude-code/managed",
+    "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/rocq.mcp.json",
+    "plugin_root": "<TMP>/gauss-home/autoformalize/assets/fisher-provers/rocq",
+    "project_manifest_path": "<TMP>/rocqproj/.gauss/project.yaml",
+    "project_root": "<TMP>/rocqproj",
+    "skills_root": "<TMP>/gauss-home/autoformalize/assets/fisher-provers/rocq/skills/rocq",
+    "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",
+    "workflow_kind": "prove"
+  },
+  "startup_context": [
+    "# Fisher Managed Rocq Workflow Session",
+    "",
+    "- Managed backend: `claude-code`",
+    "- Fisher command: `/prove`",
+    "- Backend command: `/rocq:prove Main`",
+    "- Workflow kind: `prove`",
+    "- Project root: `<TMP>/rocqproj`",
+    "- Rocq root: `<TMP>/rocqproj`",
+    "- Active working directory: `<TMP>/rocqproj`",
+    "- Rocq skill: `<TMP>/gauss-home/autoformalize/assets/fisher-provers/rocq/skills/rocq/SKILL.md`",
+    "- Workflow guide: `<TMP>/gauss-home/autoformalize/assets/fisher-provers/rocq/commands/prove.md`",
+    "- MCP config: `<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/rocq.mcp.json` (server `rocq`)",
+    "- Fisher check command: `<EXE> check`",
+    "",
+    "## Workflow Request",
+    "/rocq:prove Main",
+    "",
+    "## Session Contract",
+    "- Work inside the current Rocq project.",
+    "- Use the `rocq` MCP server for goals, searches and checking; the skill names its tools.",
+    "- Run the managed backend workflow command exactly as requested before improvising.",
+    "- A proof is done when `fisher check` passes on it; run it as the Fisher check command above.",
+    "- Keep changes reproducible and explain blockers clearly if the workflow cannot proceed.",
+    "",
+    "## Forwarded Arguments",
+    "Main",
+    "",
+    "## arXiv Search",
+    "",
+    "To look up a paper or result before formalizing it: `python3 \"<ARXIV>\" \"QUERY\"` (also `--author`, `--category`, `--id`)."
+  ]
+}

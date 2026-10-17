@@ -1,0 +1,92 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.39.1.
+--
+-- see: https://github.com/sol/hpack
+
+name:           fisher-swarm
+version:        0.2.0.0
+synopsis:       Managed workflow sessions - PTY sessions, stream-json progress, attach, cancel
+author:         Tom Reynolds
+maintainer:     Tom Reynolds
+license:        BSD-3-Clause
+build-type:     Simple
+
+library
+  exposed-modules:
+      Fisher.Swarm
+      Fisher.Swarm.Event
+      Fisher.Swarm.Launch
+      Fisher.Swarm.Pty
+      Fisher.Swarm.Render
+      Fisher.Swarm.Types
+  other-modules:
+      Paths_fisher_swarm
+  autogen-modules:
+      Paths_fisher_swarm
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat
+  c-sources:
+      cbits/fisher_pty.c
+  build-depends:
+      aeson
+    , aeson-pretty
+    , async
+    , base >=4.14 && <5
+    , bytestring
+    , containers
+    , directory
+    , filepath
+    , fisher-core
+    , fisher-workflow
+    , process
+    , stm
+    , text
+    , time
+    , unix
+    , vector
+  default-language: GHC2021
+
+test-suite fisher-swarm-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Fisher.Golden
+      Fisher.SwarmGoldenSpec
+      Fisher.SwarmSpec
+      Paths_fisher_swarm
+  autogen-modules:
+      Paths_fisher_swarm
+  hs-source-dirs:
+      test
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat -threaded
+  build-tool-depends:
+      hspec-discover:hspec-discover
+  build-depends:
+      aeson
+    , aeson-pretty
+    , async
+    , base >=4.14 && <5
+    , bytestring
+    , containers
+    , directory
+    , filepath
+    , fisher-core
+    , fisher-swarm
+    , fisher-workflow
+    , hspec
+    , process
+    , stm
+    , temporary
+    , text
+    , time
+    , unix
+    , vector
+  default-language: GHC2021

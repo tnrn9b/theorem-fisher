@@ -1,0 +1,157 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.39.1.
+--
+-- see: https://github.com/sol/hpack
+
+name:           fisher-agent
+version:        0.2.0.0
+synopsis:       The agent loop (upstream's run_agent.py) and what it leans on
+author:         Tom Reynolds
+maintainer:     Tom Reynolds
+license:        BSD-3-Clause
+build-type:     Simple
+extra-source-files:
+    data/default-soul.md
+    data/memory-guidance.txt
+    data/platform-hints.json
+    data/session-search-guidance.txt
+    data/skills-guidance.txt
+    data/threat-patterns.json
+    data/tool-schemas.json
+
+library
+  exposed-modules:
+      Fisher.Agent.Aux
+      Fisher.Agent.Compress
+      Fisher.Agent.Context.Budget
+      Fisher.Agent.Context.Clm
+      Fisher.Agent.Context.ClmStore
+      Fisher.Agent.Context.EditGate
+      Fisher.Agent.Context.Mirror
+      Fisher.Agent.Context.Recall
+      Fisher.Agent.Context.Rlm
+      Fisher.Agent.Context.RlmModels
+      Fisher.Agent.Display
+      Fisher.Agent.Inbox
+      Fisher.Agent.Ledger
+      Fisher.Agent.Loop
+      Fisher.Agent.Metadata
+      Fisher.Agent.Prompt
+      Fisher.Agent.Replay
+      Fisher.Agent.RunLock
+      Fisher.Agent.Session
+      Fisher.Agent.Steps
+      Fisher.Agent.StoreDB
+      Fisher.Agent.Tools.Approval
+      Fisher.Agent.Tools.Browser
+      Fisher.Agent.Tools.Memory
+      Fisher.Agent.Tools.Process
+      Fisher.Agent.Tools.Terminal
+      Fisher.Agent.Tools.Todo
+      Fisher.Agent.Tools.Web
+      Fisher.Agent.Types
+      Fisher.Agent.UiHooks
+  other-modules:
+      Paths_fisher_agent
+  autogen-modules:
+      Paths_fisher_agent
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat
+  build-depends:
+      aeson
+    , async
+    , base >=4.14 && <5
+    , bytestring
+    , containers
+    , directory
+    , file-embed
+    , filepath
+    , fisher-core
+    , fisher-llm
+    , fisher-rlm
+    , fisher-tools
+    , process
+    , sqlite-simple
+    , text
+    , time
+    , unix
+    , vector
+  default-language: GHC2021
+
+test-suite fisher-agent-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Fisher.Agent.AuxSpec
+      Fisher.Agent.BrowserSpec
+      Fisher.Agent.ClmHarness
+      Fisher.Agent.ClmPropSpec
+      Fisher.Agent.ClmReadBackSpec
+      Fisher.Agent.ClmReplaySpec
+      Fisher.Agent.ClmScenarioSpec
+      Fisher.Agent.ClmStorePropSpec
+      Fisher.Agent.ClmStoreReplaySpec
+      Fisher.Agent.ClmStoreScenarioSpec
+      Fisher.Agent.ClmStoreSpec
+      Fisher.Agent.CompressSpec
+      Fisher.Agent.DisplaySpec
+      Fisher.Agent.InboxSpec
+      Fisher.Agent.LedgerSpec
+      Fisher.Agent.LoopSpec
+      Fisher.Agent.MemorySpec
+      Fisher.Agent.MetadataSpec
+      Fisher.Agent.ProcessSpec
+      Fisher.Agent.PromptSpec
+      Fisher.Agent.RecallSpec
+      Fisher.Agent.ReplaySpec
+      Fisher.Agent.RlmLoopSpec
+      Fisher.Agent.RlmOffloadSpec
+      Fisher.Agent.RlmPropSpec
+      Fisher.Agent.RlmReplaySpec
+      Fisher.Agent.RunLockSpec
+      Fisher.Agent.StepsSpec
+      Fisher.Agent.StoreLoopSpec
+      Fisher.Agent.TerminalSpec
+      Fisher.Agent.TestUtil
+      Fisher.Agent.TodoSpec
+      Fisher.Agent.WebSpec
+      Paths_fisher_agent
+  autogen-modules:
+      Paths_fisher_agent
+  hs-source-dirs:
+      test
+  default-extensions:
+      OverloadedStrings
+      LambdaCase
+  ghc-options: -Wall -Wcompat -threaded
+  build-tool-depends:
+      hspec-discover:hspec-discover
+  build-depends:
+      QuickCheck
+    , aeson
+    , async
+    , base >=4.14 && <5
+    , bytestring
+    , containers
+    , directory
+    , file-embed
+    , filepath
+    , fisher-agent
+    , fisher-core
+    , fisher-llm
+    , fisher-rlm
+    , fisher-tools
+    , hspec
+    , process
+    , sqlite-simple
+    , temporary
+    , text
+    , time
+    , unix
+    , vector
+  default-language: GHC2021

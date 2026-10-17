@@ -1,0 +1,18 @@
+This is an unattended run: never stop to ask a question.
+Prove exactly one declaration in the file: `main`.
+Its statement is:
+```lean
+theorem main : P
+```
+Besides what the file already proves, you may use only these lemmas of the current plan, even where they still end in `sorry`: `aux`, `Foo.b`. Use no other declaration that still ends in `sorry`.
+Do not edit any other declaration.
+
+The plan so far:
+# Plan for main
+
+- main (open)
+
+When you finish, make the last line of your reply one of these:
+NOTE: <what you tried and why you stopped>
+FALSE: <a counterexample>
+Use the FALSE line only if the statement is false.

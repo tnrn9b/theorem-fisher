@@ -1,0 +1,24 @@
+{"depth":0,"event":"node added","name":"Demo.main_thm","node":1,"t":0}
+{"depth":0,"event":"node added","name":"Demo.side_thm","node":2,"t":0}
+{"attempt":1,"event":"launched","node":1,"t":0.1}
+{"attempt":2,"event":"launched","node":2,"t":0.1}
+{"attempt":2,"event":"repaired","holes_after":0,"holes_before":2,"node":2,"t":40.2}
+{"attempt":2,"event":"finished","node":2,"outcome":"closed","t":41}
+{"event":"node proved","node":2,"t":41}
+{"event":"cost","role":"worker","t":41,"usd":0.3}
+{"attempt":1,"event":"finished","node":1,"outcome":"exit 0","t":60.5}
+{"event":"cost","role":"worker","t":60.5,"usd":0.2}
+{"event":"split proposed","node":1,"split":1,"t":61}
+{"event":"cost","role":"planner","t":70,"usd":0.02}
+{"event":"cost","role":"verifier","t":74,"usd":0.01}
+{"event":"split accepted","lemmas":[3,4],"split":1,"t":75}
+{"depth":1,"event":"node added","name":"Demo.main_thm_l1","node":3,"t":75}
+{"depth":1,"event":"node added","name":"Demo.main_thm_l2","node":4,"t":75}
+{"event":"auto closed","node":3,"snippets":"simp","t":80}
+{"event":"node proved","node":3,"t":80}
+{"event":"disproved","node":4,"result":"false","t":82,"tactic":"decide"}
+{"event":"node failed","node":4,"reason":"disproved by decide","t":82}
+{"event":"split proposed","node":1,"split":2,"t":90}
+{"event":"cost","role":"planner","t":94,"usd":0.02}
+{"event":"split rejected","reason":"the lemmas do not imply the goal","split":2,"t":95}
+{"event":"stopped","reason":"no action left","t":100}

@@ -1,0 +1,15 @@
+[system]
+You are given a Lean 4 statement and a claim that the statement is false.
+Decide whether the claim really shows that the statement is false.
+Reply with the JSON object only, in this form:
+{"false": true, "reason": "..."}
+The value of false is true only when the claim holds up. reason is a short sentence.
+
+[user]
+The statement:
+```lean
+lemma a : forall n : Nat, n > 0
+```
+
+The claim:
+n = 0 is a counterexample

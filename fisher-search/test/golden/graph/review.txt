@@ -1,0 +1,26 @@
+[system]
+You check a proposed split of a Lean 4 goal into lemmas.
+Judge whether each lemma is simpler than the goal and plausibly true,
+and whether the sketch proves the goal from the lemmas.
+Reply with the JSON object only, in this form:
+{"accept": true, "reason": "...", "suspect": []}
+accept is true when the split should be used. reason is a short sentence.
+suspect lists the names of lemmas that look false or no simpler than the goal.
+
+[user]
+The goal:
+```lean
+theorem main : P
+```
+
+The blueprint:
+a then b
+
+The sketch:
+```lean
+lemma a : A := by sorry
+theorem main : P := by sorry
+```
+
+The plan so far:
+# Plan for main

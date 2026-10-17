@@ -1,0 +1,8 @@
+Closed under the global context
+Axioms:
+adm : 2 + 2 = 4
+Axioms:
+ax : False
+File "./A.v", line 8, characters 18-25:
+Error: The reference nothere was not found in the current environment.
+

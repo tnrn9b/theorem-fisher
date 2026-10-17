@@ -1,0 +1,59 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 474.6,
+            "goal": "Step.Graft.runBody_subst",
+            "outcome": "closed (helpers: payload_f_congr, tie_store, enqueue_tie, sendEffect_tie, commEffect_sendAny_tie)",
+            "started_s": 0,
+            "stats": {
+                "cost_usd": 0.8278810000000001,
+                "exit": 0,
+                "input_tokens": 2384438,
+                "output_tokens": 30644,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 14,
+                    "mcp_lean_lsp_lean_goal": 2,
+                    "mcp_lean_lsp_lean_hover_info": 1,
+                    "mcp_lean_lsp_lean_verify": 1,
+                    "patch": 16,
+                    "read_file": 7,
+                    "terminal": 7
+                },
+                "turns": 29,
+                "wall_s": 449.6
+            }
+        }
+    ],
+    "backends": {
+        "gauss": [
+            1,
+            1
+        ]
+    },
+    "budget_s": 7200,
+    "budget_spent": false,
+    "closed_per_hour": 7.6,
+    "elapsed_s": 474.6,
+    "file": "Step/Graft.lean",
+    "goals": [
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": 1,
+            "by_backend": "gauss",
+            "closed_at_s": 474.6,
+            "goal": "Step.Graft.runBody_subst",
+            "status": "closed"
+        }
+    ],
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/h/3/lean",
+    "slots": 4
+}

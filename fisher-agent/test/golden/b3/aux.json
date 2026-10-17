@@ -1,0 +1,8478 @@
+{
+ "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+ "python": "3.11.15",
+ "cases": [
+  {
+   "env": {},
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1/",
+    "OPENAI_API_KEY": "sk-local",
+    "GAUSS_MODEL": "llama3"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "llama3",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1/",
+    "OPENAI_API_KEY": "sk-local",
+    "GAUSS_MODEL": "llama3"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1/",
+    "OPENAI_API_KEY": "sk-local",
+    "GAUSS_MODEL": "llama3"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "llama3",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1/",
+    "OPENAI_API_KEY": "sk-local",
+    "GAUSS_MODEL": "llama3"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "llama3",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "https://api.openai.com/v1",
+    "OPENAI_API_KEY": "sk-oa"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.openai.com/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-oa",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "https://api.openai.com/v1",
+    "OPENAI_API_KEY": "sk-oa"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.openai.com/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-oa",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "https://api.openai.com/v1",
+    "OPENAI_API_KEY": "sk-oa"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.openai.com/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-oa",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "https://api.openai.com/v1",
+    "OPENAI_API_KEY": "sk-oa"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.openai.com/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-oa",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_BASE_URL": "http://mylocal/v1",
+    "OPENROUTER_API_KEY": "sk-or2"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or2",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_BASE_URL": "http://mylocal/v1",
+    "OPENROUTER_API_KEY": "sk-or2"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or2",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_BASE_URL": "http://mylocal/v1",
+    "OPENROUTER_API_KEY": "sk-or2"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or2",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_BASE_URL": "http://mylocal/v1",
+    "OPENROUTER_API_KEY": "sk-or2"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or2",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "KIMI_API_KEY": "sk-kimi-abc"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.kimi.com/coding/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-kimi-abc",
+      "content-type": "application/json",
+      "user-agent": "KimiCLI/1.0"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "kimi-k2-turbo-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "KIMI_API_KEY": "sk-kimi-abc"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.kimi.com/coding/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-kimi-abc",
+      "content-type": "application/json",
+      "user-agent": "KimiCLI/1.0"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "KIMI_API_KEY": "sk-kimi-abc"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.kimi.com/coding/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-kimi-abc",
+      "content-type": "application/json",
+      "user-agent": "KimiCLI/1.0"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "kimi-k2-turbo-preview",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "KIMI_API_KEY": "sk-kimi-abc"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.kimi.com/coding/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-kimi-abc",
+      "content-type": "application/json",
+      "user-agent": "KimiCLI/1.0"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "kimi-k2-turbo-preview",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "KIMI_API_KEY": "plain",
+    "KIMI_BASE_URL": "https://api.kimi.com/coding/v1/"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.kimi.com/coding/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer plain",
+      "content-type": "application/json",
+      "user-agent": "KimiCLI/1.0"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "kimi-k2-turbo-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "KIMI_API_KEY": "plain",
+    "KIMI_BASE_URL": "https://api.kimi.com/coding/v1/"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.kimi.com/coding/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer plain",
+      "content-type": "application/json",
+      "user-agent": "KimiCLI/1.0"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "KIMI_API_KEY": "plain",
+    "KIMI_BASE_URL": "https://api.kimi.com/coding/v1/"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.kimi.com/coding/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer plain",
+      "content-type": "application/json",
+      "user-agent": "KimiCLI/1.0"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "kimi-k2-turbo-preview",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "KIMI_API_KEY": "plain",
+    "KIMI_BASE_URL": "https://api.kimi.com/coding/v1/"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.kimi.com/coding/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer plain",
+      "content-type": "application/json",
+      "user-agent": "KimiCLI/1.0"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "kimi-k2-turbo-preview",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "MINIMAX_CN_API_KEY": "mm"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.minimaxi.com/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer mm",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "MiniMax-M2.5-highspeed",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "MINIMAX_CN_API_KEY": "mm"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.minimaxi.com/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer mm",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "MINIMAX_CN_API_KEY": "mm"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.minimaxi.com/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer mm",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "MiniMax-M2.5-highspeed",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "MINIMAX_CN_API_KEY": "mm"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.minimaxi.com/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer mm",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "MiniMax-M2.5-highspeed",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "DEEPSEEK_API_KEY": "ds"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.deepseek.com/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer ds",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "default",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "DEEPSEEK_API_KEY": "ds"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.deepseek.com/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer ds",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "DEEPSEEK_API_KEY": "ds"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.deepseek.com/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer ds",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "default",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "DEEPSEEK_API_KEY": "ds"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.deepseek.com/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer ds",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "default",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1",
+    "AUXILIARY_COMPRESSION_MODEL": "aux/model"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    "aux/model",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "aux/model",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1",
+    "AUXILIARY_COMPRESSION_MODEL": "aux/model"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1",
+    "AUXILIARY_COMPRESSION_MODEL": "aux/model"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1",
+    "AUXILIARY_COMPRESSION_MODEL": "aux/model"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1",
+    "CONTEXT_COMPRESSION_MODEL": "google/gemini-3-flash-preview",
+    "CONTEXT_COMPRESSION_PROVIDER": "auto"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1",
+    "CONTEXT_COMPRESSION_MODEL": "google/gemini-3-flash-preview",
+    "CONTEXT_COMPRESSION_PROVIDER": "auto"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1",
+    "CONTEXT_COMPRESSION_MODEL": "google/gemini-3-flash-preview",
+    "CONTEXT_COMPRESSION_PROVIDER": "auto"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1",
+    "CONTEXT_COMPRESSION_MODEL": "google/gemini-3-flash-preview",
+    "CONTEXT_COMPRESSION_PROVIDER": "auto"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "g",
+    "CONTEXT_COMPRESSION_MODEL": "google/gemini-3-flash-preview"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer g",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "g",
+    "CONTEXT_COMPRESSION_MODEL": "google/gemini-3-flash-preview"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer g",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "g",
+    "CONTEXT_COMPRESSION_MODEL": "google/gemini-3-flash-preview"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer g",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "g",
+    "CONTEXT_COMPRESSION_MODEL": "google/gemini-3-flash-preview"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer g",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "custom",
+    null,
+    "http://aux:9/v1",
+    "k9"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://aux:9/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer k9",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "custom",
+    "google/gemini-3-flash-preview",
+    "http://aux:9/v1",
+    "k9"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://aux:9/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer k9",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "OPENAI_API_KEY": "fallback"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "custom",
+    null,
+    "http://aux:9/v1",
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://aux:9/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer fallback",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "OPENAI_API_KEY": "fallback"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "custom",
+    "google/gemini-3-flash-preview",
+    "http://aux:9/v1",
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://aux:9/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer fallback",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "OPENAI_API_KEY": "fallback"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "OPENAI_API_KEY": "fallback"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_MCP_PROVIDER": "auto",
+    "CONTEXT_MCP_PROVIDER": "zai",
+    "GLM_API_KEY": "g"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer g",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_MCP_PROVIDER": "auto",
+    "CONTEXT_MCP_PROVIDER": "zai",
+    "GLM_API_KEY": "g"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer g",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_MCP_PROVIDER": "auto",
+    "CONTEXT_MCP_PROVIDER": "zai",
+    "GLM_API_KEY": "g"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "zai",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer g",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_MCP_PROVIDER": "auto",
+    "CONTEXT_MCP_PROVIDER": "zai",
+    "GLM_API_KEY": "g"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer g",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "openrouter",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "openrouter",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "Glm",
+    "GLM_API_KEY": "g",
+    "OPENROUTER_API_KEY": "o"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "glm",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer o",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "Glm",
+    "GLM_API_KEY": "g",
+    "OPENROUTER_API_KEY": "o"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "glm",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer o",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "Glm",
+    "GLM_API_KEY": "g",
+    "OPENROUTER_API_KEY": "o"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer o",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "Glm",
+    "GLM_API_KEY": "g",
+    "OPENROUTER_API_KEY": "o"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer o",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "zai",
+    "GLM_API_KEY": "g",
+    "GLM_BASE_URL": "https://glm.example/v4/"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "zai",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://glm.example/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer g",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "zai",
+    "GLM_API_KEY": "g",
+    "GLM_BASE_URL": "https://glm.example/v4/"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "zai",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://glm.example/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer g",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "zai",
+    "GLM_API_KEY": "g",
+    "GLM_BASE_URL": "https://glm.example/v4/"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://glm.example/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer g",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "zai",
+    "GLM_API_KEY": "g",
+    "GLM_BASE_URL": "https://glm.example/v4/"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://glm.example/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer g",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "deepseek",
+    "DEEPSEEK_API_KEY": "d"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "deepseek",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.deepseek.com/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer d",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "deepseek",
+    "DEEPSEEK_API_KEY": "d"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "deepseek",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.deepseek.com/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer d",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "deepseek",
+    "DEEPSEEK_API_KEY": "d"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.deepseek.com/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer d",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "default",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "deepseek",
+    "DEEPSEEK_API_KEY": "d"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.deepseek.com/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer d",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "default",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "custom",
+    "OPENAI_BASE_URL": "http://c/v1",
+    "OPENAI_API_KEY": "c"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "custom",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://c/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer c",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "custom",
+    "OPENAI_BASE_URL": "http://c/v1",
+    "OPENAI_API_KEY": "c"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "custom",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://c/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer c",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "custom",
+    "OPENAI_BASE_URL": "http://c/v1",
+    "OPENAI_API_KEY": "c"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://c/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer c",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "custom",
+    "OPENAI_BASE_URL": "http://c/v1",
+    "OPENAI_API_KEY": "c"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://c/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer c",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "main",
+    "GLM_API_KEY": "g"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "main",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer g",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "main",
+    "GLM_API_KEY": "g"
+   },
+   "config": null,
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "main",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer g",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "main",
+    "GLM_API_KEY": "g"
+   },
+   "config": null,
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer g",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "main",
+    "GLM_API_KEY": "g"
+   },
+   "config": null,
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer g",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {},
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "openrouter",
+    "cfg/model",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "openrouter",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "openrouter",
+    "cfg/model",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "cfg/model",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "openrouter",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "openrouter",
+    "cfg/model",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "openrouter",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "openrouter",
+    "cfg/model",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "openrouter",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "custom",
+    "cfg/model",
+    "http://aux:9/v1",
+    "k9"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://aux:9/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer k9",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "cfg/model",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "custom",
+    "google/gemini-3-flash-preview",
+    "http://aux:9/v1",
+    "k9"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://aux:9/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer k9",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "openrouter",
+    "cfg/model",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "openrouter",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: openrouter\n    model: cfg/model\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "custom",
+    null,
+    "http://cfg:1/v1",
+    "ck"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://cfg:1/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer ck",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {},
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "custom",
+    "google/gemini-3-flash-preview",
+    "http://cfg:1/v1",
+    "ck"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://cfg:1/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer ck",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {},
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "custom",
+    null,
+    "http://cfg:1/v1",
+    "ck"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://cfg:1/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer ck",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "custom",
+    "google/gemini-3-flash-preview",
+    "http://cfg:1/v1",
+    "ck"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://cfg:1/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer ck",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "custom",
+    null,
+    "http://cfg:1/v1",
+    "ck"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://cfg:1/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer ck",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "custom",
+    "google/gemini-3-flash-preview",
+    "http://cfg:1/v1",
+    "ck"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://cfg:1/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer ck",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "custom",
+    null,
+    "http://cfg:1/v1",
+    "ck"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://cfg:1/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer ck",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "custom",
+    "google/gemini-3-flash-preview",
+    "http://cfg:1/v1",
+    "ck"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://cfg:1/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer ck",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "custom",
+    null,
+    "http://aux:9/v1",
+    "k9"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://aux:9/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer k9",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "custom",
+    "google/gemini-3-flash-preview",
+    "http://aux:9/v1",
+    "k9"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://aux:9/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer k9",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "openrouter",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "openrouter",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "auxiliary:\n  compression:\n    base_url: http://cfg:1/v1\n    api_key: ck\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "zai",
+    "cm",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=zai. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "zai",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=zai. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "zai",
+    "cm",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "cm",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "zai",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "zai",
+    "cm",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=zai. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "zai",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=zai. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "zai",
+    "cm",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "cm",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "zai",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "custom",
+    "cm",
+    "http://aux:9/v1",
+    "k9"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://aux:9/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer k9",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "cm",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "custom",
+    "google/gemini-3-flash-preview",
+    "http://aux:9/v1",
+    "k9"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://aux:9/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer k9",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "openrouter",
+    "cm",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "openrouter",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "auxiliary:\n  compression:\n    provider: ''\ncompression:\n  summary_provider: zai\n  summary_model: cm\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "None",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=None. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "None",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=None. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "None",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "None",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "None",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=None. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "None",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=None. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "None",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=None. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "None",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=None. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "custom",
+    null,
+    "http://aux:9/v1",
+    "k9"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://aux:9/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer k9",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "anthropic/claude-opus-4.6",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "custom",
+    "google/gemini-3-flash-preview",
+    "http://aux:9/v1",
+    "k9"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://aux:9/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer k9",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "openrouter",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "openrouter",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "auxiliary:\n  compression:\n    provider:\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {},
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENROUTER_API_KEY": "sk-or-1"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://openrouter.ai/api/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-or-1",
+      "content-type": "application/json",
+      "http-referer": "https://gauss-agent.nousresearch.com",
+      "x-openrouter-categories": "productivity,cli-agent",
+      "x-openrouter-title": "Gauss Agent"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "cfg-main",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "cfg-main",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "OPENAI_BASE_URL": "http://localhost:8080/v1",
+    "OPENAI_API_KEY": "sk-local"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://localhost:8080/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer sk-local",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "cfg-main",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "auto",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 50
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "GLM_API_KEY": "glm-key"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "https://api.z.ai/api/paas/v4/chat/completions",
+     "headers": {
+      "authorization": "Bearer glm-key",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "glm-4.5-flash",
+      "max_tokens": 5120,
+      "temperature": 0.3,
+      "tools": [
+       {
+        "type": "function",
+        "function": {
+         "name": "memory",
+         "parameters": {}
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "custom",
+    null,
+    "http://aux:9/v1",
+    "k9"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://aux:9/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer k9",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "cfg-main",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "custom",
+    "google/gemini-3-flash-preview",
+    "http://aux:9/v1",
+    "k9"
+   ],
+   "outcome": {
+    "content": " sum "
+   },
+   "requests": [
+    {
+     "method": "POST",
+     "url": "http://aux:9/v1/chat/completions",
+     "headers": {
+      "authorization": "Bearer k9",
+      "content-type": "application/json"
+     },
+     "body": {
+      "messages": [
+       {
+        "role": "user",
+        "content": "summarize"
+       }
+      ],
+      "model": "google/gemini-3-flash-preview",
+      "max_tokens": 1000,
+      "temperature": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_BASE_URL": "http://aux:9/v1",
+    "AUXILIARY_COMPRESSION_API_KEY": "k9"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": null
+   },
+   "resolved": [
+    "openrouter",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "compression",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 1000,
+    "model": "google/gemini-3-flash-preview"
+   },
+   "resolved": [
+    "openrouter",
+    "google/gemini-3-flash-preview",
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "mcp",
+   "args": {
+    "max_tokens": 50,
+    "temperature": null,
+    "model": null
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  },
+  {
+   "env": {
+    "AUXILIARY_COMPRESSION_PROVIDER": "openrouter"
+   },
+   "config": "model:\n  default: cfg-main\n  provider: custom\n  base_url: http://cfgbase/v1\n",
+   "task": "flush_memories",
+   "args": {
+    "temperature": 0.3,
+    "max_tokens": 5120,
+    "tools": [
+     {
+      "type": "function",
+      "function": {
+       "name": "memory",
+       "parameters": {}
+      }
+     }
+    ]
+   },
+   "resolved": [
+    "auto",
+    null,
+    null,
+    null
+   ],
+   "outcome": {
+    "raises": "RuntimeError",
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+   },
+   "requests": []
+  }
+ ]
+}

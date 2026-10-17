@@ -1,0 +1,68 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 452.4,
+            "goal": "Step.Diamond.twoFire_joint",
+            "outcome": "closed",
+            "started_s": 16.4,
+            "stats": {
+                "cost_usd": 1.0260106,
+                "exit": 0,
+                "input_tokens": 2529436,
+                "output_tokens": 35981,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 6,
+                    "mcp_lean_lsp_lean_goal": 2,
+                    "mcp_lean_lsp_lean_verify": 1,
+                    "patch": 6,
+                    "read_file": 14,
+                    "search_files": 4,
+                    "terminal": 1
+                },
+                "turns": 22,
+                "wall_s": 402
+            }
+        }
+    ],
+    "auto_closed": 0,
+    "auto_off": null,
+    "auto_ran": true,
+    "auto_requested": true,
+    "auto_warmup_s": 53.8,
+    "backends": {
+        "gauss": [
+            1,
+            1
+        ]
+    },
+    "budget_s": 7200,
+    "budget_spent": false,
+    "closed_per_hour": 8,
+    "disproved": 0,
+    "elapsed_s": 452.4,
+    "file": "Step/Diamond.lean",
+    "goals": [
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": 1,
+            "by_backend": "gauss",
+            "closedBy": "model",
+            "closed_at_s": 452.4,
+            "goal": "Step.Diamond.twoFire_joint",
+            "status": "closed"
+        }
+    ],
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/h/5/lean",
+    "repaired_then_closed": 0,
+    "repairs_kept": 0,
+    "slots": 4
+}

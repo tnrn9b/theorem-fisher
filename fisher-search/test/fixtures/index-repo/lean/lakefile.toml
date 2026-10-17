@@ -1,0 +1,5 @@
+name = "twist"
+
+[[lean_lib]]
+name = "Twist"
+srcDir = "src"

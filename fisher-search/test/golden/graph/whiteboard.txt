@@ -1,0 +1,10 @@
+# Plan for main
+- main (open)
+  - a (open)
+    - c (proved)
+    - b (open)
+  - b (open)
+
+## Failed
+a: simp failed
+b: wrong type

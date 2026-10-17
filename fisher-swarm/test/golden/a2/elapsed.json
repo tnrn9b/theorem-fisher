@@ -1,0 +1,49 @@
+{
+  "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+  "machine": {
+    "is_root": true,
+    "strict_unavailable": "strict mode requires a controlling TTY (No such device or address)"
+  },
+  "cases": [
+    {
+      "seconds": 0,
+      "text": "0s"
+    },
+    {
+      "seconds": 0.9,
+      "text": "0s"
+    },
+    {
+      "seconds": 59.99,
+      "text": "59s"
+    },
+    {
+      "seconds": 60,
+      "text": "1m"
+    },
+    {
+      "seconds": 61,
+      "text": "1m"
+    },
+    {
+      "seconds": 3599,
+      "text": "59m"
+    },
+    {
+      "seconds": 3600,
+      "text": "1h0m"
+    },
+    {
+      "seconds": 3661,
+      "text": "1h1m"
+    },
+    {
+      "seconds": 7322.5,
+      "text": "2h2m"
+    },
+    {
+      "seconds": 86400,
+      "text": "24h0m"
+    }
+  ]
+}

@@ -1,0 +1,1723 @@
+{
+ "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+ "python": "3.11.15",
+ "sudo": [
+  {
+   "password": "",
+   "command": "sudo apt update",
+   "out": "sudo apt update",
+   "stdin": null
+  },
+  {
+   "password": "",
+   "command": "ls",
+   "out": "ls",
+   "stdin": null
+  },
+  {
+   "password": "",
+   "command": "visudo -c",
+   "out": "visudo -c",
+   "stdin": null
+  },
+  {
+   "password": "",
+   "command": "cat /etc/sudoers",
+   "out": "cat /etc/sudoers",
+   "stdin": null
+  },
+  {
+   "password": "",
+   "command": "echo sudo",
+   "out": "echo sudo",
+   "stdin": null
+  },
+  {
+   "password": "",
+   "command": "sudo-rs x",
+   "out": "sudo-rs x",
+   "stdin": null
+  },
+  {
+   "password": "",
+   "command": "x.sudo y",
+   "out": "x.sudo y",
+   "stdin": null
+  },
+  {
+   "password": "",
+   "command": "sudo -u bob sudo id",
+   "out": "sudo -u bob sudo id",
+   "stdin": null
+  },
+  {
+   "password": "",
+   "command": "SUDO=1 make",
+   "out": "SUDO=1 make",
+   "stdin": null
+  },
+  {
+   "password": "",
+   "command": "pseudo",
+   "out": "pseudo",
+   "stdin": null
+  },
+  {
+   "password": "",
+   "command": "sudo",
+   "out": "sudo",
+   "stdin": null
+  },
+  {
+   "password": "pw",
+   "command": "sudo apt update",
+   "out": "sudo -S -p '' apt update",
+   "stdin": "pw\n"
+  },
+  {
+   "password": "pw",
+   "command": "ls",
+   "out": "ls",
+   "stdin": null
+  },
+  {
+   "password": "pw",
+   "command": "visudo -c",
+   "out": "visudo -c",
+   "stdin": null
+  },
+  {
+   "password": "pw",
+   "command": "cat /etc/sudoers",
+   "out": "cat /etc/sudoers",
+   "stdin": null
+  },
+  {
+   "password": "pw",
+   "command": "echo sudo",
+   "out": "echo sudo -S -p ''",
+   "stdin": "pw\n"
+  },
+  {
+   "password": "pw",
+   "command": "sudo-rs x",
+   "out": "sudo -S -p ''-rs x",
+   "stdin": "pw\n"
+  },
+  {
+   "password": "pw",
+   "command": "x.sudo y",
+   "out": "x.sudo -S -p '' y",
+   "stdin": "pw\n"
+  },
+  {
+   "password": "pw",
+   "command": "sudo -u bob sudo id",
+   "out": "sudo -S -p '' -u bob sudo -S -p '' id",
+   "stdin": "pw\n"
+  },
+  {
+   "password": "pw",
+   "command": "SUDO=1 make",
+   "out": "SUDO=1 make",
+   "stdin": null
+  },
+  {
+   "password": "pw",
+   "command": "pseudo",
+   "out": "pseudo",
+   "stdin": null
+  },
+  {
+   "password": "pw",
+   "command": "sudo",
+   "out": "sudo -S -p ''",
+   "stdin": "pw\n"
+  },
+  {
+   "password": "p'w \"x",
+   "command": "sudo apt update",
+   "out": "sudo -S -p '' apt update",
+   "stdin": "p'w \"x\n"
+  },
+  {
+   "password": "p'w \"x",
+   "command": "ls",
+   "out": "ls",
+   "stdin": null
+  },
+  {
+   "password": "p'w \"x",
+   "command": "visudo -c",
+   "out": "visudo -c",
+   "stdin": null
+  },
+  {
+   "password": "p'w \"x",
+   "command": "cat /etc/sudoers",
+   "out": "cat /etc/sudoers",
+   "stdin": null
+  },
+  {
+   "password": "p'w \"x",
+   "command": "echo sudo",
+   "out": "echo sudo -S -p ''",
+   "stdin": "p'w \"x\n"
+  },
+  {
+   "password": "p'w \"x",
+   "command": "sudo-rs x",
+   "out": "sudo -S -p ''-rs x",
+   "stdin": "p'w \"x\n"
+  },
+  {
+   "password": "p'w \"x",
+   "command": "x.sudo y",
+   "out": "x.sudo -S -p '' y",
+   "stdin": "p'w \"x\n"
+  },
+  {
+   "password": "p'w \"x",
+   "command": "sudo -u bob sudo id",
+   "out": "sudo -S -p '' -u bob sudo -S -p '' id",
+   "stdin": "p'w \"x\n"
+  },
+  {
+   "password": "p'w \"x",
+   "command": "SUDO=1 make",
+   "out": "SUDO=1 make",
+   "stdin": null
+  },
+  {
+   "password": "p'w \"x",
+   "command": "pseudo",
+   "out": "pseudo",
+   "stdin": null
+  },
+  {
+   "password": "p'w \"x",
+   "command": "sudo",
+   "out": "sudo -S -p ''",
+   "stdin": "p'w \"x\n"
+  }
+ ],
+ "blocklist": [
+  "ANTHROPIC_API_KEY",
+  "ANTHROPIC_BASE_URL",
+  "ANTHROPIC_TOKEN",
+  "BROWSERBASE_API_KEY",
+  "BROWSERBASE_PROJECT_ID",
+  "CLAUDE_CODE_OAUTH_TOKEN",
+  "COHERE_API_KEY",
+  "DEEPSEEK_API_KEY",
+  "DEEPSEEK_BASE_URL",
+  "DISCORD_ALLOWED_USERS",
+  "DISCORD_AUTO_THREAD",
+  "DISCORD_BOT_TOKEN",
+  "DISCORD_FREE_RESPONSE_CHANNELS",
+  "DISCORD_HOME_CHANNEL",
+  "DISCORD_HOME_CHANNEL_NAME",
+  "DISCORD_REQUIRE_MENTION",
+  "ELEVENLABS_API_KEY",
+  "EMAIL_ADDRESS",
+  "EMAIL_HOME_ADDRESS",
+  "EMAIL_HOME_ADDRESS_NAME",
+  "EMAIL_IMAP_HOST",
+  "EMAIL_PASSWORD",
+  "EMAIL_SMTP_HOST",
+  "FAL_KEY",
+  "FIRECRAWL_API_KEY",
+  "FIRECRAWL_API_URL",
+  "FIREWORKS_API_KEY",
+  "GATEWAY_ALLOWED_USERS",
+  "GATEWAY_ALLOW_ALL_USERS",
+  "GH_TOKEN",
+  "GITHUB_APP_ID",
+  "GITHUB_APP_INSTALLATION_ID",
+  "GITHUB_APP_PRIVATE_KEY_PATH",
+  "GITHUB_TOKEN",
+  "GLM_API_KEY",
+  "GLM_BASE_URL",
+  "GOOGLE_API_KEY",
+  "GROQ_API_KEY",
+  "HASS_TOKEN",
+  "HASS_URL",
+  "HELICONE_API_KEY",
+  "KIMI_API_KEY",
+  "KIMI_BASE_URL",
+  "LLM_MODEL",
+  "MINIMAX_API_KEY",
+  "MINIMAX_BASE_URL",
+  "MINIMAX_CN_API_KEY",
+  "MINIMAX_CN_BASE_URL",
+  "MISTRAL_API_KEY",
+  "OPENAI_API_BASE",
+  "OPENAI_API_KEY",
+  "OPENAI_BASE_URL",
+  "OPENAI_ORGANIZATION",
+  "OPENAI_ORG_ID",
+  "OPENROUTER_API_KEY",
+  "PERPLEXITY_API_KEY",
+  "SIGNAL_ACCOUNT",
+  "SIGNAL_ALLOWED_USERS",
+  "SIGNAL_GROUP_ALLOWED_USERS",
+  "SIGNAL_HOME_CHANNEL",
+  "SIGNAL_HOME_CHANNEL_NAME",
+  "SIGNAL_HTTP_URL",
+  "SIGNAL_IGNORE_STORIES",
+  "SLACK_ALLOWED_USERS",
+  "SLACK_APP_TOKEN",
+  "SLACK_BOT_TOKEN",
+  "SLACK_HOME_CHANNEL",
+  "SLACK_HOME_CHANNEL_NAME",
+  "SUDO_PASSWORD",
+  "TELEGRAM_ALLOWED_USERS",
+  "TELEGRAM_BOT_TOKEN",
+  "TELEGRAM_HOME_CHANNEL",
+  "TELEGRAM_HOME_CHANNEL_NAME",
+  "TINKER_API_KEY",
+  "TOGETHER_API_KEY",
+  "VOICE_TOOLS_OPENAI_KEY",
+  "WANDB_API_KEY",
+  "WHATSAPP_ALLOWED_USERS",
+  "WHATSAPP_ENABLED",
+  "WHATSAPP_MODE",
+  "XAI_API_KEY",
+  "ZAI_API_KEY",
+  "Z_AI_API_KEY"
+ ],
+ "run_env": [
+  {
+   "environ": {
+    "PATH": "/opt/bin",
+    "HOME": "/h",
+    "OPENAI_API_KEY": "x",
+    "_GAUSS_FORCE_OPENAI_API_KEY": "y"
+   },
+   "extra": {},
+   "run_env": {
+    "PATH": "/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "HOME": "/h",
+    "OPENAI_API_KEY": "y"
+   }
+  },
+  {
+   "environ": {
+    "PATH": "/usr/bin:/bin",
+    "SUDO_PASSWORD": "s",
+    "A": "1"
+   },
+   "extra": {
+    "B": "2",
+    "_GAUSS_FORCE_GH_TOKEN": "t"
+   },
+   "run_env": {
+    "PATH": "/usr/bin:/bin",
+    "A": "1",
+    "B": "2",
+    "GH_TOKEN": "t"
+   }
+  },
+  {
+   "environ": {},
+   "extra": {},
+   "run_env": {
+    "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+   }
+  },
+  {
+   "environ": {
+    "PATH": ""
+   },
+   "extra": {
+    "PATH": "/x"
+   },
+   "run_env": {
+    "PATH": "/x:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+   }
+  },
+  {
+   "environ": {
+    "X": "1",
+    "_GAUSS_FORCE_X": "2"
+   },
+   "extra": {},
+   "run_env": {
+    "X": "2",
+    "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+   }
+  },
+  {
+   "environ": {
+    "_GAUSS_FORCE_X": "2",
+    "X": "1"
+   },
+   "extra": {},
+   "run_env": {
+    "X": "1",
+    "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+   }
+  }
+ ],
+ "fence": [
+  {
+   "raw": "",
+   "extracted": "",
+   "cleaned": ""
+  },
+  {
+   "raw": "plain",
+   "extracted": "plain",
+   "cleaned": "plain"
+  },
+  {
+   "raw": "bash: no job control in this shell\nhi\n\nLast login: x\n",
+   "extracted": "hi\n",
+   "cleaned": "hi\n"
+  },
+  {
+   "raw": "a\n\n",
+   "extracted": "a\n",
+   "cleaned": "a\n"
+  },
+  {
+   "raw": "noise__GAUSS_FENCE_a9f7b3__out\n__GAUSS_FENCE_a9f7b3__bye",
+   "extracted": "out\n",
+   "cleaned": "noise__GAUSS_FENCE_a9f7b3__out\n__GAUSS_FENCE_a9f7b3__bye"
+  },
+  {
+   "raw": "__GAUSS_FENCE_a9f7b3__only start\nlogout\n",
+   "extracted": "only start\nlogout\n",
+   "cleaned": "__GAUSS_FENCE_a9f7b3__only start\nlogout\n"
+  },
+  {
+   "raw": "x__GAUSS_FENCE_a9f7b3__a__GAUSS_FENCE_a9f7b3__b__GAUSS_FENCE_a9f7b3__c",
+   "extracted": "a__GAUSS_FENCE_a9f7b3__b",
+   "cleaned": "x__GAUSS_FENCE_a9f7b3__a__GAUSS_FENCE_a9f7b3__b__GAUSS_FENCE_a9f7b3__c"
+  },
+  {
+   "raw": "Oh My Zsh\n",
+   "extracted": "",
+   "cleaned": ""
+  },
+  {
+   "raw": "\n\n\n",
+   "extracted": "",
+   "cleaned": ""
+  },
+  {
+   "raw": "keep\nLast login: mid\nkeep2",
+   "extracted": "keep\nLast login: mid\nkeep2",
+   "cleaned": "keep\nLast login: mid\nkeep2"
+  },
+  {
+   "raw": "__GAUSS_FENCE_a9f7b3____GAUSS_FENCE_a9f7b3__",
+   "extracted": "",
+   "cleaned": "__GAUSS_FENCE_a9f7b3____GAUSS_FENCE_a9f7b3__"
+  },
+  {
+   "raw": "command not found: x\nreal\n",
+   "extracted": "real\n",
+   "cleaned": "real\n"
+  }
+ ],
+ "config": [
+  {
+   "env": {},
+   "config": {
+    "env_type": "local",
+    "docker_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "singularity_image": "docker://nikolaik/python-nodejs:python3.11-nodejs20",
+    "modal_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "daytona_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "cwd": "<CWD>",
+    "host_cwd": null,
+    "docker_mount_cwd_to_workspace": false,
+    "timeout": 180,
+    "lifetime_seconds": 300,
+    "ssh_host": "",
+    "ssh_user": "",
+    "ssh_port": 22,
+    "ssh_key": "",
+    "ssh_persistent": true,
+    "local_persistent": false,
+    "container_cpu": 1.0,
+    "container_memory": 5120,
+    "container_disk": 51200,
+    "container_persistent": true,
+    "docker_volumes": []
+   }
+  },
+  {
+   "env": {
+    "TERMINAL_ENV": "ssh"
+   },
+   "config": {
+    "env_type": "ssh",
+    "docker_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "singularity_image": "docker://nikolaik/python-nodejs:python3.11-nodejs20",
+    "modal_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "daytona_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "cwd": "~",
+    "host_cwd": null,
+    "docker_mount_cwd_to_workspace": false,
+    "timeout": 180,
+    "lifetime_seconds": 300,
+    "ssh_host": "",
+    "ssh_user": "",
+    "ssh_port": 22,
+    "ssh_key": "",
+    "ssh_persistent": true,
+    "local_persistent": false,
+    "container_cpu": 1.0,
+    "container_memory": 5120,
+    "container_disk": 51200,
+    "container_persistent": true,
+    "docker_volumes": []
+   }
+  },
+  {
+   "env": {
+    "TERMINAL_ENV": "docker",
+    "TERMINAL_CWD": "/Users/tom/proj"
+   },
+   "config": {
+    "env_type": "docker",
+    "docker_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "singularity_image": "docker://nikolaik/python-nodejs:python3.11-nodejs20",
+    "modal_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "daytona_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "cwd": "/root",
+    "host_cwd": null,
+    "docker_mount_cwd_to_workspace": false,
+    "timeout": 180,
+    "lifetime_seconds": 300,
+    "ssh_host": "",
+    "ssh_user": "",
+    "ssh_port": 22,
+    "ssh_key": "",
+    "ssh_persistent": true,
+    "local_persistent": false,
+    "container_cpu": 1.0,
+    "container_memory": 5120,
+    "container_disk": 51200,
+    "container_persistent": true,
+    "docker_volumes": []
+   }
+  },
+  {
+   "env": {
+    "TERMINAL_ENV": "docker",
+    "TERMINAL_CWD": "/root"
+   },
+   "config": {
+    "env_type": "docker",
+    "docker_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "singularity_image": "docker://nikolaik/python-nodejs:python3.11-nodejs20",
+    "modal_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "daytona_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "cwd": "/root",
+    "host_cwd": null,
+    "docker_mount_cwd_to_workspace": false,
+    "timeout": 180,
+    "lifetime_seconds": 300,
+    "ssh_host": "",
+    "ssh_user": "",
+    "ssh_port": 22,
+    "ssh_key": "",
+    "ssh_persistent": true,
+    "local_persistent": false,
+    "container_cpu": 1.0,
+    "container_memory": 5120,
+    "container_disk": 51200,
+    "container_persistent": true,
+    "docker_volumes": []
+   }
+  },
+  {
+   "env": {
+    "TERMINAL_ENV": "docker",
+    "TERMINAL_DOCKER_MOUNT_CWD_TO_WORKSPACE": "yes",
+    "TERMINAL_CWD": "/home/u/p"
+   },
+   "config": {
+    "env_type": "docker",
+    "docker_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "singularity_image": "docker://nikolaik/python-nodejs:python3.11-nodejs20",
+    "modal_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "daytona_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "cwd": "/workspace",
+    "host_cwd": "/home/u/p",
+    "docker_mount_cwd_to_workspace": true,
+    "timeout": 180,
+    "lifetime_seconds": 300,
+    "ssh_host": "",
+    "ssh_user": "",
+    "ssh_port": 22,
+    "ssh_key": "",
+    "ssh_persistent": true,
+    "local_persistent": false,
+    "container_cpu": 1.0,
+    "container_memory": 5120,
+    "container_disk": 51200,
+    "container_persistent": true,
+    "docker_volumes": []
+   }
+  },
+  {
+   "env": {
+    "TERMINAL_ENV": "docker",
+    "TERMINAL_DOCKER_MOUNT_CWD_TO_WORKSPACE": "TRUE",
+    "TERMINAL_CWD": "/workspace/x"
+   },
+   "config": {
+    "env_type": "docker",
+    "docker_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "singularity_image": "docker://nikolaik/python-nodejs:python3.11-nodejs20",
+    "modal_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "daytona_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "cwd": "/workspace/x",
+    "host_cwd": null,
+    "docker_mount_cwd_to_workspace": true,
+    "timeout": 180,
+    "lifetime_seconds": 300,
+    "ssh_host": "",
+    "ssh_user": "",
+    "ssh_port": 22,
+    "ssh_key": "",
+    "ssh_persistent": true,
+    "local_persistent": false,
+    "container_cpu": 1.0,
+    "container_memory": 5120,
+    "container_disk": 51200,
+    "container_persistent": true,
+    "docker_volumes": []
+   }
+  },
+  {
+   "env": {
+    "TERMINAL_TIMEOUT": "5m"
+   },
+   "error": "ValueError: Invalid value for TERMINAL_TIMEOUT: '5m' (expected integer). Check ~/.gauss/.env or environment variables."
+  },
+  {
+   "env": {
+    "TERMINAL_TIMEOUT": " 1_000 "
+   },
+   "config": {
+    "env_type": "local",
+    "docker_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "singularity_image": "docker://nikolaik/python-nodejs:python3.11-nodejs20",
+    "modal_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "daytona_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "cwd": "<CWD>",
+    "host_cwd": null,
+    "docker_mount_cwd_to_workspace": false,
+    "timeout": 1000,
+    "lifetime_seconds": 300,
+    "ssh_host": "",
+    "ssh_user": "",
+    "ssh_port": 22,
+    "ssh_key": "",
+    "ssh_persistent": true,
+    "local_persistent": false,
+    "container_cpu": 1.0,
+    "container_memory": 5120,
+    "container_disk": 51200,
+    "container_persistent": true,
+    "docker_volumes": []
+   }
+  },
+  {
+   "env": {
+    "TERMINAL_CONTAINER_CPU": "inf"
+   },
+   "config": {
+    "env_type": "local",
+    "docker_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "singularity_image": "docker://nikolaik/python-nodejs:python3.11-nodejs20",
+    "modal_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "daytona_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "cwd": "<CWD>",
+    "host_cwd": null,
+    "docker_mount_cwd_to_workspace": false,
+    "timeout": 180,
+    "lifetime_seconds": 300,
+    "ssh_host": "",
+    "ssh_user": "",
+    "ssh_port": 22,
+    "ssh_key": "",
+    "ssh_persistent": true,
+    "local_persistent": false,
+    "container_cpu": Infinity,
+    "container_memory": 5120,
+    "container_disk": 51200,
+    "container_persistent": true,
+    "docker_volumes": []
+   }
+  },
+  {
+   "env": {
+    "TERMINAL_CONTAINER_CPU": "abc"
+   },
+   "error": "ValueError: Invalid value for TERMINAL_CONTAINER_CPU: 'abc' (expected number). Check ~/.gauss/.env or environment variables."
+  },
+  {
+   "env": {
+    "TERMINAL_DOCKER_VOLUMES": "{bad"
+   },
+   "error": "ValueError: Invalid value for TERMINAL_DOCKER_VOLUMES: '{bad' (expected valid JSON). Check ~/.gauss/.env or environment variables."
+  },
+  {
+   "env": {
+    "TERMINAL_DOCKER_VOLUMES": "[\"/a:/b\", 3]"
+   },
+   "config": {
+    "env_type": "local",
+    "docker_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "singularity_image": "docker://nikolaik/python-nodejs:python3.11-nodejs20",
+    "modal_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "daytona_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "cwd": "<CWD>",
+    "host_cwd": null,
+    "docker_mount_cwd_to_workspace": false,
+    "timeout": 180,
+    "lifetime_seconds": 300,
+    "ssh_host": "",
+    "ssh_user": "",
+    "ssh_port": 22,
+    "ssh_key": "",
+    "ssh_persistent": true,
+    "local_persistent": false,
+    "container_cpu": 1.0,
+    "container_memory": 5120,
+    "container_disk": 51200,
+    "container_persistent": true,
+    "docker_volumes": [
+     "/a:/b",
+     3
+    ]
+   }
+  },
+  {
+   "env": {
+    "TERMINAL_SSH_PORT": "-22"
+   },
+   "config": {
+    "env_type": "local",
+    "docker_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "singularity_image": "docker://nikolaik/python-nodejs:python3.11-nodejs20",
+    "modal_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "daytona_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "cwd": "<CWD>",
+    "host_cwd": null,
+    "docker_mount_cwd_to_workspace": false,
+    "timeout": 180,
+    "lifetime_seconds": 300,
+    "ssh_host": "",
+    "ssh_user": "",
+    "ssh_port": -22,
+    "ssh_key": "",
+    "ssh_persistent": true,
+    "local_persistent": false,
+    "container_cpu": 1.0,
+    "container_memory": 5120,
+    "container_disk": 51200,
+    "container_persistent": true,
+    "docker_volumes": []
+   }
+  },
+  {
+   "env": {
+    "TERMINAL_PERSISTENT_SHELL": "false"
+   },
+   "config": {
+    "env_type": "local",
+    "docker_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "singularity_image": "docker://nikolaik/python-nodejs:python3.11-nodejs20",
+    "modal_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "daytona_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "cwd": "<CWD>",
+    "host_cwd": null,
+    "docker_mount_cwd_to_workspace": false,
+    "timeout": 180,
+    "lifetime_seconds": 300,
+    "ssh_host": "",
+    "ssh_user": "",
+    "ssh_port": 22,
+    "ssh_key": "",
+    "ssh_persistent": false,
+    "local_persistent": false,
+    "container_cpu": 1.0,
+    "container_memory": 5120,
+    "container_disk": 51200,
+    "container_persistent": true,
+    "docker_volumes": []
+   }
+  },
+  {
+   "env": {
+    "TERMINAL_SSH_PERSISTENT": "1",
+    "TERMINAL_PERSISTENT_SHELL": "false"
+   },
+   "config": {
+    "env_type": "local",
+    "docker_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "singularity_image": "docker://nikolaik/python-nodejs:python3.11-nodejs20",
+    "modal_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "daytona_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "cwd": "<CWD>",
+    "host_cwd": null,
+    "docker_mount_cwd_to_workspace": false,
+    "timeout": 180,
+    "lifetime_seconds": 300,
+    "ssh_host": "",
+    "ssh_user": "",
+    "ssh_port": 22,
+    "ssh_key": "",
+    "ssh_persistent": true,
+    "local_persistent": false,
+    "container_cpu": 1.0,
+    "container_memory": 5120,
+    "container_disk": 51200,
+    "container_persistent": true,
+    "docker_volumes": []
+   }
+  },
+  {
+   "env": {
+    "TERMINAL_LOCAL_PERSISTENT": "Yes"
+   },
+   "config": {
+    "env_type": "local",
+    "docker_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "singularity_image": "docker://nikolaik/python-nodejs:python3.11-nodejs20",
+    "modal_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "daytona_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "cwd": "<CWD>",
+    "host_cwd": null,
+    "docker_mount_cwd_to_workspace": false,
+    "timeout": 180,
+    "lifetime_seconds": 300,
+    "ssh_host": "",
+    "ssh_user": "",
+    "ssh_port": 22,
+    "ssh_key": "",
+    "ssh_persistent": true,
+    "local_persistent": true,
+    "container_cpu": 1.0,
+    "container_memory": 5120,
+    "container_disk": 51200,
+    "container_persistent": true,
+    "docker_volumes": []
+   }
+  },
+  {
+   "env": {
+    "TERMINAL_ENV": "modal",
+    "TERMINAL_CWD": "C:/x"
+   },
+   "config": {
+    "env_type": "modal",
+    "docker_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "singularity_image": "docker://nikolaik/python-nodejs:python3.11-nodejs20",
+    "modal_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "daytona_image": "nikolaik/python-nodejs:python3.11-nodejs20",
+    "cwd": "/root",
+    "host_cwd": null,
+    "docker_mount_cwd_to_workspace": false,
+    "timeout": 180,
+    "lifetime_seconds": 300,
+    "ssh_host": "",
+    "ssh_user": "",
+    "ssh_port": 22,
+    "ssh_key": "",
+    "ssh_persistent": true,
+    "local_persistent": false,
+    "container_cpu": 1.0,
+    "container_memory": 5120,
+    "container_disk": 51200,
+    "container_persistent": true,
+    "docker_volumes": []
+   }
+  },
+  {
+   "env": {
+    "TERMINAL_TIMEOUT": "it's"
+   },
+   "error": "ValueError: Invalid value for TERMINAL_TIMEOUT: \"it's\" (expected integer). Check ~/.gauss/.env or environment variables."
+  }
+ ],
+ "ssh_argv": [
+  {
+   "host": "h",
+   "user": "u",
+   "port": 22,
+   "key": "",
+   "base": [
+    "ssh",
+    "-o",
+    "ControlPath=/tmp/gauss-ssh/u@h:22.sock",
+    "-o",
+    "ControlMaster=auto",
+    "-o",
+    "ControlPersist=300",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=accept-new",
+    "-o",
+    "ConnectTimeout=10",
+    "u@h"
+   ],
+   "with": [
+    "ssh",
+    "-o",
+    "ControlPath=/tmp/gauss-ssh/u@h:22.sock",
+    "-o",
+    "ControlMaster=auto",
+    "-o",
+    "ControlPersist=300",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=accept-new",
+    "-o",
+    "ConnectTimeout=10",
+    "-t",
+    "u@h"
+   ]
+  },
+  {
+   "host": "10.0.0.1",
+   "user": "root",
+   "port": 2222,
+   "key": "~/.ssh/id",
+   "base": [
+    "ssh",
+    "-o",
+    "ControlPath=/tmp/gauss-ssh/root@10.0.0.1:2222.sock",
+    "-o",
+    "ControlMaster=auto",
+    "-o",
+    "ControlPersist=300",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=accept-new",
+    "-o",
+    "ConnectTimeout=10",
+    "-p",
+    "2222",
+    "-i",
+    "~/.ssh/id",
+    "root@10.0.0.1"
+   ],
+   "with": [
+    "ssh",
+    "-o",
+    "ControlPath=/tmp/gauss-ssh/root@10.0.0.1:2222.sock",
+    "-o",
+    "ControlMaster=auto",
+    "-o",
+    "ControlPersist=300",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=accept-new",
+    "-o",
+    "ConnectTimeout=10",
+    "-p",
+    "2222",
+    "-i",
+    "~/.ssh/id",
+    "-t",
+    "root@10.0.0.1"
+   ]
+  },
+  {
+   "host": "h",
+   "user": "u",
+   "port": 22,
+   "key": "/k",
+   "base": [
+    "ssh",
+    "-o",
+    "ControlPath=/tmp/gauss-ssh/u@h:22.sock",
+    "-o",
+    "ControlMaster=auto",
+    "-o",
+    "ControlPersist=300",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=accept-new",
+    "-o",
+    "ConnectTimeout=10",
+    "-i",
+    "/k",
+    "u@h"
+   ],
+   "with": [
+    "ssh",
+    "-o",
+    "ControlPath=/tmp/gauss-ssh/u@h:22.sock",
+    "-o",
+    "ControlMaster=auto",
+    "-o",
+    "ControlPersist=300",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=accept-new",
+    "-o",
+    "ConnectTimeout=10",
+    "-i",
+    "/k",
+    "-t",
+    "u@h"
+   ]
+  }
+ ],
+ "docker_argv": [
+  {
+   "args": {
+    "image": "img",
+    "cwd": "/root",
+    "timeout": 60,
+    "cpu": 1.0,
+    "memory": 5120,
+    "disk": 51200,
+    "persistent_filesystem": true,
+    "task_id": "t1"
+   },
+   "runs": [
+    {
+     "run": [
+      "/usr/bin/docker",
+      "version"
+     ]
+    },
+    {
+     "run": [
+      "/usr/bin/docker",
+      "info",
+      "--format",
+      "{{.Driver}}"
+     ]
+    },
+    {
+     "run": [
+      "/usr/bin/docker",
+      "create",
+      "--storage-opt",
+      "size=1m",
+      "hello-world"
+     ]
+    },
+    {
+     "run": [
+      "/usr/bin/docker",
+      "rm",
+      "hello123"
+     ]
+    },
+    {
+     "inner": {
+      "image": "img",
+      "cwd": "/root",
+      "timeout": 60,
+      "run_args": [
+       "--cap-drop",
+       "ALL",
+       "--cap-add",
+       "DAC_OVERRIDE",
+       "--cap-add",
+       "CHOWN",
+       "--cap-add",
+       "FOWNER",
+       "--security-opt",
+       "no-new-privileges",
+       "--pids-limit",
+       "256",
+       "--tmpfs",
+       "/tmp:rw,nosuid,size=512m",
+       "--tmpfs",
+       "/var/tmp:rw,noexec,nosuid,size=256m",
+       "--tmpfs",
+       "/run:rw,noexec,nosuid,size=64m",
+       "-v",
+       "<SANDBOX>/docker/t1/home:/root",
+       "-v",
+       "<SANDBOX>/docker/t1/workspace:/workspace",
+       "--cpus",
+       "1.0",
+       "--memory",
+       "5120m",
+       "--storage-opt",
+       "size=51200m"
+      ]
+     }
+    }
+   ],
+   "error": null,
+   "exec": [
+    {
+     "command": "ls",
+     "cwd": "",
+     "stdin": null,
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-w",
+      "/root",
+      "cid123",
+      "bash",
+      "-lc",
+      "ls"
+     ],
+     "stdin_mode": "DEVNULL"
+    },
+    {
+     "command": "cat > f",
+     "cwd": "/tmp",
+     "stdin": "data",
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-i",
+      "-w",
+      "/tmp",
+      "cid123",
+      "bash",
+      "-lc",
+      "cat > f"
+     ],
+     "stdin_mode": "PIPE"
+    },
+    {
+     "command": "pwd",
+     "cwd": "~/x",
+     "stdin": null,
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-w",
+      "/",
+      "cid123",
+      "bash",
+      "-lc",
+      "cd ~/x && pwd"
+     ],
+     "stdin_mode": "DEVNULL"
+    },
+    {
+     "command": "pwd",
+     "cwd": "~",
+     "stdin": "",
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-i",
+      "-w",
+      "/",
+      "cid123",
+      "bash",
+      "-lc",
+      "cd ~ && pwd"
+     ],
+     "stdin_mode": "DEVNULL"
+    },
+    {
+     "command": "sudo ls",
+     "cwd": "",
+     "stdin": null,
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-w",
+      "/root",
+      "cid123",
+      "bash",
+      "-lc",
+      "sudo ls"
+     ],
+     "stdin_mode": "DEVNULL"
+    }
+   ]
+  },
+  {
+   "args": {
+    "image": "img",
+    "cwd": "~",
+    "timeout": 30,
+    "cpu": 0,
+    "memory": 0,
+    "disk": 0,
+    "persistent_filesystem": false,
+    "task_id": "t2"
+   },
+   "runs": [
+    {
+     "run": [
+      "/usr/bin/docker",
+      "version"
+     ]
+    },
+    {
+     "inner": {
+      "image": "img",
+      "cwd": "/root",
+      "timeout": 30,
+      "run_args": [
+       "--cap-drop",
+       "ALL",
+       "--cap-add",
+       "DAC_OVERRIDE",
+       "--cap-add",
+       "CHOWN",
+       "--cap-add",
+       "FOWNER",
+       "--security-opt",
+       "no-new-privileges",
+       "--pids-limit",
+       "256",
+       "--tmpfs",
+       "/tmp:rw,nosuid,size=512m",
+       "--tmpfs",
+       "/var/tmp:rw,noexec,nosuid,size=256m",
+       "--tmpfs",
+       "/run:rw,noexec,nosuid,size=64m",
+       "--tmpfs",
+       "/workspace:rw,exec,size=10g",
+       "--tmpfs",
+       "/home:rw,exec,size=1g",
+       "--tmpfs",
+       "/root:rw,exec,size=1g"
+      ]
+     }
+    }
+   ],
+   "error": null,
+   "exec": [
+    {
+     "command": "ls",
+     "cwd": "",
+     "stdin": null,
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-w",
+      "/root",
+      "cid123",
+      "bash",
+      "-lc",
+      "ls"
+     ],
+     "stdin_mode": "DEVNULL"
+    },
+    {
+     "command": "cat > f",
+     "cwd": "/tmp",
+     "stdin": "data",
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-i",
+      "-w",
+      "/tmp",
+      "cid123",
+      "bash",
+      "-lc",
+      "cat > f"
+     ],
+     "stdin_mode": "PIPE"
+    },
+    {
+     "command": "pwd",
+     "cwd": "~/x",
+     "stdin": null,
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-w",
+      "/",
+      "cid123",
+      "bash",
+      "-lc",
+      "cd ~/x && pwd"
+     ],
+     "stdin_mode": "DEVNULL"
+    },
+    {
+     "command": "pwd",
+     "cwd": "~",
+     "stdin": "",
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-i",
+      "-w",
+      "/",
+      "cid123",
+      "bash",
+      "-lc",
+      "cd ~ && pwd"
+     ],
+     "stdin_mode": "DEVNULL"
+    },
+    {
+     "command": "sudo ls",
+     "cwd": "",
+     "stdin": null,
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-w",
+      "/root",
+      "cid123",
+      "bash",
+      "-lc",
+      "sudo ls"
+     ],
+     "stdin_mode": "DEVNULL"
+    }
+   ]
+  },
+  {
+   "args": {
+    "image": "img",
+    "cwd": "/workspace",
+    "timeout": 60,
+    "cpu": 2.5,
+    "memory": 100,
+    "disk": 0,
+    "persistent_filesystem": true,
+    "task_id": "t3",
+    "volumes": [
+     "/a:/b",
+     " ",
+     "nocolon",
+     7,
+     "/x:/workspace:ro"
+    ]
+   },
+   "runs": [
+    {
+     "run": [
+      "/usr/bin/docker",
+      "version"
+     ]
+    },
+    {
+     "inner": {
+      "image": "img",
+      "cwd": "/workspace",
+      "timeout": 60,
+      "run_args": [
+       "--cap-drop",
+       "ALL",
+       "--cap-add",
+       "DAC_OVERRIDE",
+       "--cap-add",
+       "CHOWN",
+       "--cap-add",
+       "FOWNER",
+       "--security-opt",
+       "no-new-privileges",
+       "--pids-limit",
+       "256",
+       "--tmpfs",
+       "/tmp:rw,nosuid,size=512m",
+       "--tmpfs",
+       "/var/tmp:rw,noexec,nosuid,size=256m",
+       "--tmpfs",
+       "/run:rw,noexec,nosuid,size=64m",
+       "-v",
+       "<SANDBOX>/docker/t3/home:/root",
+       "--cpus",
+       "2.5",
+       "--memory",
+       "100m",
+       "-v",
+       "/a:/b",
+       "-v",
+       "/x:/workspace:ro"
+      ]
+     }
+    }
+   ],
+   "error": null,
+   "exec": [
+    {
+     "command": "ls",
+     "cwd": "",
+     "stdin": null,
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-w",
+      "/workspace",
+      "cid123",
+      "bash",
+      "-lc",
+      "ls"
+     ],
+     "stdin_mode": "DEVNULL"
+    },
+    {
+     "command": "cat > f",
+     "cwd": "/tmp",
+     "stdin": "data",
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-i",
+      "-w",
+      "/tmp",
+      "cid123",
+      "bash",
+      "-lc",
+      "cat > f"
+     ],
+     "stdin_mode": "PIPE"
+    },
+    {
+     "command": "pwd",
+     "cwd": "~/x",
+     "stdin": null,
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-w",
+      "/",
+      "cid123",
+      "bash",
+      "-lc",
+      "cd ~/x && pwd"
+     ],
+     "stdin_mode": "DEVNULL"
+    },
+    {
+     "command": "pwd",
+     "cwd": "~",
+     "stdin": "",
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-i",
+      "-w",
+      "/",
+      "cid123",
+      "bash",
+      "-lc",
+      "cd ~ && pwd"
+     ],
+     "stdin_mode": "DEVNULL"
+    },
+    {
+     "command": "sudo ls",
+     "cwd": "",
+     "stdin": null,
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-w",
+      "/workspace",
+      "cid123",
+      "bash",
+      "-lc",
+      "sudo ls"
+     ],
+     "stdin_mode": "DEVNULL"
+    }
+   ]
+  },
+  {
+   "args": {
+    "image": "img",
+    "cwd": "/workspace",
+    "timeout": 60,
+    "cpu": 1.0,
+    "memory": 5120,
+    "disk": 0,
+    "persistent_filesystem": false,
+    "task_id": "t4",
+    "host_cwd": "<HOSTDIR>",
+    "auto_mount_cwd": true
+   },
+   "runs": [
+    {
+     "run": [
+      "/usr/bin/docker",
+      "version"
+     ]
+    },
+    {
+     "inner": {
+      "image": "img",
+      "cwd": "/workspace",
+      "timeout": 60,
+      "run_args": [
+       "--cap-drop",
+       "ALL",
+       "--cap-add",
+       "DAC_OVERRIDE",
+       "--cap-add",
+       "CHOWN",
+       "--cap-add",
+       "FOWNER",
+       "--security-opt",
+       "no-new-privileges",
+       "--pids-limit",
+       "256",
+       "--tmpfs",
+       "/tmp:rw,nosuid,size=512m",
+       "--tmpfs",
+       "/var/tmp:rw,noexec,nosuid,size=256m",
+       "--tmpfs",
+       "/run:rw,noexec,nosuid,size=64m",
+       "--tmpfs",
+       "/home:rw,exec,size=1g",
+       "--tmpfs",
+       "/root:rw,exec,size=1g",
+       "--cpus",
+       "1.0",
+       "--memory",
+       "5120m",
+       "-v",
+       "<HOSTDIR>:/workspace"
+      ]
+     }
+    }
+   ],
+   "error": null,
+   "exec": [
+    {
+     "command": "ls",
+     "cwd": "",
+     "stdin": null,
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-w",
+      "/workspace",
+      "cid123",
+      "bash",
+      "-lc",
+      "ls"
+     ],
+     "stdin_mode": "DEVNULL"
+    },
+    {
+     "command": "cat > f",
+     "cwd": "/tmp",
+     "stdin": "data",
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-i",
+      "-w",
+      "/tmp",
+      "cid123",
+      "bash",
+      "-lc",
+      "cat > f"
+     ],
+     "stdin_mode": "PIPE"
+    },
+    {
+     "command": "pwd",
+     "cwd": "~/x",
+     "stdin": null,
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-w",
+      "/",
+      "cid123",
+      "bash",
+      "-lc",
+      "cd ~/x && pwd"
+     ],
+     "stdin_mode": "DEVNULL"
+    },
+    {
+     "command": "pwd",
+     "cwd": "~",
+     "stdin": "",
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-i",
+      "-w",
+      "/",
+      "cid123",
+      "bash",
+      "-lc",
+      "cd ~ && pwd"
+     ],
+     "stdin_mode": "DEVNULL"
+    },
+    {
+     "command": "sudo ls",
+     "cwd": "",
+     "stdin": null,
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-w",
+      "/workspace",
+      "cid123",
+      "bash",
+      "-lc",
+      "sudo ls"
+     ],
+     "stdin_mode": "DEVNULL"
+    }
+   ]
+  },
+  {
+   "args": {
+    "image": "img",
+    "cwd": "/workspace",
+    "timeout": 60,
+    "cpu": 1.0,
+    "memory": 0,
+    "disk": 0,
+    "persistent_filesystem": true,
+    "task_id": "t5",
+    "host_cwd": "<HOSTDIR>",
+    "auto_mount_cwd": true,
+    "volumes": "notalist"
+   },
+   "runs": [
+    {
+     "run": [
+      "/usr/bin/docker",
+      "version"
+     ]
+    },
+    {
+     "inner": {
+      "image": "img",
+      "cwd": "/workspace",
+      "timeout": 60,
+      "run_args": [
+       "--cap-drop",
+       "ALL",
+       "--cap-add",
+       "DAC_OVERRIDE",
+       "--cap-add",
+       "CHOWN",
+       "--cap-add",
+       "FOWNER",
+       "--security-opt",
+       "no-new-privileges",
+       "--pids-limit",
+       "256",
+       "--tmpfs",
+       "/tmp:rw,nosuid,size=512m",
+       "--tmpfs",
+       "/var/tmp:rw,noexec,nosuid,size=256m",
+       "--tmpfs",
+       "/run:rw,noexec,nosuid,size=64m",
+       "-v",
+       "<SANDBOX>/docker/t5/home:/root",
+       "--cpus",
+       "1.0",
+       "-v",
+       "<HOSTDIR>:/workspace"
+      ]
+     }
+    }
+   ],
+   "error": null,
+   "exec": [
+    {
+     "command": "ls",
+     "cwd": "",
+     "stdin": null,
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-w",
+      "/workspace",
+      "cid123",
+      "bash",
+      "-lc",
+      "ls"
+     ],
+     "stdin_mode": "DEVNULL"
+    },
+    {
+     "command": "cat > f",
+     "cwd": "/tmp",
+     "stdin": "data",
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-i",
+      "-w",
+      "/tmp",
+      "cid123",
+      "bash",
+      "-lc",
+      "cat > f"
+     ],
+     "stdin_mode": "PIPE"
+    },
+    {
+     "command": "pwd",
+     "cwd": "~/x",
+     "stdin": null,
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-w",
+      "/",
+      "cid123",
+      "bash",
+      "-lc",
+      "cd ~/x && pwd"
+     ],
+     "stdin_mode": "DEVNULL"
+    },
+    {
+     "command": "pwd",
+     "cwd": "~",
+     "stdin": "",
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-i",
+      "-w",
+      "/",
+      "cid123",
+      "bash",
+      "-lc",
+      "cd ~ && pwd"
+     ],
+     "stdin_mode": "DEVNULL"
+    },
+    {
+     "command": "sudo ls",
+     "cwd": "",
+     "stdin": null,
+     "argv": [
+      "/usr/bin/docker",
+      "exec",
+      "-w",
+      "/workspace",
+      "cid123",
+      "bash",
+      "-lc",
+      "sudo ls"
+     ],
+     "stdin_mode": "DEVNULL"
+    }
+   ]
+  }
+ ],
+ "cases": []
+}

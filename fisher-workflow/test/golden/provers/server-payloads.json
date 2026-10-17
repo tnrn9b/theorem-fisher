@@ -1,0 +1,209 @@
+{
+  "bad-override": "error: GAUSS_AUTOFORMALIZE_ROCQ_MCP_SPEC must be a package spec, without spaces.",
+  "blank-override": {
+    "args": [
+      "--from",
+      "git+https://github.com/LLM4Rocq/rocq-mcp@6983113d0844c0b7f987c79dab13988445109bfb",
+      "rocq-mcp"
+    ],
+    "command": "uvx",
+    "connect_timeout": 300,
+    "cwd": "/work/proj",
+    "env": {
+      "ROCQ_PROJECT_PATH": "/work/proj",
+      "ROCQ_WORKSPACE": "/work/proj"
+    },
+    "fisher_messages": true,
+    "reconnect_on_exit": true,
+    "timeout": 300,
+    "tools": {
+      "include": [
+        "rocq_compile",
+        "rocq_compile_file",
+        "rocq_verify",
+        "rocq_query",
+        "rocq_assumptions",
+        "rocq_toc",
+        "rocq_notations",
+        "rocq_start",
+        "rocq_step_multi",
+        "rocq_check",
+        "rocq_diag",
+        "rocq_health"
+      ]
+    },
+    "type": "stdio"
+  },
+  "isabelle": {
+    "args": [
+      "--from",
+      "isabelle-mcp==0.6.0",
+      "python",
+      "/work/state/isabelle-mcp/isabelle_mcp_shim.py"
+    ],
+    "command": "uvx",
+    "connect_timeout": 300,
+    "cwd": "/work/proj",
+    "env": {
+      "ISABELLE_PROJECT_PATH": "/work/proj"
+    },
+    "fisher_messages": true,
+    "reconnect_on_exit": true,
+    "timeout": 300,
+    "tools": {
+      "include": [
+        "isabelle_launch",
+        "isabelle_terminate",
+        "isabelle_evaluate_to",
+        "isabelle_evaluation_status",
+        "isabelle_cancel_evaluation",
+        "isabelle_hover",
+        "isabelle_definition",
+        "isabelle_local_occurrences",
+        "isabelle_goal",
+        "isabelle_find_theorems",
+        "isabelle_command_output",
+        "isabelle_command_status",
+        "isabelle_session_info"
+      ]
+    },
+    "type": "stdio"
+  },
+  "isabelle-no-shim": {
+    "args": [
+      "--from",
+      "isabelle-mcp==0.6.0",
+      "isabelle-mcp"
+    ],
+    "command": "uvx",
+    "connect_timeout": 300,
+    "cwd": "/work/proj",
+    "env": {
+      "ISABELLE_PROJECT_PATH": "/work/proj"
+    },
+    "fisher_messages": true,
+    "reconnect_on_exit": true,
+    "timeout": 300,
+    "tools": {
+      "include": [
+        "isabelle_launch",
+        "isabelle_terminate",
+        "isabelle_evaluate_to",
+        "isabelle_evaluation_status",
+        "isabelle_cancel_evaluation",
+        "isabelle_hover",
+        "isabelle_definition",
+        "isabelle_local_occurrences",
+        "isabelle_goal",
+        "isabelle_find_theorems",
+        "isabelle_command_output",
+        "isabelle_command_status",
+        "isabelle_session_info"
+      ]
+    },
+    "type": "stdio"
+  },
+  "isabelle-override": {
+    "args": [
+      "--from",
+      "git+https://example.org/isabelle-mcp",
+      "python",
+      "/work/state/isabelle-mcp/isabelle_mcp_shim.py"
+    ],
+    "command": "uvx",
+    "connect_timeout": 300,
+    "cwd": "/work/proj",
+    "env": {
+      "ISABELLE_PROJECT_PATH": "/work/proj"
+    },
+    "fisher_messages": true,
+    "reconnect_on_exit": true,
+    "timeout": 300,
+    "tools": {
+      "include": [
+        "isabelle_launch",
+        "isabelle_terminate",
+        "isabelle_evaluate_to",
+        "isabelle_evaluation_status",
+        "isabelle_cancel_evaluation",
+        "isabelle_hover",
+        "isabelle_definition",
+        "isabelle_local_occurrences",
+        "isabelle_goal",
+        "isabelle_find_theorems",
+        "isabelle_command_output",
+        "isabelle_command_status",
+        "isabelle_session_info"
+      ]
+    },
+    "type": "stdio"
+  },
+  "rocq": {
+    "args": [
+      "--from",
+      "git+https://github.com/LLM4Rocq/rocq-mcp@6983113d0844c0b7f987c79dab13988445109bfb",
+      "rocq-mcp"
+    ],
+    "command": "uvx",
+    "connect_timeout": 300,
+    "cwd": "/work/proj",
+    "env": {
+      "ROCQ_PROJECT_PATH": "/work/proj",
+      "ROCQ_WORKSPACE": "/work/proj"
+    },
+    "fisher_messages": true,
+    "reconnect_on_exit": true,
+    "timeout": 300,
+    "tools": {
+      "include": [
+        "rocq_compile",
+        "rocq_compile_file",
+        "rocq_verify",
+        "rocq_query",
+        "rocq_assumptions",
+        "rocq_toc",
+        "rocq_notations",
+        "rocq_start",
+        "rocq_step_multi",
+        "rocq_check",
+        "rocq_diag",
+        "rocq_health"
+      ]
+    },
+    "type": "stdio"
+  },
+  "rocq-override": {
+    "args": [
+      "--from",
+      "rocq-mcp==0.3",
+      "rocq-mcp"
+    ],
+    "command": "uvx",
+    "connect_timeout": 300,
+    "cwd": "/work/proj",
+    "env": {
+      "ROCQ_PROJECT_PATH": "/work/proj",
+      "ROCQ_WORKSPACE": "/work/proj"
+    },
+    "fisher_messages": true,
+    "reconnect_on_exit": true,
+    "timeout": 300,
+    "tools": {
+      "include": [
+        "rocq_compile",
+        "rocq_compile_file",
+        "rocq_verify",
+        "rocq_query",
+        "rocq_assumptions",
+        "rocq_toc",
+        "rocq_notations",
+        "rocq_start",
+        "rocq_step_multi",
+        "rocq_check",
+        "rocq_diag",
+        "rocq_health"
+      ]
+    },
+    "type": "stdio"
+  }
+}

@@ -1,0 +1,736 @@
+{
+ "upstream": "f87633900ae185b8037bf451a914fe7eeae1eb08",
+ "python": "3.11.15",
+ "cases": [
+  {
+   "value": {
+    "role": "user",
+    "content": "it's \"q\"\n é"
+   },
+   "str": "{'role': 'user', 'content': 'it\\'s \"q\"\\n é'}",
+   "len": 44
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": null,
+    "tool_calls": [
+     {
+      "id": "c1",
+      "type": "function",
+      "function": {
+       "name": "read_file",
+       "arguments": "{\"path\": \"a\"}"
+      }
+     }
+    ]
+   },
+   "str": "{'role': 'assistant', 'content': None, 'tool_calls': [{'id': 'c1', 'type': 'function', 'function': {'name': 'read_file', 'arguments': '{\"path\": \"a\"}'}}]}",
+   "len": 153
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "x\ty\r\u0000​ 😀퟿",
+    "tool_call_id": "c1"
+   },
+   "str": "{'role': 'tool', 'content': 'x\\ty\\r\\x00\\x7f\\x9f\\u200b\\u2028😀\\ud7ff', 'tool_call_id': 'c1'}",
+   "len": 90
+  },
+  {
+   "value": {
+    "a": 1.0,
+    "b": 1e-05,
+    "c": 1e+16,
+    "d": 0.1,
+    "e": -0.0,
+    "f": 123456789.125,
+    "g": true,
+    "h": false,
+    "i": null
+   },
+   "str": "{'a': 1.0, 'b': 1e-05, 'c': 1e+16, 'd': 0.1, 'e': -0.0, 'f': 123456789.125, 'g': True, 'h': False, 'i': None}",
+   "len": 109
+  },
+  {
+   "value": {
+    "k": [
+     "'",
+     "\"",
+     "'\"",
+     "\\",
+     " ",
+     "　",
+     "́",
+     "﻿",
+     "󠀁",
+     "􏿿"
+    ]
+   },
+   "str": "{'k': [\"'\", '\"', '\\'\"', '\\\\', '\\xa0', '\\u3000', '́', '\\ufeff', '\\U000e0001', '\\U0010ffff']}",
+   "len": 91
+  },
+  {
+   "value": {
+    "nested": {
+     "x": [
+      [],
+      {},
+      [
+       1,
+       [
+        2,
+        [
+         3
+        ]
+       ]
+      ]
+     ]
+    },
+    "n": -12345678901234567890
+   },
+   "str": "{'nested': {'x': [[], {}, [1, [2, [3]]]]}, 'n': -12345678901234567890}",
+   "len": 70
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": " "
+   },
+   "str": "{'role': 'assistant', 'content': ' '}",
+   "len": 37
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "∀\t '😀😀😀\n ‍'\\\t😀\té'\né∀\u0005"
+   },
+   "str": "{'role': 'user', 'content': \"∀\\t '😀😀😀\\n \\u200d'\\\\\\t😀\\té'\\né∀\\x05\"}",
+   "len": 66
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "\"''\t\n'\\é∀∀😀aa∀😀\u0005\u0005\u0005😀\"\\\\é \t\u0005'é\t😀é∀\\‍∀\"\né\na"
+   },
+   "str": "{'role': 'user', 'content': '\"\\'\\'\\t\\n\\'\\\\é∀∀😀aa∀😀\\x05\\x05\\x05😀\"\\\\\\\\é \\t\\x05\\'é\\t😀é∀\\\\\\u200d∀\"\\né\\na'}",
+   "len": 102
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "\" \taé\\ éaé\\\na \u0005∀\u0005😀 \t\" ∀\" \n\n‍\n😀\t\u0005a"
+   },
+   "str": "{'role': 'user', 'content': '\" \\taé\\\\ éaé\\\\\\na \\x05∀\\x05😀 \\t\" ∀\" \\n\\n\\u200d\\n😀\\t\\x05a'}",
+   "len": 87
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "\"\"\u0005 a😀\té😀\n\t\\\"\\\u0005\\‍\\∀‍\t\\\n'\n\\\t\t\"aa'😀"
+   },
+   "str": "{'role': 'tool', 'content': '\"\"\\x05 a😀\\té😀\\n\\t\\\\\"\\\\\\x05\\\\\\u200d\\\\∀\\u200d\\t\\\\\\n\\'\\n\\\\\\t\\t\"aa\\'😀'}",
+   "len": 96
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "\naa\"'∀\"'\\\"a \\\\\"\"a"
+   },
+   "str": "{'role': 'assistant', 'content': '\\naa\"\\'∀\"\\'\\\\\"a \\\\\\\\\"\"a'}",
+   "len": 59
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "'😀\taéé '😀a\n'a‍'😀 \\\t"
+   },
+   "str": "{'role': 'user', 'content': \"'😀\\taéé '😀a\\n'a\\u200d'😀 \\\\\\t\"}",
+   "len": 59
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "é \u0005aé\\é∀😀'\t\u0005\n\\\n"
+   },
+   "str": "{'role': 'user', 'content': \"é \\x05aé\\\\é∀😀'\\t\\x05\\n\\\\\\n\"}",
+   "len": 57
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": " é\n\t\u0005‍‍  ∀é''\n\"∀a\\😀\t \né∀a\u0005😀\t\t\t \\' \t\"‍"
+   },
+   "str": "{'role': 'assistant', 'content': ' é\\n\\t\\x05\\u200d\\u200d  ∀é\\'\\'\\n\"∀a\\\\😀\\t \\né∀a\\x05😀\\t\\t\\t \\\\\\' \\t\"\\u200d'}",
+   "len": 108
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "\t\u0005∀\u0005∀\n ∀∀"
+   },
+   "str": "{'role': 'tool', 'content': '\\t\\x05∀\\x05∀\\n ∀∀'}",
+   "len": 48
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "∀‍\u0005\té\u0005aé"
+   },
+   "str": "{'role': 'tool', 'content': '∀\\u200d\\x05\\té\\x05aé'}",
+   "len": 51
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "😀\u0005éa‍∀\\'a\\ \n\\∀é\t\n' \"\"a‍\"'😀\u0005\u0005‍\"\t\\é  \"\u0005\n\\'"
+   },
+   "str": "{'role': 'user', 'content': '😀\\x05éa\\u200d∀\\\\\\'a\\\\ \\n\\\\∀é\\t\\n\\' \"\"a\\u200d\"\\'😀\\x05\\x05\\u200d\"\\t\\\\é  \"\\x05\\n\\\\\\''}",
+   "len": 112
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "é\u0005\u0005é'\"\néa∀\"‍∀\u0005\t''\u0005a\t\n\u0005 😀😀 😀∀  "
+   },
+   "str": "{'role': 'tool', 'content': 'é\\x05\\x05é\\'\"\\néa∀\"\\u200d∀\\x05\\t\\'\\'\\x05a\\t\\n\\x05 😀😀 😀∀  '}",
+   "len": 88
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": " ∀😀'\\😀'∀a\\ '∀\t 😀\u0005∀é\u0005\"\u0005é\n é\t\n"
+   },
+   "str": "{'role': 'tool', 'content': ' ∀😀\\'\\\\😀\\'∀a\\\\ \\'∀\\t 😀\\x05∀é\\x05\"\\x05é\\n é\\t\\n'}",
+   "len": 77
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "\"a\\a\"\u0005‍‍\na‍\"a\n '\\\n\t∀é\u0005\"\"é😀"
+   },
+   "str": "{'role': 'assistant', 'content': '\"a\\\\a\"\\x05\\u200d\\u200d\\na\\u200d\"a\\n \\'\\\\\\n\\t∀é\\x05\"\"é😀'}",
+   "len": 90
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "\\'∀😀‍\\😀\\\t 'a\n😀é\"\t''éé\t'\\'''\\‍∀\\\"∀😀\\ \n\\😀"
+   },
+   "str": "{'role': 'user', 'content': '\\\\\\'∀😀\\u200d\\\\😀\\\\\\t \\'a\\n😀é\"\\t\\'\\'éé\\t\\'\\\\\\'\\'\\'\\\\\\u200d∀\\\\\"∀😀\\\\ \\n\\\\😀'}",
+   "len": 101
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "é∀😀\\\\‍‍a∀\u0005 \t\\😀"
+   },
+   "str": "{'role': 'user', 'content': 'é∀😀\\\\\\\\\\u200d\\u200da∀\\x05 \\t\\\\😀'}",
+   "len": 62
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "\n\n\n\t\u0005\u0005é\n\t😀\\a\u0005'\u0005\n'\ta\u0005"
+   },
+   "str": "{'role': 'tool', 'content': \"\\n\\n\\n\\t\\x05\\x05é\\n\\t😀\\\\a\\x05'\\x05\\n'\\ta\\x05\"}",
+   "len": 75
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "''\néa'\u0005a∀\u0005∀\n"
+   },
+   "str": "{'role': 'assistant', 'content': \"''\\néa'\\x05a∀\\x05∀\\n\"}",
+   "len": 56
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": " \"'é∀'a‍ \t\t \\a\\\t∀\na"
+   },
+   "str": "{'role': 'user', 'content': ' \"\\'é∀\\'a\\u200d \\t\\t \\\\a\\\\\\t∀\\na'}",
+   "len": 63
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "‍aa \n\té\\∀😀\"'"
+   },
+   "str": "{'role': 'user', 'content': '\\u200daa \\n\\té\\\\∀😀\"\\''}",
+   "len": 52
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "é‍\t ∀\u0005\\‍😀'‍'é\\\"\u0005\\"
+   },
+   "str": "{'role': 'tool', 'content': 'é\\u200d\\t ∀\\x05\\\\\\u200d😀\\'\\u200d\\'é\\\\\"\\x05\\\\'}",
+   "len": 75
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": " "
+   },
+   "str": "{'role': 'assistant', 'content': ' '}",
+   "len": 37
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "\n\"a'‍\"a‍‍\\😀\"∀\né\n'é\n∀‍'😀é'😀\t"
+   },
+   "str": "{'role': 'assistant', 'content': '\\n\"a\\'\\u200d\"a\\u200d\\u200d\\\\😀\"∀\\né\\n\\'é\\n∀\\u200d\\'😀é\\'😀\\t'}",
+   "len": 93
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "\t∀∀'"
+   },
+   "str": "{'role': 'assistant', 'content': \"\\t∀∀'\"}",
+   "len": 41
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "é'\u0005\u0005a\\'\t\\\\\"\\😀‍∀‍é\t '‍\"\\'\t"
+   },
+   "str": "{'role': 'user', 'content': 'é\\'\\x05\\x05a\\\\\\'\\t\\\\\\\\\"\\\\😀\\u200d∀\\u200dé\\t \\'\\u200d\"\\\\\\'\\t'}",
+   "len": 89
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "∀ '"
+   },
+   "str": "{'role': 'user', 'content': \"∀ '\"}",
+   "len": 34
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "a'\"a\u0005\\😀\"\"'a😀"
+   },
+   "str": "{'role': 'tool', 'content': 'a\\'\"a\\x05\\\\😀\"\"\\'a😀'}",
+   "len": 49
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "‍‍\\∀\u0005‍\té😀' éa\\a\naa\t\\'😀∀‍\"\t\n\t"
+   },
+   "str": "{'role': 'user', 'content': '\\u200d\\u200d\\\\∀\\x05\\u200d\\té😀\\' éa\\\\a\\naa\\t\\\\\\'😀∀\\u200d\"\\t\\n\\t'}",
+   "len": 93
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "\t😀∀a\\é\"a\u0005\"\"é😀∀é' é\u0005\\∀\u0005\n∀\\\\é \"\n'\""
+   },
+   "str": "{'role': 'tool', 'content': '\\t😀∀a\\\\é\"a\\x05\"\"é😀∀é\\' é\\x05\\\\∀\\x05\\n∀\\\\\\\\é \"\\n\\'\"'}",
+   "len": 81
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "\t  😀a‍\n\\"
+   },
+   "str": "{'role': 'assistant', 'content': '\\t  😀a\\u200d\\n\\\\'}",
+   "len": 52
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "''\t\t‍\t\t\"\n∀ éa\n‍ \t∀\t\\ \n é∀ \\\u0005"
+   },
+   "str": "{'role': 'user', 'content': '\\'\\'\\t\\t\\u200d\\t\\t\"\\n∀ éa\\n\\u200d \\t∀\\t\\\\ \\n é∀ \\\\\\x05'}",
+   "len": 85
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "😀\té\t∀😀\ta\n\t\t\t\\\\‍😀é \n😀∀\ta\né😀\\\u0005aé\n∀a"
+   },
+   "str": "{'role': 'assistant', 'content': '😀\\té\\t∀😀\\ta\\n\\t\\t\\t\\\\\\\\\\u200d😀é \\n😀∀\\ta\\né😀\\\\\\x05aé\\n∀a'}",
+   "len": 91
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "'\u0005a😀\u0005‍∀'\u0005é😀a∀∀\t\\‍\"a\t\t😀\u0005\"\n∀∀‍ "
+   },
+   "str": "{'role': 'tool', 'content': '\\'\\x05a😀\\x05\\u200d∀\\'\\x05é😀a∀∀\\t\\\\\\u200d\"a\\t\\t😀\\x05\"\\n∀∀\\u200d '}",
+   "len": 94
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "é\u0005\"\t\"é😀\"\u0005 'é'‍ \n ∀😀a∀\u0005\n∀\u0005\t '  \t"
+   },
+   "str": "{'role': 'tool', 'content': 'é\\x05\"\\t\"é😀\"\\x05 \\'é\\'\\u200d \\n ∀😀a∀\\x05\\n∀\\x05\\t \\'  \\t'}",
+   "len": 87
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "\u0005‍é😀\u0005\t∀\t'\n é\u0005‍\t \taa\ta\"\"\t\u0005\t\\\\∀😀é😀é\u0005a\n"
+   },
+   "str": "{'role': 'assistant', 'content': '\\x05\\u200dé😀\\x05\\t∀\\t\\'\\n é\\x05\\u200d\\t \\taa\\ta\"\"\\t\\x05\\t\\\\\\\\∀😀é😀é\\x05a\\n'}",
+   "len": 109
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "\\∀‍∀'‍'∀\"😀‍\"' \"∀'\n'\n\\∀ "
+   },
+   "str": "{'role': 'assistant', 'content': '\\\\∀\\u200d∀\\'\\u200d\\'∀\"😀\\u200d\"\\' \"∀\\'\\n\\'\\n\\\\∀ '}",
+   "len": 83
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": ""
+   },
+   "str": "{'role': 'user', 'content': ''}",
+   "len": 31
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "∀\"∀ 😀\t\t\\'é\t\\\\😀"
+   },
+   "str": "{'role': 'user', 'content': '∀\"∀ 😀\\t\\t\\\\\\'é\\t\\\\\\\\😀'}",
+   "len": 52
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "∀\u0005\\\t '∀∀\"∀😀'∀∀\u0005∀aaéé\n😀"
+   },
+   "str": "{'role': 'user', 'content': '∀\\x05\\\\\\t \\'∀∀\"∀😀\\'∀∀\\x05∀aaéé\\n😀'}",
+   "len": 64
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "\\\\∀ ‍''😀a\t∀‍\t"
+   },
+   "str": "{'role': 'user', 'content': \"\\\\\\\\∀ \\u200d''😀a\\t∀\\u200d\\t\"}",
+   "len": 58
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "‍∀a"
+   },
+   "str": "{'role': 'user', 'content': '\\u200d∀a'}",
+   "len": 39
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "\"é😀é‍\n\té\u0005\\\t\n∀' \n😀\\ \\∀\"\\‍\té😀\\ 😀"
+   },
+   "str": "{'role': 'user', 'content': '\"é😀é\\u200d\\n\\té\\x05\\\\\\t\\n∀\\' \\n😀\\\\ \\\\∀\"\\\\\\u200d\\té😀\\\\ 😀'}",
+   "len": 86
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "‍'😀é‍😀''\n\t\t\\\u0005\t ∀\\a\\\n∀ \"\n\u0005\\\t\u0005\t∀'\\é∀😀 é"
+   },
+   "str": "{'role': 'assistant', 'content': '\\u200d\\'😀é\\u200d😀\\'\\'\\n\\t\\t\\\\\\x05\\t ∀\\\\a\\\\\\n∀ \"\\n\\x05\\\\\\t\\x05\\t∀\\'\\\\é∀😀 é'}",
+   "len": 109
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "\"'😀😀'a\u0005\n😀\t😀😀\t\t∀ ‍ \n∀\\'∀é\"a"
+   },
+   "str": "{'role': 'user', 'content': '\"\\'😀😀\\'a\\x05\\n😀\\t😀😀\\t\\t∀ \\u200d \\n∀\\\\\\'∀é\"a'}",
+   "len": 74
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "\t\t∀‍😀\t''😀\n‍\\ 😀\u0005é\u0005😀\t\\"
+   },
+   "str": "{'role': 'tool', 'content': \"\\t\\t∀\\u200d😀\\t''😀\\n\\u200d\\\\ 😀\\x05é\\x05😀\\t\\\\\"}",
+   "len": 74
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "a😀\u0005a' ‍a \"‍aa 😀😀\u0005 😀∀\t'\n\\"
+   },
+   "str": "{'role': 'user', 'content': 'a😀\\x05a\\' \\u200da \"\\u200daa 😀😀\\x05 😀∀\\t\\'\\n\\\\'}",
+   "len": 76
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "\"😀\\\t"
+   },
+   "str": "{'role': 'user', 'content': '\"😀\\\\\\t'}",
+   "len": 37
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "\\aa  \"\u0005\\\n\té∀\"‍😀😀\\😀‍'\"\"\u0005😀\u0005😀 \\"
+   },
+   "str": "{'role': 'assistant', 'content': '\\\\aa  \"\\x05\\\\\\n\\té∀\"\\u200d😀😀\\\\😀\\u200d\\'\"\"\\x05😀\\x05😀 \\\\'}",
+   "len": 90
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "‍ "
+   },
+   "str": "{'role': 'tool', 'content': '\\u200d '}",
+   "len": 38
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "😀\t\"é∀😀\"\u0005\n \"a\\‍‍ 😀a\"\n 😀'\"😀‍‍😀'"
+   },
+   "str": "{'role': 'assistant', 'content': '😀\\t\"é∀😀\"\\x05\\n \"a\\\\\\u200d\\u200d 😀a\"\\n 😀\\'\"😀\\u200d\\u200d😀\\''}",
+   "len": 94
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "\t\" ∀aéa\u0005\n\u0005\t∀a😀éé\ta'😀\u0005\\😀\"\t\t\u0005a\n é\t\"'\" ''‍'"
+   },
+   "str": "{'role': 'tool', 'content': '\\t\" ∀aéa\\x05\\n\\x05\\t∀a😀éé\\ta\\'😀\\x05\\\\😀\"\\t\\t\\x05a\\n é\\t\"\\'\" \\'\\'\\u200d\\''}",
+   "len": 102
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "\" é\t\"😀"
+   },
+   "str": "{'role': 'tool', 'content': '\" é\\t\"😀'}",
+   "len": 38
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "\u0005\\\t\n \\"
+   },
+   "str": "{'role': 'assistant', 'content': '\\x05\\\\\\t\\n \\\\'}",
+   "len": 49
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "\naa😀 ∀‍😀"
+   },
+   "str": "{'role': 'user', 'content': '\\naa😀 ∀\\u200d😀'}",
+   "len": 45
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "\"\\\\\"\"\né\u0005😀\naa∀😀😀 \u0005'\t\t😀\n\u0005\"é∀\t \\ \\éé∀\n' ∀a\t"
+   },
+   "str": "{'role': 'user', 'content': '\"\\\\\\\\\"\"\\né\\x05😀\\naa∀😀😀 \\x05\\'\\t\\t😀\\n\\x05\"é∀\\t \\\\ \\\\éé∀\\n\\' ∀a\\t'}",
+   "len": 94
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "\u0005😀\" é \t\"\"😀'"
+   },
+   "str": "{'role': 'assistant', 'content': '\\x05😀\" é \\t\"\"😀\\''}",
+   "len": 52
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": " 😀\t'‍\u0005∀'\u0005‍\\éé"
+   },
+   "str": "{'role': 'assistant', 'content': \" 😀\\t'\\u200d\\x05∀'\\x05\\u200d\\\\éé\"}",
+   "len": 67
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "\"‍\"\u0005\"  \u0005"
+   },
+   "str": "{'role': 'user', 'content': '\"\\u200d\"\\x05\"  \\x05'}",
+   "len": 50
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "\u0005\u0005a\n\"‍éé😀a 😀\u0005😀\"\u0005\"'\"\n😀é\u0005‍\n"
+   },
+   "str": "{'role': 'tool', 'content': '\\x05\\x05a\\n\"\\u200déé😀a 😀\\x05😀\"\\x05\"\\'\"\\n😀é\\x05\\u200d\\n'}",
+   "len": 85
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "a\\😀\\é\n\n\\😀‍😀"
+   },
+   "str": "{'role': 'user', 'content': 'a\\\\😀\\\\é\\n\\n\\\\😀\\u200d😀'}",
+   "len": 52
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "∀\\ ‍😀' \té\t∀\\é\\\\∀‍\n∀' a'∀ é‍\"‍é‍\n"
+   },
+   "str": "{'role': 'assistant', 'content': '∀\\\\ \\u200d😀\\' \\té\\t∀\\\\é\\\\\\\\∀\\u200d\\n∀\\' a\\'∀ é\\u200d\"\\u200dé\\u200d\\n'}",
+   "len": 104
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "é∀é\\\t\"\" \\\"a'a‍\t\"\"\t\u0005 ∀\\\t\"\n '∀\u0005‍∀  \u0005\n\u0005"
+   },
+   "str": "{'role': 'assistant', 'content': 'é∀é\\\\\\t\"\" \\\\\"a\\'a\\u200d\\t\"\"\\t\\x05 ∀\\\\\\t\"\\n \\'∀\\x05\\u200d∀  \\x05\\n\\x05'}",
+   "len": 105
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "a\"\néé'  ∀'\n\t∀éé \\\t\\ \n‍"
+   },
+   "str": "{'role': 'user', 'content': 'a\"\\néé\\'  ∀\\'\\n\\t∀éé \\\\\\t\\\\ \\n\\u200d'}",
+   "len": 67
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "\"a‍\n\n\\'a\"😀'\t‍\\\n‍ ∀a"
+   },
+   "str": "{'role': 'tool', 'content': '\"a\\u200d\\n\\n\\\\\\'a\"😀\\'\\t\\u200d\\\\\\n\\u200d ∀a'}",
+   "len": 73
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "a\\a  😀😀😀\n'\t∀\\\"a\ta∀\\\t\n\u0005\u0005 \\"
+   },
+   "str": "{'role': 'user', 'content': 'a\\\\a  😀😀😀\\n\\'\\t∀\\\\\"a\\ta∀\\\\\\t\\n\\x05\\x05 \\\\'}",
+   "len": 72
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "'‍\t'\t\t'"
+   },
+   "str": "{'role': 'tool', 'content': \"'\\u200d\\t'\\t\\t'\"}",
+   "len": 46
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "∀"
+   },
+   "str": "{'role': 'user', 'content': '∀'}",
+   "len": 32
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "∀∀'a'\n"
+   },
+   "str": "{'role': 'tool', 'content': \"∀∀'a'\\n\"}",
+   "len": 38
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "‍\na😀\u0005∀''éa\"😀\u0005😀\t 😀‍\"\n'😀'\n'∀\t\n\t😀"
+   },
+   "str": "{'role': 'assistant', 'content': '\\u200d\\na😀\\x05∀\\'\\'éa\"😀\\x05😀\\t 😀\\u200d\"\\n\\'😀\\'\\n\\'∀\\t\\n\\t😀'}",
+   "len": 94
+  },
+  {
+   "value": {
+    "role": "tool",
+    "content": "‍\n∀‍\u0005\t'é\u0005 ∀ aé\t\\\t\"\\é'\ta\\∀\n"
+   },
+   "str": "{'role': 'tool', 'content': '\\u200d\\n∀\\u200d\\x05\\t\\'é\\x05 ∀ aé\\t\\\\\\t\"\\\\é\\'\\ta\\\\∀\\n'}",
+   "len": 84
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "'\"\"a"
+   },
+   "str": "{'role': 'user', 'content': '\\'\"\"a'}",
+   "len": 36
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "\\\n‍\"\né∀\\ aé😀\n\t😀\"∀‍‍😀\u0005\n‍ \té\n😀 '😀∀∀‍‍a\\'"
+   },
+   "str": "{'role': 'user', 'content': '\\\\\\n\\u200d\"\\né∀\\\\ aé😀\\n\\t😀\"∀\\u200d\\u200d😀\\x05\\n\\u200d \\té\\n😀 \\'😀∀∀\\u200d\\u200da\\\\\\''}",
+   "len": 114
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "\"\u0005"
+   },
+   "str": "{'role': 'assistant', 'content': '\"\\x05'}",
+   "len": 41
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": ""
+   },
+   "str": "{'role': 'user', 'content': ''}",
+   "len": 31
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "\t\n😀😀\"\\\"é\na"
+   },
+   "str": "{'role': 'user', 'content': '\\t\\n😀😀\"\\\\\"é\\na'}",
+   "len": 45
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "\t😀\n\t\"\t‍∀ '\u0005\n\t \"\u0005∀\t\\é\"a∀a\u0005∀\\\t'é \"\n\\\"\"'éa"
+   },
+   "str": "{'role': 'assistant', 'content': '\\t😀\\n\\t\"\\t\\u200d∀ \\'\\x05\\n\\t \"\\x05∀\\t\\\\é\"a∀a\\x05∀\\\\\\t\\'é \"\\n\\\\\"\"\\'éa'}",
+   "len": 104
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "\t😀😀😀😀"
+   },
+   "str": "{'role': 'assistant', 'content': '\\t😀😀😀😀'}",
+   "len": 42
+  },
+  {
+   "value": {
+    "role": "user",
+    "content": "∀é ∀\u0005\u0005a‍\u0005 ‍ ∀\u0005a\n\t \na\t\\\\a'\"a\\\n' \\"
+   },
+   "str": "{'role': 'user', 'content': '∀é ∀\\x05\\x05a\\u200d\\x05 \\u200d ∀\\x05a\\n\\t \\na\\t\\\\\\\\a\\'\"a\\\\\\n\\' \\\\'}",
+   "len": 96
+  },
+  {
+   "value": {
+    "role": "assistant",
+    "content": "∀ 😀'\\"
+   },
+   "str": "{'role': 'assistant', 'content': \"∀ 😀'\\\\\"}",
+   "len": 42
+  }
+ ]
+}

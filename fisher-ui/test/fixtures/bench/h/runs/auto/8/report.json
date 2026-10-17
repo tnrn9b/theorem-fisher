@@ -1,0 +1,66 @@
+{
+    "attempt_s": 1200,
+    "attempts": [
+        {
+            "attempt": 1,
+            "backend": "gauss",
+            "ended_s": 212.1,
+            "goal": "Step.Frame.runBody_split",
+            "outcome": "closed (helpers: Touches.of_single)",
+            "started_s": 10.8,
+            "stats": {
+                "cost_usd": 0.4222138,
+                "exit": 0,
+                "input_tokens": 921642,
+                "output_tokens": 13184,
+                "tools": {
+                    "mcp_lean_lsp_lean_diagnostic_messages": 7,
+                    "mcp_lean_lsp_lean_verify": 1,
+                    "patch": 7,
+                    "read_file": 5,
+                    "terminal": 4
+                },
+                "turns": 15,
+                "wall_s": 174
+            }
+        }
+    ],
+    "auto_closed": 0,
+    "auto_off": null,
+    "auto_ran": true,
+    "auto_requested": true,
+    "auto_warmup_s": 90.1,
+    "backends": {
+        "gauss": [
+            1,
+            1
+        ]
+    },
+    "budget_s": 7200,
+    "budget_spent": false,
+    "closed_per_hour": 17,
+    "disproved": 0,
+    "elapsed_s": 212.1,
+    "file": "Step/Frame.lean",
+    "goals": [
+        {
+            "attempts": [
+                "gauss"
+            ],
+            "by_attempt": 1,
+            "by_backend": "gauss",
+            "closedBy": "model",
+            "closed_at_s": 212.1,
+            "goal": "Step.Frame.runBody_split",
+            "status": "closed"
+        }
+    ],
+    "goals_closed": 1,
+    "goals_total": 1,
+    "max_turns": 40,
+    "mode": "swarm",
+    "project": "/Users/thomasreynolds/.cache/fisher/bench/h/8/lean",
+    "repaired_then_closed": 0,
+    "repairs_kept": 0,
+    "slots": 4
+}
