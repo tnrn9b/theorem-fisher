@@ -693,7 +693,7 @@
    ],
    "execs": [
     {
-     "command": "nohup bash -c 'python server.py' > /tmp/gauss_bg_proc_1f2e3d000000.log 2>&1 & echo $! > /tmp/gauss_bg_proc_1f2e3d000000.pid && cat /tmp/gauss_bg_proc_1f2e3d000000.pid",
+     "command": "nohup bash -c 'python server.py' > /tmp/fisher_bg_proc_1f2e3d000000.log 2>&1 & echo $! > /tmp/fisher_bg_proc_1f2e3d000000.pid && cat /tmp/fisher_bg_proc_1f2e3d000000.pid",
      "cwd": null,
      "timeout": 10
     },
@@ -740,7 +740,7 @@
    ],
    "execs": [
     {
-     "command": "nohup bash -c 'python server.py' > /tmp/gauss_bg_proc_1f2e3d000000.log 2>&1 & echo $! > /tmp/gauss_bg_proc_1f2e3d000000.pid && cat /tmp/gauss_bg_proc_1f2e3d000000.pid",
+     "command": "nohup bash -c 'python server.py' > /tmp/fisher_bg_proc_1f2e3d000000.log 2>&1 & echo $! > /tmp/fisher_bg_proc_1f2e3d000000.pid && cat /tmp/fisher_bg_proc_1f2e3d000000.pid",
      "cwd": null,
      "timeout": 10
     }

@@ -58,7 +58,7 @@ loadCases path = do
 data World = World
   { wRoot :: FilePath
   , wHome :: FilePath
-  , wGaussHome :: FilePath
+  , wFisherHome :: FilePath
   }
 
 data Observed = Observed
@@ -94,7 +94,7 @@ makeWorld = do
 -- | The placeholders a recording uses, longest first.
 placeholders :: World -> [(Text, Text)]
 placeholders w =
-  [ (T.pack (wGaussHome w), "<GAUSS_HOME>")
+  [ (T.pack (wFisherHome w), "<GAUSS_HOME>")
   , (T.pack (wHome w), "<HOME>")
   , (T.pack (wRoot w), "<TMP>") ]
 
@@ -132,9 +132,11 @@ str' :: Text -> PyVal -> Text
 str' k v = maybe "" pyStrOf (get k v)
 
 -- | Lay the case's files down: @{"gauss_home": {...}, "home": {...}}@.
+-- The recordings come from upstream, so their own names (@gauss_home@,
+-- @<GAUSS_HOME>@, @GAUSS_HOME@) stay; @gauss_home@ is the Fisher home.
 writeFiles :: World -> PyVal -> IO ()
 writeFiles w files = do
-  forM_ [("gauss_home", wGaussHome w), ("home", wHome w)] $ \(side, base) ->
+  forM_ [("gauss_home", wFisherHome w), ("home", wHome w)] $ \(side, base) ->
     forM_ (maybe [] (\case PDict kvs -> kvs; _ -> []) (get side files)) $ \(rel, spec) -> do
       let p = base </> T.unpack rel
           mode = fst . head <$> nonEmpty (readOct (T.unpack (str' "mode" spec)))
@@ -147,11 +149,11 @@ writeFiles w files = do
   where
     nonEmpty xs = if null xs then Nothing else Just xs
 
--- | Every file and directory under the home and GAUSS_HOME, in the
+-- | Every file and directory under the home and the Fisher home, in the
 -- recording's form. Fisher's own @fisher/@ directory is left out.
 snapshotFiles :: World -> Text -> IO PyVal
 snapshotFiles w soul = do
-  sides <- forM [("gauss_home", wGaussHome w), ("home", wHome w)] $ \(side, base) -> do
+  sides <- forM [("gauss_home", wFisherHome w), ("home", wHome w)] $ \(side, base) -> do
     exists <- doesDirectoryExist base
     entries <- if exists then walk base "" else pure []
     pure (side, PDict entries)
@@ -162,7 +164,7 @@ snapshotFiles w soul = do
       fmap concat . forM names $ \n -> do
         let r = if null rel then n else rel </> n
             p = base </> r
-        if r == "fisher" && base == wGaussHome w
+        if r == "fisher" && base == wFisherHome w
           then pure []
           else do
             isDir <- doesDirectoryExist p
@@ -240,7 +242,7 @@ replay doc mworld c action = do
         _ -> []
       ghEnv = case lookup "GAUSS_HOME" caseEnv of
         Just PNull -> []
-        _ -> [("GAUSS_HOME", T.pack (wGaussHome w))]
+        _ -> [("GAUSS_HOME", T.pack (wFisherHome w))]
       env0 = Map.fromList (base <> [("HOME", T.pack (wHome w))] <> ghEnv <> [(k, unmask w (pyStrOf v)) | (k, v) <- caseEnv, v /= PNull])
       scen = fromMaybe (obj []) (get "scenario" c)
       pty = get "mode" c == Just (PStr "pty")
@@ -357,9 +359,9 @@ replay doc mworld c action = do
               tz <- Map.lookup "TZ" <$> readIORef envRef
               pure (zoneFor tz t)
           , sysHome = wHome w
-          , sysGaussHome = case lookup "GAUSS_HOME" caseEnv of
+          , sysFisherHome = case lookup "GAUSS_HOME" caseEnv of
               Just PNull -> wHome w </> ".gauss"
-              _ -> wGaussHome w
+              _ -> wFisherHome w
           , sysOut = say
           , sysInput = \prompt -> do
               say prompt

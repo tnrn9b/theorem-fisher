@@ -1,4 +1,4 @@
--- | @gauss status [--all] [--deep]@: every section upstream prints, from
+-- | @fisher status [--all] [--deep]@: every section upstream prints, from
 -- the environment and keys through the auth providers, terminal backend,
 -- messaging, gateway service, scheduled jobs and sessions. Ported from
 -- @gauss_cli/status.py@. Like upstream it is not read-only: loading the
@@ -47,7 +47,7 @@ data StatusInfo = StatusInfo
   }
   deriving (Eq, Show)
 
--- | @gauss status ...@ from its arguments: the home's @.env@ loaded as
+-- | @fisher status ...@ from its arguments: the home's @.env@ loaded as
 -- the CLI does at start-up, then argparse, then the report.
 statusMain :: StatusInfo -> Sys -> [Text] -> IO Int
 statusMain info sys args = do
@@ -62,12 +62,12 @@ statusMain info sys args = do
 sysStyle :: Sys -> IO Style
 sysStyle sys = do
   let envT k = sysGetEnv sys k
-      truthyEnv k = maybe False ((`elem` ["1", "true", "yes", "on"]) . T.toLower . T.strip) <$> envT k
-  forcePlain <- truthyEnv "GAUSS_FORCE_PLAIN_OUTPUT"
+      truthyEnv k = maybe False ((`elem` ["1", "true", "yes", "on"]) . T.toLower . T.strip) <$> sysGetEnvCompat sys k
+  forcePlain <- truthyEnv "FISHER_FORCE_PLAIN_OUTPUT"
   noColor <- envT "NO_COLOR"
   tty <- sysStdoutTty sys
   term <- maybe "" (T.toLower . T.strip) <$> envT "TERM"
-  forceAscii <- truthyEnv "GAUSS_FORCE_ASCII"
+  forceAscii <- truthyEnv "FISHER_FORCE_ASCII"
   ioEnc <- envT "PYTHONIOENCODING"
   locs <- mapM envT ["LC_ALL", "LC_CTYPE", "LANG"]
   let loc = case [l | Just l <- locs, not (T.null l)] of
@@ -99,6 +99,10 @@ formatIsoTimestamp sys = \case
 
 -- | @gateway.get_service_name()@: @gauss-gateway@ for the default home,
 -- else suffixed with the first 8 hex digits of the resolved home's SHA-256.
+-- The gateway service is upstream's (Fisher installs none), so its names
+-- and the home they are derived from stay upstream's: @GAUSS_HOME@, else
+-- @~/.gauss@, the unit @gauss-gateway@ and the launchd label
+-- @ai.gauss.gateway@.
 gatewayServiceName :: Sys -> IO Text
 gatewayServiceName sys = do
   env <- sysGetEnv sys "GAUSS_HOME"
@@ -129,7 +133,7 @@ showStatus info sys showAll deep = do
       c codes t = color st codes t
       check ok = if ok then c [green] "✓" else c [red] "✗"
       header t = p "" >> p (c [cyan, bold] ("◆ " <> t))
-      title = "Gauss Status" :: Text
+      title = "Fisher Status" :: Text
       centred = let w = 55; n = T.length title; l = (w - n) `div` 2 in T.replicate l " " <> title <> T.replicate (w - n - l) " "
       envOr k = fromMaybe "" <$> sysGetEnv sys k
       valueOr k = fromMaybe "" <$> getEnvValue sys k
@@ -141,7 +145,7 @@ showStatus info sys showAll deep = do
   header "Environment"
   p ("  Project:      " <> siProject info)
   p ("  Python:       " <> siPython info)
-  envExists <- doesFileExist (envPathIn (sysGaussHome sys))
+  envExists <- doesFileExist (envPathIn (sysFisherHome sys))
   p ("  .env file:    " <> check envExists <> " " <> (if envExists then "exists" else "not found"))
   cfg <- either (\(_ :: SomeException) -> PDict []) id <$> try (loadConfigPy sys)
   let modelLabel = case get "model" cfg of
@@ -284,7 +288,7 @@ showStatus info sys showAll deep = do
       pure 1
     Right () -> do
       header "Scheduled Jobs"
-      jobs <- readJsonFile (sysGaussHome sys </> "cron" </> "jobs.json")
+      jobs <- readJsonFile (sysFisherHome sys </> "cron" </> "jobs.json")
       p $ "  Jobs:         " <> case jobs of
         Nothing -> "0"
         Just (Right d@(PDict _)) -> case fromMaybe (PList []) (get "jobs" d) of
@@ -297,7 +301,7 @@ showStatus info sys showAll deep = do
         _ -> "(error reading jobs file)"
 
       header "Sessions"
-      sessions <- readJsonFile (sysGaussHome sys </> "sessions" </> "sessions.json")
+      sessions <- readJsonFile (sysFisherHome sys </> "sessions" </> "sessions.json")
       p $ "  Active:       " <> case sessions of
         Nothing -> "0"
         Just (Right (PDict kvs)) -> tshow (length kvs) <> " session(s)"

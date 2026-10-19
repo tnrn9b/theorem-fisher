@@ -24,7 +24,7 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Data.Time (defaultTimeLocale, formatTime, getZonedTime)
 import System.Console.Haskeline
-import System.Directory (getHomeDirectory)
+import System.Directory (doesFileExist, getHomeDirectory)
 import System.Environment (getEnvironment, lookupEnv, setEnv)
 import System.Exit (ExitCode (..))
 import System.FilePath ((</>))
@@ -162,7 +162,7 @@ runShell opts = do
           , dAnsi = styleAnsi st
           , dUnicode = styleUnicode st
           , dRenderTerminal = renderText st
-          , dGaussHome = home
+          , dFisherHome = home
           , dConfigPath = configPath
           , dProject = do
               ps <- projectState session
@@ -243,7 +243,11 @@ runShell opts = do
   showBanner deps state
   plainPrint deps ""
   welcome deps state
-  let settings = (defaultSettings :: Settings IO) {historyFile = Just (home </> ".gauss_history")}
+  -- the history: .fisher_history, else the one kept before the rename
+  hasNew <- doesFileExist (home </> ".fisher_history")
+  hasOld <- doesFileExist (home </> ".gauss_history")
+  let history = if not hasNew && hasOld then ".gauss_history" else ".fisher_history"
+      settings = (defaultSettings :: Settings IO) {historyFile = Just (home </> history)}
   runInputT settings $ do
     ext <- getExternalPrint
     liftIO (writeIORef external (\t -> ext (T.unpack t <> "\n")))

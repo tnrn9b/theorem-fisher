@@ -1,4 +1,4 @@
--- | What @gauss setup@ and @gauss model@ share beyond the credential layer:
+-- | What @fisher setup@ and @fisher model@ share beyond the credential layer:
 -- the merged configuration as Python holds it (a dict in insertion order,
 -- ints and floats apart) and its save; the model catalogues of
 -- @gauss_cli/models.py@ and its @/models@ probes; and
@@ -13,6 +13,8 @@ module Fisher.Cli.SetupCommon
   , setModelProvider
   , setDefaultModel
   , envValue
+  , envValueCompat
+  , homeLabelOf
     -- * Catalogues
   , openrouterModels
   , modelIds
@@ -39,6 +41,7 @@ import qualified Data.Text as T
 import System.Directory (doesFileExist)
 import System.FilePath ((</>))
 
+import Fisher.Compat (envNames)
 import Fisher.LLM.Auth.Anthropic (isOauthToken, resolveAnthropicToken)
 import Fisher.LLM.Auth.Codex (readCodexTokens)
 import Fisher.LLM.Auth.Env (getEnvValue)
@@ -46,6 +49,7 @@ import Fisher.LLM.Auth.PyYaml (loadConfigOrdered, saveConfigOrdered)
 import Fisher.LLM.Auth.Resolve (RuntimeRequest (..), defaultRuntimeRequest, resolveRuntimeProvider)
 import Fisher.LLM.Auth.Util (rstripSlash)
 import Fisher.LLM.Sys
+import Fisher.Paths (homeLabel)
 import Fisher.Py.Value
 
 -- ------------------------------------------------------------ configuration
@@ -94,6 +98,21 @@ setDefaultModel name cfg
 -- | @get_env_value(k) or ""@.
 envValue :: Sys -> Text -> IO Text
 envValue sys k = fromMaybe "" <$> getEnvValue sys k
+
+-- | 'envValue' of a renamed variable: @FISHER_X@ (the environment, then
+-- the home's .env), else @GAUSS_X@ the same way.
+envValueCompat :: Sys -> Text -> IO Text
+envValueCompat sys k = do
+  let (new, old) = envNames (T.unpack k)
+  getEnvValue sys (T.pack new) >>= \case
+    Just v -> pure v
+    Nothing -> envValue sys (T.pack old)
+
+-- | How a message names the Fisher home this 'Sys' uses ('homeLabel'):
+-- @~/.gauss@ on a machine with only that home, never a literal
+-- @~/.fisher@ the user would then create.
+homeLabelOf :: Sys -> Text
+homeLabelOf sys = T.pack (homeLabel (sysHome sys) (sysFisherHome sys))
 
 -- | @str(v).strip()@ of an optional value; empty for None.
 pyStrStrip :: Maybe PyVal -> Text
@@ -241,7 +260,7 @@ fetchAnthropicModels sys =
 
 -- ------------------------------------------------------------------- vision
 
--- | @get_available_vision_backends()@: the backends Gauss can use for
+-- | @get_available_vision_backends()@: the backends Fisher can use for
 -- vision, the configured provider first. Left where upstream raises: with
 -- an Anthropic token the Anthropic client cannot be built in upstream's
 -- environment (its SDK wants httpx2's Timeout), and the error escapes the
@@ -294,7 +313,7 @@ availableVisionBackends sys = do
           _ -> False
       _ -> pure (Right False)
     nousAvailable = do
-      let path = sysGaussHome sys </> "auth.json"
+      let path = sysFisherHome sys </> "auth.json"
       exists <- doesFileExist path
       if not exists
         then pure False

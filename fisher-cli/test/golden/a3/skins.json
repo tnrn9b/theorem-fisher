@@ -6,7 +6,7 @@
       "builtin": {
         "default": {
           "name": "default",
-          "description": "Classic Gauss — gold and kawaii",
+          "description": "Classic Fisher — gold and kawaii",
           "colors": {
             "banner_border": "#CD7F32",
             "banner_title": "#FFD700",
@@ -26,11 +26,11 @@
           },
           "spinner": {},
           "branding": {
-            "agent_name": "Gauss",
-            "welcome": "Welcome to Gauss! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
+            "agent_name": "Fisher",
+            "welcome": "Welcome to Fisher! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
             "status_glyph": "@",
             "goodbye": "Goodbye! @",
-            "response_label": " ∑ Gauss ",
+            "response_label": " ∑ Fisher ",
             "prompt_symbol": "❯ ",
             "help_header": "(^_^)? Available Commands"
           },
@@ -143,11 +143,11 @@
           },
           "spinner": {},
           "branding": {
-            "agent_name": "Gauss",
-            "welcome": "Welcome to Gauss! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
+            "agent_name": "Fisher",
+            "welcome": "Welcome to Fisher! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
             "status_glyph": "@",
             "goodbye": "Goodbye! @",
-            "response_label": " ∑ Gauss ",
+            "response_label": " ∑ Fisher ",
             "prompt_symbol": "❯ ",
             "help_header": "[?] Available Commands"
           },
@@ -180,11 +180,11 @@
           },
           "spinner": {},
           "branding": {
-            "agent_name": "Gauss",
-            "welcome": "Welcome to Gauss! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
+            "agent_name": "Fisher",
+            "welcome": "Welcome to Fisher! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
             "status_glyph": "@",
             "goodbye": "Goodbye! @",
-            "response_label": " ∑ Gauss ",
+            "response_label": " ∑ Fisher ",
             "prompt_symbol": "❯ ",
             "help_header": "(^_^)? Available Commands"
           },
@@ -460,10 +460,10 @@
           "spinner": {},
           "branding": {
             "agent_name": "Partial",
-            "welcome": "Welcome to Gauss! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
+            "welcome": "Welcome to Fisher! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
             "status_glyph": "@",
             "goodbye": "Goodbye! @",
-            "response_label": " ∑ Gauss ",
+            "response_label": " ∑ Fisher ",
             "prompt_symbol": "❯ ",
             "help_header": "(^_^)? Available Commands"
           },
@@ -476,7 +476,7 @@
         },
         "noname": {
           "name": "default",
-          "description": "Classic Gauss — gold and kawaii",
+          "description": "Classic Fisher — gold and kawaii",
           "colors": {
             "banner_border": "#CD7F32",
             "banner_title": "#FFD700",
@@ -496,11 +496,11 @@
           },
           "spinner": {},
           "branding": {
-            "agent_name": "Gauss",
-            "welcome": "Welcome to Gauss! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
+            "agent_name": "Fisher",
+            "welcome": "Welcome to Fisher! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
             "status_glyph": "@",
             "goodbye": "Goodbye! @",
-            "response_label": " ∑ Gauss ",
+            "response_label": " ∑ Fisher ",
             "prompt_symbol": "❯ ",
             "help_header": "(^_^)? Available Commands"
           },
@@ -513,7 +513,7 @@
         },
         "listy": {
           "name": "default",
-          "description": "Classic Gauss — gold and kawaii",
+          "description": "Classic Fisher — gold and kawaii",
           "colors": {
             "banner_border": "#CD7F32",
             "banner_title": "#FFD700",
@@ -533,11 +533,11 @@
           },
           "spinner": {},
           "branding": {
-            "agent_name": "Gauss",
-            "welcome": "Welcome to Gauss! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
+            "agent_name": "Fisher",
+            "welcome": "Welcome to Fisher! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
             "status_glyph": "@",
             "goodbye": "Goodbye! @",
-            "response_label": " ∑ Gauss ",
+            "response_label": " ∑ Fisher ",
             "prompt_symbol": "❯ ",
             "help_header": "(^_^)? Available Commands"
           },
@@ -550,7 +550,7 @@
         },
         "broken": {
           "name": "default",
-          "description": "Classic Gauss — gold and kawaii",
+          "description": "Classic Fisher — gold and kawaii",
           "colors": {
             "banner_border": "#CD7F32",
             "banner_title": "#FFD700",
@@ -570,11 +570,11 @@
           },
           "spinner": {},
           "branding": {
-            "agent_name": "Gauss",
-            "welcome": "Welcome to Gauss! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
+            "agent_name": "Fisher",
+            "welcome": "Welcome to Fisher! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
             "status_glyph": "@",
             "goodbye": "Goodbye! @",
-            "response_label": " ∑ Gauss ",
+            "response_label": " ∑ Fisher ",
             "prompt_symbol": "❯ ",
             "help_header": "(^_^)? Available Commands"
           },
@@ -618,11 +618,11 @@
             ]
           },
           "branding": {
-            "agent_name": "Gauss",
-            "welcome": "Welcome to Gauss! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
+            "agent_name": "Fisher",
+            "welcome": "Welcome to Fisher! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
             "status_glyph": "@",
             "goodbye": "Goodbye! @",
-            "response_label": " ∑ Gauss ",
+            "response_label": " ∑ Fisher ",
             "prompt_symbol": "❯ ",
             "help_header": "(^_^)? Available Commands"
           },
@@ -657,11 +657,11 @@
           },
           "spinner": {},
           "branding": {
-            "agent_name": "Gauss",
-            "welcome": "Welcome to Gauss! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
+            "agent_name": "Fisher",
+            "welcome": "Welcome to Fisher! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
             "status_glyph": "@",
             "goodbye": "Goodbye! @",
-            "response_label": " ∑ Gauss ",
+            "response_label": " ∑ Fisher ",
             "prompt_symbol": "❯ ",
             "help_header": "(^_^)? Available Commands"
           },
@@ -694,11 +694,11 @@
           },
           "spinner": {},
           "branding": {
-            "agent_name": "Gauss",
-            "welcome": "Welcome to Gauss! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
+            "agent_name": "Fisher",
+            "welcome": "Welcome to Fisher! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
             "status_glyph": "@",
             "goodbye": "Goodbye! @",
-            "response_label": " ∑ Gauss ",
+            "response_label": " ∑ Fisher ",
             "prompt_symbol": "❯ ",
             "help_header": "(^_^)? Available Commands"
           },
@@ -711,7 +711,7 @@
         },
         "missing": {
           "name": "default",
-          "description": "Classic Gauss — gold and kawaii",
+          "description": "Classic Fisher — gold and kawaii",
           "colors": {
             "banner_border": "#CD7F32",
             "banner_title": "#FFD700",
@@ -731,11 +731,11 @@
           },
           "spinner": {},
           "branding": {
-            "agent_name": "Gauss",
-            "welcome": "Welcome to Gauss! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
+            "agent_name": "Fisher",
+            "welcome": "Welcome to Fisher! Type /chat for inline onboarding, /project for project setup, or /help for commands.",
             "status_glyph": "@",
             "goodbye": "Goodbye! @",
-            "response_label": " ∑ Gauss ",
+            "response_label": " ∑ Fisher ",
             "prompt_symbol": "❯ ",
             "help_header": "(^_^)? Available Commands"
           },
@@ -750,7 +750,7 @@
       "list": [
         {
           "name": "default",
-          "description": "Classic Gauss — gold and kawaii",
+          "description": "Classic Fisher — gold and kawaii",
           "source": "builtin"
         },
         {

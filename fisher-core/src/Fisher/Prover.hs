@@ -52,7 +52,8 @@ data Marker
 
 -- | The prover's MCP server: the name it is registered under, the command
 -- that launches it by default, the environment variable that overrides the
--- package spec, and the tools Fisher's native toolset offers from it.
+-- package spec (its new name; @GAUSS_@ in place of @FISHER_@ is read as a
+-- fallback, see 'Fisher.Compat.lookupCompat'), and the tools Fisher's native toolset offers from it.
 data ServerSpec = ServerSpec
   { svName :: Text
   , svDefault :: [Text]
@@ -95,7 +96,7 @@ prover = \case
           ServerSpec
             { svName = "lean-lsp"
             , svDefault = ["uvx", "--from", "lean-lsp-mcp", "lean-lsp-mcp"]
-            , svOverride = "GAUSS_AUTOFORMALIZE_LEAN_LSP_MCP_SPEC"
+            , svOverride = "FISHER_AUTOFORMALIZE_LEAN_LSP_MCP_SPEC"
             , svTools = []
             }
       , pvBinaries = [Binary "lake" ["--version"] True]
@@ -113,7 +114,7 @@ prover = \case
             -- pinned: the commit whose 13 tools (12 here, rocq_switch
             -- left out) were checked against svTools
             , svDefault = ["uvx", "--from", "git+https://github.com/LLM4Rocq/rocq-mcp@6983113d0844c0b7f987c79dab13988445109bfb", "rocq-mcp"]
-            , svOverride = "GAUSS_AUTOFORMALIZE_ROCQ_MCP_SPEC"
+            , svOverride = "FISHER_AUTOFORMALIZE_ROCQ_MCP_SPEC"
             , svTools =
                 [ "rocq_compile", "rocq_compile_file", "rocq_verify", "rocq_query", "rocq_assumptions"
                 , "rocq_toc", "rocq_notations", "rocq_start", "rocq_step_multi", "rocq_check"
@@ -140,7 +141,7 @@ prover = \case
           ServerSpec
             { svName = "isabelle"
             , svDefault = ["uvx", "--from", "isabelle-mcp==0.6.0", "isabelle-mcp"]
-            , svOverride = "GAUSS_AUTOFORMALIZE_ISABELLE_MCP_SPEC"
+            , svOverride = "FISHER_AUTOFORMALIZE_ISABELLE_MCP_SPEC"
             , svTools =
                 [ "isabelle_launch", "isabelle_terminate", "isabelle_evaluate_to", "isabelle_evaluation_status"
                 , "isabelle_cancel_evaluation", "isabelle_hover", "isabelle_definition", "isabelle_local_occurrences"

@@ -71,6 +71,7 @@ import qualified Data.Text as T
 import Numeric (showFFloat)
 import System.Timeout (timeout)
 
+import Fisher.Compat (nativeBackend)
 import Fisher.Search.Auto (AutoConfig (..), AutoFail (..), Hole (..), Lsp (..), autoGoal, holesIn)
 import Fisher.Search.Check (AxiomPolicy, LeanRun)
 import qualified Fisher.Search.Check as C
@@ -103,7 +104,7 @@ data SearchConfig = SearchConfig
 
 defaultSearchConfig :: SearchConfig
 defaultSearchConfig = SearchConfig
-  { scBackends = ["claude-code", "gauss"], scSlots = 4, scMaxAttempts = 3, scBudget = 7200, scParallelPerGoal = True
+  { scBackends = ["claude-code", nativeBackend], scSlots = 4, scMaxAttempts = 3, scBudget = 7200, scParallelPerGoal = True
   , scTiers = [], scControl = False, scUntiered = [] }
 
 data AttemptSpec = AttemptSpec

@@ -31,7 +31,7 @@ spec = do
             "" -> "default"
             s -> s
           cwd = wRoot w </> T.unpack (str "cwd" c)
-      skin <- loadSkin (wGaussHome w) skinName
+      skin <- loadSkin (wFisherHome w) skinName
       project <- projectSummaryAt w cwd
       let ls
             | width < 34 = compactBanner width (not ascii) skin

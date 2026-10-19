@@ -58,6 +58,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import System.Timeout (timeout)
 
+import Fisher.Compat (nativeBackend)
 import Fisher.Search.Auto (AutoConfig (..), AutoFail (..), autoGoal)
 import Fisher.Search.Check (Verdict (..))
 import Fisher.Search.Child (ChildStats (..))
@@ -183,7 +184,7 @@ data GraphReport = GraphReport
 
 -- | The native backend the workers run on.
 workerBackend :: Text
-workerBackend = "gauss"
+workerBackend = nativeBackend
 
 data Kind
   = KWorker AttemptSpec Double

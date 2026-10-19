@@ -1,4 +1,4 @@
--- | Fisher's native backend (C3): `gauss.autoformalize.backend: fisher`
+-- | Fisher's native backend (C3): `fisher.autoformalize.backend: fisher`
 -- (or the old name `gauss`) plans the workflow on `fisher chat`, with the skill and the command doc
 -- in a system prompt file, the Lean MCP server in an --mcp-config file and
 -- the Claude credentials staged as for claude-code.
@@ -84,13 +84,20 @@ spec = describe "the fisher backend" $ do
       runner <- either (fail . T.unpack) pure =<< resolveUvRunner (Map.toList base)
       fmap (\case Object s -> KM.lookup "args" s; _ -> Nothing) server `shouldBe` Just (Just (Data.Aeson.toJSON (drop 1 runner)))
       Map.lookup "HOME" (hrEnv req) `shouldBe` Just (managed </> "gauss-home")
+      -- the child gets both names: it may be an older Fisher or an upstream tool
+      Map.lookup "FISHER_HOME" (hrEnv req) `shouldBe` Just (root </> "gauss-home")
       Map.lookup "GAUSS_HOME" (hrEnv req) `shouldBe` Just (root </> "gauss-home")
+      Map.lookup "FISHER_AUTOFORMALIZE_BACKEND" (hrEnv req) `shouldBe` Just "fisher"
       Map.lookup "GAUSS_AUTOFORMALIZE_BACKEND" (hrEnv req) `shouldBe` Just "fisher"
       doesFileExist (managed </> "gauss-home" </> ".claude" </> ".credentials.json") `shouldReturn` True
 
   it "rejects an unknown provider" $
     planProve [("GAUSS_AUTOFORMALIZE_NATIVE_PROVIDER", "bogus")] $ \_ _ r ->
-      either errorMessage (const "") r `shouldBe` "`gauss.autoformalize.native_provider` must be one of: openrouter, anthropic."
+      either errorMessage (const "") r `shouldBe` "`fisher.autoformalize.native_provider` must be one of: openrouter, anthropic."
+
+  it "reads FISHER_AUTOFORMALIZE_NATIVE_PROVIDER before the GAUSS_ name" $ do
+    planProve [("FISHER_AUTOFORMALIZE_NATIVE_PROVIDER", "bogus"), ("GAUSS_AUTOFORMALIZE_NATIVE_PROVIDER", "openrouter")] $ \_ _ r ->
+      either errorMessage (const "") r `shouldBe` "`fisher.autoformalize.native_provider` must be one of: openrouter, anthropic."
 
   it "has no chat of its own" $ do
     file <- either fail pure =<< (Data.Aeson.eitherDecodeFileStrict "test/golden/a2/workflow-plans.json" :: IO (Either String Value))

@@ -1,5 +1,5 @@
 -- | The launch's model: @--model M@ in the command (which @fisher launch
--- --model M@ puts there), else @gauss.autoformalize.model@, else the
+-- --model M@ puts there), else @fisher.autoformalize.model@, else the
 -- backend's own default. Each backend's child takes it in its own flag:
 -- claude-code @--model@, codex @-m@, the native @fisher chat -m@.
 module Fisher.LaunchModelSpec (spec) where
@@ -25,7 +25,7 @@ import Fisher.Workflow.Settings (resolveLaunchModel)
 import Fisher.Workflow.Types
 
 -- | Plan a command for a Lean project from a recorded case, with the
--- backend and more @gauss.autoformalize@ keys.
+-- backend and more @fisher.autoformalize@ keys (given under the old @gauss@ root).
 planLean :: Text -> Text -> [(Key, Value)] -> [(String, String)] -> Text -> (Either WorkflowError WorkflowPlan -> IO ()) -> IO ()
 planLean caseName backend auto extraEnv command k = do
   let path = "test/golden/a2/workflow-plans.json"

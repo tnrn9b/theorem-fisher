@@ -79,7 +79,7 @@ arxivPath :: FilePath
 arxivPath = "/fisher-test/arxiv/search_arxiv.py"
 
 machineFor :: Value -> FilePath -> Machine
-machineFor golden gaussHome =
+machineFor golden fisherHome =
   let mach = field "machine" golden :: Value
    in Machine
         { mIsRoot = field "is_root" mach
@@ -87,7 +87,7 @@ machineFor golden gaussHome =
         , mKeychain = pure Nothing
         , mNow = pure (UTCTime (fromGregorian 2026 10 1) 0)
         , mStamp = pure "20261001-120000"
-        , mGaussHome = gaussHome
+        , mFisherHome = fisherHome
         , mArxivScript = Just arxivPath
         , mNote = \_ -> pure ()
         }

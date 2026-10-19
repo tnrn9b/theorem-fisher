@@ -19,14 +19,14 @@ manifestErrorContaining needle = \case
   _ -> False
 
 writeManifest :: FilePath -> [String] -> IO ()
-writeManifest root ls = writeFile (root </> ".gauss" </> "project.yaml") (unlines ls)
+writeManifest root ls = writeFile (root </> ".fisher" </> "project.yaml") (unlines ls)
 
 goodManifest :: [String]
 goodManifest =
   [ "schema_version: 1", "name: Demo Project", "kind: lean4", "lean_root: ."
   , "created_at: 2026-03-18T00:00:00+00:00", "source:", "  mode: init", "  template_source: ''"
-  , "blueprint:", "  markers: []", "paths:", "  runtime: .gauss/runtime", "  cache: .gauss/cache"
-  , "  workflows: .gauss/workflows" ]
+  , "blueprint:", "  markers: []", "paths:", "  runtime: .fisher/runtime", "  cache: .fisher/cache"
+  , "  workflows: .fisher/workflows" ]
 
 -- | A manifest of another kind: @kind@ and @root@ in place of @lean_root@.
 kindManifest :: String -> String -> [String]
@@ -57,11 +57,11 @@ spec = do
     project <- initializeProject root defaultInitOptions { initName = Just "Demo Project" }
     loaded <- loadProject root
     projectLabel loaded `shouldBe` "Demo Project"
-    projectManifestPath loaded `shouldBe` root </> ".gauss" </> "project.yaml"
+    projectManifestPath loaded `shouldBe` root </> ".fisher" </> "project.yaml"
     projectLeanRoot loaded `shouldBe` root
-    projectRuntimeDir loaded `shouldBe` root </> ".gauss" </> "runtime"
-    projectCacheDir loaded `shouldBe` root </> ".gauss" </> "cache"
-    projectWorkflowsDir loaded `shouldBe` root </> ".gauss" </> "workflows"
+    projectRuntimeDir loaded `shouldBe` root </> ".fisher" </> "runtime"
+    projectCacheDir loaded `shouldBe` root </> ".fisher" </> "cache"
+    projectWorkflowsDir loaded `shouldBe` root </> ".fisher" </> "workflows"
     lookupKey "schema_version" (projectManifest loaded) `shouldBe` Just (Number 1)
     project `shouldBe` loaded
 
@@ -112,13 +112,13 @@ spec = do
       _ -> False
 
   it "prefers the environment's template source over the config" $ do
-    let config = object ["gauss" .= object ["project" .= object ["template_source" .= ("config-template" :: String)]]]
+    let config = object ["fisher" .= object ["project" .= object ["template_source" .= ("config-template" :: String)]]]
     resolveTemplateSource config [(templateEnvVar, "env-template")] `shouldBe` "env-template"
 
   -- Beyond upstream's tests: the branches upstream does not exercise.
   describe "edge cases" $ do
     it "falls back to the config template source when the env value is blank" $ do
-      let config = object ["gauss" .= object ["project" .= object ["template_source" .= (" from-config " :: String)]]]
+      let config = object ["fisher" .= object ["project" .= object ["template_source" .= (" from-config " :: String)]]]
       resolveTemplateSource config [(templateEnvVar, "   ")] `shouldBe` "from-config"
       resolveTemplateSource (object []) [] `shouldBe` ""
 
@@ -139,12 +139,12 @@ spec = do
       projectBlueprintMarkers p `shouldBe` ["lakefile.lean"]
       formatProjectSummary p Nothing `shouldReturn` "Plain · blueprint"
 
-    it "accepts the manifest path and the .gauss dir as targets" $ withTmp $ \tmp -> do
+    it "accepts the manifest path and the .fisher dir as targets" $ withTmp $ \tmp -> do
       let root = tmp </> "Demo"
       writeLeanRoot root
       p <- initializeProject root defaultInitOptions
-      loadProject (root </> ".gauss") `shouldReturn` p
-      loadProject (root </> ".gauss" </> "project.yaml") `shouldReturn` p
+      loadProject (root </> ".fisher") `shouldReturn` p
+      loadProject (root </> ".fisher" </> "project.yaml") `shouldReturn` p
 
     it "names the project after its directory by default" $ withTmp $ \tmp -> do
       let root = tmp </> "Lemmas"
@@ -155,16 +155,16 @@ spec = do
 
     it "reports a missing project" $ withTmp $ \tmp ->
       discoverProject tmp `shouldThrow` \case
-        ProjectNotFound m -> "No active Gauss project found" `T.isInfixOf` m
+        ProjectNotFound m -> "No active Fisher project found" `T.isInfixOf` m
         _ -> False
 
-    it "reports a .gauss dir without a manifest" $ withTmp $ \tmp -> do
-      createDirectoryIfMissing True (tmp </> ".gauss")
+    it "reports a .fisher dir without a manifest" $ withTmp $ \tmp -> do
+      createDirectoryIfMissing True (tmp </> ".fisher")
       loadProject tmp `shouldThrow` manifestErrorContaining "`project.yaml` is missing"
 
     it "refuses a wrong schema version, quoting it" $ withTmp $ \tmp -> do
       writeLeanRoot tmp
-      createDirectoryIfMissing True (tmp </> ".gauss")
+      createDirectoryIfMissing True (tmp </> ".fisher")
       writeManifest tmp (replaceLine "schema_version" "schema_version: 2" goodManifest)
       loadProject tmp `shouldThrow` manifestErrorContaining "has schema_version=2; expected 1."
       writeManifest tmp (filter (\l -> take 6 l /= "schema") goodManifest)
@@ -172,7 +172,7 @@ spec = do
 
     it "refuses a blank name and a foreign kind" $ withTmp $ \tmp -> do
       writeLeanRoot tmp
-      createDirectoryIfMissing True (tmp </> ".gauss")
+      createDirectoryIfMissing True (tmp </> ".fisher")
       writeManifest tmp (replaceLine "name" "name: '  '" goodManifest)
       loadProject tmp `shouldThrow` manifestErrorContaining "is missing a non-empty `name`."
       writeManifest tmp (replaceLine "kind" "kind: coq" goodManifest)
@@ -180,7 +180,7 @@ spec = do
 
     it "refuses absolute, empty and null path fields" $ withTmp $ \tmp -> do
       writeLeanRoot tmp
-      createDirectoryIfMissing True (tmp </> ".gauss")
+      createDirectoryIfMissing True (tmp </> ".fisher")
       writeManifest tmp (replaceLine "  cache" "  cache: /tmp/cache" goodManifest)
       loadProject tmp `shouldThrow` manifestErrorContaining "`paths.cache` must be relative."
       writeManifest tmp (replaceLine "lean_root" "lean_root: null" goodManifest)
@@ -190,17 +190,17 @@ spec = do
 
     it "treats null source and blueprint sections as empty" $ withTmp $ \tmp -> do
       writeLeanRoot tmp
-      createDirectoryIfMissing True (tmp </> ".gauss")
+      createDirectoryIfMissing True (tmp </> ".fisher")
       writeManifest tmp
         [ "schema_version: 1", "name: Bare", "source: null", "blueprint: null" ]
       p <- loadProject tmp
       projectSourceMode p `shouldBe` "init"
       projectBlueprintMarkers p `shouldBe` []
-      doesDirectoryExist (tmp </> ".gauss" </> "workflows") `shouldReturn` True
+      doesDirectoryExist (tmp </> ".fisher" </> "workflows") `shouldReturn` True
 
     it "refuses a lean_root that is not a Lean project" $ withTmp $ \tmp -> do
       writeLeanRoot tmp
-      createDirectoryIfMissing True (tmp </> ".gauss")
+      createDirectoryIfMissing True (tmp </> ".fisher")
       createDirectoryIfMissing True (tmp </> "docs")
       writeManifest tmp (replaceLine "lean_root" "lean_root: docs" goodManifest)
       loadProject tmp `shouldThrow` manifestErrorContaining "declares lean_root='docs', but that directory"
@@ -232,7 +232,7 @@ spec = do
     -- Review Focus: a manifest written before Rocq and Isabelle loads as before.
     it "loads an old Lean manifest (no kind, lean_root only) unchanged" $ withTmp $ \tmp -> do
       writeLeanRoot (tmp </> "lean")
-      createDirectoryIfMissing True (tmp </> ".gauss")
+      createDirectoryIfMissing True (tmp </> ".fisher")
       writeManifest tmp
         [ "schema_version: 1", "name: Old", "lean_root: lean", "created_at: '2026-03-18T00:00:00+00:00'" ]
       p <- loadProject tmp
@@ -244,7 +244,7 @@ spec = do
 
     it "accepts root as a synonym of lean_root, and both when they agree" $ withTmp $ \tmp -> do
       writeLeanRoot (tmp </> "lean")
-      createDirectoryIfMissing True (tmp </> ".gauss")
+      createDirectoryIfMissing True (tmp </> ".fisher")
       writeManifest tmp (replaceLine "lean_root" "root: lean" goodManifest)
       p <- loadProject tmp
       projectProverRoot p `shouldBe` tmp </> "lean"
@@ -256,14 +256,14 @@ spec = do
     it "refuses lean_root and root that disagree" $ withTmp $ \tmp -> do
       writeLeanRoot tmp
       writeLeanRoot (tmp </> "lean")
-      createDirectoryIfMissing True (tmp </> ".gauss")
+      createDirectoryIfMissing True (tmp </> ".fisher")
       writeManifest tmp (goodManifest <> ["root: lean"])
       loadProject tmp `shouldThrow`
-        manifestError (T.pack (tmp </> ".gauss" </> "project.yaml") <> " declares lean_root and root differently.")
+        manifestError (T.pack (tmp </> ".fisher" </> "project.yaml") <> " declares lean_root and root differently.")
 
     it "loads a Rocq manifest with its root" $ withTmp $ \tmp -> do
       writeRocqRoot (tmp </> "coq")
-      createDirectoryIfMissing True (tmp </> ".gauss")
+      createDirectoryIfMissing True (tmp </> ".fisher")
       writeManifest tmp (kindManifest "rocq" "coq")
       p <- loadProject tmp
       projectKind p `shouldBe` "rocq"
@@ -273,7 +273,7 @@ spec = do
 
     it "loads an Isabelle manifest whose root defaults to the project" $ withTmp $ \tmp -> do
       writeIsabelleRoot tmp
-      createDirectoryIfMissing True (tmp </> ".gauss")
+      createDirectoryIfMissing True (tmp </> ".fisher")
       writeManifest tmp (filter (\l -> take 4 l /= "root") (kindManifest "isabelle" "."))
       p <- loadProject tmp
       projectProver p `shouldBe` Isabelle
@@ -281,14 +281,14 @@ spec = do
 
     it "refuses a Rocq root that is not a Rocq project root" $ withTmp $ \tmp -> do
       writeLeanRoot (tmp </> "docs")
-      createDirectoryIfMissing True (tmp </> ".gauss")
+      createDirectoryIfMissing True (tmp </> ".fisher")
       writeManifest tmp (kindManifest "rocq" "docs")
       loadProject tmp `shouldThrow`
-        manifestError (T.pack (tmp </> ".gauss" </> "project.yaml")
+        manifestError (T.pack (tmp </> ".fisher" </> "project.yaml")
           <> " declares root='docs', but that directory is not a Rocq project root.")
       writeManifest tmp (kindManifest "isabelle" "docs")
       loadProject tmp `shouldThrow`
-        manifestError (T.pack (tmp </> ".gauss" </> "project.yaml")
+        manifestError (T.pack (tmp </> ".fisher" </> "project.yaml")
           <> " declares root='docs', but that directory is not an Isabelle project root.")
 
     it "writes a Lean manifest byte for byte as before" $ withTmp $ \tmp -> do
@@ -299,7 +299,7 @@ spec = do
       withoutCreatedAt written `shouldBe`
         [ "schema_version: 1", "name: d", "kind: lean4", "lean_root: .", "source:", "  mode: init"
         , "  template_source: ''", "blueprint:", "  markers:", "  - lakefile.lean", "paths:"
-        , "  runtime: .gauss/runtime", "  cache: .gauss/cache", "  workflows: .gauss/workflows" ]
+        , "  runtime: .fisher/runtime", "  cache: .fisher/cache", "  workflows: .fisher/workflows" ]
       projectProver p `shouldBe` Lean4
 
     it "initializes a Rocq project with kind and root" $ withTmp $ \tmp -> do
@@ -310,7 +310,7 @@ spec = do
       withoutCreatedAt written `shouldBe`
         [ "schema_version: 1", "name: r", "kind: rocq", "root: .", "source:", "  mode: init"
         , "  template_source: ''", "blueprint:", "  markers: []", "paths:"
-        , "  runtime: .gauss/runtime", "  cache: .gauss/cache", "  workflows: .gauss/workflows" ]
+        , "  runtime: .fisher/runtime", "  cache: .fisher/cache", "  workflows: .fisher/workflows" ]
       projectProver p `shouldBe` Rocq
       projectProverRoot p `shouldBe` root
       loadProject root `shouldReturn` p
@@ -343,7 +343,7 @@ spec = do
       writeRocqRoot root
       s <- session root
       out <- handleProjectTokens s ["init"]
-      take 1 out `shouldBe` ["(^_^)b Initialized Gauss project: R"]
+      take 1 out `shouldBe` ["(^_^)b Initialized Fisher project: R"]
       status <- handleProjectTokens s ["status"]
       status `shouldContain` ["  Rocq root: " <> T.pack root]
 
@@ -363,7 +363,7 @@ spec = do
       tie <- handleProjectTokens s ["init"]
       take 1 tie `shouldBe` ["(>_<) " <> T.pack root <> " holds both a Lean 4 and an Isabelle project; pass --prover lean4|rocq|isabelle."]
       out <- handleProjectTokens s ["init", "--prover", "isabelle"]
-      take 1 out `shouldBe` ["(^_^)b Initialized Gauss project: B"]
+      take 1 out `shouldBe` ["(^_^)b Initialized Fisher project: B"]
       bad <- handleProjectTokens (s { sessionCwd = tmp }) ["init", "--prover", "coq"]
       take 1 bad `shouldBe` ["(>_<) Unknown prover `coq`; expected lean4, rocq or isabelle."]
 
@@ -380,7 +380,7 @@ spec = do
       createDirectoryIfMissing True (root </> "Sub")
       s <- session (root </> "Sub")
       out <- handleProjectTokens s ["init"]
-      take 1 out `shouldBe` ["(^_^)b Initialized Gauss project: Tied"]
+      take 1 out `shouldBe` ["(^_^)b Initialized Fisher project: Tied"]
       conv <- handleProjectTokens s ["convert", T.pack root]
-      take 1 conv `shouldBe` ["(^_^)b Registered existing repository as a Gauss project: Tied"]
+      take 1 conv `shouldBe` ["(^_^)b Registered existing repository as a Fisher project: Tied"]
       loadProject root `shouldReturn` p

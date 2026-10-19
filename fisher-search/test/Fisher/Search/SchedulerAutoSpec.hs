@@ -80,7 +80,7 @@ auto :: AutoConfig
 auto = defaultAutoConfig {acTactics = ["rfl", "simp_all"]}
 
 cfg0 :: SearchConfig
-cfg0 = defaultSearchConfig {scBackends = ["claude-code", "gauss"], scSlots = 4, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = True}
+cfg0 = defaultSearchConfig {scBackends = ["claude-code", "fisher"], scSlots = 4, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = True}
 
 goalOf :: Text -> SearchReport -> GoalState
 goalOf g rep = fromMaybe (error "no goal") (lookup g (srGoals rep))
@@ -125,10 +125,10 @@ spec :: Spec
 spec = describe "the automation pre-pass in flat search" $ do
   it "with auto off, runs today's search: no new events, today's report fields" $ do
     r <- search cfg0 {scSlots = 1} Nothing fake0 fakeLean three
-      (Map.fromList [ (("a", "claude-code"), [("BAD", 5)]), (("a", "gauss"), [("ok", 5)])
+      (Map.fromList [ (("a", "claude-code"), [("BAD", 5)]), (("a", "fisher"), [("ok", 5)])
                     , (("b", "*"), [("ok", 5)]), (("c", "*"), [("ok", 5)]) ])
     lookup "a" [(g, gsStatus s) | (g, s) <- srGoals (rReport r)] `shouldBe` Just Closed
-    [b | Launched _ _ "a" b <- rEvents r] `shouldBe` ["claude-code", "gauss"]
+    [b | Launched _ _ "a" b <- rEvents r] `shouldBe` ["claude-code", "fisher"]
     filter isAutoEvent (rEvents r) `shouldBe` []
     rCalls r `shouldBe` []
     (srAutoRan (rReport r), srAutoOff (rReport r)) `shouldBe` (False, Nothing)

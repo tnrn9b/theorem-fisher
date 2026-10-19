@@ -2,7 +2,7 @@
 -- @strategy@) and @GET /api/sessions/:id@.
 --
 -- state.db does not record a session's project, so it is found from the
--- replay log: the first absolute path a tool touched that lies in a Gauss
+-- replay log: the first absolute path a tool touched that lies in a Fisher
 -- project (its manifest's kind is the prover) or in a prover project root
 -- (lakefile, _CoqProject, ROOT). The project is that directory's path. A compression child writes no log of its
 -- own (the agent keeps logging to the log it opened), so a child takes its
@@ -18,6 +18,7 @@ module Fisher.UI.Api.Sessions
   ) where
 
 import Control.Exception (SomeException, try)
+import Control.Monad (filterM)
 import qualified Data.Aeson as A
 import qualified Data.Aeson.KeyMap as KM
 import Data.IORef
@@ -33,6 +34,7 @@ import Network.Wai (Request (..))
 import System.Directory (canonicalizePath, doesDirectoryExist, doesFileExist)
 import System.FilePath (takeDirectory, (</>))
 
+import Fisher.Compat (projectDirNames)
 import Fisher.Prover (Prover (..), detectProver, prover)
 import Fisher.UI.Db
 import Fisher.UI.Response (Api, jsonResponse)
@@ -192,21 +194,21 @@ projectOf env = \case
                 Left (_ :: SomeException) -> Nothing
                 _ -> Nothing
 
--- | The nearest directory at or above holding @.gauss/project.yaml@, with
+-- | The nearest directory at or above holding @.fisher/project.yaml@ (or,
+-- from before the rename, @.gauss/project.yaml@), with
 -- the manifest's kind (lean4 when it names none). Read here rather than by
 -- 'Fisher.Project.loadProject', which creates the project's runtime
 -- directories.
 manifestAbove :: FilePath -> IO (Maybe (FilePath, Text))
 manifestAbove d = do
-  let m = d </> ".gauss" </> "project.yaml"
-  here <- doesFileExist m
-  if here
-    then do
+  found <- filterM doesFileExist [d </> n </> "project.yaml" | n <- projectDirNames]
+  case found of
+    m : _ -> do
       v <- either (\(_ :: SomeException) -> Nothing) Just <$> try (Y.decodeFileThrow m)
       let kind = case v of
             Just (A.Object o) | Just (A.String k) <- KM.lookup "kind" o, not (T.null k) -> k
             _ -> "lean4"
       pure (Just (d, kind))
-    else
+    [] ->
       let up = takeDirectory d
        in if up == d then pure Nothing else manifestAbove up

@@ -108,6 +108,7 @@ test-suite fisher-agent-test
       Fisher.Agent.ProcessSpec
       Fisher.Agent.PromptSpec
       Fisher.Agent.RecallSpec
+      Fisher.Agent.RenameCompatSpec
       Fisher.Agent.ReplaySpec
       Fisher.Agent.RlmLoopSpec
       Fisher.Agent.RlmOffloadSpec

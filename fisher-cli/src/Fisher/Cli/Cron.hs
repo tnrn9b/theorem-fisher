@@ -13,7 +13,7 @@
 --
 -- A due job runs on the native agent (platform @cron@, every toolset but
 -- @cronjob@), its session saved in state.db, its output written to
--- @~/.gauss/cron/output/JOB/TIME.md@. Delivery to a chat platform needs
+-- @$FISHER_HOME/cron/output/JOB/TIME.md@. Delivery to a chat platform needs
 -- upstream's gateway, which Fisher does not port: such a job's result
 -- stays in its output file, and a warning says so.
 module Fisher.Cli.Cron
@@ -80,12 +80,12 @@ data CronDeps = CronDeps
 defaultCronDeps :: CronDeps
 defaultCronDeps = CronDeps defaultChatDeps realCronEnv tickerPid (TIO.hPutStrLn stderr) True
 
--- | The zone @gauss_time.now()@ uses: GAUSS_TIMEZONE, else config.yaml's
+-- | The zone @gauss_time.now()@ uses: FISHER_TIMEZONE (else GAUSS_TIMEZONE), else config.yaml's
 -- @timezone@, else the system's local time (a fixed offset, as
 -- @datetime.now().astimezone()@ gives).
 realCronEnv :: Sys -> IO CronEnv
 realCronEnv sys = do
-  fromEnv <- maybe "" T.strip <$> sysGetEnv sys "GAUSS_TIMEZONE"
+  fromEnv <- maybe "" T.strip <$> sysGetEnvCompat sys "FISHER_TIMEZONE"
   name <-
     if not (T.null fromEnv)
       then pure fromEnv
@@ -99,7 +99,7 @@ realCronEnv sys = do
   let localOffset = (* 60) . timeZoneMinutes <$> getCurrentTimeZone
   pure
     CronEnv
-      { ceHome = sysGaussHome sys
+      { ceHome = sysFisherHome sys
       , ceNow = do
           t <- sysNow sys
           tz <- case zone of
@@ -112,7 +112,7 @@ realCronEnv sys = do
 -- | config.yaml as written (yaml.safe_load), or an empty dict.
 rawConfig :: Sys -> IO PyVal
 rawConfig sys = do
-  let p = sysGaussHome sys </> "config.yaml"
+  let p = sysFisherHome sys </> "config.yaml"
   ex <- doesFileExist p
   if not ex
     then pure (PDict [])
@@ -123,7 +123,7 @@ rawConfig sys = do
         _ -> PDict []
 
 tickerFile :: Sys -> FilePath
-tickerFile sys = sysGaussHome sys </> "cron" </> "ticker.pid"
+tickerFile sys = sysFisherHome sys </> "cron" </> "ticker.pid"
 
 -- | The PID in cron/ticker.pid, when that process is alive.
 tickerPid :: Sys -> IO (Maybe Int)
@@ -160,33 +160,33 @@ data Sub = Sub
 
 subcommands :: [(Text, Sub)]
 subcommands =
-  [ ("list", Sub "gauss cron list" "usage: gauss cron list [-h] [--all]\n" [] [Flag "--all"])
+  [ ("list", Sub "fisher cron list" "usage: fisher cron list [-h] [--all]\n" [] [Flag "--all"])
   , ("create", createSub), ("add", createSub)
   , ( "edit"
-    , Sub "gauss cron edit"
-        "usage: gauss cron edit [-h] [--schedule SCHEDULE] [--prompt PROMPT]\n\
-        \                       [--name NAME] [--deliver DELIVER] [--repeat REPEAT]\n\
-        \                       [--skill SKILLS] [--add-skill ADD_SKILLS]\n\
-        \                       [--remove-skill REMOVE_SKILLS] [--clear-skills]\n\
-        \                       job_id\n"
+    , Sub "fisher cron edit"
+        "usage: fisher cron edit [-h] [--schedule SCHEDULE] [--prompt PROMPT]\n\
+        \                        [--name NAME] [--deliver DELIVER] [--repeat REPEAT]\n\
+        \                        [--skill SKILLS] [--add-skill ADD_SKILLS]\n\
+        \                        [--remove-skill REMOVE_SKILLS] [--clear-skills]\n\
+        \                        job_id\n"
         [("job_id", True)]
         [ Value "--schedule", Value "--prompt", Value "--name", Value "--deliver", IntValue "--repeat", Append "--skill"
         , Append "--add-skill", Append "--remove-skill", Flag "--clear-skills" ] )
   , ("pause", jobSub "pause"), ("resume", jobSub "resume"), ("run", jobSub "run")
   , ("remove", jobSub "remove"), ("rm", jobSub "remove"), ("delete", jobSub "remove")
-  , ("status", Sub "gauss cron status" "usage: gauss cron status [-h]\n" [] [])
-  , ("tick", Sub "gauss cron tick" "usage: gauss cron tick [-h]\n" [] [])
+  , ("status", Sub "fisher cron status" "usage: fisher cron status [-h]\n" [] [])
+  , ("tick", Sub "fisher cron tick" "usage: fisher cron tick [-h]\n" [] [])
   , ("serve", Sub "fisher cron serve" "usage: fisher cron serve [-h] [--interval SECONDS]\n" [] [IntValue "--interval"])
   ]
   where
     createSub =
-      Sub "gauss cron create"
-        "usage: gauss cron create [-h] [--name NAME] [--deliver DELIVER]\n\
-        \                         [--repeat REPEAT] [--skill SKILLS]\n\
-        \                         schedule [prompt]\n"
+      Sub "fisher cron create"
+        "usage: fisher cron create [-h] [--name NAME] [--deliver DELIVER]\n\
+        \                          [--repeat REPEAT] [--skill SKILLS]\n\
+        \                          schedule [prompt]\n"
         [("schedule", True), ("prompt", False)]
         [Value "--name", Value "--deliver", IntValue "--repeat", Append "--skill"]
-    jobSub n = Sub ("gauss cron " <> n) ("usage: gauss cron " <> n <> " [-h] job_id\n") [("job_id", True)] []
+    jobSub n = Sub ("fisher cron " <> n) ("usage: fisher cron " <> n <> " [-h] job_id\n") [("job_id", True)] []
 
 -- | Parsed: options (an append option once per use), positionals by name.
 type Parsed = [(Text, Text)]
@@ -257,10 +257,10 @@ cronMain deps sys args = do
     sub : rest -> case lookup sub subcommands of
       Nothing -> do
         crErr deps
-          ( "usage: gauss cron [-h]\n\
-            \                  {list,create,add,edit,pause,resume,run,remove,rm,delete,status,tick}\n\
-            \                  ...\n\
-            \gauss cron: error: argument cron_command: invalid choice: '" <> sub <> "' (choose from 'list', 'create', 'add', 'edit', 'pause', 'resume', 'run', 'remove', 'rm', 'delete', 'status', 'tick')" )
+          ( "usage: fisher cron [-h]\n\
+            \                   {list,create,add,edit,pause,resume,run,remove,rm,delete,status,tick}\n\
+            \                   ...\n\
+            \fisher cron: error: argument cron_command: invalid choice: '" <> sub <> "' (choose from 'list', 'create', 'add', 'edit', 'pause', 'resume', 'run', 'remove', 'rm', 'delete', 'status', 'tick')" )
         pure 2
       Just spec -> case parseSub spec rest of
         Left e -> crErr deps (T.dropWhileEnd (== '\n') e) >> pure 2
@@ -298,7 +298,7 @@ cronList deps sys env say paint showAll = do
   if null jobs
     then do
       say (paint [dim] "No scheduled jobs.")
-      say (paint [dim] "Create one with 'gauss cron create ...' or the /cron command in chat.")
+      say (paint [dim] "Create one with 'fisher cron create ...' or the /cron command in chat.")
     else do
       say ""
       say (paint [cyan] "┌─────────────────────────────────────────────────────────────────────────┐")
@@ -463,7 +463,7 @@ jobAction env sys say paint action p verb = do
 -- | @fisher cron serve@: tick now and every interval, until stopped.
 serve :: CronDeps -> Sys -> Int -> IO Int
 serve deps sys interval = do
-  createDirectoryIfMissing True (sysGaussHome sys </> "cron")
+  createDirectoryIfMissing True (sysFisherHome sys </> "cron")
   -- SIGTERM (launchd, systemd, kill) ends the loop as Ctrl-C does, so the
   -- PID file goes
   me <- myThreadId
@@ -529,7 +529,7 @@ tick deps sys = do
       let jid = maybe "" pyStrOf (get "id" job)
           target = maybe "local" pyStrOf (get "deliver" job)
       unless (target == "local") $
-        crErr deps ("Job '" <> jid <> "': deliver=" <> target <> ", but Fisher has no messaging gateway; the result is in " <> T.pack (sysGaussHome sys </> "cron" </> "output" </> T.unpack jid))
+        crErr deps ("Job '" <> jid <> "': deliver=" <> target <> ", but Fisher has no messaging gateway; the result is in " <> T.pack (sysFisherHome sys </> "cron" </> "output" </> T.unpack jid))
 
 -- | @_build_job_prompt(job)@: Left is the error a missing skill raises.
 buildJobPrompt :: Sys -> PyVal -> IO (Either Text Text)
@@ -562,7 +562,7 @@ buildJobPrompt sys job = do
 -- | @skill_view(name)@'s content (or its error), as cron uses it.
 skillView :: Sys -> Text -> IO (Either Text Text)
 skillView sys name = do
-  let root = sysGaussHome sys </> "skills"
+  let root = sysFisherHome sys </> "skills"
   ex <- doesDirectoryExist root
   if not ex
     then pure (Left "Skills directory does not exist yet. It will be created on first install.")
@@ -625,7 +625,7 @@ runJob deps sys env shared job = do
   r <- try @SomeException $ do
     loadDotenvIntoSys sys
     cfg <- rawConfig sys
-    envModel <- sysGetEnv sys "GAUSS_MODEL"
+    envModel <- sysGetEnvCompat sys "FISHER_MODEL"
     let jobModel = case get "model" job of
           Just (PStr m) | not (T.null m) -> Just m
           _ -> Nothing
@@ -635,21 +635,21 @@ runJob deps sys env shared job = do
           (Nothing, Just d@(PDict _)) -> maybe model0 pyStrOf (get "default" d)
           _ -> model0
         agentCfg = fromMaybe (PDict []) (get "agent" cfg)
-    effortEnv <- fromMaybe "" <$> sysGetEnv sys "GAUSS_REASONING_EFFORT"
+    effortEnv <- fromMaybe "" <$> sysGetEnvCompat sys "FISHER_REASONING_EFFORT"
     let effort = if T.null effortEnv then T.strip (maybe "" pyStrOf (get "reasoning_effort" agentCfg)) else effortEnv
         reasoning
           | not (T.null effort) && T.toLower effort /= "none" =
               if T.toLower effort `elem` ["xhigh", "high", "medium", "low", "minimal"] then Just (PDict [("enabled", PBool True), ("effort", PStr (T.toLower effort))]) else Nothing
           | T.toLower effort == "none" = Just (PDict [("enabled", PBool False)])
           | otherwise = Nothing
-    prefillEnv <- fromMaybe "" <$> sysGetEnv sys "GAUSS_PREFILL_MESSAGES_FILE"
+    prefillEnv <- fromMaybe "" <$> sysGetEnvCompat sys "FISHER_PREFILL_MESSAGES_FILE"
     let prefillFile = if T.null prefillEnv then maybe "" pyStrOf (get "prefill_messages_file" cfg) else prefillEnv
     prefill <-
       if T.null prefillFile
         then pure []
         else do
           let p0 = T.unpack prefillFile
-              p = if "/" `isPrefixOf` p0 then p0 else if "~/" `isPrefixOf` p0 then sysHome sys </> drop 2 p0 else sysGaussHome sys </> p0
+              p = if "/" `isPrefixOf` p0 then p0 else if "~/" `isPrefixOf` p0 then sysHome sys </> drop 2 p0 else sysFisherHome sys </> p0
           ex <- doesFileExist p
           if not ex then pure [] else do
             b <- BS.readFile p
@@ -665,7 +665,7 @@ runJob deps sys env shared job = do
         routing = Routing (strs "only") (strs "ignore") (strs "order") (pyStrOf <$> get "sort" pr) False Nothing
     reqProvider <- case get "provider" job of
       Just (PStr p) | not (T.null p) -> pure (Just p)
-      _ -> nonEmpty <$> sysGetEnv sys "GAUSS_INFERENCE_PROVIDER"
+      _ -> nonEmpty <$> sysGetEnvCompat sys "FISHER_INFERENCE_PROVIDER"
     let baseUrl = case get "base_url" job of
           Just (PStr b) | not (T.null b) -> Just b
           _ -> Nothing
@@ -674,7 +674,7 @@ runJob deps sys env shared job = do
         Left e -> ioErrorNative "RuntimeError" (formatRuntimeProviderError e)
         Right v -> pure v
     now <- ceNow env
-    store <- either (const Nothing) Just <$> try @SomeException (openStore (sysGaussHome sys </> "state.db"))
+    store <- either (const Nothing) Just <$> try @SomeException (openStore (sysFisherHome sys </> "state.db"))
     let field' k = maybe "" pyStrOf (get k rt)
         sid = "cron_" <> jid <> "_" <> strftimeSessionId now
         spec =

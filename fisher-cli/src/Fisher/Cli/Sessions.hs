@@ -142,7 +142,7 @@ runSessions env cmd = withStore (seStorePath env) $ \st -> do
           put ("Database size: " <> pyFormatFixed 1 (fromIntegral size / (1024 * 1024)) <> " MB")
         else pure ()
 
--- | @gauss sessions@'s arguments.
+-- | @fisher sessions@'s arguments.
 sessionsParser :: Parser SessionsCmd
 sessionsParser = hsubparser
   ( command "list" (info (SList <$> optional (T.pack <$> strOption (long "source" <> metavar "SRC"))

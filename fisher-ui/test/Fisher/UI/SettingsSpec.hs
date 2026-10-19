@@ -188,7 +188,9 @@ spec = describe "/api/settings" $ do
     configAt home ["model", "default"] `shouldReturn` Just (A.String "example/model-c")
     configAt home ["model", "provider"] `shouldReturn` Just (A.String "anthropic")
     configAt home ["fisher", "context"] `shouldReturn` Just (A.String "rlm")
-    configAt home ["gauss", "autoformalize", "model"] `shouldReturn` Just (A.String "")
+    configAt home ["fisher", "autoformalize", "model"] `shouldReturn` Just (A.String "")
+    -- the old section is kept for older binaries sharing the file
+    configAt home ["gauss", "autoformalize", "model"] `shouldReturn` Just (A.String "example/model-b")
     (_, v2, _) <- getS home
     key "provider" v2 `shouldBe` A.String "anthropic"
     key "contextStrategy" v2 `shouldBe` A.String "rlm"

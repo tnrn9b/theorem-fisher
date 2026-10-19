@@ -116,7 +116,7 @@ spec = do
               , sysOpenBrowser = \_ -> pure False, sysRun = \_ -> pure (Left "no"), sysRunInteractive = \_ -> pure (Left "no")
               , sysWhich = \_ -> pure Nothing, sysPlatform = "linux"
               , sysUuidHex = atomicModifyIORef' uuidN (\n -> (n + 1, uuidAt (n + 1)))
-              , sysTimeZoneAt = \_ -> pure utc, sysHome = home, sysGaussHome = gauss
+              , sysTimeZoneAt = \_ -> pure utc, sysHome = home, sysFisherHome = gauss
               , sysOut = \t -> modifyIORef outBuf (<> [t]), sysInput = \_ -> pure Nothing, sysGetPass = \_ -> pure Nothing
               , sysStdinTty = pure False, sysStdoutTty = pure False, sysPid = 4242 }
           models = fld "models_answer" c

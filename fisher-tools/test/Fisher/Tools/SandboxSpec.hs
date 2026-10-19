@@ -40,7 +40,7 @@ spec = do
       extractFencedOutput (txt "raw" c) `shouldBe` txt "extracted" c
       cleanShellNoise (txt "raw" c) `shouldBe` txt "cleaned" c
   describe "_get_env_config" $
-    forM_ (listOf (field "config" doc)) $ \c -> it (show (strDict (field "env" c))) $ do
+    forM_ (listOf (field "config" doc)) $ \c -> it (show (strDict (field "env" c))) $ withIsolatedHome $ do
       let env = strDict (field "env" c)
       r <- getEnvConfig (\k -> pure (lookup k env)) "<CWD>"
       case r of

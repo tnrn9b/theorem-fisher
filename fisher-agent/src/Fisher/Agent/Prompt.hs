@@ -8,7 +8,7 @@ module Fisher.Agent.Prompt
   ( PromptInput (..)
   , buildSystemPrompt
   , buildContextFilesPrompt
-  , ensureGaussHome
+  , ensureFisherHomeLayout
   , scanContextContent
   , truncateContent
   , MemorySnapshot (..)
@@ -98,10 +98,10 @@ truncateContent content filename
     headN = 14000
     tailN = 4000
 
--- | @ensure_gauss_home()@: the home and its @cron@, @sessions@, @logs@ and
+-- | @ensure_gauss_home()@ upstream: the home and its @cron@, @sessions@, @logs@ and
 -- @memories@ directories (mode 0700), and SOUL.md seeded (0600).
-ensureGaussHome :: FilePath -> IO ()
-ensureGaussHome home = do
+ensureFisherHomeLayout :: FilePath -> IO ()
+ensureFisherHomeLayout home = do
   createDirectoryIfMissing True home
   secure home
   mapM_ (\d -> createDirectoryIfMissing True (home </> d) >> secure (home </> d)) ["cron", "sessions", "logs", "memories"]
@@ -125,7 +125,7 @@ readStripped p = do
 -- visited in name order (upstream follows the order the filesystem lists
 -- them in).
 buildContextFilesPrompt :: (Text -> IO ()) -> FilePath -> FilePath -> IO Text
-buildContextFilesPrompt warn gaussHome cwd0 = do
+buildContextFilesPrompt warn fisherHome cwd0 = do
   cwd <- canonicalizePath cwd0
   top <- firstExisting [cwd </> "AGENTS.md", cwd </> "agents.md"]
   agents <- case top of
@@ -171,13 +171,13 @@ buildContextFilesPrompt warn gaussHome cwd0 = do
               pure ("## " <> label <> "\n\n" <> s <> "\n\n")
             _ -> pure ""
   let cursor = cr1 <> cr2
-  _ <- try @SomeException (ensureGaussHome gaussHome)
-  soulOk <- doesPathExist (gaussHome </> "SOUL.md")
+  _ <- try @SomeException (ensureFisherHomeLayout fisherHome)
+  soulOk <- doesPathExist (fisherHome </> "SOUL.md")
   soul <-
     if not soulOk
       then pure Nothing
       else do
-        c <- readStripped (gaussHome </> "SOUL.md")
+        c <- readStripped (fisherHome </> "SOUL.md")
         case c of
           Just content | not (T.null content) -> do
             s <- scan content "SOUL.md"
@@ -272,7 +272,7 @@ data PromptInput = PromptInput
   , piMemory :: Maybe (Bool, Bool, MemorySnapshot)
   -- ^ memory enabled, user profile enabled, the snapshot (when a store exists)
   , piSkipContextFiles :: Bool
-  , piGaussHome :: FilePath
+  , piFisherHome :: FilePath
   , piCwd :: FilePath
   , piNow :: LocalTime
   , piSessionId :: Maybe Text
@@ -287,7 +287,7 @@ timestampLine t = "Conversation started: " <> T.pack (formatTime defaultTimeLoca
 -- | @_build_system_prompt(system_message)@
 buildSystemPrompt :: (Text -> IO ()) -> PromptInput -> IO Text
 buildSystemPrompt warn pin = do
-  ctx <- if piSkipContextFiles pin then pure "" else buildContextFilesPrompt warn (piGaussHome pin) (piCwd pin)
+  ctx <- if piSkipContextFiles pin then pure "" else buildContextFilesPrompt warn (piFisherHome pin) (piCwd pin)
   let names = piToolNames pin
       guidance =
         [memoryGuidance | "memory" `elem` names]

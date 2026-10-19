@@ -96,6 +96,7 @@ import Fisher.LLM.Prepare (PrepareInput (..), prepareMessages, usesPromptCaching
 import Fisher.LLM.Request (buildRequest)
 import Fisher.LLM.Sys (Sys (..))
 import Fisher.LLM.Types
+import Fisher.Paths (homeLabel)
 import qualified Fisher.Py.Difflib as D
 import Fisher.Py.JsonError (jsonError)
 import qualified Fisher.Py.Re as Re
@@ -639,7 +640,7 @@ newAgent cfg env = do
     Nothing -> do
       h <- sysUuidHex sys
       pure (T.pack (formatTime defaultTimeLocale "%Y%m%d_%H%M%S" start) <> "_" <> T.take 6 h)
-  let home = sysGaussHome sys
+  let home = sysFisherHome sys
       logsDir = home </> "sessions"
   createDirectoryIfMissing True logsDir
   forM_ (envDb env) $ \db ->
@@ -931,7 +932,7 @@ dumpRequest ag hr reason err = when (envWriteFiles (agEnv ag)) $ do
   t <- envNowLocal (agEnv ag)
   s <- readIORef (agSettings ag)
   let stamp = T.pack (formatTime defaultTimeLocale "%Y%m%d_%H%M%S_%6q" t)
-      path = sysGaussHome (envSys (agEnv ag)) </> "sessions" </> T.unpack ("request_dump_" <> sid <> "_" <> stamp <> ".json")
+      path = sysFisherHome (envSys (agEnv ag)) </> "sessions" </> T.unpack ("request_dump_" <> sid <> "_" <> stamp <> ".json")
       key = sApiKey s
       masked = if T.null key then PNull else PStr ("Bearer " <> (if T.length key <= 12 then "***" else T.take 8 key <> "..." <> T.takeEnd 4 key))
       body = maybe PNull dropNulls (hrBody hr)
@@ -985,7 +986,7 @@ buildPrompt ag systemMessage = do
           (Just (m, u, _, _), Just s) -> Just (m, u, s)
           _ -> Nothing
       , piSkipContextFiles = cfgSkipContextFiles cfg
-      , piGaussHome = sysGaussHome (envSys env)
+      , piFisherHome = sysFisherHome (envSys env)
       , piCwd = cwd
       , piNow = t
       , piSessionId = if cfgPassSessionId cfg then Just sid else Nothing
@@ -1669,7 +1670,7 @@ runConversation' ag ri = do
           writeIORef (agComp ag) comp1
           s <- readIORef (agSettings ag)
           when (cContextProbed comp1) $ do
-            when (envWriteFiles env) $ saveContextLength (sysGaussHome (envSys env)) (sModel s) (sBaseUrl s) (cContextLength comp1)
+            when (envWriteFiles env) $ saveContextLength (sysFisherHome (envSys env)) (sModel s) (sBaseUrl s) (cContextLength comp1)
             say ag (pfx ag <> "💾 Cached context length: " <> commas (cContextLength comp1) <> " tokens for " <> sModel s)
             modifyIORef (agComp ag) (\c -> c {cContextProbed = False})
           modifyIORef (agCounters ag) (\(p, c, t, k) -> (p + uPrompt u, c + uCompletion u, t + uTotal u, k + 1))
@@ -1735,17 +1736,19 @@ runConversation' ag ri = do
           when (status == Just 401 && sMode s == AnthropicMessages) $ do
             let key = sApiKey s
                 p = pfx ag
+                sys = envSys (agEnv ag)
+                envFile = T.pack (homeLabel (sysHome sys) (sysFisherHome sys) </> ".env")
             say ag (p <> "🔐 Anthropic 401 — authentication failed.")
             say ag (p <> "   Auth method: " <> (if not (T.null key) && not ("sk-ant-api" `T.isPrefixOf` key) then "Bearer (OAuth/setup-token)" else "x-api-key (API key)"))
             say ag (p <> (if T.null key || T.length key <= 12 then "   Token: (empty or short)" else "   Token prefix: " <> T.take 12 key <> "..."))
             say ag (p <> "   Troubleshooting:")
             mapM_ (say ag . (p <>))
-              [ "     • Check ANTHROPIC_TOKEN in ~/.gauss/.env for Gauss-managed OAuth/setup tokens"
-              , "     • Check ANTHROPIC_API_KEY in ~/.gauss/.env for API keys or legacy token values"
+              [ "     • Check ANTHROPIC_TOKEN in " <> envFile <> " for Fisher-managed OAuth/setup tokens"
+              , "     • Check ANTHROPIC_API_KEY in " <> envFile <> " for API keys or legacy token values"
               , "     • For API keys: verify at https://console.anthropic.com/settings/keys"
               , "     • For Claude Code: run 'claude /login' to refresh, then retry"
-              , "     • Clear stale keys: gauss config set ANTHROPIC_TOKEN \"\""
-              , "     • Legacy cleanup: gauss config set ANTHROPIC_API_KEY \"\"" ]
+              , "     • Clear stale keys: fisher config set ANTHROPIC_TOKEN \"\""
+              , "     • Legacy cleanup: fisher config set ANTHROPIC_API_KEY \"\"" ]
           let retry' = retry + 1
               etype = errorClass err
               etext = errorText err

@@ -20,7 +20,7 @@ import Fisher.Cli.ConfigShow
 import Fisher.Cli.Sessions
 import Fisher.Config (defaultConfig, loadConfigAt, saveConfigAt)
 import Fisher.EnvVars (getEnvValueAt)
-import Fisher.Paths (configPathIn, ensureGaussHome, envPathIn)
+import Fisher.Paths (configPathIn, ensureFisherHome, envPathIn)
 import Fisher.Shell.Data (upstreamReleaseDate, upstreamVersion)
 import Fisher.Store (storePath)
 import Fisher.Swarm (nowSeconds)
@@ -28,7 +28,7 @@ import Fisher.Term (detectStyle)
 
 sessionsCli :: SessionsCmd -> IO ()
 sessionsCli cmd = do
-  home <- ensureGaussHome
+  home <- ensureFisherHome
   now <- nowSeconds
   tz <- getCurrentTimeZone
   let ask p = do
@@ -38,7 +38,7 @@ sessionsCli cmd = do
         pure (Just l)
   runSessions (SessionsEnv (storePath home) now tz TIO.putStrLn ask) cmd
 
--- | Process environment first, then ~/.gauss/.env (@get_env_value@).
+-- | Process environment first, then the Fisher home's .env (@get_env_value@).
 envValue :: FilePath -> T.Text -> IO (Maybe T.Text)
 envValue home k = lookupEnv (T.unpack k) >>= \case
   Just v -> pure (Just (T.pack v))
@@ -46,7 +46,7 @@ envValue home k = lookupEnv (T.unpack k) >>= \case
 
 configShowCli :: IO ()
 configShowCli = do
-  home <- ensureGaussHome
+  home <- ensureFisherHome
   (cfg, _) <- loadConfigAt home
   st <- detectStyle
   exe <- getExecutablePath
@@ -55,7 +55,7 @@ configShowCli = do
 
 configEditCli :: IO ()
 configEditCli = do
-  home <- ensureGaussHome
+  home <- ensureFisherHome
   let path = configPathIn home
   editConfig
     EditEnv

@@ -30,7 +30,7 @@ spec = do
   describe "config-load.json" $ do
     cases <- runIO (goldenCases (golden "config-load.json"))
     forM_ cases $ \c -> it (T.unpack (textField "name" c)) $ withTmp $ \tmp -> do
-      let home = tmp </> "gauss-home"
+      let home = tmp </> "fisher-home"
       createDirectoryIfMissing True home
       forM_ (field "input" c :: Maybe Text) $ \t -> BS.writeFile (home </> "config.yaml") (TE.encodeUtf8 t)
       (cfg, warnings) <- loadConfigAt home
@@ -73,16 +73,16 @@ spec = do
       writeFile (proj </> "lakefile.lean") "-- lean\n"
       case field "manifest" c :: Maybe Text of
         Just text -> do
-          createDirectoryIfMissing True (proj </> ".gauss")
+          createDirectoryIfMissing True (proj </> ".fisher")
           createDirectoryIfMissing True (proj </> "docs")
           createDirectoryIfMissing True (proj </> "sub")
           writeFile (proj </> "sub" </> "lakefile.toml") ""
           createDirectoryIfMissing True (tmp </> "Outside")
           writeFile (tmp </> "Outside" </> "lakefile.lean") ""
-          BS.writeFile (proj </> ".gauss" </> "project.yaml") (TE.encodeUtf8 text)
+          BS.writeFile (proj </> ".fisher" </> "project.yaml") (TE.encodeUtf8 text)
         Nothing
-          | name == "gauss-dir-no-manifest" -> createDirectoryIfMissing True (proj </> ".gauss")
-          | name == "gauss-is-file" -> writeFile (proj </> ".gauss") ""
+          | name == "fisher-dir-no-manifest" -> createDirectoryIfMissing True (proj </> ".fisher")
+          | name == "fisher-is-file" -> writeFile (proj </> ".fisher") ""
           | otherwise -> pure ()
       result <- try (loadProject proj)
       checkOutcome tmp c "ok" "error" result
@@ -130,7 +130,7 @@ errorClass = \case
 projectView :: Project -> Value
 projectView p =
   object
-    [ "root" .= projectRoot p, "gauss_dir" .= projectGaussDir p
+    [ "root" .= projectRoot p, "fisher_dir" .= projectFisherDir p
     , "manifest_path" .= projectManifestPath p, "name" .= projectName p
     , "kind" .= projectKind p, "schema_version" .= projectSchemaVersion p
     , "lean_root" .= projectLeanRoot p, "runtime_dir" .= projectRuntimeDir p

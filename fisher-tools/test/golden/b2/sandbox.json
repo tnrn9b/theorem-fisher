@@ -381,19 +381,19 @@
    "cleaned": "a\n"
   },
   {
-   "raw": "noise__GAUSS_FENCE_a9f7b3__out\n__GAUSS_FENCE_a9f7b3__bye",
+   "raw": "noise__FISHER_FENCE_a9f7b3__out\n__FISHER_FENCE_a9f7b3__bye",
    "extracted": "out\n",
-   "cleaned": "noise__GAUSS_FENCE_a9f7b3__out\n__GAUSS_FENCE_a9f7b3__bye"
+   "cleaned": "noise__FISHER_FENCE_a9f7b3__out\n__FISHER_FENCE_a9f7b3__bye"
   },
   {
-   "raw": "__GAUSS_FENCE_a9f7b3__only start\nlogout\n",
+   "raw": "__FISHER_FENCE_a9f7b3__only start\nlogout\n",
    "extracted": "only start\nlogout\n",
-   "cleaned": "__GAUSS_FENCE_a9f7b3__only start\nlogout\n"
+   "cleaned": "__FISHER_FENCE_a9f7b3__only start\nlogout\n"
   },
   {
-   "raw": "x__GAUSS_FENCE_a9f7b3__a__GAUSS_FENCE_a9f7b3__b__GAUSS_FENCE_a9f7b3__c",
-   "extracted": "a__GAUSS_FENCE_a9f7b3__b",
-   "cleaned": "x__GAUSS_FENCE_a9f7b3__a__GAUSS_FENCE_a9f7b3__b__GAUSS_FENCE_a9f7b3__c"
+   "raw": "x__FISHER_FENCE_a9f7b3__a__FISHER_FENCE_a9f7b3__b__FISHER_FENCE_a9f7b3__c",
+   "extracted": "a__FISHER_FENCE_a9f7b3__b",
+   "cleaned": "x__FISHER_FENCE_a9f7b3__a__FISHER_FENCE_a9f7b3__b__FISHER_FENCE_a9f7b3__c"
   },
   {
    "raw": "Oh My Zsh\n",
@@ -411,9 +411,9 @@
    "cleaned": "keep\nLast login: mid\nkeep2"
   },
   {
-   "raw": "__GAUSS_FENCE_a9f7b3____GAUSS_FENCE_a9f7b3__",
+   "raw": "__FISHER_FENCE_a9f7b3____FISHER_FENCE_a9f7b3__",
    "extracted": "",
-   "cleaned": "__GAUSS_FENCE_a9f7b3____GAUSS_FENCE_a9f7b3__"
+   "cleaned": "__FISHER_FENCE_a9f7b3____FISHER_FENCE_a9f7b3__"
   },
   {
    "raw": "command not found: x\nreal\n",
@@ -598,7 +598,7 @@
    "env": {
     "TERMINAL_TIMEOUT": "5m"
    },
-   "error": "ValueError: Invalid value for TERMINAL_TIMEOUT: '5m' (expected integer). Check ~/.gauss/.env or environment variables."
+   "error": "ValueError: Invalid value for TERMINAL_TIMEOUT: '5m' (expected integer). Check ~/.fisher/.env or environment variables."
   },
   {
    "env": {
@@ -660,13 +660,13 @@
    "env": {
     "TERMINAL_CONTAINER_CPU": "abc"
    },
-   "error": "ValueError: Invalid value for TERMINAL_CONTAINER_CPU: 'abc' (expected number). Check ~/.gauss/.env or environment variables."
+   "error": "ValueError: Invalid value for TERMINAL_CONTAINER_CPU: 'abc' (expected number). Check ~/.fisher/.env or environment variables."
   },
   {
    "env": {
     "TERMINAL_DOCKER_VOLUMES": "{bad"
    },
-   "error": "ValueError: Invalid value for TERMINAL_DOCKER_VOLUMES: '{bad' (expected valid JSON). Check ~/.gauss/.env or environment variables."
+   "error": "ValueError: Invalid value for TERMINAL_DOCKER_VOLUMES: '{bad' (expected valid JSON). Check ~/.fisher/.env or environment variables."
   },
   {
    "env": {
@@ -845,7 +845,7 @@
    "env": {
     "TERMINAL_TIMEOUT": "it's"
    },
-   "error": "ValueError: Invalid value for TERMINAL_TIMEOUT: \"it's\" (expected integer). Check ~/.gauss/.env or environment variables."
+   "error": "ValueError: Invalid value for TERMINAL_TIMEOUT: \"it's\" (expected integer). Check ~/.fisher/.env or environment variables."
   }
  ],
  "ssh_argv": [
@@ -857,7 +857,7 @@
    "base": [
     "ssh",
     "-o",
-    "ControlPath=/tmp/gauss-ssh/u@h:22.sock",
+    "ControlPath=/tmp/fisher-ssh/u@h:22.sock",
     "-o",
     "ControlMaster=auto",
     "-o",
@@ -873,7 +873,7 @@
    "with": [
     "ssh",
     "-o",
-    "ControlPath=/tmp/gauss-ssh/u@h:22.sock",
+    "ControlPath=/tmp/fisher-ssh/u@h:22.sock",
     "-o",
     "ControlMaster=auto",
     "-o",
@@ -896,7 +896,7 @@
    "base": [
     "ssh",
     "-o",
-    "ControlPath=/tmp/gauss-ssh/root@10.0.0.1:2222.sock",
+    "ControlPath=/tmp/fisher-ssh/root@10.0.0.1:2222.sock",
     "-o",
     "ControlMaster=auto",
     "-o",
@@ -916,7 +916,7 @@
    "with": [
     "ssh",
     "-o",
-    "ControlPath=/tmp/gauss-ssh/root@10.0.0.1:2222.sock",
+    "ControlPath=/tmp/fisher-ssh/root@10.0.0.1:2222.sock",
     "-o",
     "ControlMaster=auto",
     "-o",
@@ -943,7 +943,7 @@
    "base": [
     "ssh",
     "-o",
-    "ControlPath=/tmp/gauss-ssh/u@h:22.sock",
+    "ControlPath=/tmp/fisher-ssh/u@h:22.sock",
     "-o",
     "ControlMaster=auto",
     "-o",
@@ -961,7 +961,7 @@
    "with": [
     "ssh",
     "-o",
-    "ControlPath=/tmp/gauss-ssh/u@h:22.sock",
+    "ControlPath=/tmp/fisher-ssh/u@h:22.sock",
     "-o",
     "ControlMaster=auto",
     "-o",

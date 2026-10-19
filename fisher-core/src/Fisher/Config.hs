@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
--- | @~/.gauss/config.yaml@: the defaults, the merge of a user file over
--- them, and the save. Ported from @gauss_cli/config.py@ at the commit in
--- @UPSTREAM@.
+-- | @config.yaml@ in the Fisher home: the defaults, the merge of a user
+-- file over them, and the save. Ported from @gauss_cli/config.py@ at the
+-- commit in @UPSTREAM@.
 --
 -- Keys are written in upstream's order: the defaults' order, then the order
 -- of the file being replaced for keys the defaults lack (where Python's
@@ -19,6 +19,8 @@ module Fisher.Config
   , saveConfig
   , renderConfig
   , renderConfigWith
+  , renderConfigKeeping
+  , legacySectionAt
   , defaultKeyOrder
   , getPath
   ) where
@@ -38,7 +40,8 @@ import System.Directory (doesFileExist)
 import System.IO.Unsafe (unsafePerformIO)
 
 import Fisher.Atomic (atomicWriteFile, secureFile)
-import Fisher.Paths (configPathIn, ensureGaussHome, ensureGaussHomeAt)
+import Fisher.Compat (legacySection, normalizeConfigCompat, withLegacySection)
+import Fisher.Paths (configPathIn, ensureFisherHome, ensureFisherHomeAt)
 import Fisher.Py (lookupKey, pyTruthy)
 import Fisher.Yaml.Ordered (KeyOrder, encodeOrdered, keyOrderOf, keyOrderOfFile)
 
@@ -112,12 +115,13 @@ liftLegacyMaxTurns u = case KM.lookup "max_turns" u of
           _ -> KM.insert "max_turns" mt agent
      in KM.delete "max_turns" (KM.insert "agent" (Object agent') u)
 
--- | Load the configuration under a given home. Returns the configuration and
--- any warnings; upstream prints the same warning and falls back to the
+-- | Load the configuration under a given home. A @gauss@ section in the
+-- file is read as @fisher@ ('normalizeConfigCompat'), so the result holds
+-- only @fisher@. Returns the configuration and any warnings; upstream prints the same warning and falls back to the
 -- defaults when the file cannot be read.
 loadConfigAt :: FilePath -> IO (Value, [Text])
 loadConfigAt home = do
-  ensureGaussHomeAt home
+  ensureFisherHomeAt home
   let path = configPathIn home
   exists <- doesFileExist path
   if not exists
@@ -128,7 +132,7 @@ loadConfigAt home = do
         Left e -> fallback (T.pack (Y.prettyPrintParseException e))
         Right v
           | not (pyTruthy v) -> (normalizeMaxTurns defaultConfig, [])
-          | Object u <- v -> (normalizeMaxTurns (deepMerge defaultConfig (Object (liftLegacyMaxTurns u))), [])
+          | Object u <- normalizeConfigCompat v -> (normalizeMaxTurns (deepMerge defaultConfig (Object (liftLegacyMaxTurns u))), [])
           | otherwise -> fallback "the file does not contain a mapping"
   where
     fallback why = (normalizeMaxTurns defaultConfig, ["Warning: Failed to load config: " <> why])
@@ -136,12 +140,13 @@ loadConfigAt home = do
 -- | 'loadConfigAt' on the active home, printing warnings as upstream does.
 loadConfig :: IO Value
 loadConfig = do
-  home <- ensureGaussHome
+  home <- ensureFisherHome
   (cfg, warnings) <- loadConfigAt home
   mapM_ TIO.putStrLn warnings
   pure cfg
 
--- | The bytes @save_config@ writes: the normalized configuration, then the
+-- | The bytes @save_config@ writes: the normalized configuration (any
+-- @gauss@ section written as @fisher@), then the
 -- commented-out security and fallback sections when those features are not
 -- configured.
 renderConfig :: Value -> ByteString
@@ -154,8 +159,13 @@ defaultKeyOrder = unsafePerformIO (keyOrderOf defaultConfigYaml)
 
 -- | 'renderConfig' with keys laid out by the given orders, first first.
 renderConfigWith :: [KeyOrder] -> Value -> ByteString
-renderConfigWith orders cfg =
-  let normalized = normalizeMaxTurns cfg
+renderConfigWith orders = renderConfigKeeping orders Nothing
+
+-- | 'renderConfigWith', with an old file's @gauss@ section written back
+-- unchanged beside the @fisher@ one ('withLegacySection').
+renderConfigKeeping :: [KeyOrder] -> Maybe Value -> Value -> ByteString
+renderConfigKeeping orders legacy cfg =
+  let normalized = withLegacySection legacy (normalizeMaxTurns (normalizeConfigCompat cfg))
       sec = lookupKey "security" normalized
       needsSecurity = case sec of
         Just s | pyTruthy s -> maybe True (== Null) (lookupKey "redact_secrets" s)
@@ -168,15 +178,27 @@ renderConfigWith orders cfg =
       extra = [securityComment | needsSecurity] <> [fallbackComment | needsFallback]
    in encodeOrdered orders normalized <> BS.concat extra
 
+-- | The save: the configuration under @fisher@, and the file's existing
+-- @gauss@ section, if any, kept as it was.
 saveConfigAt :: FilePath -> Value -> IO ()
 saveConfigAt home cfg = do
-  ensureGaussHomeAt home
+  ensureFisherHomeAt home
   let path = configPathIn home
   existing <- keyOrderOfFile path
-  atomicWriteFile ".config_.tmp" path (renderConfigWith [defaultKeyOrder, existing] cfg)
+  legacy <- legacySectionAt path
+  atomicWriteFile ".config_.tmp" path (renderConfigKeeping [defaultKeyOrder, existing] legacy cfg)
   secureFile path
+
+-- | The @gauss@ section of the configuration file at a path, when the file
+-- exists and reads as a mapping holding one.
+legacySectionAt :: FilePath -> IO (Maybe Value)
+legacySectionAt path = do
+  exists <- doesFileExist path
+  if not exists
+    then pure Nothing
+    else either (const Nothing) legacySection <$> (Y.decodeFileEither path :: IO (Either Y.ParseException Value))
 
 saveConfig :: Value -> IO ()
 saveConfig cfg = do
-  home <- ensureGaussHome
+  home <- ensureFisherHome
   saveConfigAt home cfg

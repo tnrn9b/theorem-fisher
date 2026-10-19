@@ -3878,7 +3878,7 @@
       "https://example.com"
      ],
      "timeout": 60,
-     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "socket_dir": "<SOCK>/agent-browser-fisher_default_1f2e3d00",
      "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
     },
     {
@@ -3890,7 +3890,7 @@
       "close"
      ],
      "timeout": 10,
-     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "socket_dir": "<SOCK>/agent-browser-fisher_default_1f2e3d00",
      "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
     }
    ],
@@ -3976,7 +3976,7 @@
       "https://example.com"
      ],
      "timeout": 60,
-     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "socket_dir": "<SOCK>/agent-browser-fisher_default_1f2e3d00",
      "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
     }
    ],
@@ -3995,7 +3995,7 @@
    "kills": [],
    "available": true,
    "socket_dirs_left": [
-    "agent-browser-gauss_default_1f2e3d00"
+    "agent-browser-fisher_default_1f2e3d00"
    ],
    "screenshots": []
   },
@@ -4052,7 +4052,7 @@
       "https://example.com"
      ],
      "timeout": 60,
-     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "socket_dir": "<SOCK>/agent-browser-fisher_default_1f2e3d00",
      "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
     }
    ],
@@ -4071,7 +4071,7 @@
    "kills": [],
    "available": true,
    "socket_dirs_left": [
-    "agent-browser-gauss_default_1f2e3d00"
+    "agent-browser-fisher_default_1f2e3d00"
    ],
    "screenshots": []
   },
@@ -4135,7 +4135,7 @@
       "https://example.com"
      ],
      "timeout": 60,
-     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "socket_dir": "<SOCK>/agent-browser-fisher_default_1f2e3d00",
      "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
     }
    ],
@@ -4172,7 +4172,7 @@
    "kills": [],
    "available": true,
    "socket_dirs_left": [
-    "agent-browser-gauss_default_1f2e3d00"
+    "agent-browser-fisher_default_1f2e3d00"
    ],
    "screenshots": []
   },
@@ -4232,7 +4232,7 @@
       "https://example.com"
      ],
      "timeout": 60,
-     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "socket_dir": "<SOCK>/agent-browser-fisher_default_1f2e3d00",
      "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
     }
    ],
@@ -4260,7 +4260,7 @@
    "kills": [],
    "available": true,
    "socket_dirs_left": [
-    "agent-browser-gauss_default_1f2e3d00"
+    "agent-browser-fisher_default_1f2e3d00"
    ],
    "screenshots": []
   },
@@ -4380,7 +4380,7 @@
       "https://example.com"
      ],
      "timeout": 60,
-     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "socket_dir": "<SOCK>/agent-browser-fisher_default_1f2e3d00",
      "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
     },
     {
@@ -4392,7 +4392,7 @@
       "close"
      ],
      "timeout": 10,
-     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "socket_dir": "<SOCK>/agent-browser-fisher_default_1f2e3d00",
      "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
     }
    ],

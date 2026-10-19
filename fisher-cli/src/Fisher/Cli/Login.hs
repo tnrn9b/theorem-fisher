@@ -1,5 +1,5 @@
--- | @gauss login ...@: upstream removed the command; argparse still checks
--- the flags, then it points at @gauss model@ and @gauss setup@. The login
+-- | @fisher login ...@: upstream removed the command; argparse still checks
+-- the flags, then it points at @fisher model@ and @fisher setup@. The login
 -- flows themselves ('Fisher.LLM.Auth.Nous.loginNous',
 -- 'Fisher.LLM.Auth.Codex.loginOpenAICodex') are reached from model and
 -- setup.

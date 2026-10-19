@@ -134,7 +134,8 @@ resolveApiKeyProviderCredentials sys pid = case lookupProvider pid of
   _ -> throwIO (AuthError ("Provider '" <> pid <> "' is not an API-key provider.") pid (Just "invalid_provider") False)
 
 -- | @resolve_requested_provider(requested)@: the argument, then
--- @model.provider@ in the config, then @GAUSS_INFERENCE_PROVIDER@, then
+-- @model.provider@ in the config, then @FISHER_INFERENCE_PROVIDER@ (else
+-- @GAUSS_INFERENCE_PROVIDER@), then
 -- @auto@ (all lower-cased).
 resolveRequestedProvider :: Sys -> Maybe Text -> IO Text
 resolveRequestedProvider sys requested = case requested of
@@ -144,7 +145,7 @@ resolveRequestedProvider sys requested = case requested of
     case get "provider" (modelConfig cfg) of
       Just (PStr p) | not (T.null (T.strip p)) -> pure (T.toLower (T.strip p))
       _ -> do
-        e <- T.toLower <$> envStrip sys "GAUSS_INFERENCE_PROVIDER"
+        e <- T.toLower <$> (maybe "" T.strip <$> sysGetEnvCompat sys "FISHER_INFERENCE_PROVIDER")
         pure (if T.null e then "auto" else e)
 
 -- | @_normalize_custom_provider_name@.
@@ -208,9 +209,9 @@ resolveRuntimeProvider sys req = do
       let tail' kvs = obj (kvs <> [("requested_provider", str requested)])
       case provider of
         "nous" -> do
-          ttlEnv <- fromMaybe "1800" <$> sysGetEnv sys "GAUSS_NOUS_MIN_KEY_TTL_SECONDS"
+          ttlEnv <- fromMaybe "1800" <$> sysGetEnvCompat sys "FISHER_NOUS_MIN_KEY_TTL_SECONDS"
           ttl <- maybe (throwIO (intError ttlEnv)) pure (pyIntText ttlEnv)
-          toEnv <- fromMaybe "15" <$> sysGetEnv sys "GAUSS_NOUS_TIMEOUT_SECONDS"
+          toEnv <- fromMaybe "15" <$> sysGetEnvCompat sys "FISHER_NOUS_TIMEOUT_SECONDS"
           to <- maybe (throwIO (pyError "ValueError" ("could not convert string to float: " <> pyRepr (str toEnv)))) pure (pyFloatText toEnv)
           creds <- resolveNousRuntimeCredentials sys defaultNousOpts {noMinKeyTtl = fromInteger (max 60 ttl), noTimeout = to}
           pure $ tail'
@@ -225,7 +226,7 @@ resolveRuntimeProvider sys req = do
             [ ("provider", str "openai-codex"), ("api_mode", str "codex_responses")
             , ("base_url", str (rstripSlash (strOr "" (get "base_url" creds))))
             , ("api_key", fromMaybe (str "") (get "api_key" creds))
-            , ("source", fromMaybe (str "gauss-auth-store") (get "source" creds))
+            , ("source", fromMaybe (str "fisher-auth-store") (get "source" creds))
             , ("last_refresh", fromMaybe PNull (get "last_refresh" creds)) ]
         "anthropic" -> do
           tok <- resolveAnthropicToken sys

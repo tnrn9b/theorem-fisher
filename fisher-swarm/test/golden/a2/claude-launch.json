@@ -36,6 +36,7 @@
         "prompt"
       ],
       "out_env": {
+        "FISHER_YOLO_MODE": "1",
         "GAUSS_YOLO_MODE": "1"
       }
     },
@@ -56,6 +57,7 @@
         "m"
       ],
       "out_env": {
+        "FISHER_YOLO_MODE": "1",
         "GAUSS_YOLO_MODE": "1"
       }
     },
@@ -75,6 +77,7 @@
         "p"
       ],
       "out_env": {
+        "FISHER_YOLO_MODE": "1",
         "GAUSS_YOLO_MODE": "1"
       }
     },
@@ -93,6 +96,7 @@
         "p"
       ],
       "out_env": {
+        "FISHER_YOLO_MODE": "1",
         "GAUSS_YOLO_MODE": "1"
       }
     },
@@ -111,6 +115,7 @@
         "p"
       ],
       "out_env": {
+        "FISHER_YOLO_MODE": "1",
         "GAUSS_YOLO_MODE": "1"
       }
     },
@@ -129,6 +134,7 @@
       ],
       "out_env": {
         "A": "1",
+        "FISHER_YOLO_MODE": "1",
         "GAUSS_YOLO_MODE": "1"
       }
     },

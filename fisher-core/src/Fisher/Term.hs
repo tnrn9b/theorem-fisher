@@ -18,6 +18,8 @@ import qualified Data.Text.Normalize as N
 import System.Environment (lookupEnv)
 import System.IO (hGetEncoding, hIsTerminalDevice, stdout)
 
+import Fisher.Compat (lookupEnvCompat)
+
 data Style = Style { styleAnsi :: Bool, styleUnicode :: Bool }
   deriving (Eq, Show)
 
@@ -25,16 +27,17 @@ data Style = Style { styleAnsi :: Bool, styleUnicode :: Bool }
 plainStyle :: Style
 plainStyle = Style False True
 
+-- | @FISHER_X@, else @GAUSS_X@, read as a yes.
 truthyEnv :: String -> IO Bool
-truthyEnv name = maybe False ((`elem` ["1", "true", "yes", "on"]) . T.toLower . T.strip . T.pack) <$> lookupEnv name
+truthyEnv name = maybe False ((`elem` ["1", "true", "yes", "on"]) . T.toLower . T.strip . T.pack) <$> lookupEnvCompat name
 
 detectStyle :: IO Style
 detectStyle = do
-  forcePlain <- truthyEnv "GAUSS_FORCE_PLAIN_OUTPUT"
+  forcePlain <- truthyEnv "FISHER_FORCE_PLAIN_OUTPUT"
   noColor <- lookupEnv "NO_COLOR"
   tty <- hIsTerminalDevice stdout
   term <- maybe "" (T.toLower . T.strip . T.pack) <$> lookupEnv "TERM"
-  forceAscii <- truthyEnv "GAUSS_FORCE_ASCII"
+  forceAscii <- truthyEnv "FISHER_FORCE_ASCII"
   enc <- hGetEncoding stdout
   let ansi = not forcePlain && noColor == Nothing && tty && term /= "dumb"
       utf = maybe False (T.isInfixOf "utf" . T.toLower . T.pack . show) enc

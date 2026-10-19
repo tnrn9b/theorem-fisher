@@ -53,7 +53,7 @@ spec = do
         PDict [("toolset", PStr (tdToolset td)), ("schema", tdSchema td), ("requires_env", PList (map PStr (tdRequiresEnv td))), ("emoji", PStr (tdEmoji td))]
           `shouldBe` PDict [(k, field k e) | k <- ["toolset", "schema", "requires_env", "emoji"]]
   describe "tools/terminal_tool.py" $
-    forM_ (list "cases" doc) $ \c -> it (T.unpack (txt "name" c)) $
+    forM_ (list "cases" doc) $ \c -> it (T.unpack (txt "name" c)) $ withIsolatedHome $
       withSystemTempDirectory "fisher-terminal" $ \root -> do
         let gh = root </> "gauss"
             opts = field "opts" c
@@ -117,7 +117,7 @@ spec = do
               TirithEnv
                 { tiGetEnv = getEnv, tiSecurity = configSecurity gh
                 , tiWhich = \n -> pure (case get n (field "which" opts) of Just (PStr p) -> Just p; _ -> Nothing)
-                , tiIsExecutable = \_ -> pure False, tiExpandUser = pure, tiGaussHome = gh
+                , tiIsExecutable = \_ -> pure False, tiExpandUser = pure, tiFisherHome = gh
                 , tiRun = \argv t -> do
                     modifyIORef tiriths (<> [PDict [("argv", PList (map PStr argv)), ("timeout", PInt (fromIntegral t))]])
                     a <- next tirithQ

@@ -67,7 +67,7 @@ data ProviderConfig = ProviderConfig
 defaultNousPortalUrl, defaultNousInferenceUrl, defaultNousClientId, defaultNousScope :: Text
 defaultNousPortalUrl = "https://portal.nousresearch.com"
 defaultNousInferenceUrl = "https://inference-api.nousresearch.com/v1"
-defaultNousClientId = "gauss-cli"
+defaultNousClientId = "gauss-cli" -- the OAuth client upstream registered with Nous; it stays
 defaultNousScope = "inference:mint_agent_key"
 
 defaultAgentKeyMinTtlSeconds, accessTokenRefreshSkewSeconds, deviceAuthPollIntervalCapSeconds, codexAccessTokenRefreshSkewSeconds :: Int

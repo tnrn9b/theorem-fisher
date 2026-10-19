@@ -31,6 +31,9 @@
   "cwd": "<TMP>/rocqproj",
   "env": {
     "CLAUDE_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/assets/fisher-provers/rocq",
+    "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
+    "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/assets/fisher-provers/rocq/skills/rocq",
+    "FISHER_PROJECT_ROOT": "<TMP>/rocqproj",
     "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
     "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/assets/fisher-provers/rocq/skills/rocq",
     "GAUSS_PROJECT_ROOT": "<TMP>/rocqproj",
@@ -80,7 +83,7 @@
     "managed_root": "<TMP>/gauss-home/autoformalize/claude-code/managed",
     "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/rocq.mcp.json",
     "plugin_root": "<TMP>/gauss-home/autoformalize/assets/fisher-provers/rocq",
-    "project_manifest_path": "<TMP>/rocqproj/.gauss/project.yaml",
+    "project_manifest_path": "<TMP>/rocqproj/.fisher/project.yaml",
     "project_root": "<TMP>/rocqproj",
     "skills_root": "<TMP>/gauss-home/autoformalize/assets/fisher-provers/rocq/skills/rocq",
     "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",

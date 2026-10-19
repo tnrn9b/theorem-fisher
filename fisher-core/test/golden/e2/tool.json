@@ -912,9 +912,9 @@
    "steps": [
     {
      "env": {
-      "GAUSS_SESSION_PLATFORM": "telegram",
-      "GAUSS_SESSION_CHAT_ID": "-100123",
-      "GAUSS_SESSION_CHAT_NAME": "Lean"
+      "FISHER_SESSION_PLATFORM": "telegram",
+      "FISHER_SESSION_CHAT_ID": "-100123",
+      "FISHER_SESSION_CHAT_NAME": "Lean"
      }
     },
     {

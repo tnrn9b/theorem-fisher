@@ -10,7 +10,7 @@
       "cron"
      ],
      "exit": 0,
-     "output": "No scheduled jobs.\nCreate one with 'gauss cron create ...' or the /cron command in chat.\n",
+     "output": "No scheduled jobs.\nCreate one with 'fisher cron create ...' or the /cron command in chat.\n",
      "jobs": null,
      "now": "2026-10-02T04:50:07.123456+00:00"
     },
@@ -20,7 +20,7 @@
       "list"
      ],
      "exit": 0,
-     "output": "No scheduled jobs.\nCreate one with 'gauss cron create ...' or the /cron command in chat.\n",
+     "output": "No scheduled jobs.\nCreate one with 'fisher cron create ...' or the /cron command in chat.\n",
      "jobs": null,
      "now": "2026-10-02T04:50:07.123456+00:00"
     },
@@ -31,7 +31,7 @@
       "--all"
      ],
      "exit": 0,
-     "output": "No scheduled jobs.\nCreate one with 'gauss cron create ...' or the /cron command in chat.\n",
+     "output": "No scheduled jobs.\nCreate one with 'fisher cron create ...' or the /cron command in chat.\n",
      "jobs": null,
      "now": "2026-10-02T04:50:07.123456+00:00"
     },
@@ -596,7 +596,7 @@
       "create"
      ],
      "exit": 2,
-     "output": "usage: gauss cron create [-h] [--name NAME] [--deliver DELIVER]\n                         [--repeat REPEAT] [--skill SKILLS]\n                         schedule [prompt]\ngauss cron create: error: the following arguments are required: schedule\n",
+     "output": "usage: fisher cron create [-h] [--name NAME] [--deliver DELIVER]\n                          [--repeat REPEAT] [--skill SKILLS]\n                          schedule [prompt]\nfisher cron create: error: the following arguments are required: schedule\n",
      "jobs": null,
      "now": "2026-10-02T04:50:07.123456+00:00"
     },
@@ -607,7 +607,7 @@
       "--all"
      ],
      "exit": 0,
-     "output": "No scheduled jobs.\nCreate one with 'gauss cron create ...' or the /cron command in chat.\n",
+     "output": "No scheduled jobs.\nCreate one with 'fisher cron create ...' or the /cron command in chat.\n",
      "jobs": null,
      "now": "2026-10-02T04:50:07.123456+00:00"
     }
@@ -1272,7 +1272,7 @@
       "list"
      ],
      "exit": 0,
-     "output": "No scheduled jobs.\nCreate one with 'gauss cron create ...' or the /cron command in chat.\n",
+     "output": "No scheduled jobs.\nCreate one with 'fisher cron create ...' or the /cron command in chat.\n",
      "jobs": {
       "jobs": [
        {
@@ -1850,7 +1850,7 @@
       "--all"
      ],
      "exit": 0,
-     "output": "No scheduled jobs.\nCreate one with 'gauss cron create ...' or the /cron command in chat.\n",
+     "output": "No scheduled jobs.\nCreate one with 'fisher cron create ...' or the /cron command in chat.\n",
      "jobs": {
       "jobs": [],
       "updated_at": "2026-10-02T05:50:07.123456+00:00"
@@ -2973,7 +2973,7 @@
       "frobnicate"
      ],
      "exit": 2,
-     "output": "usage: gauss cron [-h]\n                  {list,create,add,edit,pause,resume,run,remove,rm,delete,status,tick}\n                  ...\ngauss cron: error: argument cron_command: invalid choice: 'frobnicate' (choose from 'list', 'create', 'add', 'edit', 'pause', 'resume', 'run', 'remove', 'rm', 'delete', 'status', 'tick')\n",
+     "output": "usage: fisher cron [-h]\n                   {list,create,add,edit,pause,resume,run,remove,rm,delete,status,tick}\n                   ...\nfisher cron: error: argument cron_command: invalid choice: 'frobnicate' (choose from 'list', 'create', 'add', 'edit', 'pause', 'resume', 'run', 'remove', 'rm', 'delete', 'status', 'tick')\n",
      "jobs": null,
      "now": "2026-10-02T04:50:07.123456+00:00"
     }

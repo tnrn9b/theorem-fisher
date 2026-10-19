@@ -1,4 +1,4 @@
--- | @gauss setup [section]@: upstream's wizard (@gauss_cli/setup.py@,
+-- | @fisher setup [section]@: upstream's wizard (@gauss_cli/setup.py@,
 -- @run_setup_wizard@ and every section it runs: model and provider,
 -- terminal backend, tools, agent settings), its non-interactive guidance,
 -- the returning user's menu, quick setup and the closing summary. The
@@ -61,7 +61,7 @@ data Env = Env
   , eInfo :: SetupInfo
   }
 
--- | @gauss setup ...@.
+-- | @fisher setup ...@.
 setupMain :: Sys -> [Text] -> IO Int
 setupMain sys args = do
   exe <- getExecutablePath
@@ -133,7 +133,7 @@ runSetupWizard :: Env -> Parsed -> IO ()
 runSetupWizard e opts = do
   let ui = eUI e
       sys = eSys e
-      home = sysGaussHome sys
+      home = sysFisherHome sys
   cref <- newIORef =<< loadCfg sys
   tty <- sysStdinTty sys
   if flagSet "non-interactive" opts || not tty
@@ -143,7 +143,7 @@ runSetupWizard e opts = do
         Just label -> do
           sayLn ui ""
           sayLn ui (paint ui [magenta] "┌─────────────────────────────────────────────────────────┐")
-          sayLn ui (paint ui [magenta] ("│     ⚕ Gauss Setup — " <> T.justifyLeft 34 ' ' label <> " │"))
+          sayLn ui (paint ui [magenta] ("│     ⚕ Fisher Setup — " <> T.justifyLeft 33 ' ' label <> " │"))
           sayLn ui (paint ui [magenta] "└─────────────────────────────────────────────────────────┘")
           runSection e cref False section
           readIORef cref >>= saveCfg sys
@@ -154,16 +154,16 @@ runSetupWizard e opts = do
           printInfo ui ("Available sections: " <> T.intercalate ", " (map fst sections))
       Nothing -> do
         active <- getActiveProvider sys
-        force <- maybe False ((`elem` ["1", "true", "yes", "on"]) . T.toLower . T.strip) <$> sysGetEnv sys "GAUSS_FORCE_FIRST_TIME_SETUP"
+        force <- maybe False ((`elem` ["1", "true", "yes", "on"]) . T.toLower . T.strip) <$> sysGetEnvCompat sys "FISHER_FORCE_FIRST_TIME_SETUP"
         orKey <- envValue sys "OPENROUTER_API_KEY"
         baseUrl <- envValue sys "OPENAI_BASE_URL"
         let isExisting = not force && (not (T.null orKey) || not (T.null baseUrl) || active /= PNull)
         sayLn ui ""
         mapM_ (sayLn ui . paint ui [magenta])
           [ "┌─────────────────────────────────────────────────────────┐"
-          , "│             ⚕ Gauss Agent Setup Wizard                │"
+          , "│             ⚕ Fisher Agent Setup Wizard               │"
           , "├─────────────────────────────────────────────────────────┤"
-          , "│  Let's configure your Gauss Agent installation.       │"
+          , "│  Let's configure your Fisher Agent installation.      │"
           , "│  Press Ctrl+C at any time to exit.                     │"
           , "└─────────────────────────────────────────────────────────┘" ]
         proceed <-
@@ -171,7 +171,7 @@ runSetupWizard e opts = do
             then do
               sayLn ui ""
               printHeader ui "Welcome Back!"
-              printSuccess ui "You already have Gauss configured."
+              printSuccess ui "You already have Fisher configured."
               sayLn ui ""
               choice <- promptChoice ui "What would you like to do?"
                 [ "Quick Setup - configure missing items only", "Full Setup - reconfigure everything", "---"
@@ -207,7 +207,7 @@ runSetupWizard e opts = do
           printInfo ui ("Data folder:  " <> T.pack home)
           printInfo ui ("Install dir:  " <> siInstallDir (eInfo e))
           sayLn ui ""
-          printInfo ui "You can edit these files directly or use 'gauss config edit'"
+          printInfo ui ("You can edit these files directly or use '" <> cliName <> " config edit'")
           setupModelProvider e cref
           setupTerminalBackend e cref
           runSection e cref (not isExisting) "tools"
@@ -218,15 +218,15 @@ runSetupWizard e opts = do
 noninteractiveGuidance :: UI -> IO ()
 noninteractiveGuidance ui = do
   sayLn ui ""
-  sayLn ui (paint ui [cyan, bold] "⚕ Gauss Setup — Non-interactive mode")
+  sayLn ui (paint ui [cyan, bold] "⚕ Fisher Setup — Non-interactive mode")
   sayLn ui ""
   printInfo ui "Running in a non-interactive environment (no TTY detected)."
   printInfo ui "The interactive wizard cannot be used here."
   sayLn ui ""
-  printInfo ui "Configure Gauss using environment variables or config commands:"
-  printInfo ui "  gauss config set model.provider custom"
-  printInfo ui "  gauss config set model.base_url http://localhost:8080/v1"
-  printInfo ui "  gauss config set model.default your-model-name"
+  printInfo ui "Configure Fisher using environment variables or config commands:"
+  printInfo ui ("  " <> cliName <> " config set model.provider custom")
+  printInfo ui ("  " <> cliName <> " config set model.base_url http://localhost:8080/v1")
+  printInfo ui ("  " <> cliName <> " config set model.default your-model-name")
   sayLn ui ""
   printInfo ui "Or set OPENROUTER_API_KEY / OPENAI_API_KEY in your environment."
   printInfo ui ("Run '" <> cliName <> " setup' in an interactive terminal to use the full wizard.")
@@ -318,7 +318,7 @@ promptApiKey ui sys v = do
   value <- prompt ui ("  " <> evPrompt v) Nothing (evPassword v)
   if not (T.null value)
     then saveEnvValue sys (evName v) value >> printSuccess ui "  ✓ Saved"
-    else printWarning ui "  Skipped (configure later with 'gauss setup')"
+    else printWarning ui ("  Skipped (configure later with '" <> cliName <> " setup')")
 
 -- ----------------------------------------------------------------- summary
 
@@ -327,7 +327,7 @@ printSetupSummary :: Env -> IORef PyVal -> IO ()
 printSetupSummary e cref = do
   let ui = eUI e
       sys = eSys e
-      home = sysGaussHome sys
+      home = sysFisherHome sys
       has' k = not . T.null <$> envValue sys k
   config <- readIORef cref
   sayLn ui ""
@@ -349,7 +349,7 @@ printSetupSummary e cref = do
         Just v -> pyStrOf v
         Nothing -> "edge"
       status =
-        [ if not (null vision) then ("Vision (image analysis)", True, "") else ("Vision (image analysis)", False, "run 'gauss setup' to configure")
+        [ if not (null vision) then ("Vision (image analysis)", True, "") else ("Vision (image analysis)", False, "run '" <> cliName <> " setup' to configure")
         , if orKey then ("Mixture of Agents", True, "") else ("Mixture of Agents", False, "OPENROUTER_API_KEY")
         , if fire then ("Web Search & Extract", True, "") else ("Web Search & Extract", False, "FIRECRAWL_API_KEY")
         , if bb
@@ -375,7 +375,7 @@ printSetupSummary e cref = do
   sayLn ui ""
   when (available < length status) $ do
     printWarning ui ("Some tools are disabled. Run '" <> cliName <> " setup tools' to configure them,")
-    printWarning ui "or edit ~/.gauss/.env directly to add the missing API keys."
+    printWarning ui ("or edit " <> homeLabelOf sys <> "/.env directly to add the missing API keys.")
     sayLn ui ""
   sayLn ui ""
   sayLn ui (paint ui [green] "┌─────────────────────────────────────────────────────────┐")
@@ -385,7 +385,7 @@ printSetupSummary e cref = do
   let cfgPath = T.pack (configPathIn home)
       envPath = T.pack (envPathIn home)
       g = paint ui [green]
-  sayLn ui (paint ui [cyan, bold] "📁 All your files are in ~/.gauss/:")
+  sayLn ui (paint ui [cyan, bold] ("📁 All your files are in " <> homeLabelOf sys <> "/:"))
   sayLn ui ""
   sayLn ui ("   " <> paint ui [yellow] "Settings:" <> "  " <> cfgPath)
   sayLn ui ("   " <> paint ui [yellow] "API Keys:" <> "  " <> envPath)
@@ -395,15 +395,15 @@ printSetupSummary e cref = do
   sayLn ui ""
   sayLn ui (paint ui [cyan, bold] "📝 To edit your configuration:")
   sayLn ui ""
-  sayLn ui ("   " <> g "gauss setup" <> "          Re-run the full wizard")
-  sayLn ui ("   " <> g "gauss setup model" <> "    Change model/provider")
-  sayLn ui ("   " <> g "gauss setup terminal" <> " Change terminal backend")
-  sayLn ui ("   " <> g "gauss setup tools" <> "    Configure tool providers")
+  sayLn ui ("   " <> g "fisher setup" <> "          Re-run the full wizard")
+  sayLn ui ("   " <> g "fisher setup model" <> "    Change model/provider")
+  sayLn ui ("   " <> g "fisher setup terminal" <> " Change terminal backend")
+  sayLn ui ("   " <> g "fisher setup tools" <> "    Configure tool providers")
   sayLn ui ""
-  sayLn ui ("   " <> g "gauss config" <> "         View current settings")
-  sayLn ui ("   " <> g "gauss config edit" <> "    Open config in your editor")
-  sayLn ui ("   " <> g "gauss config set <key> <value>")
-  sayLn ui "                          Set a specific value"
+  sayLn ui ("   " <> g "fisher config" <> "         View current settings")
+  sayLn ui ("   " <> g "fisher config edit" <> "    Open config in your editor")
+  sayLn ui ("   " <> g "fisher config set <key> <value>")
+  sayLn ui "                           Set a specific value"
   sayLn ui ""
   sayLn ui "   Or edit the files directly:"
   sayLn ui ("   " <> paint ui [dim] ("nano " <> cfgPath))
@@ -413,8 +413,8 @@ printSetupSummary e cref = do
   sayLn ui ""
   sayLn ui (paint ui [cyan, bold] "🚀 Ready to go!")
   sayLn ui ""
-  sayLn ui ("   " <> g "gauss" <> "              Start chatting")
-  sayLn ui ("   " <> g "gauss doctor" <> "       Check for issues")
+  sayLn ui ("   " <> g "fisher" <> "              Start chatting")
+  sayLn ui ("   " <> g "fisher doctor" <> "       Check for issues")
   sayLn ui ""
 
 -- ------------------------------------------------------- model & provider
@@ -431,11 +431,14 @@ currentModelOf dflt cfg = case get "model" cfg of
 
 -- | The raw @config.yaml@ rewrite of setup's OpenRouter and custom
 -- branches (@yaml.safe_dump@, no comment blocks, the mode left alone), at
--- @$GAUSS_HOME@ as given. False where upstream's attempt raises.
+-- @$FISHER_HOME@ (else @$GAUSS_HOME@) as given, else the Fisher home.
+-- False where upstream's attempt raises.
 rawModelRewrite :: Sys -> (PyVal -> PyVal) -> IO Bool
 rawModelRewrite sys f = do
-  gh <- sysGetEnv sys "GAUSS_HOME"
-  let path = maybe (sysHome sys </> ".gauss") T.unpack gh </> "config.yaml"
+  given <- mapM (sysGetEnv sys) ["FISHER_HOME", "GAUSS_HOME"]
+  let path = case [h | Just h <- given, not (T.null h)] of
+        h : _ -> T.unpack h </> "config.yaml"
+        [] -> sysFisherHome sys </> "config.yaml"
   exists <- doesFileExist path
   loaded <- if exists then readRawConfig path else pure (Just (PDict []))
   case loaded of
@@ -510,7 +513,7 @@ setupModelProvider e cref = do
           <> maybe [] pure keepLabel
       dflt = if hasAny then length choices - 1 else 2
   unless hasAny $ do
-    printWarning ui "An inference provider is required for Gauss to work."
+    printWarning ui "An inference provider is required for Fisher to work."
     sayLn ui ""
   idx <- promptChoice ui "Select your inference provider:" choices dflt
   nousModelsRef <- newIORef ([] :: [Text])
@@ -610,7 +613,7 @@ setupModelProvider e cref = do
                   case prModels probe of
                     Just ms -> printSuccess ui ("Verified endpoint via " <> fromMaybe "None" (prProbedUrl probe) <> " (" <> showT (length ms) <> " model(s) visible)")
                     Nothing -> do
-                      printWarning ui ("Could not verify this endpoint via " <> fromMaybe "None" (prProbedUrl probe) <> ". Gauss will still save it.")
+                      printWarning ui ("Could not verify this endpoint via " <> fromMaybe "None" (prProbedUrl probe) <> ". Fisher will still save it.")
                       forM_ (prSuggestedBaseUrl probe) $ \s -> printInfo ui ("  If this server expects /v1, try base URL: " <> s)
                   pure baseUrl0
             saveEnvValue sys "OPENAI_BASE_URL" b
@@ -760,7 +763,7 @@ setupModelProvider e cref = do
     sayLn ui ""
     printHeader ui "Vision & Image Analysis (optional)"
     printInfo ui ("Vision uses a separate multimodal backend. " <> display)
-    printInfo ui "doesn't currently provide one Gauss can auto-use for vision,"
+    printInfo ui "doesn't currently provide one Fisher can auto-use for vision,"
     printInfo ui "so choose a backend now or skip and configure later."
     sayLn ui ""
     v <- promptChoice ui "Configure vision:"
@@ -791,7 +794,7 @@ setupModelProvider e cref = do
             saveEnvValue sys "AUXILIARY_VISION_MODEL" vm
             printSuccess ui ("Vision configured with " <> b <> (if T.null vm then "" else " (" <> vm <> ")"))
           else printInfo ui "Skipped — vision won't be available"
-      _ -> printInfo ui "Skipped — add later with 'gauss setup' or configure AUXILIARY_VISION_* settings"
+      _ -> printInfo ui ("Skipped — add later with '" <> cliName <> " setup' or configure AUXILIARY_VISION_* settings")
   -- Default model.
   when (selected /= Just "custom") $ do
     printHeader ui "Default Model"
@@ -994,7 +997,7 @@ setupTerminalBackend e cref = do
           Right r -> pure r
           Left msg -> throwIO (pyError "FileNotFoundError" (msg <> ": '" <> head argv <> "'"))
   printHeader ui "Terminal Backend"
-  printInfo ui "Choose where Gauss runs shell commands and code."
+  printInfo ui "Choose where Fisher runs shell commands and code."
   printInfo ui "This affects tool execution, file access, and isolation."
   sayLn ui ""
   cfg <- readIORef cref
@@ -1156,7 +1159,7 @@ setupAgentSettings e cref = do
       sub k c = getD k c
   printHeader ui "Agent Settings"
   cfg0 <- readIORef cref
-  envMax <- envValue sys "GAUSS_MAX_ITERATIONS"
+  envMax <- envValueCompat sys "FISHER_MAX_ITERATIONS"
   let currentMax = if T.null envMax then maybe "90" pyStrOf (get "max_turns" (sub "agent" cfg0)) else envMax
   printInfo ui "Maximum tool-calling iterations per conversation."
   printInfo ui "Higher = more complex tasks, but costs more tokens."
@@ -1165,7 +1168,7 @@ setupAgentSettings e cref = do
   case pyIntOf maxStr of
     Nothing -> printWarning ui "Invalid number, keeping current value"
     Just n -> when (n > 0) $ do
-      saveEnvValue sys "GAUSS_MAX_ITERATIONS" (showT n)
+      saveEnvValue sys "FISHER_MAX_ITERATIONS" (showT n)
       modifyIORef cref (\c -> delete "max_turns" (set "agent" (set "max_turns" (PInt n) (sub "agent" c)) c))
       printSuccess ui ("Max iterations set to " <> showT n)
   printInfo ui ""

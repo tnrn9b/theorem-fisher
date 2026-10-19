@@ -65,6 +65,7 @@ test-suite fisher-tools-test
       Fisher.Tools.LocalSandboxSpec
       Fisher.Tools.PureSpec
       Fisher.Tools.RegistrySpec
+      Fisher.Tools.RenameCompatSpec
       Fisher.Tools.SandboxSpec
       Fisher.Tools.TestUtil
       Paths_fisher_tools

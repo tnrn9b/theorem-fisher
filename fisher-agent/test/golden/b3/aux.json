@@ -19,7 +19,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -40,7 +40,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -61,7 +61,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -90,7 +90,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -123,7 +123,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -168,7 +168,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -213,7 +213,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -265,7 +265,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -888,7 +888,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -934,7 +934,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -980,7 +980,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -1033,7 +1033,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -2020,7 +2020,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -2066,7 +2066,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -2112,7 +2112,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -2165,7 +2165,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -2221,7 +2221,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -2268,7 +2268,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -2315,7 +2315,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -2369,7 +2369,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -2688,7 +2688,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -2720,7 +2720,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -2830,7 +2830,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -2862,7 +2862,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -3077,7 +3077,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -3100,7 +3100,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -3123,7 +3123,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -3154,7 +3154,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -3189,7 +3189,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -3236,7 +3236,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -3283,7 +3283,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -3337,7 +3337,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -4139,7 +4139,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -4160,7 +4160,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -4181,7 +4181,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -4210,7 +4210,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -4243,7 +4243,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -4288,7 +4288,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -4333,7 +4333,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -4385,7 +4385,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -4430,7 +4430,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -4454,7 +4454,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -4579,7 +4579,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -4602,7 +4602,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -4812,7 +4812,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -4844,7 +4844,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -4867,7 +4867,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -4890,7 +4890,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -4913,7 +4913,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -4944,7 +4944,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -5045,7 +5045,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -5074,7 +5074,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -5191,7 +5191,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -5243,7 +5243,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -5746,7 +5746,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -5778,7 +5778,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -5801,7 +5801,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -5824,7 +5824,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -5847,7 +5847,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -5878,7 +5878,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -5899,7 +5899,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=zai. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=zai. Run: fisher setup"
    },
    "requests": []
   },
@@ -5920,7 +5920,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=zai. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=zai. Run: fisher setup"
    },
    "requests": []
   },
@@ -5941,7 +5941,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -5970,7 +5970,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -6003,7 +6003,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -6048,7 +6048,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -6093,7 +6093,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -6145,7 +6145,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -6190,7 +6190,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=zai. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=zai. Run: fisher setup"
    },
    "requests": []
   },
@@ -6214,7 +6214,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=zai. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=zai. Run: fisher setup"
    },
    "requests": []
   },
@@ -6610,7 +6610,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -6642,7 +6642,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -6665,7 +6665,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -6688,7 +6688,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -6711,7 +6711,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -6742,7 +6742,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -6763,7 +6763,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=None. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=None. Run: fisher setup"
    },
    "requests": []
   },
@@ -6784,7 +6784,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=None. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=None. Run: fisher setup"
    },
    "requests": []
   },
@@ -6805,7 +6805,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -6834,7 +6834,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -6867,7 +6867,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -6912,7 +6912,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -6957,7 +6957,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -7009,7 +7009,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -7054,7 +7054,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=None. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=None. Run: fisher setup"
    },
    "requests": []
   },
@@ -7078,7 +7078,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=None. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=None. Run: fisher setup"
    },
    "requests": []
   },
@@ -7203,7 +7203,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=None. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=None. Run: fisher setup"
    },
    "requests": []
   },
@@ -7226,7 +7226,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=None. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=None. Run: fisher setup"
    },
    "requests": []
   },
@@ -7436,7 +7436,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -7468,7 +7468,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -7491,7 +7491,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -7514,7 +7514,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -7537,7 +7537,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -7568,7 +7568,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -7589,7 +7589,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -7610,7 +7610,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -7631,7 +7631,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -7660,7 +7660,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -7693,7 +7693,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -7738,7 +7738,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -7783,7 +7783,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -7835,7 +7835,7 @@
       "content-type": "application/json",
       "http-referer": "https://gauss-agent.nousresearch.com",
       "x-openrouter-categories": "productivity,cli-agent",
-      "x-openrouter-title": "Gauss Agent"
+      "x-openrouter-title": "Fisher Agent"
      },
      "body": {
       "messages": [
@@ -8338,7 +8338,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -8370,7 +8370,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -8393,7 +8393,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -8416,7 +8416,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=compression provider=openrouter. Run: gauss setup"
+    "message": "No LLM provider configured for task=compression provider=openrouter. Run: fisher setup"
    },
    "requests": []
   },
@@ -8439,7 +8439,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=mcp provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=mcp provider=auto. Run: fisher setup"
    },
    "requests": []
   },
@@ -8470,7 +8470,7 @@
    ],
    "outcome": {
     "raises": "RuntimeError",
-    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: gauss setup"
+    "message": "No LLM provider configured for task=flush_memories provider=auto. Run: fisher setup"
    },
    "requests": []
   }

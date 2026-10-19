@@ -91,6 +91,7 @@ test-suite fisher-llm-test
       Fisher.LLM.AuthResolveSpec
       Fisher.LLM.GoldenSpec
       Fisher.LLM.LiveSpec
+      Fisher.LLM.PyYamlCompatSpec
       Paths_fisher_llm
   autogen-modules:
       Paths_fisher_llm

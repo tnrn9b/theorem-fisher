@@ -24,8 +24,8 @@ import Data.Scientific (floatingOrInteger)
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Vector as V
-import System.Environment (lookupEnv)
 
+import Fisher.Compat (lookupEnvCompatNamed)
 import Fisher.Config
 import Fisher.Env (saveEnvValueAt)
 import Fisher.EnvVars
@@ -117,6 +117,7 @@ migrateConfigAt home interactive quiet prompter say = do
       addWarn x = modifyIORef' warnRef (<> [x])
       out = unless quiet . say
       getEnv = getEnvValueAt home
+      getEnvNamed = getEnvValueNamedAt home
   (current, latest) <- checkConfigVersionAt home
 
   -- Version 3 to 4: tool progress moves from .env to config.yaml.
@@ -126,17 +127,19 @@ migrateConfigAt home interactive quiet prompter say = do
           Just d@(Object _) -> d
           _ -> Object KM.empty
     when (isNothing (lookupKey "tool_progress" display)) $ do
-      oldEnabled <- getEnv "GAUSS_TOOL_PROGRESS"
-      oldMode <- getEnv "GAUSS_TOOL_PROGRESS_MODE"
+      -- FISHER_TOOL_PROGRESS, else GAUSS_TOOL_PROGRESS; the message names
+      -- the one read.
+      oldEnabled <- getEnvNamed "FISHER_TOOL_PROGRESS"
+      oldMode <- getEnvNamed "FISHER_TOOL_PROGRESS_MODE"
       let nonEmpty = \case
-            Just t | not (T.null t) -> Just t
+            Just (n, t) | not (T.null t) -> Just (n, t)
             _ -> Nothing
       progress <- case (nonEmpty oldEnabled, nonEmpty oldMode) of
-        (Just e, _) | lower e `elem` ["false", "0", "no"] -> do
-          addCfg "display.tool_progress=off (from GAUSS_TOOL_PROGRESS=false)"
+        (Just (n, e), _) | lower e `elem` ["false", "0", "no"] -> do
+          addCfg ("display.tool_progress=off (from " <> n <> "=false)")
           pure "off"
-        (_, Just md) | lower md `elem` ["new", "all"] -> do
-          addCfg ("display.tool_progress=" <> lower md <> " (from GAUSS_TOOL_PROGRESS_MODE)")
+        (_, Just (n, md)) | lower md `elem` ["new", "all"] -> do
+          addCfg ("display.tool_progress=" <> lower md <> " (from " <> n <> ")")
           pure (lower md)
         _ -> do
           addCfg "display.tool_progress=all (default)"
@@ -148,10 +151,12 @@ migrateConfigAt home interactive quiet prompter say = do
   when (current < 5) $ do
     (cfg, _) <- loadConfigAt home
     when (isNothing (lookupKey "timezone" cfg)) $ do
-      oldTz <- maybe "" (T.strip . T.pack) <$> lookupEnv "GAUSS_TIMEZONE"
+      tzVar <- lookupEnvCompatNamed "FISHER_TIMEZONE"
+      let oldTz = maybe "" (T.strip . T.pack . snd) tzVar
+          tzName = maybe "FISHER_TIMEZONE" (T.pack . fst) tzVar
       if T.null oldTz
         then addCfg "timezone= (empty, uses server-local)"
-        else addCfg ("timezone=" <> oldTz <> " (from GAUSS_TIMEZONE)")
+        else addCfg ("timezone=" <> oldTz <> " (from " <> tzName <> ")")
       saveConfigAt home (setNested ["timezone"] (String oldTz) cfg)
       out ("  ✓ Added timezone to config.yaml: " <> (if T.null oldTz then "(server-local)" else oldTz))
 

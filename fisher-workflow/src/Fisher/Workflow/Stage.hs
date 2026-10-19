@@ -66,6 +66,7 @@ copyTreeKeepingLinks src dst = do
 -- | Copy a tree and mark it with its revision; an up-to-date copy is kept.
 stageTree :: FilePath -> FilePath -> Text -> IO ()
 stageTree src dst revision = do
+  -- the marker keeps upstream's name, so existing copies stay current
   let marker = dst </> ".gauss-managed-revision"
   exists <- doesFileExist marker
   current <- if exists then T.strip <$> TIO.readFile marker else pure ""

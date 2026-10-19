@@ -79,7 +79,7 @@ golden file = do
       rest <- mapM (runStep (Just w0)) later
       forM_ (zip [0 :: Int ..] (first : rest)) $ \(i, (c, w, o, files)) -> do
         let tag = "step " <> show i <> ": "
-        gh <- canonicalizePath (wGaussHome w)
+        gh <- canonicalizePath (wFisherHome w)
         let sha8 = T.take 8 (sha256Hex (TE.encodeUtf8 (T.pack gh)))
             unsha = T.replace ("gauss-gateway-" <> sha8) "gauss-gateway-<GH_SHA8>"
             want = maybe "" pyStrOf (get "transcript" c)

@@ -1,7 +1,7 @@
 -- | 'Fisher.Agent.Prompt' against @agent/prompt_builder.py@
 -- (@test/golden/b3/prompt.json@): the context-files section for a range
 -- of project layouts and SOUL.md contents (and what building it creates
--- in the Gauss home), the injection scan, truncation, and the constants.
+-- in the Fisher home), the injection scan, truncation, and the constants.
 module Fisher.Agent.PromptSpec (spec) where
 
 import Control.Monad (forM, forM_)

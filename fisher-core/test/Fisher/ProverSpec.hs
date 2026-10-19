@@ -36,7 +36,7 @@ spec = do
       let s = pvServer (prover Rocq)
       svName s `shouldBe` "rocq"
       svDefault s `shouldBe` ["uvx", "--from", "git+https://github.com/LLM4Rocq/rocq-mcp@6983113d0844c0b7f987c79dab13988445109bfb", "rocq-mcp"]
-      svOverride s `shouldBe` "GAUSS_AUTOFORMALIZE_ROCQ_MCP_SPEC"
+      svOverride s `shouldBe` "FISHER_AUTOFORMALIZE_ROCQ_MCP_SPEC"
     it "offers every Rocq-MCP tool but rocq_switch" $ do
       let ts = svTools (pvServer (prover Rocq))
       length ts `shouldBe` 12
@@ -53,7 +53,7 @@ spec = do
       let s = pvServer (prover Isabelle)
       svName s `shouldBe` "isabelle"
       svDefault s `shouldBe` ["uvx", "--from", "isabelle-mcp==0.6.0", "isabelle-mcp"]
-      svOverride s `shouldBe` "GAUSS_AUTOFORMALIZE_ISABELLE_MCP_SPEC"
+      svOverride s `shouldBe` "FISHER_AUTOFORMALIZE_ISABELLE_MCP_SPEC"
       svTools s `shouldBe`
         [ "isabelle_launch", "isabelle_terminate", "isabelle_evaluate_to", "isabelle_evaluation_status"
         , "isabelle_cancel_evaluation", "isabelle_hover", "isabelle_definition", "isabelle_local_occurrences"

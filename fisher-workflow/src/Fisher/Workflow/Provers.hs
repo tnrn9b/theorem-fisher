@@ -59,7 +59,6 @@ import qualified Data.ByteString.Lazy.Char8 as BL8
 import Data.Char (isDigit, isSpace)
 import qualified Data.Map.Strict as Map
 import Data.List (isPrefixOf, nub)
-import Data.Maybe (fromMaybe)
 import Data.FileEmbed (embedFile, makeRelativeToProject)
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -73,6 +72,7 @@ import System.Timeout (timeout)
 import System.FilePath (takeDirectory, takeFileName, (</>))
 
 import Fisher.Prover (Prover (..), ProverKind (..), ServerSpec (..), binaryFix, findIsabelle, findRocqCompiler, prover, proverByName, proverTitle, versionBelow)
+import Fisher.Compat (lookupCompatNamed)
 import Fisher.Py (lookupKey)
 import Data.Text.Encoding (decodeUtf8)
 import Fisher.Workflow.Assets (removeExistingPath)
@@ -230,7 +230,12 @@ stageCodexProverSkill k dest =
 proverServerCommand :: ProverKind -> [(String, String)] -> Maybe FilePath -> Either Text [Text]
 proverServerCommand k env shim =
   let sv = pvServer (prover k)
-      spec = T.strip (T.pack (fromMaybe "" (lookup (svOverride sv) env)))
+      -- FISHER_..._MCP_SPEC, else GAUSS_..._MCP_SPEC; the message names
+      -- the one given.
+      (overrideName, overrideValue) = case lookupCompatNamed (svOverride sv) env of
+        Just (n, v) -> (n, v)
+        Nothing -> (svOverride sv, "")
+      spec = T.strip (T.pack overrideValue)
       viaShim = case (k, shim) of
         (Isabelle, Just p) -> viaIsabelleShim p
         _ -> id
@@ -239,7 +244,7 @@ proverServerCommand k env shim =
           then Right (svDefault sv)
           else
             if T.any isSpace spec
-              then Left (T.pack (svOverride sv) <> " must be a package spec, without spaces.")
+              then Left (T.pack overrideName <> " must be a package spec, without spaces.")
               else Right ["uvx", "--from", spec, last (svDefault sv)]
 
 -- | Fisher's launcher for Isabelle-MCP, a Python file run by the server's

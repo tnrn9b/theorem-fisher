@@ -2,7 +2,7 @@
 -- (upstream @gauss acp@, acp_adapter/ on agent-client-protocol 0.8.1),
 -- JSON-RPC over stdio for editors (Zed, VS Code, JetBrains).
 --
--- Each ACP session holds an agent (platform @acp@, toolset @gauss-acp@,
+-- Each ACP session holds an agent (platform @acp@, toolset @fisher-acp@,
 -- quiet) and the conversation so far. A prompt runs one turn and streams
 -- what happens as @session/update@ notifications: the spinner's thinking
 -- lines as @agent_thought_chunk@, each tool as a @tool_call@ when it
@@ -389,7 +389,7 @@ makeAgent sv ss sid model provider = do
       hooks f = readIORef (ssHooks ss) >>= f
       spec =
         spec1
-          { nsModel = theModel, nsEnabled = Just ["gauss-acp"], nsReplay = adReplay (svDeps sv)
+          { nsModel = theModel, nsEnabled = Just ["fisher-acp"], nsReplay = adReplay (svDeps sv)
           , nsOut = adLog (svDeps sv) . T.dropWhileEnd (== '\n')
           , nsCallbacks =
               Callbacks
@@ -434,8 +434,8 @@ handleRequest sv method params = case method of
     pure . Right . PDict $
       [ ("protocolVersion", PInt 1)
       , ("agentCapabilities", PDict [("loadSession", PBool True), ("sessionCapabilities", PDict [("fork", PDict []), ("list", PDict []), ("resume", PDict [])])])
-      , ("agentInfo", PDict [("name", PStr "gauss-agent"), ("version", PStr upstreamVersion)]) ]
-        <> maybe [] (\p -> [("authMethods", PList [PDict [("description", PStr ("Authenticate Gauss using the currently configured " <> p <> " runtime credentials.")), ("id", PStr p), ("name", PStr (p <> " runtime credentials"))]])]) prov
+      , ("agentInfo", PDict [("name", PStr "fisher-agent"), ("version", PStr upstreamVersion)]) ]
+        <> maybe [] (\p -> [("authMethods", PList [PDict [("description", PStr ("Authenticate Fisher using the currently configured " <> p <> " runtime credentials.")), ("id", PStr p), ("name", PStr (p <> " runtime credentials"))]])]) prov
   "authenticate" -> withFields ["methodId"] (pure (Right (PDict [])))
   "session/new" -> withFields ["cwd", "mcpServers"] $ do
     sid <- adSessionUuid (svDeps sv)
@@ -537,7 +537,7 @@ slashCommands :: [(Text, Text)]
 slashCommands =
   [ ("help", "Show available commands"), ("model", "Show or change current model"), ("tools", "List available tools")
   , ("context", "Show conversation context info"), ("reset", "Clear conversation history")
-  , ("compact", "Compress conversation context"), ("version", "Show Gauss version") ]
+  , ("compact", "Compress conversation context"), ("version", "Show Fisher version") ]
 
 -- | @_handle_slash_command(text, state)@: Nothing for a command it does
 -- not know (the text goes to the model).
@@ -578,7 +578,7 @@ slashCommand sv ss text = do
             pure ("Model switched to: " <> newModel <> "\nProvider: " <> (if T.null target then aaProvider ag' else target))
       "tools" -> do
         sh <- sharedFor sv
-        (defs, _) <- getToolDefinitions (atRegistry (nsTools sh)) (Just ["gauss-acp"]) Nothing
+        (defs, _) <- getToolDefinitions (atRegistry (nsTools sh)) (Just ["fisher-acp"]) Nothing
         let defs' = maybe defs fst (cdTools (adChat (svDeps sv)))
         pure $
           if null defs'
@@ -609,7 +609,7 @@ slashCommand sv ss text = do
       "compact" -> do
         hist <- readIORef (ssHistory ss)
         pure (if null hist then "Nothing to compress — conversation is empty." else "Context compression not available for this agent.")
-      _ -> pure ("Gauss Agent v" <> upstreamVersion)
+      _ -> pure ("Fisher Agent v" <> upstreamVersion)
 
 -- ------------------------------------------------------------------ loop
 

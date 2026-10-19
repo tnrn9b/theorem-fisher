@@ -14,11 +14,13 @@ import qualified Data.Text as T
 import Fisher.LLM.Types
 import Fisher.Py.Value
 
+-- | The referer URL and the Nous @product=gauss-agent@ tag are the
+-- providers' registrations of upstream's app, so they stay; the title is ours.
 openRouterHeaders :: [(Text, Text)]
 openRouterHeaders =
   [ ("http-referer", "https://gauss-agent.nousresearch.com")
   , ("x-openrouter-categories", "productivity,cli-agent")
-  , ("x-openrouter-title", "Gauss Agent") ]
+  , ("x-openrouter-title", "Fisher Agent") ]
 
 -- | The OpenAI SDK's headers plus the client's @default_headers@
 -- (@run_agent.py:515-526@).

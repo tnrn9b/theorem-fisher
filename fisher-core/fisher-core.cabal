@@ -22,6 +22,7 @@ extra-source-files:
 library
   exposed-modules:
       Fisher.Atomic
+      Fisher.Compat
       Fisher.Config
       Fisher.Config.Migrate
       Fisher.Config.Set
@@ -92,6 +93,7 @@ test-suite fisher-core-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Fisher.CompatSpec
       Fisher.ConfigSetSpec
       Fisher.ConfigSpec
       Fisher.CronSpec

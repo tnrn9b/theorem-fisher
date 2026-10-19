@@ -126,7 +126,7 @@ newSys home env offset uuidN outBuf =
         , sysOpenBrowser = \_ -> pure False, sysRun = \_ -> pure (Left "no"), sysRunInteractive = \_ -> pure (Left "no")
         , sysWhich = \_ -> pure Nothing, sysPlatform = "linux"
         , sysUuidHex = atomicModifyIORef' uuidN (\n -> (n + 1, T.justifyRight 32 '0' (T.pack (showHex (toInteger (n + 1) * 0x1F2E3D * 2 ^ (104 :: Int)) ""))))
-        , sysTimeZoneAt = \_ -> pure utc, sysHome = home, sysGaussHome = home </> ".gauss"
+        , sysTimeZoneAt = \_ -> pure utc, sysHome = home, sysFisherHome = home </> ".gauss"
         , sysOut = \t -> modifyIORef outBuf (<> [t]), sysInput = \_ -> pure Nothing, sysGetPass = \_ -> pure Nothing
         , sysStdinTty = pure False, sysStdoutTty = pure False, sysPid = 4242 }
 

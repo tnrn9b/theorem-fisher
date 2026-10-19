@@ -267,9 +267,9 @@ data SshOpts = SshOpts
   , soPersistent :: Bool
   }
 
--- | @<tmp>/gauss-ssh/<user>@<host>:<port>.sock@.
+-- | @<tmp>/fisher-ssh/<user>@<host>:<port>.sock@.
 sshControlSocket :: FilePath -> SshOpts -> FilePath
-sshControlSocket tmp o = tmp <> "/gauss-ssh/" <> T.unpack (soUser o <> "@" <> soHost o <> ":" <> T.pack (show (soPort o))) <> ".sock"
+sshControlSocket tmp o = tmp <> "/fisher-ssh/" <> T.unpack (soUser o <> "@" <> soHost o <> ":" <> T.pack (show (soPort o))) <> ".sock"
 
 -- | @_build_ssh_command(extra)@ without the remote command.
 sshBaseArgv :: FilePath -> SshOpts -> [Text] -> [Text]
@@ -285,7 +285,7 @@ sshBaseArgv sock o extra =
 newSshSandbox :: SandboxEnv -> SshOpts -> IO (Either Text Sandbox)
 newSshSandbox se o = do
   tmp <- getTemporaryDirectory
-  createDirectoryIfMissing True (tmp <> "/gauss-ssh")
+  createDirectoryIfMissing True (tmp <> "/fisher-ssh")
   let sock = sshControlSocket (stripSlash tmp) o
       base = sshBaseArgv sock o []
       run1 :: [Text] -> Int -> IO (Maybe (ExitCode, String, String))
@@ -331,7 +331,7 @@ newSshSandbox se o = do
 sshHooks :: [Text] -> ([Text] -> Int -> IO (Maybe (ExitCode, String, String))) -> PersistentHooks
 sshHooks base run1 =
   PersistentHooks
-    { phPrefixBase = "/tmp/gauss-ssh"
+    { phPrefixBase = "/tmp/fisher-ssh"
     , phSpawn = do
         (Just hin, Just hout, _, ph) <-
           createProcess (proc (T.unpack (head base)) (map T.unpack (tail base) <> ["bash -l"])) {std_in = CreatePipe, std_out = CreatePipe, std_err = NoStream}
@@ -341,7 +341,7 @@ sshHooks base run1 =
           r <- run1 (base <> ["cat " <> p <> " 2>/dev/null"]) 10
           pure [maybe "" (\(_, o, _) -> T.pack o) r]
         _ -> do
-          let delim = "__GAUSS_SEP_" <> sid <> "__"
+          let delim = "__FISHER_SEP_" <> sid <> "__"
               script = T.intercalate "; " ["cat " <> p <> " 2>/dev/null; echo '" <> delim <> "'" | p <- paths]
           r <- run1 (base <> [script]) 10
           case r of

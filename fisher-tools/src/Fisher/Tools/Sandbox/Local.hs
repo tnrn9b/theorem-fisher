@@ -144,7 +144,7 @@ effTimeout def = \case
 -- | The backend-specific parts of upstream's @PersistentShellMixin@.
 data PersistentHooks = PersistentHooks
   { phPrefixBase :: Text
-  -- ^ "/tmp/gauss-local" (the session id is appended)
+  -- ^ "/tmp/fisher-local" (the session id is appended)
   , phSpawn :: IO (Handle, Handle, ProcessHandle)
   -- ^ the shell: its stdin and stdout (stderr discarded)
   , phReadFiles :: Text -> [Text] -> IO [Text]
@@ -324,7 +324,7 @@ cleanupPersistent p = do
 localHooks :: SandboxEnv -> PersistentHooks
 localHooks se =
   PersistentHooks
-    { phPrefixBase = "/tmp/gauss-local"
+    { phPrefixBase = "/tmp/fisher-local"
     , phSpawn = do
         bash <- findBash
         environ <- seEnviron se

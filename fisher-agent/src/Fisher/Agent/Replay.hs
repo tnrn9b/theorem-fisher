@@ -1,6 +1,6 @@
 -- | Replay logs (Fisher only): every agent session the CLI runs is
 -- written as one JSON line per event to
--- @$GAUSS_HOME/fisher/replays/<session>.jsonl@ (the agent's settings,
+-- @<Fisher home>/fisher/replays/<session>.jsonl@ (the agent's settings,
 -- each system prompt, each HTTP exchange, each tool call, each id drawn,
 -- each turn and its result), and 'replayFile' runs the turns again with
 -- the recorded answers, checking that every request Fisher sends is the
@@ -83,15 +83,15 @@ import qualified Fisher.RLM.Types as RT
 data ReplayLog = ReplayLog (MVar Handle) FilePath
 
 replayDir :: FilePath -> FilePath
-replayDir gaussHome = gaussHome </> "fisher" </> "replays"
+replayDir fisherHome = fisherHome </> "fisher" </> "replays"
 
 replayPath :: FilePath -> Text -> FilePath
-replayPath gaussHome sid = replayDir gaussHome </> T.unpack (sid <> ".jsonl")
+replayPath fisherHome sid = replayDir fisherHome </> T.unpack (sid <> ".jsonl")
 
 openReplayLog :: FilePath -> Text -> IO ReplayLog
-openReplayLog gaussHome sid = do
-  createDirectoryIfMissing True (replayDir gaussHome)
-  let p = replayPath gaussHome sid
+openReplayLog fisherHome sid = do
+  createDirectoryIfMissing True (replayDir fisherHome)
+  let p = replayPath fisherHome sid
   h <- openFile p AppendMode
   m <- newMVar h
   pure (ReplayLog m p)
@@ -420,10 +420,10 @@ configFromPy key v =
 -- (keys and tokens masked).
 replayEnvNames :: [Text]
 replayEnvNames =
-  [ "OPENROUTER_API_KEY", "OPENROUTER_BASE_URL", "OPENAI_BASE_URL", "OPENAI_API_KEY", "OPENAI_MODEL", "GAUSS_MODEL", "LLM_MODEL"
+  [ "OPENROUTER_API_KEY", "OPENROUTER_BASE_URL", "OPENAI_BASE_URL", "OPENAI_API_KEY", "OPENAI_MODEL", "FISHER_MODEL", "GAUSS_MODEL", "LLM_MODEL"
   , "NOUS_INFERENCE_BASE_URL", "GLM_API_KEY", "ZAI_API_KEY", "Z_AI_API_KEY", "GLM_BASE_URL", "KIMI_API_KEY", "KIMI_BASE_URL"
   , "MINIMAX_API_KEY", "MINIMAX_BASE_URL", "MINIMAX_CN_API_KEY", "MINIMAX_CN_BASE_URL", "DEEPSEEK_API_KEY", "DEEPSEEK_BASE_URL"
-  , "ANTHROPIC_API_KEY", "ANTHROPIC_TOKEN", "CLAUDE_CODE_OAUTH_TOKEN", "GAUSS_INFERENCE_PROVIDER"
+  , "ANTHROPIC_API_KEY", "ANTHROPIC_TOKEN", "CLAUDE_CODE_OAUTH_TOKEN", "FISHER_INFERENCE_PROVIDER", "GAUSS_INFERENCE_PROVIDER"
   , "CONTEXT_COMPRESSION_THRESHOLD", "CONTEXT_COMPRESSION_ENABLED", "CONTEXT_COMPRESSION_MODEL", "CONTEXT_COMPRESSION_PROVIDER" ]
     <> [p <> t <> "_" <> k | p <- ["AUXILIARY_", "CONTEXT_"], t <- ["COMPRESSION", "MCP", "FLUSH_MEMORIES"], k <- ["PROVIDER", "MODEL", "BASE_URL", "API_KEY"]]
 
@@ -650,7 +650,7 @@ replayFileWith replOf rb path = do
                 , envNowLocal = pure (rbNow rb), envPromptNow = pure (rbNow rb), envCwd = pure "."
                 , envChoice = \_ -> pure 0, envAnimate = False, envDb = Just db, envTools = runner
                 , envAux = callLlm auxEnv, envAuxEnv = Just auxEnv
-                , envMeta = MetaEnv tr clock (sysGaussHome sys) cache (\_ -> pure ())
+                , envMeta = MetaEnv tr clock (sysFisherHome sys) cache (\_ -> pure ())
                 , envSkin = defaultSkin, envConfig = config, envCallbacks = noCallbacks, envWarn = \_ -> pure ()
                 , envPromptHook = \built -> isCut >>= \c -> if c then pure built else fromMaybe built <$> next promptQ
                 , envWriteFiles = False

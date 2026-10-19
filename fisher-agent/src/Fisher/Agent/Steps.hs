@@ -1,6 +1,6 @@
 -- | The step log (Fisher UI): every file change the agent makes through
 -- @write_file@ or @patch@, one JSON line per changed file in
--- @$GAUSS_HOME/fisher/steps/<session>.jsonl@: the step's number, the
+-- @<Fisher home>/fisher/steps/<session>.jsonl@: the step's number, the
 -- tool call's id, the path, the SHA-256 of the file's bytes, the whole
 -- file as the tool left it, the tool and the time. The UI server reads it
 -- to show and check each step.
@@ -50,10 +50,10 @@ data Step = Step
   deriving (Eq, Show)
 
 stepsDir :: FilePath -> FilePath
-stepsDir gaussHome = gaussHome </> "fisher" </> "steps"
+stepsDir fisherHome = fisherHome </> "fisher" </> "steps"
 
 stepsPath :: FilePath -> Text -> FilePath
-stepsPath gaussHome sid = stepsDir gaussHome </> T.unpack (sid <> ".jsonl")
+stepsPath fisherHome sid = stepsDir fisherHome </> T.unpack (sid <> ".jsonl")
 
 stepToPy :: Step -> PyVal
 stepToPy s =

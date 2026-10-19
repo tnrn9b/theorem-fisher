@@ -67,7 +67,7 @@ newNativeShared :: Sys -> ChatDeps -> (Text -> IO ()) -> IO NativeShared
 newNativeShared sys deps logLine = do
   let ui = NetUi logLine logLine (\_ -> pure (Left False)) (pure Nothing)
   sudo <- sudoPromptFor sys ui
-  at <- newAgentToolsWith (\se -> se {seSudoPassword = sudoPasswordFor sudo}) (sysGaussHome sys)
+  at <- newAgentToolsWith (\se -> se {seSudoPassword = sudoPasswordFor sudo}) (sysFisherHome sys)
   tr <- cdTransport deps
   net <- newNetTools sys (cdRuntime deps) tr (cdWhich deps) (pure False) ui at
   registerNetTools (atRegistry at) net
@@ -122,7 +122,7 @@ buildNative sys0 deps sh spec = do
       net = nsNet sh
       reg = atRegistry at
       sid = nsSessionId spec
-  lg <- if nsReplay spec then Just <$> openReplayLog (sysGaussHome sys0) sid else pure Nothing
+  lg <- if nsReplay spec then Just <$> openReplayLog (sysFisherHome sys0) sid else pure Nothing
   let sys = maybe sys0 (`recordUuids` sys0) lg
       cfg =
         defaultAgentConfig
@@ -164,7 +164,7 @@ buildNative sys0 deps sh spec = do
           , envCwd = cdCwd deps, envChoice = cdChoice deps
           , envAnimate = False, envDb = nsDb spec, envTools = runner
           , envAux = callLlm auxEnv, envAuxEnv = Just auxEnv
-          , envMeta = MetaEnv tr (sysNow sys) (sysGaussHome sys) (nsModels sh) (\_ -> pure ())
+          , envMeta = MetaEnv tr (sysNow sys) (sysFisherHome sys) (nsModels sh) (\_ -> pure ())
           , envSkin = D.Skin "┊" [] [], envConfig = cfg0
           , envCallbacks = nsCallbacks spec
           , envWarn = \_ -> pure ()

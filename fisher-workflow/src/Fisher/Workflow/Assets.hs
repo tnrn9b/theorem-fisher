@@ -23,6 +23,7 @@ import System.FilePath (takeDirectory, (</>))
 import System.Posix.Files (getSymbolicLinkStatus, isDirectory, isSymbolicLink)
 import Control.Exception (IOException, try)
 
+import Fisher.Compat (lookupCompat)
 import Fisher.Workflow.Run (runStaging)
 import Fisher.Workflow.Types
 
@@ -54,6 +55,7 @@ missingPaths co =
 checkoutIsComplete :: FilePath -> IO Bool
 checkoutIsComplete co = null <$> missingPaths co
 
+-- | The marker keeps upstream's name: existing checkouts stay current.
 revisionFile :: FilePath -> FilePath
 revisionFile co = co </> ".gauss-managed-revision"
 
@@ -110,12 +112,12 @@ ensureGitCheckout url revision dest git = do
   T.strip <$> runStaging [git, "-C", dest, "rev-parse", "HEAD"] "Failed to read managed asset revision" Nothing Nothing
 
 -- | @_ensure_lean4_checkout_assets@: refresh when asked, when a revision is
--- requested by @GAUSS_AUTOFORMALIZE_LEAN4_SKILLS_REF@, or when the checkout
+-- requested by @FISHER_AUTOFORMALIZE_LEAN4_SKILLS_REF@ (else @GAUSS_...@), or when the checkout
 -- is incomplete; otherwise reuse it and its recorded revision.
 ensureLean4Checkout :: FilePath -> Env -> FilePath -> Bool -> IO (FilePath, Text)
 ensureLean4Checkout assets env git refresh = do
   let co = checkoutRoot assets
-      ref = case T.strip (T.pack (Map.findWithDefault "" "GAUSS_AUTOFORMALIZE_LEAN4_SKILLS_REF" env)) of
+      ref = case T.strip (T.pack (fromMaybe "" (lookupCompat "FISHER_AUTOFORMALIZE_LEAN4_SKILLS_REF" (Map.toList env)))) of
         t | T.null t -> Nothing
         t -> Just t
   complete <- checkoutIsComplete co

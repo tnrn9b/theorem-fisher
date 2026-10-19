@@ -53,7 +53,7 @@ data LoginArgs = LoginArgs
   }
   deriving (Eq, Show)
 
--- | What @gauss model@ and @gauss setup@ pass: argparse's defaults.
+-- | What @fisher model@ and @fisher setup@ pass: argparse's defaults.
 defaultLoginArgs :: LoginArgs
 defaultLoginArgs = LoginArgs Nothing Nothing Nothing Nothing False (Just 15.0) Nothing False
 
@@ -65,18 +65,22 @@ nonEmptyT = \case
 envT :: Sys -> Text -> IO (Maybe Text)
 envT sys k = nonEmptyT <$> sysGetEnv sys k
 
+-- | 'envT' for a renamed variable: @FISHER_X@, else @GAUSS_X@.
+envTCompat :: Sys -> Text -> IO (Maybe Text)
+envTCompat sys k = nonEmptyT <$> sysGetEnvCompat sys k
+
 -- | @_login_nous(args, pconfig)@. Raises 'SystemExit' 130 on Ctrl-C and 1
 -- on any other failure, as upstream.
 loginNous :: Sys -> LoginArgs -> ProviderConfig -> IO ()
 loginNous sys args pc = do
-  gaussPortal <- envT sys "GAUSS_PORTAL_BASE_URL"
+  fisherPortal <- envTCompat sys "FISHER_PORTAL_BASE_URL"
   nousPortal <- envT sys "NOUS_PORTAL_BASE_URL"
   nousInf <- envT sys "NOUS_INFERENCE_BASE_URL"
-  gaussCa <- envT sys "GAUSS_CA_BUNDLE"
+  fisherCa <- envTCompat sys "FISHER_CA_BUNDLE"
   sslCert <- envT sys "SSL_CERT_FILE"
   sshClient <- envT sys "SSH_CLIENT"
   sshTty <- envT sys "SSH_TTY"
-  let portal = rstripSlash (fromMaybe (pcPortalBaseUrl pc) (orText [nonEmptyT (laPortalUrl args), gaussPortal, nousPortal]))
+  let portal = rstripSlash (fromMaybe (pcPortalBaseUrl pc) (orText [nonEmptyT (laPortalUrl args), fisherPortal, nousPortal]))
       requestedInf = rstripSlash (fromMaybe (pcInferenceBaseUrl pc) (orText [nonEmptyT (laInferenceUrl args), nousInf]))
       clientId = fromMaybe (pcClientId pc) (nonEmptyT (laClientId args))
       scope = fromMaybe (pcScope pc) (nonEmptyT (laScope args))
@@ -84,14 +88,14 @@ loginNous sys args pc = do
         Just t | t /= 0 -> t
         _ -> 15.0
       insecure = laInsecure args
-      caBundle = orText [nonEmptyT (laCaBundle args), gaussCa, sslCert]
+      caBundle = orText [nonEmptyT (laCaBundle args), fisherCa, sslCert]
       verify
         | insecure = VerifyOff
         | Just ca <- caBundle = VerifyCa ca
         | otherwise = VerifyOn
       openBrowser = not (laNoBrowser args) && not (isJust sshClient || isJust sshTty)
       client = httpxClient [("Accept", "application/json")] timeoutS
-  outLn sys ("Starting Gauss login via " <> pcName pc <> "...")
+  outLn sys ("Starting Fisher login via " <> pcName pc <> "...")
   outLn sys ("Portal: " <> portal)
   if insecure
     then outLn sys "TLS verification: disabled (--insecure)"
@@ -259,8 +263,8 @@ mintAgentKey sys client portal access minTtl = do
               _ -> "Agent key mint request failed"
         throwIO (AuthError desc "nous" (Just code) (code `elem` ["invalid_token", "invalid_grant"]))
 
--- | @fetch_nous_models@: the ids from @{base}/models@ without Gauss's own
--- models, opus first, then pro, then the rest, then sonnet.
+-- | @fetch_nous_models@: the ids from @{base}/models@ without upstream
+-- Gauss's own models (ids containing @gauss@, Nous's names, kept), opus first, then pro, then the rest, then sonnet.
 fetchNousModels :: Sys -> Text -> Text -> Double -> IO [Text]
 fetchNousModels sys base key timeoutS = do
   resp <- send sys (httpxClient [("Accept", "application/json")] timeoutS) "GET" (rstripSlash base <> "/models")
@@ -317,13 +321,13 @@ resolveNousRuntimeCredentials sys opts = do
     store0 <- loadAuthStore sys
     st0 <- case loadProviderState store0 "nous" of
       Just s | truthy s -> pure s
-      _ -> throwIO (AuthError "Gauss is not logged into Nous Portal." "nous" Nothing True)
-    gaussPortal <- envT sys "GAUSS_PORTAL_BASE_URL"
+      _ -> throwIO (AuthError "Fisher is not logged into Nous Portal." "nous" Nothing True)
+    fisherPortal <- envTCompat sys "FISHER_PORTAL_BASE_URL"
     nousPortal <- envT sys "NOUS_PORTAL_BASE_URL"
     nousInf <- envT sys "NOUS_INFERENCE_BASE_URL"
-    gaussCa <- envT sys "GAUSS_CA_BUNDLE"
+    fisherCa <- envTCompat sys "FISHER_CA_BUNDLE"
     sslCert <- envT sys "SSL_CERT_FILE"
-    let portal = rstripSlash (fromMaybe defaultNousPortalUrl (orText [optionalBaseUrl (get "portal_base_url" st0), gaussPortal, nousPortal]))
+    let portal = rstripSlash (fromMaybe defaultNousPortalUrl (orText [optionalBaseUrl (get "portal_base_url" st0), fisherPortal, nousPortal]))
         inf0 = rstripSlash (fromMaybe defaultNousInferenceUrl (orText [optionalBaseUrl (get "inference_base_url" st0), nousInf]))
         clientId = case get "client_id" st0 of
           Just v | truthy v -> pyStrOf v
@@ -332,7 +336,7 @@ resolveNousRuntimeCredentials sys opts = do
           Just t@(PDict _) -> t
           _ -> PDict []
         insecure = fromMaybe (maybe False truthy (get "insecure" tls)) (noInsecure opts)
-        ca = orText [nonEmptyT (noCaBundle opts), case get "ca_bundle" tls of Just v | truthy v -> Just (pyStrOf v); _ -> Nothing, gaussCa, sslCert]
+        ca = orText [nonEmptyT (noCaBundle opts), case get "ca_bundle" tls of Just v | truthy v -> Just (pyStrOf v); _ -> Nothing, fisherCa, sslCert]
         verify
           | insecure = VerifyOff
           | Just c <- ca = VerifyCa c

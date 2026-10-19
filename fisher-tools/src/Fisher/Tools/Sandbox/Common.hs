@@ -24,7 +24,7 @@ import qualified Data.Text.Encoding.Error as TEE
 
 import Fisher.Py.Re (compileOrDie, search, subText)
 
--- | @_GAUSS_PROVIDER_ENV_BLOCKLIST@: Gauss-managed secrets and settings that
+-- | @_GAUSS_PROVIDER_ENV_BLOCKLIST@ upstream: Fisher-managed secrets and settings that
 -- never reach a subprocess. Upstream derives part of it from its provider
 -- registry and optional-env table; this is the resulting set at the
 -- pinned commit (the sandbox golden checks it).
@@ -52,18 +52,19 @@ providerEnvBlocklist =
 sanePath :: Text
 sanePath = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
-forcePrefix :: Text
-forcePrefix = "_GAUSS_FORCE_"
+-- | @_FISHER_FORCE_X@ re-admits @X@; upstream's @_GAUSS_FORCE_X@ still does.
+forcePrefixes :: [Text]
+forcePrefixes = ["_FISHER_FORCE_", "_GAUSS_FORCE_"]
 
 -- | @_make_run_env(env)@ over this process's environment (in its order):
--- blocked names dropped, @_GAUSS_FORCE_X@ re-admitted as @X@, and the sane
+-- blocked names dropped, @_FISHER_FORCE_X@ (or @_GAUSS_FORCE_X@) re-admitted as @X@, and the sane
 -- PATH appended when @/usr/bin@ is missing from it.
 makeRunEnv :: [(Text, Text)] -> [(Text, Text)] -> [(Text, Text)]
 makeRunEnv environ extra =
   let merged = [(k, maybe v id (lookup k extra)) | (k, v) <- environ] <> [(k, v) | (k, v) <- extra, k `notElem` map fst environ]
       put acc (k, v) = if any ((== k) . fst) acc then [(k', if k' == k then v else v') | (k', v') <- acc] else acc <> [(k, v)]
       step acc (k, v)
-        | forcePrefix `T.isPrefixOf` k = put acc (T.drop (T.length forcePrefix) k, v)
+        | (p : _) <- filter (`T.isPrefixOf` k) forcePrefixes = put acc (T.drop (T.length p) k, v)
         | k `S.member` providerEnvBlocklist = acc
         | otherwise = put acc (k, v)
       runEnv = foldl step [] merged
@@ -91,10 +92,10 @@ mergeStdin sudo stdin = case (sudo, stdin) of
   (Nothing, d) -> d
 
 outputFence :: Text
-outputFence = "__GAUSS_FENCE_a9f7b3__"
+outputFence = "__FISHER_FENCE_a9f7b3__"
 
 fencedCommand :: Text -> Text
-fencedCommand cmd = "printf '" <> outputFence <> "'; " <> cmd <> "; __gauss_rc=$?; printf '" <> outputFence <> "'; exit $__gauss_rc"
+fencedCommand cmd = "printf '" <> outputFence <> "'; " <> cmd <> "; __fisher_rc=$?; printf '" <> outputFence <> "'; exit $__fisher_rc"
 
 -- | @_extract_fenced_output@.
 extractFencedOutput :: Text -> Text

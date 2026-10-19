@@ -42,6 +42,8 @@ import System.Process (CreateProcess (..), Pid, StdStream (..), createProcess, g
 import Text.Read (readMaybe)
 import Text.Printf (printf)
 
+import Fisher.Compat (childEnvCompat)
+
 -- | A started run: its tag (the @FISHER_UI_TAG@ it was given), its pid
 -- (also its process group) and when it started (POSIX seconds).
 data Child = Child { chTag :: Text, chPid :: Pid, chStarted :: Double }
@@ -71,7 +73,9 @@ spawnChild logPath cwd' argv env = case argv of
   (exe : args) -> do
     tag <- maybe newTag (pure . T.pack) (lookup "FISHER_UI_TAG" env)
     base <- getEnvironment
-    let full = M.toList (M.union (M.fromList env) (M.fromList base))
+    -- every FISHER_X also as GAUSS_X, for children that know only the old
+    -- names (an inherited GAUSS_X is replaced)
+    let full = childEnvCompat (M.toList (M.union (M.fromList env) (M.fromList base)))
     devnull <- openBinaryFile "/dev/null" ReadMode
     out <- maybe (openBinaryFile "/dev/null" WriteMode) openLog logPath
     started <- realToFrac <$> getPOSIXTime

@@ -6,6 +6,7 @@ module Fisher.Cron.Tool
   , scanCronPrompt
   , repeatDisplay
   , formatJob
+  , originFromEnv
   ) where
 
 import Data.Char (ord)
@@ -221,14 +222,20 @@ cronjob env getenv args = do
                     Left e -> failure e
                     Right updated -> out [("success", PBool True), ("job", formatJob (fromMaybe PNull updated))]
 
--- | @_origin_from_env()@
+-- | @_origin_from_env()@, each @FISHER_SESSION_X@ read with
+-- @GAUSS_SESSION_X@ as its fallback.
 originFromEnv :: (Text -> IO (Maybe Text)) -> IO (Maybe PyVal)
-originFromEnv getenv = do
-  p <- getenv "GAUSS_SESSION_PLATFORM"
-  c <- getenv "GAUSS_SESSION_CHAT_ID"
+originFromEnv getenv0 = do
+  p <- getenv "SESSION_PLATFORM"
+  c <- getenv "SESSION_CHAT_ID"
   case (p, c) of
     (Just pl, Just ch) | not (T.null pl), not (T.null ch) -> do
-      n <- getenv "GAUSS_SESSION_CHAT_NAME"
-      th <- getenv "GAUSS_SESSION_THREAD_ID"
+      n <- getenv "SESSION_CHAT_NAME"
+      th <- getenv "SESSION_THREAD_ID"
       pure (Just (PDict [("platform", PStr pl), ("chat_id", PStr ch), ("chat_name", maybe PNull PStr n), ("thread_id", maybe PNull PStr th)]))
     _ -> pure Nothing
+  where
+    getenv suffix =
+      getenv0 ("FISHER_" <> suffix) >>= \case
+        Just v -> pure (Just v)
+        Nothing -> getenv0 ("GAUSS_" <> suffix)

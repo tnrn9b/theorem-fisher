@@ -44,7 +44,7 @@ pathSys gauss env0 = do
           , sysOpenBrowser = \_ -> pure False, sysRun = \_ -> pure (Left "no"), sysRunInteractive = \_ -> pure (Left "no")
           , sysWhich = which, sysPlatform = "linux"
           , sysUuidHex = pure "00000000000000000000000000000001"
-          , sysTimeZoneAt = \_ -> pure utc, sysHome = takeDirectory gauss, sysGaussHome = gauss
+          , sysTimeZoneAt = \_ -> pure utc, sysHome = takeDirectory gauss, sysFisherHome = gauss
           , sysOut = \t -> modifyIORef printed (<> [t]), sysInput = \_ -> pure Nothing, sysGetPass = \_ -> pure Nothing
           , sysStdinTty = pure False, sysStdoutTty = pure False, sysPid = 4242 }
   pure (sys, T.concat <$> readIORef printed)

@@ -1,5 +1,5 @@
 -- | The @memory@ tool (@tools/memory_tool.py@): MEMORY.md and USER.md
--- under @$GAUSS_HOME/memories@, entries split on @\\n§\\n@, character
+-- under the Fisher home's @memories@, entries split on @\\n§\\n@, character
 -- limits, the injection scan, and the snapshot frozen into the system
 -- prompt when the store loads.
 module Fisher.Agent.Tools.Memory
@@ -143,7 +143,7 @@ threats =
   , (rx "cat\\s+[^\\n]*(\\.env|credentials|\\.netrc|\\.pgpass|\\.npmrc|\\.pypirc)", "read_secrets")
   , (rx "authorized_keys", "ssh_backdoor")
   , (rx "\\$HOME/\\.ssh|~/\\.ssh", "ssh_access")
-  , (rx "\\$HOME/\\.gauss/\\.env|~/\\.gauss/\\.env", "gauss_env")
+  , (rx "\\$HOME/\\.(fisher|gauss)/\\.env|~/\\.(fisher|gauss)/\\.env", "fisher_env")
   ]
   where
     rx = Re.compileOrDie [Re.IgnoreCase]

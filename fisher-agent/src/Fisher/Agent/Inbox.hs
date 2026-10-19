@@ -1,5 +1,5 @@
 -- | The inbox (Fisher UI): messages for a running session, one JSON line
--- each (@{"text": ...}@) in @$GAUSS_HOME/fisher/inbox/<session>.jsonl@.
+-- each (@{"text": ...}@) in @<Fisher home>/fisher/inbox/<session>.jsonl@.
 -- The UI server appends; the agent loop takes what is new at each tool
 -- boundary and sends it as the next user turn. What has been taken is
 -- kept as a byte offset beside the file (@<session>.offset@), so each line
@@ -29,10 +29,10 @@ import System.IO (stderr)
 import Fisher.Py.Value
 
 inboxDir :: FilePath -> FilePath
-inboxDir gaussHome = gaussHome </> "fisher" </> "inbox"
+inboxDir fisherHome = fisherHome </> "fisher" </> "inbox"
 
 inboxPath :: FilePath -> Text -> FilePath
-inboxPath gaussHome sid = inboxDir gaussHome </> T.unpack (sid <> ".jsonl")
+inboxPath fisherHome sid = inboxDir fisherHome </> T.unpack (sid <> ".jsonl")
 
 offsetPath :: FilePath -> FilePath
 offsetPath p = replaceExtension p "offset"

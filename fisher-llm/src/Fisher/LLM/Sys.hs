@@ -11,6 +11,7 @@ module Fisher.LLM.Sys
   , HttpFail (..)
   , RunResult (..)
   , getEnvT
+  , sysGetEnvCompat
   , envNonEmpty
   , out
   , outLn
@@ -32,6 +33,7 @@ import Data.Time (TimeZone)
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import Data.Time.Format (defaultTimeLocale, formatTime)
 
+import Fisher.Compat (lookupEnvCompatWith)
 import Fisher.Py.Value
 
 -- | Which Python HTTP stack upstream used at a call site: an unreachable
@@ -95,7 +97,8 @@ data Sys = Sys
   , sysUuidHex :: IO Text
   , sysTimeZoneAt :: Double -> IO TimeZone
   , sysHome :: FilePath
-  , sysGaussHome :: FilePath
+  , sysFisherHome :: FilePath
+  -- ^ the Fisher home ('Fisher.Paths.getFisherHome')
   , sysOut :: Text -> IO ()
   -- ^ stdout, as written (no newline added)
   , sysInput :: Text -> IO (Maybe Text)
@@ -109,6 +112,12 @@ data Sys = Sys
 
 getEnvT :: Sys -> Text -> IO (Maybe Text)
 getEnvT = sysGetEnv
+
+-- | 'sysGetEnv' for a renamed variable, by 'Fisher.Compat.lookupEnvCompat'
+-- rule: @FISHER_X@ when set (even empty), else @GAUSS_X@. The argument is
+-- @FISHER_X@, @GAUSS_X@ or the bare suffix @X@.
+sysGetEnvCompat :: Sys -> Text -> IO (Maybe Text)
+sysGetEnvCompat sys = lookupEnvCompatWith (sysGetEnv sys)
 
 -- | @os.getenv(k, "").strip()@, Nothing when empty.
 envNonEmpty :: Sys -> Text -> IO (Maybe Text)

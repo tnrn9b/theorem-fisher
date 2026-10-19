@@ -1,4 +1,4 @@
--- | @gauss config set KEY VALUE@ (@set_config_value@ in
+-- | @fisher config set KEY VALUE@ (@set_config_value@ in
 -- @gauss_cli/config.py@). Credentials go to @.env@; anything else goes to
 -- @config.yaml@, written from the user's own file rather than the merged
 -- defaults.
@@ -25,7 +25,8 @@ import System.Posix.Files (fileMode, getFileStatus, setFileMode)
 
 import Fisher.Atomic (atomicWriteFile, secureFile)
 import Fisher.Env (saveEnvValueAt)
-import Fisher.Paths (configPathIn, ensureGaussHomeAt, envPathIn)
+import Fisher.Compat (configPathCompat)
+import Fisher.Paths (configPathIn, ensureFisherHomeAt, envPathIn)
 import Fisher.Py (pyTruthy)
 import Fisher.Yaml.Ordered (encodeOrdered, keyOrderOfFile)
 
@@ -42,12 +43,13 @@ envKeys =
   , "GITHUB_TOKEN", "WANDB_API_KEY", "TINKER_API_KEY" ]
 
 -- | Listed credentials, and any @*_API_KEY@, @*_TOKEN@ or @TERMINAL_SSH*@,
--- go to .env under the upper-cased name; anything else is a dotted path.
+-- go to .env under the upper-cased name; anything else is a dotted path,
+-- one under @gauss@ written under @fisher@.
 setTarget :: Text -> SetTarget
 setTarget key
   | up `elem` envKeys || "_API_KEY" `T.isSuffixOf` up || "_TOKEN" `T.isSuffixOf` up
       || "TERMINAL_SSH" `T.isPrefixOf` up = ToEnv up
-  | otherwise = ToConfig (T.splitOn "." key)
+  | otherwise = ToConfig (configPathCompat (T.splitOn "." key))
   where
     up = T.toUpper key
 
@@ -126,7 +128,7 @@ setConfigValueAt home key value = case setTarget key of
       Right o -> do
         let c = coerceValue value
             v = toValue c
-        ensureGaussHomeAt home
+        ensureFisherHomeAt home
         order <- keyOrderOfFile cfgPath
         -- Fisher only: a temporary file renamed over it, never a
         -- half-written config.yaml. As upstream's plain write: through a
@@ -137,4 +139,4 @@ setConfigValueAt home key value = case setTarget key of
         atomicWriteFile ".config_.tmp" target (encodeOrdered [order] (Object (setPath path v o)))
         maybe (secureFile target) (setFileMode target) mode
         forM_ (lookup key configToEnv) $ \envName -> saveEnvValueAt home envName (render c)
-        pure (Right ("✓ Set " <> key <> " = " <> render c <> " in " <> T.pack cfgPath))
+        pure (Right ("✓ Set " <> T.intercalate "." path <> " = " <> render c <> " in " <> T.pack cfgPath))

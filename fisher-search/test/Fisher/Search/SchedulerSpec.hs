@@ -59,7 +59,7 @@ status :: SearchReport -> [(T.Text, GoalStatus)]
 status rep = [(g, gsStatus s) | (g, s) <- srGoals rep]
 
 cfg0 :: SearchConfig
-cfg0 = defaultSearchConfig {scBackends = ["claude-code", "gauss"], scSlots = 4, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = True}
+cfg0 = defaultSearchConfig {scBackends = ["claude-code", "fisher"], scSlots = 4, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = True}
 
 spec :: Spec
 spec = describe "the swarm's scheduler" $ do
@@ -72,35 +72,35 @@ spec = describe "the swarm's scheduler" $ do
     T.isInfixOf "exact b_ok" (srBase rep) `shouldBe` True
   it "gives every goal a first attempt before any second, spread over backends" $ do
     (rep, es) <- search cfg0 {scSlots = 3, scParallelPerGoal = False}
-      (Map.fromList [((g, b), ("ok", 20)) | g <- ["a", "b", "c"], b <- ["claude-code", "gauss"]])
+      (Map.fromList [((g, b), ("ok", 20)) | g <- ["a", "b", "c"], b <- ["claude-code", "fisher"]])
     srClosed rep `shouldBe` 3
-    [(g, b) | Launched _ _ g b <- es] `shouldBe` [("a", "claude-code"), ("b", "gauss"), ("c", "claude-code")]
+    [(g, b) | Launched _ _ g b <- es] `shouldBe` [("a", "claude-code"), ("b", "fisher"), ("c", "claude-code")]
   it "retries a failed goal on the backend that has not tried it" $ do
     (rep, es) <- search cfg0 {scSlots = 1}
-      (Map.fromList [ (("a", "claude-code"), ("BAD", 5)), (("a", "gauss"), ("ok", 5))
+      (Map.fromList [ (("a", "claude-code"), ("BAD", 5)), (("a", "fisher"), ("ok", 5))
                     , (("b", "claude-code"), ("ok", 5)), (("c", "claude-code"), ("ok", 5)) ])
     lookup "a" (status rep) `shouldBe` Just Closed
-    [b | Launched _ _ "a" b <- es] `shouldBe` ["claude-code", "gauss"]
+    [b | Launched _ _ "a" b <- es] `shouldBe` ["claude-code", "fisher"]
   it "keeps a proof that uses an open goal waiting, and closes it when that goal closes" $ do
     (rep, es) <- search cfg0 {scSlots = 3, scParallelPerGoal = False}
-      (Map.fromList [ (("a", "claude-code"), ("exact b", 5)), (("b", "gauss"), ("ok", 200)), (("c", "claude-code"), ("ok", 5)) ])
+      (Map.fromList [ (("a", "claude-code"), ("exact b", 5)), (("b", "fisher"), ("ok", 200)), (("c", "claude-code"), ("ok", 5)) ])
     status rep `shouldBe` [("a", Closed), ("b", Closed), ("c", Closed)]
     [g | GoalWaiting _ g _ <- es] `shouldBe` ["a"]
   it "runs a goal on two backends at once and cancels the slower when one closes it" $ do
     (rep, es) <- search cfg0 {scSlots = 6}
-      (Map.fromList ([ (("a", "claude-code"), ("ok", 5)), (("a", "gauss"), ("ok", 5000)) ]
-                     <> [((g, b), ("ok", 5)) | g <- ["b", "c"], b <- ["claude-code", "gauss"]]))
+      (Map.fromList ([ (("a", "claude-code"), ("ok", 5)), (("a", "fisher"), ("ok", 5000)) ]
+                     <> [((g, b), ("ok", 5)) | g <- ["b", "c"], b <- ["claude-code", "fisher"]]))
     lookup "a" (status rep) `shouldBe` Just Closed
     [g | AttemptCancelled _ _ g _ <- es] `shouldSatisfy` elem "a"
     srElapsed rep `shouldSatisfy` (< 4)
   it "gives up after the attempts allowed" $ do
     (rep, es) <- search cfg0 {scSlots = 2, scMaxAttempts = 2, scParallelPerGoal = False}
-      (Map.fromList ([((g, b), ("BAD", 5)) | g <- ["a"], b <- ["claude-code", "gauss"]] <> [((g, "claude-code"), ("ok", 5)) | g <- ["b", "c"]]))
+      (Map.fromList ([((g, b), ("BAD", 5)) | g <- ["a"], b <- ["claude-code", "fisher"]] <> [((g, "claude-code"), ("ok", 5)) | g <- ["b", "c"]]))
     lookup "a" (status rep) `shouldBe` Just GaveUp
     length [() | Launched _ _ "a" _ <- es] `shouldBe` 2
   it "stops at the budget and cancels what runs" $ do
     (rep, es) <- search cfg0 {scBudget = 0.5}
-      (Map.fromList [((g, b), ("ok", 60000)) | g <- ["a", "b", "c"], b <- ["claude-code", "gauss"]])
+      (Map.fromList [((g, b), ("ok", 60000)) | g <- ["a", "b", "c"], b <- ["claude-code", "fisher"]])
     srBudgetSpent rep `shouldBe` True
     srClosed rep `shouldBe` 0
     [() | BudgetSpent _ <- es] `shouldBe` [()]

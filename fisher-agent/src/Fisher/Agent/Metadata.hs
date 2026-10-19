@@ -46,7 +46,7 @@ newModelCache = ModelCache <$> newIORef ([], 0)
 data MetaEnv = MetaEnv
   { meTransport :: Transport
   , meNow :: IO Double
-  , meGaussHome :: FilePath
+  , meFisherHome :: FilePath
   , meCache :: ModelCache
   , meWarn :: Text -> IO ()
   }
@@ -122,7 +122,7 @@ fetchModelMetadata env = do
 -- | @get_model_context_length(model, base_url)@
 getModelContextLength :: MetaEnv -> Text -> Text -> IO Integer
 getModelContextLength env model baseUrl = do
-  cachedLen <- if T.null baseUrl then pure Nothing else getCachedContextLength (meGaussHome env) model baseUrl
+  cachedLen <- if T.null baseUrl then pure Nothing else getCachedContextLength (meFisherHome env) model baseUrl
   case cachedLen of
     Just n -> pure n
     Nothing -> do

@@ -105,7 +105,7 @@ withCase act =
     act w
 
 maskAll :: World -> Text -> Text
-maskAll w = mask (T.pack (wRoot w)) "<TMP>" . mask (T.pack (wGaussHome w)) "<GAUSS_HOME>"
+maskAll w = mask (T.pack (wRoot w)) "<TMP>" . mask (T.pack (wFisherHome w)) "<GAUSS_HOME>"
 
 spec :: Spec
 spec = do
@@ -114,7 +114,7 @@ spec = do
 
   describe "fisher sessions" $
     forM_ (kind "sessions") $ \c -> it (T.unpack (str "name" c)) $ withCase $ \w -> do
-      let gh = wGaussHome w
+      let gh = wFisherHome w
           db = storePath gh
           argv = [T.unpack (T.replace "<TMP>" (T.pack (wRoot w)) (str' a)) | a <- drop 1 (arr "argv" c)]
           str' = \case String s -> s; _ -> ""
@@ -148,7 +148,7 @@ spec = do
 
   describe "fisher config show" $
     forM_ (kind "config-show") $ \c -> it (T.unpack (str "name" c)) $ withCase $ \w -> do
-      let gh = wGaussHome w
+      let gh = wFisherHome w
           procEnv = caseEnv (obj "env" c)
           fileEnv = caseEnv (obj "env_file" c)
       writeConfig gh (obj "config" c)
@@ -159,12 +159,12 @@ spec = do
             Just v -> pure (Just v)
             Nothing -> Map.lookup k <$> loadEnvAt gh
       ls <- showConfigLines (ShowEnv plainStyle cfg (configPathIn gh) (envPathIn gh) "<SRC>" env)
-      let text = T.replace "  fisher " "  gauss " (T.concat [l <> "\n" | l <- ls])
+      let text = T.concat [l <> "\n" | l <- ls]
       maskAll w (clean text) `shouldBe` str "output" c
 
   describe "fisher config edit" $
     forM_ (kind "config-edit") $ \c -> it (T.unpack (str "name" c)) $ withCase $ \w -> do
-      let gh = wGaussHome w
+      let gh = wFisherHome w
           b = wBin w
           path = configPathIn gh
           logf = wRoot w </> "editor.log"

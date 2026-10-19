@@ -9,17 +9,17 @@
       "steps": [
         {
           "command": "/project",
-          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: (none)\n  Active project: (none)\n  Detail: No active Gauss project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Next: /project init, /project convert, /project create <path>, or /project use <path>\n",
+          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: (none)\n  Active project: (none)\n  Detail: No active Fisher project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Next: /project init, /project convert, /project create <path>, or /project use <path>\n",
           "override": null
         },
         {
           "command": "/project status",
-          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: (none)\n  Active project: (none)\n  Detail: No active Gauss project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Next: /project init, /project convert, /project create <path>, or /project use <path>\n",
+          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: (none)\n  Active project: (none)\n  Detail: No active Fisher project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Next: /project init, /project convert, /project create <path>, or /project use <path>\n",
           "override": null
         },
         {
           "command": "/project inspect",
-          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: (none)\n  Active project: (none)\n  Detail: No active Gauss project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Next: /project init, /project convert, /project create <path>, or /project use <path>\n",
+          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: (none)\n  Active project: (none)\n  Detail: No active Fisher project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Next: /project init, /project convert, /project create <path>, or /project use <path>\n",
           "override": null
         }
       ]
@@ -32,22 +32,22 @@
       "steps": [
         {
           "command": "/project init --name \"Demo Project\"",
-          "stdout": "(^_^)b Initialized Gauss project: Demo Project\n  Root: <TMP>/Demo\n",
+          "stdout": "(^_^)b Initialized Fisher project: Demo Project\n  Root: <TMP>/Demo\n",
           "override": "<TMP>/Demo"
         },
         {
           "command": "/project status",
-          "stdout": "\n  Project Status\n  CWD: <TMP>/Demo/Math\n  Session override: <TMP>/Demo\n  Active project: Demo Project [override]\n  Root: <TMP>/Demo\n  Lean root: <TMP>/Demo\n  Manifest: <TMP>/Demo/.gauss/project.yaml\n  Source mode: init\n  Blueprint markers: lakefile.lean\n",
+          "stdout": "\n  Project Status\n  CWD: <TMP>/Demo/Math\n  Session override: <TMP>/Demo\n  Active project: Demo Project [override]\n  Root: <TMP>/Demo\n  Lean root: <TMP>/Demo\n  Manifest: <TMP>/Demo/.fisher/project.yaml\n  Source mode: init\n  Blueprint markers: lakefile.lean\n",
           "override": "<TMP>/Demo"
         },
         {
           "command": "/project clear",
-          "stdout": "(^_^) Cleared the session project override.\n\n  Project Status\n  CWD: <TMP>/Demo/Math\n  Session override: (none)\n  Active project: Demo Project [ambient]\n  Root: <TMP>/Demo\n  Lean root: <TMP>/Demo\n  Manifest: <TMP>/Demo/.gauss/project.yaml\n  Source mode: init\n  Blueprint markers: lakefile.lean\n",
+          "stdout": "(^_^) Cleared the session project override.\n\n  Project Status\n  CWD: <TMP>/Demo/Math\n  Session override: (none)\n  Active project: Demo Project [ambient]\n  Root: <TMP>/Demo\n  Lean root: <TMP>/Demo\n  Manifest: <TMP>/Demo/.fisher/project.yaml\n  Source mode: init\n  Blueprint markers: lakefile.lean\n",
           "override": null
         },
         {
           "command": "/project status",
-          "stdout": "\n  Project Status\n  CWD: <TMP>/Demo/Math\n  Session override: (none)\n  Active project: Demo Project [ambient]\n  Root: <TMP>/Demo\n  Lean root: <TMP>/Demo\n  Manifest: <TMP>/Demo/.gauss/project.yaml\n  Source mode: init\n  Blueprint markers: lakefile.lean\n",
+          "stdout": "\n  Project Status\n  CWD: <TMP>/Demo/Math\n  Session override: (none)\n  Active project: Demo Project [ambient]\n  Root: <TMP>/Demo\n  Lean root: <TMP>/Demo\n  Manifest: <TMP>/Demo/.fisher/project.yaml\n  Source mode: init\n  Blueprint markers: lakefile.lean\n",
           "override": null
         }
       ]
@@ -60,17 +60,17 @@
       "steps": [
         {
           "command": "/project init",
-          "stdout": "(^_^)b Initialized Gauss project: Demo\n  Root: <TMP>/Demo\n",
+          "stdout": "(^_^)b Initialized Fisher project: Demo\n  Root: <TMP>/Demo\n",
           "override": "<TMP>/Demo"
         },
         {
           "command": "/project init --name Other",
-          "stdout": "(^_^)b Initialized Gauss project: Demo\n  Root: <TMP>/Demo\n",
+          "stdout": "(^_^)b Initialized Fisher project: Demo\n  Root: <TMP>/Demo\n",
           "override": "<TMP>/Demo"
         },
         {
           "command": "/project status",
-          "stdout": "\n  Project Status\n  CWD: <TMP>/Demo\n  Session override: <TMP>/Demo\n  Active project: Demo [override]\n  Root: <TMP>/Demo\n  Lean root: <TMP>/Demo\n  Manifest: <TMP>/Demo/.gauss/project.yaml\n  Source mode: init\n  Blueprint markers: lakefile.lean\n",
+          "stdout": "\n  Project Status\n  CWD: <TMP>/Demo\n  Session override: <TMP>/Demo\n  Active project: Demo [override]\n  Root: <TMP>/Demo\n  Lean root: <TMP>/Demo\n  Manifest: <TMP>/Demo/.fisher/project.yaml\n  Source mode: init\n  Blueprint markers: lakefile.lean\n",
           "override": "<TMP>/Demo"
         }
       ]
@@ -96,12 +96,12 @@
       "steps": [
         {
           "command": "/project init ../A --name Alpha",
-          "stdout": "(^_^)b Initialized Gauss project: Alpha\n  Root: <TMP>/A\n",
+          "stdout": "(^_^)b Initialized Fisher project: Alpha\n  Root: <TMP>/A\n",
           "override": "<TMP>/A"
         },
         {
           "command": "/project status",
-          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: <TMP>/A\n  Active project: Alpha [override]\n  Root: <TMP>/A\n  Lean root: <TMP>/A\n  Manifest: <TMP>/A/.gauss/project.yaml\n  Source mode: init\n  Blueprint markers: lakefile.lean\n",
+          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: <TMP>/A\n  Active project: Alpha [override]\n  Root: <TMP>/A\n  Lean root: <TMP>/A\n  Manifest: <TMP>/A/.fisher/project.yaml\n  Source mode: init\n  Blueprint markers: lakefile.lean\n",
           "override": "<TMP>/A"
         }
       ]
@@ -114,12 +114,12 @@
       "steps": [
         {
           "command": "/project convert",
-          "stdout": "(^_^)b Registered existing repository as a Gauss project: Blue\n  Root: <TMP>/Blue\n  Blueprint markers: lean-toolchain, lakefile.lean, templates/blueprint.yml\n",
+          "stdout": "(^_^)b Registered existing repository as a Fisher project: Blue\n  Root: <TMP>/Blue\n  Blueprint markers: lean-toolchain, lakefile.lean, templates/blueprint.yml\n",
           "override": "<TMP>/Blue"
         },
         {
           "command": "/project status",
-          "stdout": "\n  Project Status\n  CWD: <TMP>/Blue\n  Session override: <TMP>/Blue\n  Active project: Blue [override]\n  Root: <TMP>/Blue\n  Lean root: <TMP>/Blue\n  Manifest: <TMP>/Blue/.gauss/project.yaml\n  Source mode: convert-blueprint\n  Blueprint markers: lean-toolchain, lakefile.lean, templates/blueprint.yml\n",
+          "stdout": "\n  Project Status\n  CWD: <TMP>/Blue\n  Session override: <TMP>/Blue\n  Active project: Blue [override]\n  Root: <TMP>/Blue\n  Lean root: <TMP>/Blue\n  Manifest: <TMP>/Blue/.fisher/project.yaml\n  Source mode: convert-blueprint\n  Blueprint markers: lean-toolchain, lakefile.lean, templates/blueprint.yml\n",
           "override": "<TMP>/Blue"
         }
       ]
@@ -145,17 +145,17 @@
       "steps": [
         {
           "command": "/project init ../A",
-          "stdout": "(^_^)b Initialized Gauss project: A\n  Root: <TMP>/A\n",
+          "stdout": "(^_^)b Initialized Fisher project: A\n  Root: <TMP>/A\n",
           "override": "<TMP>/A"
         },
         {
           "command": "/project init ../B",
-          "stdout": "(^_^)b Initialized Gauss project: B\n  Root: <TMP>/B\n",
+          "stdout": "(^_^)b Initialized Fisher project: B\n  Root: <TMP>/B\n",
           "override": "<TMP>/B"
         },
         {
           "command": "/project clear",
-          "stdout": "(^_^) Cleared the session project override.\n\n  Project Status\n  CWD: <TMP>/plain\n  Session override: (none)\n  Active project: (none)\n  Detail: No active Gauss project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Next: /project init, /project convert, /project create <path>, or /project use <path>\n",
+          "stdout": "(^_^) Cleared the session project override.\n\n  Project Status\n  CWD: <TMP>/plain\n  Session override: (none)\n  Active project: (none)\n  Detail: No active Fisher project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Next: /project init, /project convert, /project create <path>, or /project use <path>\n",
           "override": null
         },
         {
@@ -165,7 +165,7 @@
         },
         {
           "command": "/project status",
-          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: <TMP>/A\n  Active project: A [override]\n  Root: <TMP>/A\n  Lean root: <TMP>/A\n  Manifest: <TMP>/A/.gauss/project.yaml\n  Source mode: init\n  Blueprint markers: lakefile.lean\n",
+          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: <TMP>/A\n  Active project: A [override]\n  Root: <TMP>/A\n  Lean root: <TMP>/A\n  Manifest: <TMP>/A/.fisher/project.yaml\n  Source mode: init\n  Blueprint markers: lakefile.lean\n",
           "override": "<TMP>/A"
         },
         {
@@ -175,12 +175,12 @@
         },
         {
           "command": "/project status",
-          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: <TMP>/B\n  Active project: B [override]\n  Root: <TMP>/B\n  Lean root: <TMP>/B\n  Manifest: <TMP>/B/.gauss/project.yaml\n  Source mode: init\n  Blueprint markers: lakefile.lean\n",
+          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: <TMP>/B\n  Active project: B [override]\n  Root: <TMP>/B\n  Lean root: <TMP>/B\n  Manifest: <TMP>/B/.fisher/project.yaml\n  Source mode: init\n  Blueprint markers: lakefile.lean\n",
           "override": "<TMP>/B"
         },
         {
           "command": "/project use",
-          "stdout": "(>_<) No active Gauss project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template-source <source>] [--name <name>]\n",
+          "stdout": "(>_<) No active Fisher project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template-source <source>] [--name <name>]\n",
           "override": "<TMP>/B"
         }
       ]
@@ -193,12 +193,12 @@
       "steps": [
         {
           "command": "/project create ../Generated --template-source <TMP>/Template --name \"Generated Project\"",
-          "stdout": "(^_^)b Created Gauss project from template: Generated Project\n  Root: <TMP>/Generated\n  Template source: <TMP>/Template\n",
+          "stdout": "(^_^)b Created Fisher project from template: Generated Project\n  Root: <TMP>/Generated\n  Template source: <TMP>/Template\n",
           "override": "<TMP>/Generated"
         },
         {
           "command": "/project status",
-          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: <TMP>/Generated\n  Active project: Generated Project [override]\n  Root: <TMP>/Generated\n  Lean root: <TMP>/Generated\n  Manifest: <TMP>/Generated/.gauss/project.yaml\n  Source mode: template\n  Template source: <TMP>/Template\n  Blueprint markers: lakefile.lean, templates/blueprint.yml\n",
+          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: <TMP>/Generated\n  Active project: Generated Project [override]\n  Root: <TMP>/Generated\n  Lean root: <TMP>/Generated\n  Manifest: <TMP>/Generated/.fisher/project.yaml\n  Source mode: template\n  Template source: <TMP>/Template\n  Blueprint markers: lakefile.lean, templates/blueprint.yml\n",
           "override": "<TMP>/Generated"
         }
       ]
@@ -207,7 +207,7 @@
       "name": "create-from-config",
       "cwd": "plain",
       "config": {
-        "gauss": {
+        "fisher": {
           "project": {
             "template_source": "<TMP>/Template"
           }
@@ -217,12 +217,12 @@
       "steps": [
         {
           "command": "/project create ../FromConfig",
-          "stdout": "(^_^)b Created Gauss project from template: FromConfig\n  Root: <TMP>/FromConfig\n  Template source: <TMP>/Template\n",
+          "stdout": "(^_^)b Created Fisher project from template: FromConfig\n  Root: <TMP>/FromConfig\n  Template source: <TMP>/Template\n",
           "override": "<TMP>/FromConfig"
         },
         {
           "command": "/project status",
-          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: <TMP>/FromConfig\n  Active project: FromConfig [override]\n  Root: <TMP>/FromConfig\n  Lean root: <TMP>/FromConfig\n  Manifest: <TMP>/FromConfig/.gauss/project.yaml\n  Source mode: template\n  Template source: <TMP>/Template\n  Blueprint markers: lakefile.lean, templates/blueprint.yml\n",
+          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: <TMP>/FromConfig\n  Active project: FromConfig [override]\n  Root: <TMP>/FromConfig\n  Lean root: <TMP>/FromConfig\n  Manifest: <TMP>/FromConfig/.fisher/project.yaml\n  Source mode: template\n  Template source: <TMP>/Template\n  Blueprint markers: lakefile.lean, templates/blueprint.yml\n",
           "override": "<TMP>/FromConfig"
         }
       ]
@@ -232,12 +232,12 @@
       "cwd": "plain",
       "config": {},
       "env": {
-        "GAUSS_BLUEPRINT_TEMPLATE_SOURCE": "<TMP>/Template"
+        "FISHER_BLUEPRINT_TEMPLATE_SOURCE": "<TMP>/Template"
       },
       "steps": [
         {
           "command": "/project create ../FromEnv",
-          "stdout": "(^_^)b Created Gauss project from template: FromEnv\n  Root: <TMP>/FromEnv\n  Template source: <TMP>/Template\n",
+          "stdout": "(^_^)b Created Fisher project from template: FromEnv\n  Root: <TMP>/FromEnv\n  Template source: <TMP>/Template\n",
           "override": "<TMP>/FromEnv"
         }
       ]
@@ -250,7 +250,7 @@
       "steps": [
         {
           "command": "/project create ../X",
-          "stdout": "(>_<) Blueprint project creation is blocked until a template source is configured. Set `gauss.project.template_source` or `GAUSS_BLUEPRINT_TEMPLATE_SOURCE`, then retry.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template-source <source>] [--name <name>]\n",
+          "stdout": "(>_<) Blueprint project creation is blocked until a template source is configured. Set `fisher.project.template_source` or `FISHER_BLUEPRINT_TEMPLATE_SOURCE`, then retry.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template-source <source>] [--name <name>]\n",
           "override": null
         }
       ]
@@ -304,7 +304,7 @@
         },
         {
           "command": "/project use ../plain",
-          "stdout": "(>_<) No active Gauss project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template-source <source>] [--name <name>]\n",
+          "stdout": "(>_<) No active Fisher project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template-source <source>] [--name <name>]\n",
           "override": null
         }
       ]
@@ -317,12 +317,12 @@
       "steps": [
         {
           "command": "/project init ../A",
-          "stdout": "(^_^)b Initialized Gauss project: A\n  Root: <TMP>/A\n",
+          "stdout": "(^_^)b Initialized Fisher project: A\n  Root: <TMP>/A\n",
           "override": "<TMP>/A"
         },
         {
           "command": "/project status",
-          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: <TMP>/A\n  Active project: (none)\n  Detail: <TMP>/A/.gauss/project.yaml has schema_version=7; expected 1.\n  Next: /project init, /project convert, /project create <path>, or /project use <path>\n",
+          "stdout": "\n  Project Status\n  CWD: <TMP>/plain\n  Session override: <TMP>/A\n  Active project: (none)\n  Detail: <TMP>/A/.fisher/project.yaml has schema_version=7; expected 1.\n  Next: /project init, /project convert, /project create <path>, or /project use <path>\n",
           "override": "<TMP>/A"
         }
       ]

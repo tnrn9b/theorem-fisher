@@ -1,4 +1,4 @@
--- | OpenAI Codex: Gauss's own copy of the ChatGPT OAuth tokens in
+-- | OpenAI Codex: Fisher's own copy of the ChatGPT OAuth tokens in
 -- @auth.json@, the one-time import from the Codex CLI's file, refresh when
 -- the JWT is about to expire, the device-code login, the status snapshot
 -- and the model list. Ported from @gauss_cli/auth.py@ and
@@ -31,6 +31,8 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import System.Directory (doesFileExist)
 import System.FilePath ((</>))
+
+import Fisher.Paths (homeLabel)
 
 import Fisher.LLM.Auth.Config (updateConfigForProvider)
 import Fisher.LLM.Auth.Error
@@ -171,12 +173,12 @@ resolveCodexRuntimeCredentials sys opts = do
           importCodexCliTokens sys >>= \case
             Nothing -> throwIO e
             Just cli -> do
-              outLn sys "⚠️  Migrating Codex credentials to Gauss's own auth store."
+              outLn sys "⚠️  Migrating Codex credentials to Fisher's own auth store."
               outLn sys "   This avoids conflicts with Codex CLI and VS Code."
               outLn sys ("   Run `" <> cliName <> " model` to create a fully independent session.\n")
               saveCodexTokens sys cli Nothing
               readCodexTokens sys True
-  timeoutEnv <- fromMaybe "20" <$> sysGetEnv sys "GAUSS_CODEX_REFRESH_TIMEOUT_SECONDS"
+  timeoutEnv <- fromMaybe "20" <$> sysGetEnvCompat sys "FISHER_CODEX_REFRESH_TIMEOUT_SECONDS"
   refreshTimeout <- maybe (throwIO (pyError "ValueError" ("could not convert string to float: " <> pyRepr (str timeoutEnv)))) pure (pyFloatText timeoutEnv)
   let accessOf d = T.strip (maybe "" (\v -> if truthy v then pyStrOf v else "") (getPath ["tokens", "access_token"] d))
       decide d =
@@ -195,11 +197,11 @@ resolveCodexRuntimeCredentials sys opts = do
             toks <- refreshCodexAuthTokens sys (fromMaybe (PDict []) (get "tokens" d)) refreshTimeout
             pure (d, T.strip (maybe "" pyStrOf (get "access_token" toks)))
           else pure (d, accessOf d)
-  baseEnv <- maybe "" (rstripSlash . T.strip) <$> sysGetEnv sys "GAUSS_CODEX_BASE_URL"
+  baseEnv <- maybe "" (rstripSlash . T.strip) <$> sysGetEnvCompat sys "FISHER_CODEX_BASE_URL"
   pure $
     obj
       [ ("provider", str "openai-codex"), ("base_url", str (if T.null baseEnv then defaultCodexBaseUrl else baseEnv))
-      , ("api_key", str access), ("source", str "gauss-auth-store")
+      , ("api_key", str access), ("source", str "fisher-auth-store")
       , ("last_refresh", fromMaybe PNull (get "last_refresh" dat)), ("auth_mode", str "chatgpt") ]
 
 -- | @get_codex_auth_status@: AuthErrors become @logged_in: False@ with the
@@ -223,7 +225,7 @@ askDefault sys prompt dflt = do
     Right (Just x) -> T.toLower (T.strip x)
     _ -> dflt
 
--- | @_login_openai_codex(args, pconfig)@: reuse Gauss's stored session,
+-- | @_login_openai_codex(args, pconfig)@: reuse Fisher's stored session,
 -- or import the Codex CLI's, or run the device flow.
 loginOpenAICodex :: Sys -> IO ()
 loginOpenAICodex sys = do
@@ -231,7 +233,7 @@ loginOpenAICodex sys = do
   reused <- case existing of
     Left (_ :: AuthError) -> pure False
     Right ex -> do
-      outLn sys "Existing Codex credentials found in Gauss auth store."
+      outLn sys "Existing Codex credentials found in Fisher auth store."
       reuse <- askDefault sys "Use existing credentials? [Y/n]: " "y"
       if reuse `elem` ["", "y", "yes"]
         then do
@@ -249,16 +251,16 @@ loginOpenAICodex sys = do
         Nothing -> pure False
         Just toks -> do
           outLn sys "Found existing Codex CLI credentials at ~/.codex/auth.json"
-          outLn sys "Gauss will create its own session to avoid conflicts with Codex CLI / VS Code."
+          outLn sys "Fisher will create its own session to avoid conflicts with Codex CLI / VS Code."
           ans <- askDefault sys "Import these credentials? (a separate login is recommended) [y/N]: " "n"
           if ans `elem` ["y", "yes"]
             then do
               saveCodexTokens sys toks Nothing
-              baseEnv <- maybe "" (rstripSlash . T.strip) <$> sysGetEnv sys "GAUSS_CODEX_BASE_URL"
+              baseEnv <- maybe "" (rstripSlash . T.strip) <$> sysGetEnvCompat sys "FISHER_CODEX_BASE_URL"
               path <- updateConfigForProvider sys "openai-codex" (if T.null baseEnv then defaultCodexBaseUrl else baseEnv) Nothing
               outLn sys ""
               outLn sys "Credentials imported. Note: if Codex CLI refreshes its token,"
-              outLn sys "Gauss will keep working independently with its own session."
+              outLn sys "Fisher will keep working independently with its own session."
               outLn sys ("  Config updated: " <> T.pack path <> " (model.provider=openai-codex)")
               pure True
             else pure False
@@ -267,14 +269,14 @@ loginOpenAICodex sys = do
         else do
           outLn sys ""
           outLn sys "Signing in to OpenAI Codex..."
-          outLn sys "(Gauss creates its own session — won't affect Codex CLI or VS Code)"
+          outLn sys "(Fisher creates its own session — won't affect Codex CLI or VS Code)"
           outLn sys ""
           creds <- codexDeviceCodeLogin sys
           saveCodexTokens sys (fromMaybe (PDict []) (get "tokens" creds)) (get "last_refresh" creds)
           path <- updateConfigForProvider sys "openai-codex" (strOr defaultCodexBaseUrl (get "base_url" creds)) Nothing
           outLn sys ""
           outLn sys "Login successful!"
-          outLn sys "  Auth state: ~/.gauss/auth.json"
+          outLn sys ("  Auth state: " <> T.pack (homeLabel (sysHome sys) (sysFisherHome sys) </> "auth.json"))
           outLn sys ("  Config updated: " <> T.pack path <> " (model.provider=openai-codex)")
 
 -- | @_codex_device_code_login@: the user code from auth.openai.com, the
@@ -342,7 +344,7 @@ codexDeviceCodeLogin sys = do
       refresh = fromMaybe (str "") (get "refresh_token" toks)
   when (not (truthy access)) $
     throwIO (plain "token_exchange_no_access_token" "Token exchange did not return an access_token.")
-  baseEnv <- maybe "" (rstripSlash . T.strip) <$> sysGetEnv sys "GAUSS_CODEX_BASE_URL"
+  baseEnv <- maybe "" (rstripSlash . T.strip) <$> sysGetEnvCompat sys "FISHER_CODEX_BASE_URL"
   lastRefresh <- isoNowZ sys
   pure $
     obj

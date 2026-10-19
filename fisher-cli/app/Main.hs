@@ -20,6 +20,7 @@ import Fisher.Cli.Subcommands
 import Fisher.Shell (ShellOptions (..), runShell)
 import Fisher.Cli.Launch
 import Fisher.Cli.Session
+import Fisher.Compat (exportEnvCompat)
 import Fisher.Config (loadConfigAt)
 import Fisher.Config.Migrate (Prompter (..))
 import Fisher.Config.Set (setConfigValueAt)
@@ -27,7 +28,7 @@ import Fisher.Doctor
 import Fisher.Lean.Mcp (serveMcp)
 import Fisher.Lean.Session (defaultLeanEnv)
 import Fisher.EnvVars (getEnvValueAt)
-import Fisher.Paths (configPathIn, envPathIn, ensureGaussHome)
+import Fisher.Paths (configPathIn, envPathIn, ensureFisherHome)
 import Fisher.ProjectCommand
 import Fisher.Term (detectStyle)
 import Fisher.Workflow.LocalAuth (readKeychainClaudeCredentials)
@@ -46,7 +47,7 @@ import Fisher.Cli.Status (StatusInfo (..), statusMain)
 import Fisher.LLM.Auth.Error (SystemExit (..))
 import Fisher.LLM.SysIO (newSysIO)
 import Fisher.UI.Server (uiMain)
-import Fisher.Paths (getGaussHome)
+import Fisher.Paths (getFisherHome)
 import System.Directory (findExecutable, getHomeDirectory)
 import System.Environment (getArgs, getExecutablePath)
 import System.FilePath (takeDirectory)
@@ -172,20 +173,20 @@ run = \case
     mapM_ TIO.putStrLn out
     readIORef (sessionOverride session) >>= saveOverride home
   Doctor fix allProvers -> do
-    home <- ensureGaussHome
+    home <- ensureFisherHome
     (cfg, _) <- loadConfigAt home
     env <- getEnvironment
     st <- detectStyle
     let de = DoctorEnv st cfg env Nothing (getEnvValueAt home) readKeychainClaudeCredentials "fisher"
     runDoctor fix allProvers de home >>= mapM_ TIO.putStrLn
-  ConfigPath -> ensureGaussHome >>= putStrLn . configPathIn
-  ConfigEnvPath -> ensureGaussHome >>= putStrLn . envPathIn
+  ConfigPath -> ensureFisherHome >>= putStrLn . configPathIn
+  ConfigEnvPath -> ensureFisherHome >>= putStrLn . envPathIn
   ConfigCheck -> do
-    home <- ensureGaussHome
+    home <- ensureFisherHome
     st <- detectStyle
     configCheck st home >>= mapM_ TIO.putStrLn
   ConfigSet key val -> do
-    home <- ensureGaussHome
+    home <- ensureFisherHome
     setConfigValueAt home (T.pack key) (T.pack val) >>= \case
       Right line -> TIO.putStrLn line
       Left e -> TIO.hPutStrLn stderr e >> exitWith (ExitFailure 1)
@@ -203,7 +204,7 @@ run = \case
   Version -> versionCli
   ViaSys c args -> do
     home <- getHomeDirectory
-    gh <- getGaussHome
+    gh <- getFisherHome
     sys <- newSysIO home gh
     exe <- getExecutablePath
     py <- maybe "python3" id <$> findExecutable "python3"
@@ -226,12 +227,15 @@ run = \case
       `catch` \(SystemExit n) -> pure n
     if code == 0 then pure () else exitWith (ExitFailure code)
   ConfigMigrate -> do
-    home <- ensureGaussHome
+    home <- ensureFisherHome
     st <- detectStyle
     configMigrate st home prompter TIO.putStrLn
 
 main :: IO ()
 main = do
+  -- every FISHER_X this process was given is given to its children as
+  -- GAUSS_X too, for older tools that know only the old names
+  exportEnvCompat
   -- The B1 commands parse their own arguments (upstream's argparse,
   -- help text and errors included), so they bypass optparse.
   args <- getArgs

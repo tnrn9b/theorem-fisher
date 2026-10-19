@@ -34,11 +34,17 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/chat/claude-home",
+              "FISHER_MANAGED_CHAT": "1",
               "GAUSS_MANAGED_CHAT": "1",
+              "FISHER_MANAGED_CHAT_BACKEND": "claude-code",
               "GAUSS_MANAGED_CHAT_BACKEND": "claude-code",
+              "FISHER_CHAT_CWD": "<TMP>/project",
               "GAUSS_CHAT_CWD": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/chat",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/chat",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/chat/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/chat/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
@@ -176,11 +182,17 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/chat/claude-home",
+              "FISHER_MANAGED_CHAT": "1",
               "GAUSS_MANAGED_CHAT": "1",
+              "FISHER_MANAGED_CHAT_BACKEND": "claude-code",
               "GAUSS_MANAGED_CHAT_BACKEND": "claude-code",
+              "FISHER_CHAT_CWD": "<TMP>/project",
               "GAUSS_CHAT_CWD": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/chat",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/chat",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/fake-plugin",
               "LEAN4_PLUGIN_ROOT": "<TMP>/fake-plugin",
@@ -286,11 +298,17 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/chat/claude-home",
+              "FISHER_MANAGED_CHAT": "1",
               "GAUSS_MANAGED_CHAT": "1",
+              "FISHER_MANAGED_CHAT_BACKEND": "claude-code",
               "GAUSS_MANAGED_CHAT_BACKEND": "claude-code",
+              "FISHER_CHAT_CWD": "<TMP>/project",
               "GAUSS_CHAT_CWD": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/chat",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/chat",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1"
             },
             "removed": []
@@ -379,11 +397,17 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/chat/claude-home",
+              "FISHER_MANAGED_CHAT": "1",
               "GAUSS_MANAGED_CHAT": "1",
+              "FISHER_MANAGED_CHAT_BACKEND": "claude-code",
               "GAUSS_MANAGED_CHAT_BACKEND": "claude-code",
+              "FISHER_CHAT_CWD": "<TMP>/project",
               "GAUSS_CHAT_CWD": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/chat",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/chat",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1"
             },
             "removed": []
@@ -444,7 +468,7 @@
       "extras": {},
       "error": {
         "class": "AutoformalizePreflightError",
-        "message": "Claude Code auth not found. Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `gauss.autoformalize.auth_mode: login` (or `GAUSS_AUTOFORMALIZE_AUTH_MODE=login`) to launch the normal Claude login flow."
+        "message": "Claude Code auth not found. Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `fisher.autoformalize.auth_mode: login` (or `FISHER_AUTOFORMALIZE_AUTH_MODE=login`) to launch the normal Claude login flow."
       },
       "files": {},
       "calls": []
@@ -487,15 +511,22 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home",
+              "FISHER_MANAGED_CHAT": "1",
               "GAUSS_MANAGED_CHAT": "1",
+              "FISHER_MANAGED_CHAT_BACKEND": "codex",
               "GAUSS_MANAGED_CHAT_BACKEND": "codex",
+              "FISHER_CHAT_CWD": "<TMP>/project",
               "GAUSS_CHAT_CWD": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/chat",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/chat",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
               "CODEX_HOME": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home/.codex",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/lib/scripts",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home/.agents/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home/.agents/skills/lean4",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home/.agents/skills/lean4/references"
             },
@@ -587,15 +618,22 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home",
+              "FISHER_MANAGED_CHAT": "1",
               "GAUSS_MANAGED_CHAT": "1",
+              "FISHER_MANAGED_CHAT_BACKEND": "codex",
               "GAUSS_MANAGED_CHAT_BACKEND": "codex",
+              "FISHER_CHAT_CWD": "<TMP>/project",
               "GAUSS_CHAT_CWD": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/chat",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/chat",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
               "CODEX_HOME": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home/.codex",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/lib/scripts",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home/.agents/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home/.agents/skills/lean4",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/codex/chat/codex-home/.agents/skills/lean4/references"
             },

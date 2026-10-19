@@ -60,7 +60,7 @@ whichIn mpath cmd = go (maybe [] (filter (not . T.null) . T.splitOn ":") mpath)
 -- | @_resolve_stdio_command(command, env)@: the command and the env with
 -- the command's directory put first on PATH.
 resolveCommand :: Text -> FilePath -> Text -> [(Text, Text)] -> IO (Text, [(Text, Text)])
-resolveCommand home gaussHome command env = do
+resolveCommand home fisherHome command env = do
   let c0 = expandUser (T.strip command)
   c <-
     if "/" `T.isInfixOf` c0
@@ -71,7 +71,7 @@ resolveCommand home gaussHome command env = do
           Just p -> pure p
           Nothing
             | c0 `elem` ["npx", "npm", "node"] -> do
-                let cands = [T.pack gaussHome <> "/node/bin/" <> c0, home <> "/.local/bin/" <> c0]
+                let cands = [T.pack fisherHome <> "/node/bin/" <> c0, home <> "/.local/bin/" <> c0]
                 found <- firstExec cands
                 pure (maybe c0 id found)
             | otherwise -> pure c0

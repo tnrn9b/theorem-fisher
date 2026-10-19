@@ -1,6 +1,6 @@
 -- | @fisher search ...@: the proof-search swarm (D).
 --
--- @fisher search FILE [--backends claude-code,gauss] [--parallel N]
+-- @fisher search FILE [--backends claude-code,fisher] [--parallel N]
 -- [--budget 2h] [--attempt-minutes 20] [--max-turns 40] [--max-attempts 3]
 -- [--one-per-goal] [--single BACKEND] [--workflow prove] [--native-decide]
 -- [--allow AXIOM]... [--out DIR] [--apply]@ searches the open goals of FILE
@@ -16,7 +16,8 @@
 -- runs the lemma-graph search instead ("Fisher.Search.GraphRun"): a goal
 -- its attempt cannot close is split into lemmas by a planner model call,
 -- reviewed by a verifier call, merged into the base and searched in turn.
--- It runs on the native backend only (gauss, also named fisher), and the
+-- It runs on the native backend only (fisher; its old name gauss is
+-- accepted wherever a backend is named, and printed as fisher), and the
 -- planner and verifier calls go to the native agent's provider with
 -- @--model@ (default: the configured model). The run directory adds
 -- graph.json and a whiteboard per root goal; @--apply@ writes back only
@@ -28,19 +29,19 @@
 -- library directory), each goal's brief gets its project facts and the
 -- lemmas earlier runs proved, and at the end the run's new lemmas (and in
 -- graph mode its notes) go into the library, by default
--- @$GAUSS_HOME/fisher/library/<key>@ (@--library-dir DIR@ names the
+-- @$FISHER_HOME/fisher/library/<key>@ (@--library-dir DIR@ names the
 -- library directory itself; @--library-read-only@ offers from it and
 -- saves nothing). @FILE --print-facts@ only prints each open goal's facts
 -- and library section, and starts no attempt.
 --
 -- The compute controller: @[--tiers M1,M2,...] [--no-cascade]
 -- [--stall-turns 8] [--stall-dollars 1.50] [--no-early-stop]@. The tiers
--- (the flag, else config @gauss.search.tiers@) are the models a goal's
+-- (the flag, else config @fisher.search.tiers@) are the models a goal's
 -- attempts climb, cheapest first; each native attempt runs on its tier's
 -- model (its @-m@). The tiers are for native backends only: claude-code and
 -- codex attempts run on their own model, take no tier and count in no
 -- tier's health. A watcher ("Fisher.Cli.Watch") polls each attempt every 5 s,
--- native attempts from their ledger rows in @$GAUSS_HOME/state.db@
+-- native attempts from their ledger rows in the Fisher home's @state.db@
 -- (@FISHER_UI_LEDGER=1@, @FISHER_UI_TAG=search-<run>-<id>-<attempt>@, the
 -- id 8 hex characters fixed once per process, so two runs with one
 -- @--out@ name never share a tag), the
@@ -86,6 +87,8 @@ module Fisher.Cli.Search
   , attemptWatched
   , attemptDollars
   , searchConfigFor
+  , attemptEnv
+  , isNative
   ) where
 
 import Control.Applicative ((<|>))
@@ -97,8 +100,6 @@ import System.Posix.Signals (Handler (Catch), installHandler, sigTERM)
 import Control.Monad (unless, void, when)
 import Data.Aeson (object, (.=))
 import qualified Data.Aeson as A
-import qualified Data.Aeson.Key as AK
-import qualified Data.Aeson.KeyMap as AKM
 import Data.Char (isSpace)
 import Data.Foldable (toList)
 import Data.Aeson.Encode.Pretty (encodePretty)
@@ -134,7 +135,8 @@ import Fisher.LLM.Auth.Sha256 (sha256Hex)
 import Fisher.LLM.Normalize (Usage (..))
 import Fisher.LLM.Sys (Sys (..))
 import Fisher.LLM.SysIO (newSysIO)
-import Fisher.Paths (getGaussHome)
+import Fisher.Compat (canonicalBackendName, childEnvCompat, lookupCompat, lookupConfigCompat, nativeBackend, projectDirNames)
+import Fisher.Paths (getFisherHome)
 import Fisher.Project (InitOptions (..), defaultInitOptions, initializeProject)
 import Fisher.Py.Value (PyVal (..), get)
 import Fisher.RLM.Types (Model, ModelError (..), Reply (..))
@@ -289,7 +291,7 @@ data RunArgs = RunArgs
   deriving (Eq, Show)
 
 defaultRunArgs :: RunArgs
-defaultRunArgs = RunArgs Nothing ["claude-code", "gauss"] 4 7200 1200 40 3 True Nothing "prove" False [] Nothing False
+defaultRunArgs = RunArgs Nothing ["claude-code", nativeBackend] 4 7200 1200 40 3 True Nothing "prove" False [] Nothing False
                          False False 3 2 25 Nothing False True True True Nothing Nothing Nothing 600
                          True True (fcMax defaultFacts) (fcChars defaultFacts) Nothing False False
                          Nothing True (srTurns defaultStallRule) (fromMaybe 1.5 (srDollars defaultStallRule)) True
@@ -301,14 +303,14 @@ runUsage = do
 
 runUsageText :: String
 runUsageText = unlines
-    [ "usage: fisher search FILE [--backends claude-code,gauss,codex] [--parallel N] [--budget 2h]"
+    [ "usage: fisher search FILE [--backends claude-code,fisher,codex] [--parallel N] [--budget 2h]"
     , "                          [--attempt-minutes 20] [--max-turns 40] [--max-attempts 3] [--one-per-goal]"
     , "                          [--single BACKEND] [--workflow prove|autoprove] [--native-decide] [--allow AXIOM]..."
     , "                          [--out DIR] [--apply] [--model MODEL]"
     , "                          [--tiers M1,M2,...] [--no-cascade] [--stall-turns 8] [--stall-dollars 1.50]"
     , "                          [--no-early-stop]"
     , "       fisher search FILE --graph [--max-depth 3] [--max-splits 2] [--cap-usd 25] [--model MODEL]"
-    , "                          [--backends gauss|fisher] [--parallel N] [--budget 2h] [--attempt-minutes 20]"
+    , "                          [--backends fisher] [--parallel N] [--budget 2h] [--attempt-minutes 20]"
     , "                          [--max-turns 40] [--native-decide] [--allow AXIOM]... [--out DIR] [--apply]"
     , "                          [--tiers M1,M2,...] [--no-cascade] [--stall-turns 8] [--stall-dollars 1.50]"
     , "                          [--no-early-stop]"
@@ -331,14 +333,14 @@ duration v = case reads v of
 parseRun :: [String] -> RunArgs -> Maybe RunArgs
 parseRun args a = case args of
   [] -> Just a
-  "--backends" : v : r -> parseRun r a {raBackends = map T.strip (T.splitOn "," (T.pack v)), raBackendsGiven = True}
+  "--backends" : v : r -> parseRun r a {raBackends = map (canonicalBackendName . T.strip) (T.splitOn "," (T.pack v)), raBackendsGiven = True}
   "--parallel" : v : r | [(n, "")] <- reads v, n > 0 -> parseRun r a {raSlots = n}
   "--budget" : v : r | Just d <- duration v -> parseRun r a {raBudget = d}
   "--attempt-minutes" : v : r | Just d <- duration (v <> "m") -> parseRun r a {raAttemptSecs = round d}
   "--max-turns" : v : r | [(n, "")] <- reads v -> parseRun r a {raMaxTurns = n}
   "--max-attempts" : v : r | [(n, "")] <- reads v -> parseRun r a {raMaxAttempts = n}
   "--one-per-goal" : r -> parseRun r a {raParallelPerGoal = False}
-  "--single" : v : r -> parseRun r a {raSingle = Just (T.pack v)}
+  "--single" : v : r -> parseRun r a {raSingle = Just (canonicalBackendName (T.pack v))}
   "--workflow" : v : r | v `elem` ["prove", "autoprove"] -> parseRun r a {raWorkflow = T.pack v}
   "--native-decide" : r -> parseRun r a {raNative = True}
   "--allow" : v : r -> parseRun r a {raAllow = T.pack v : raAllow a}
@@ -399,16 +401,12 @@ cascadeFor ra configTiers
     tiers = fromMaybe configTiers (raTiers ra)
     lastTier = if null tiers then Nothing else Just (last tiers)
 
--- | @gauss.search.tiers@ in the config: a list of model names (blank ones
--- dropped); anything else is no tiers.
+-- | @fisher.search.tiers@ (else @gauss.search.tiers@) in the config: a list
+-- of model names (blank ones dropped); anything else is no tiers.
 searchTiersConfig :: A.Value -> [T.Text]
-searchTiersConfig cfg = case at "tiers" (at "search" (at "gauss" (Just cfg))) of
+searchTiersConfig cfg = case lookupConfigCompat ["search", "tiers"] cfg of
   Just (A.Array xs) -> [T.strip t | A.String t <- toList xs, not (T.null (T.strip t))]
   _ -> []
-  where
-    at k = \case
-      Just (A.Object o) -> AKM.lookup (AK.fromText k) o
-      _ -> Nothing
 
 -- | The workflow command for a stream backend's attempt, with its tier's
 -- model when it has one.
@@ -488,10 +486,10 @@ retrievalWanted ra = raRetrieval ra || raLibrary ra
 -- log first. Nothing (and why, as an event) when the index cannot be built.
 buildRetrieval :: RunArgs -> FilePath -> FilePath -> IO (Maybe RetrievalEnv, [Event])
 buildRetrieval ra root runDir = do
-  home <- getGaussHome
+  home <- getFisherHome
   buildRetrievalAt False home ra root runDir
 
--- | 'buildRetrieval' under a given @$GAUSS_HOME@. Read-only (for
+-- | 'buildRetrieval' under a given Fisher home. Read-only (for
 -- @--print-facts@): nothing is written to the library directory or
 -- under the home; the index cache goes to a private temporary directory
 -- (mode 700, removed once the index is built), the library is read
@@ -532,9 +530,9 @@ buildRetrievalAt readOnly home ra root runDir = do
           else pure (Nothing, [])
       pure (Just (RetrievalEnv ix (factsConfig ra) lib (not (readOnly || raLibraryReadOnly ra)) dir root runDir retrievalCutoff), evs0 <> evs1)
 
--- | The library directory, given @$GAUSS_HOME@ and the package root:
+-- | The library directory, given the Fisher home and the package root:
 -- @--library-dir@ itself (one library for every project run with it, as
--- the bench's workspaces are), else @$GAUSS_HOME/fisher/library/<key>@.
+-- the bench's workspaces are), else @<home>/fisher/library/<key>@.
 libraryDirFor :: RunArgs -> FilePath -> FilePath -> FilePath
 libraryDirFor ra home root = fromMaybe (libraryDir home root) (raLibraryDir ra)
 
@@ -556,7 +554,7 @@ printFactsMain ra file0 = do
   root <- lakeRoot file >>= maybe (hPutStrLn stderr ("no lakefile above " <> file) >> exitWith (ExitFailure 2)) pure
   let rel = makeRelative root file
   original <- readUtf8 file
-  home <- getGaussHome
+  home <- getFisherHome
   (mre, evs) <- buildRetrievalAt True home ra {raRetrieval = True} root ""
   mapM_ (TIO.putStrLn . eventLine) evs
   re <- maybe (hPutStrLn stderr "(>_<) no index" >> exitWith (ExitFailure 1)) pure mre
@@ -584,7 +582,7 @@ serverWanted ra = isJust (autoConfig ra) && raSingle ra == Nothing
 
 -- | The rules for @--graph@: it takes neither @--single@ nor
 -- @--one-per-goal@, and runs on the native backend only (the backends
--- become @["gauss"]@); its own flags need it.
+-- become @["fisher"]@); its own flags need it.
 checkGraph :: RunArgs -> Either T.Text RunArgs
 checkGraph ra
   | not (raGraph ra) =
@@ -630,7 +628,7 @@ runMain ra file0 = do
   li0 <- liveInputs
   let m = liMachine li0
       casc = cascadeFor ra (searchTiersConfig (liConfig li0))
-      mainState = fromMaybe (mGaussHome m </> "autoformalize") (Map.lookup "GAUSS_AUTOFORMALIZE_MANAGED_STATE_DIR" (liBaseEnv li0))
+      mainState = fromMaybe (mFisherHome m </> "autoformalize") (lookupCompat "FISHER_AUTOFORMALIZE_MANAGED_STATE_DIR" (Map.toList (liBaseEnv li0)))
   -- stage the workflow assets once, where every attempt copies them from
   prep <- planFor li0 baseWs Nothing (fromMaybe (case raBackends ra of { b : _ -> b; [] -> "claude-code" }) (raSingle ra)) (raWorkflow ra) rel Nothing
   case prep of
@@ -694,7 +692,7 @@ runMain ra file0 = do
                     when native $ modifyIORef' ledgerOf (Map.insert (asId spec) (tag, realToFrac t0))
                     let streamPath = dir </> "stream.jsonl"
                         rule = StallRule (raStallTurns ra) (if native then Just (raStallDollars ra) else Nothing)
-                        src = if native then FromLedger (mGaussHome m </> "state.db") tag target else FromStream streamPath (asBackend spec) target
+                        src = if native then FromLedger (mFisherHome m </> "state.db") tag target else FromStream streamPath (asBackend spec) target
                         opts = defaultWatchOpts
                           { woUnread = \why -> do
                               s0 <- readIORef runStart
@@ -704,7 +702,7 @@ runMain ra file0 = do
                           , woSince = realToFrac t0 }
                     r <- watchChildWith opts rule (cEarlyStop casc) src child
                     out <- readOut
-                    streamed <- streamLast (if native then "gauss" else asBackend spec) <$> readLines streamPath
+                    streamed <- streamLast (if native then nativeBackend else asBackend spec) <$> readLines streamPath
                     let priced w res = res {arDollars = attemptDollars w (arStats res), arLastMessage = wLast w <|> streamed}
                     case r of
                       -- a model failure only of an attempt that ended by itself
@@ -719,7 +717,7 @@ runMain ra file0 = do
                         pure (priced w (plainResult out (Just stats) why) {arStop = wStop w})
       -- a cancelled native attempt's dollars: its ledger's cost rows
       priceOf spec = Map.lookup (asId spec) <$> readIORef ledgerOf >>= \case
-        Just (tag, since) -> ledgerDollars (mGaussHome m </> "state.db") tag since
+        Just (tag, since) -> ledgerDollars (mFisherHome m </> "state.db") tag since
         Nothing -> pure Nothing
       env0 = SearchEnv runAttempt (lakeLeanRun 900) pol baseWs rel (realToFrac <$> getPOSIXTime) logE
                (\t -> BS.writeFile (runDir </> "base.lean") (TE.encodeUtf8 t) >> BS.writeFile (baseWs </> rel) (TE.encodeUtf8 t))
@@ -791,7 +789,7 @@ graphMain :: RunArgs -> Cascade -> FilePath -> FilePath -> FilePath -> FilePath 
           -> [Event] -> ((Bool, Maybe T.Text) -> [Pair]) -> T.Text -> IO ()
 graphMain ra casc file root rel runDir eventsH env0 offAtStart startEvents autoExtra original = do
   home <- getHomeDirectory
-  gh <- getGaussHome
+  gh <- getFisherHome
   sys <- newSysIO home gh
   -- the planner's and the verifier's model: the last tier, else --model
   modelName <- case plannerModel (cTiers casc) (cModel casc) of
@@ -901,8 +899,9 @@ setModel m = go
       x : r -> (x :) <$> go r
       [] -> Left "the planned native child has no -m to replace"
 
+-- | The native backend, by its name or its old one.
 isNative :: T.Text -> Bool
-isNative b = b `elem` ["gauss", "fisher"]
+isNative b = canonicalBackendName b == nativeBackend
 
 -- | The native agent's model in config.yaml (@model@, or its @default@),
 -- else the agent's own default.
@@ -918,17 +917,24 @@ singlePrompt file = T.unwords
   , "Prove every theorem in " <> T.pack file <> " whose proof is sorry, one after another, without changing any statement;"
   , "you may add helper lemmas. Stop when they are all proved or you cannot make progress on the rest." ]
 
+-- | The base environment an attempt is planned in: its backend and, when
+-- it has one, its managed state directory, each set under its new name
+-- and its old one (over what either had), so the plan reads them first
+-- and a child that knows only the old names sees them too.
+attemptEnv :: T.Text -> Maybe FilePath -> Env -> Env
+attemptEnv backend state =
+  Map.fromList . childEnvCompat . Map.toList
+    . Map.insert "FISHER_AUTOFORMALIZE_BACKEND" (T.unpack backend)
+    . maybe id (Map.insert "FISHER_AUTOFORMALIZE_MANAGED_STATE_DIR") state
+
 -- | The headless child for one backend in one workspace: plan the workflow
 -- there as `fisher launch` would, with the managed state in @state@ and
 -- the model, when one is given, as the command's @--model@.
 planFor :: LaunchInputs -> FilePath -> Maybe FilePath -> T.Text -> T.Text -> FilePath -> Maybe T.Text -> IO (Either T.Text ([T.Text], FilePath, Env))
 planFor li0 ws state backend workflow rel model = do
-  hasProject <- doesDirectoryExist (ws </> ".gauss")
+  hasProject <- or <$> mapM (doesDirectoryExist . (ws </>)) projectDirNames
   unless hasProject (void (initializeProject ws defaultInitOptions {initName = Just "search"}))
-  let env = Map.insert "GAUSS_AUTOFORMALIZE_BACKEND" (T.unpack backend)
-          . maybe id (Map.insert "GAUSS_AUTOFORMALIZE_MANAGED_STATE_DIR") state
-          $ liBaseEnv li0
-      li = li0 {liBaseEnv = env, liActiveCwd = Just ws}
+  let li = li0 {liBaseEnv = attemptEnv backend state (liBaseEnv li0), liActiveCwd = Just ws}
   r <- resolveWorkflowRequest li (modelCommand model (workflowCommand workflow rel))
   pure $ case r of
     Left e -> Left (errorMessage e)

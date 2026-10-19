@@ -26,6 +26,7 @@ import System.FilePath ((</>))
 
 import Fisher.Mcp.Stdio (whichIn)
 import Fisher.Project (Project (..), discoverProject)
+import Fisher.Compat (envNames)
 import Fisher.Prover (Prover (..), ProverKind (..), ServerSpec (..), binaryFix, petMissingWarning, prover, pvToolsFor)
 import Fisher.Py.Value
 import Fisher.Tools.Registry (Registry, Toolset (..), createCustomToolset)
@@ -84,9 +85,10 @@ wantsProject (Just ts) mcpConfig =
   not mcpConfig && any (`elem` ts) [nativeToolset Rocq, nativeToolset Isabelle]
 
 -- | The variables of the chat's environment the prover servers are built
--- from: PATH and the servers' override variables.
+-- from: PATH and the servers' override variables, each under its new
+-- (@FISHER_@) and old (@GAUSS_@) name.
 chatEnvNames :: [String]
-chatEnvNames = "PATH" : [svOverride (pvServer (prover k)) | k <- [Rocq, Isabelle]]
+chatEnvNames = "PATH" : concat [[new, old] | k <- [Rocq, Isabelle], let (new, old) = envNames (svOverride (pvServer (prover k)))]
 
 -- | The servers @fisher chat@ adds to @mcp_servers@, and the warnings to
 -- print, from the chat's environment ('chatEnvNames'): those of

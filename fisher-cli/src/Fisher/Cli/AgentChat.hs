@@ -58,17 +58,18 @@ import Fisher.Cli.NetTools
 import Fisher.Cli.ProverChat (chatEnvNames, chatMcpServers, chatProject, defaultToolsets, registerChatToolsets, wantsProject)
 import Fisher.Prover (ProverKind)
 import Fisher.Cli.ToolsCheck (mainProviderSampling)
+import Fisher.Compat (envNames)
 import Fisher.LLM.Auth.Env (loadDotenvIntoSys)
-import Fisher.LLM.Auth.Error (formatRuntimeProviderError)
+import Fisher.LLM.Auth.Error (cliName, formatRuntimeProviderError)
 import Fisher.LLM.Auth.PyYaml (loadConfigOrdered)
 import Fisher.LLM.Auth.Registry (AuthType (..), ProviderConfig (..), providerRegistry)
 import Fisher.LLM.Auth.Resolve (RuntimeRequest (..), getAuthStatus, resolveRuntimeProvider)
 import Fisher.LLM.Http (Runtime (..), Transport, systemRuntime, tlsTransport)
-import Fisher.LLM.SysIO (fisherHints)
 import Fisher.LLM.Sys
 import Fisher.LLM.Types
 import Fisher.Mcp.Client
 import Fisher.Mcp.HttpClient (tlsHttpClient)
+import Fisher.Paths (homeLabel)
 import Fisher.Py.Value
 import Fisher.Rich.Render
 import Fisher.Rich.Style (parseStyle)
@@ -268,7 +269,7 @@ newChatSessionWith events deps sys ui opts sid resumed = do
           Just (PStr m) | not (T.null m) -> m
           Just d@(PDict _) -> fromMaybe "anthropic/claude-opus-4.6" (textAt ["default"] d)
           _ -> "anthropic/claude-opus-4.6"
-  skin <- loadSkin (sysGaussHome sys) skinName
+  skin <- loadSkin (sysFisherHome sys) skinName
   -- load_cli_config copies the compression settings into the environment
   forM_ [("enabled", "CONTEXT_COMPRESSION_ENABLED"), ("threshold", "CONTEXT_COMPRESSION_THRESHOLD"), ("summary_model", "CONTEXT_COMPRESSION_MODEL"), ("summary_provider", "CONTEXT_COMPRESSION_PROVIDER")] $ \(k, env) ->
     forM_ (atP ["compression", k] cli) $ \v -> sysSetEnv sys env (pyStrOf v)
@@ -304,7 +305,7 @@ ensureCredentials cs = do
         _ -> case textAt ["model", "provider"] (csCli cs) of
           Just p -> p
           Nothing -> "auto"
-  envProv <- sysGetEnv sys "GAUSS_INFERENCE_PROVIDER"
+  envProv <- sysGetEnvCompat sys "FISHER_INFERENCE_PROVIDER"
   let req = if requested == "auto" then fromMaybe "auto" (envProv >>= \p -> if T.null p then Nothing else Just p) else requested
   r <- try (resolveRuntimeProvider sys (RuntimeRequest (Just req) Nothing Nothing))
   case r of
@@ -315,9 +316,9 @@ ensureCredentials cs = do
       if T.null (field' "api_key")
         then do
           red cs $ case provider of
-            p | p `elem` ["openrouter", "custom"] -> "No main interactive provider is configured yet. Run `gauss setup`, or save `OPENROUTER_API_KEY`, `OPENAI_API_KEY`, or `ANTHROPIC_API_KEY` in `~/.gauss/.env`."
-            "anthropic" -> "No Anthropic credentials are available for chat. Run `gauss setup`, `claude auth login`, or save `ANTHROPIC_API_KEY`."
-            "openai-codex" -> "No Codex credentials are available for chat. Run `gauss setup`, `codex login`, or save `OPENAI_API_KEY`."
+            p | p `elem` ["openrouter", "custom"] -> "No main interactive provider is configured yet. Run `" <> cliName <> " setup`, or save `OPENROUTER_API_KEY`, `OPENAI_API_KEY`, or `ANTHROPIC_API_KEY` in `" <> T.pack (homeLabel (sysHome sys) (sysFisherHome sys)) <> "/.env`."
+            "anthropic" -> "No Anthropic credentials are available for chat. Run `" <> cliName <> " setup`, `claude auth login`, or save `ANTHROPIC_API_KEY`."
+            "openai-codex" -> "No Codex credentials are available for chat. Run `" <> cliName <> " setup`, `codex login`, or save `OPENAI_API_KEY`."
             _ -> "Provider resolver returned an empty API key."
           pure False
         else
@@ -340,7 +341,7 @@ toolsFor cs =
     Nothing -> do
       let sys = csSys cs
       sudo <- sudoPromptFor sys (chatNetUi (csUi cs))
-      at <- newAgentToolsWith (\se -> se {seSudoPassword = sudoPasswordFor sudo}) (sysGaussHome sys)
+      at <- newAgentToolsWith (\se -> se {seSudoPassword = sudoPasswordFor sudo}) (sysFisherHome sys)
       http <- tlsHttpClient
       environ <- fmap concat . forM ["PATH", "HOME", "USER", "LANG", "LC_ALL", "TERM", "SHELL", "TMPDIR", "LOGNAME"] $ \k ->
         maybe [] (\v -> [(k, v)]) <$> sysGetEnv sys k
@@ -351,13 +352,13 @@ toolsFor cs =
           , meSampling = mainProviderSampling sys (csConfig cs)
           , meEnviron = pure environ
           , meHome = T.pack (sysHome sys)
-          , meGaussHome = sysGaussHome sys
+          , meFisherHome = sysFisherHome sys
           , meHttp = Just http }
       given <- mcpConfigServers (csOpts cs)
       chatEnv <- fmap concat . forM chatEnvNames $ \k -> maybe [] (\v -> [(k, T.unpack v)]) <$> sysGetEnv sys (T.pack k)
       -- Fisher only: a prover project's server, and the pet check; the
       -- warnings on stderr, as stdout may be stream-json
-      let stateDir = sysGaussHome sys </> "autoformalize" </> "fisher" </> "chat"
+      let stateDir = sysFisherHome sys </> "autoformalize" </> "fisher" </> "chat"
       (extra, warnings) <- chatMcpServers chatEnv (csConfig cs) (Just stateDir) (coProject (csOpts cs)) given
       mapM_ (TIO.hPutStrLn stderr) warnings
       _ <- try @SomeException (discoverFromConfig mc (withMcpServers extra (csConfig cs)))
@@ -369,7 +370,7 @@ storeFor cs =
   readIORef (csStore cs) >>= \case
     Just s -> pure (Just s)
     Nothing -> do
-      r <- try @SomeException (openStore (sysGaussHome (csSys cs) </> "state.db"))
+      r <- try @SomeException (openStore (sysFisherHome (csSys cs) </> "state.db"))
       case r of
         Right s -> writeIORef (csStore cs) (Just s) >> pure (Just s)
         Left _ -> pure Nothing
@@ -399,7 +400,7 @@ initAgent cs =
                     case row of
                       Nothing -> do
                         uiConsole (csUi cs) ("[bold red]Session not found: " <> sid <> "[/]")
-                        uiConsole (csUi cs) "[dim]Use a session ID from a previous CLI run (gauss sessions list).[/]"
+                        uiConsole (csUi cs) "[dim]Use a session ID from a previous CLI run (fisher sessions list).[/]"
                         pure False
                       Just r -> do
                         restored <- restoreConversation st sid
@@ -435,15 +436,30 @@ initAgent cs =
 
 -- | The variables a managed workflow sets for its chat (launch's plans),
 -- recorded in the UI's ledger so a resume gets them again. No key or
--- token among them.
+-- token among them. A @FISHER_X@ that is unset is recorded as its old
+-- name @GAUSS_X@ when that is set ('resumeVarsOf').
 resumeVars :: [Text]
 resumeVars =
-  [ "CLAUDE_PLUGIN_ROOT", "FISHER_LEAN_MCP", "GAUSS_AUTOFORMALIZE", "GAUSS_AUTOFORMALIZE_AUTH_MODE", "GAUSS_AUTOFORMALIZE_BACKEND"
-  , "GAUSS_AUTOFORMALIZE_CONTEXT", "GAUSS_AUTOFORMALIZE_INSTRUCTIONS", "GAUSS_AUTOFORMALIZE_LEAN4_SKILLS_REF"
-  , "GAUSS_AUTOFORMALIZE_LEAN_LSP_MCP_SPEC", "GAUSS_AUTOFORMALIZE_MANAGED_STATE_DIR", "GAUSS_AUTOFORMALIZE_NATIVE_PROVIDER"
-  , "GAUSS_AUTOFORMALIZE_SKILLS_ROOT", "GAUSS_CHAT_CWD", "GAUSS_MANAGED_CHAT", "GAUSS_MANAGED_CHAT_BACKEND", "GAUSS_MANAGED_STATE_DIR"
-  , "GAUSS_PROJECT_MANIFEST", "GAUSS_PROJECT_ROOT", "GAUSS_REAL_HOME", "GAUSS_YOLO_MODE", "ISABELLE_PROJECT_PATH", "LEAN4_PLUGIN_ROOT"
+  [ "CLAUDE_PLUGIN_ROOT", "FISHER_LEAN_MCP", "FISHER_AUTOFORMALIZE", "FISHER_AUTOFORMALIZE_AUTH_MODE", "FISHER_AUTOFORMALIZE_BACKEND"
+  , "FISHER_AUTOFORMALIZE_CONTEXT", "FISHER_AUTOFORMALIZE_INSTRUCTIONS", "FISHER_AUTOFORMALIZE_LEAN4_SKILLS_REF"
+  , "FISHER_AUTOFORMALIZE_LEAN_LSP_MCP_SPEC", "FISHER_AUTOFORMALIZE_MANAGED_STATE_DIR", "FISHER_AUTOFORMALIZE_NATIVE_PROVIDER"
+  , "FISHER_AUTOFORMALIZE_SKILLS_ROOT", "FISHER_CHAT_CWD", "FISHER_MANAGED_CHAT", "FISHER_MANAGED_CHAT_BACKEND", "FISHER_MANAGED_STATE_DIR"
+  , "FISHER_PROJECT_MANIFEST", "FISHER_PROJECT_ROOT", "FISHER_REAL_HOME", "FISHER_YOLO_MODE", "ISABELLE_PROJECT_PATH", "LEAN4_PLUGIN_ROOT"
   , "LEAN4_REFS", "LEAN4_SCRIPTS", "LEAN_PROJECT_PATH", "ROCQ_COQC_BINARY", "ROCQ_PROJECT_PATH", "ROCQ_WORKSPACE", "TERMINAL_CWD" ]
+
+-- | 'resumeVars' as set in an environment: each by its name, and a
+-- renamed one (@FISHER_LEAN_MCP@ is Fisher's own) by the name it was
+-- found under, new first.
+resumeVarsOf :: Monad m => (Text -> m (Maybe Text)) -> m [(Text, Text)]
+resumeVarsOf look = fmap concat . forM resumeVars $ \k ->
+  if "FISHER_" `T.isPrefixOf` k && k /= "FISHER_LEAN_MCP"
+    then do
+      let (new, old) = envNames (T.unpack k)
+      v <- look (T.pack new)
+      case v of
+        Just x -> pure [(T.pack new, x)]
+        Nothing -> maybe [] (\x -> [(T.pack old, x)]) <$> look (T.pack old)
+    else maybe [] (\x -> [(k, x)]) <$> look k
 
 buildAgent :: ChatSession -> Maybe Store -> IO Agent
 buildAgent cs store = do
@@ -454,14 +470,14 @@ buildAgent cs store = do
   Just rt <- readIORef (csRuntime cs)
   model <- readIORef (csModel cs)
   (at, _) <- toolsFor cs
-  lg <- openReplayLog (sysGaussHome sys0) sid
+  lg <- openReplayLog (sysFisherHome sys0) sid
   writeIORef (csReplay cs) (Just lg)
   let field' k = maybe "" pyStrOf (get k rt)
       enabledSets = case coToolsets opts of
         Just ts -> ts
         Nothing -> case atP ["platform_toolsets", "cli"] cli of
           Just (PList ts) -> [t | PStr t <- ts]
-          _ -> ["gauss-cli"]
+          _ -> ["fisher-cli"]
       maxTurns = case (coMaxTurns opts, atP ["agent", "max_turns"] cli) of
         (Just n, _) | n > 0 -> n
         (_, Just (PInt n)) | n > 0 -> fromIntegral n
@@ -476,7 +492,7 @@ buildAgent cs store = do
         Just d@(PDict _) | Just p <- textAt ["provider"] d, Just m <- textAt ["model"] d -> Just (p, m)
         _ -> Nothing
       verbose = coVerbose opts
-  ephEnv <- sysGetEnv sys0 "GAUSS_EPHEMERAL_SYSTEM_PROMPT"
+  ephEnv <- sysGetEnvCompat sys0 "FISHER_EPHEMERAL_SYSTEM_PROMPT"
   promptFile <- traverse (fmap decodeUtf8Lenient . BS.readFile) (coSystemPromptFile opts)
   let systemPrompt = case (promptFile, ephEnv) of
         (Just f, _) -> f
@@ -485,7 +501,7 @@ buildAgent cs store = do
   prefill <- case textAt ["agent", "prefill_messages_file"] cli of
     Nothing -> pure []
     Just f -> do
-      let p = if "/" `T.isPrefixOf` f then T.unpack f else sysGaussHome sys0 </> T.unpack f
+      let p = if "/" `T.isPrefixOf` f then T.unpack f else sysFisherHome sys0 </> T.unpack f
       ex <- doesFileExist p
       if not ex then pure [] else do
         b <- BS.readFile p
@@ -515,29 +531,29 @@ buildAgent cs store = do
   hooks <- readIORef (csUiHooks cs) >>= \case
     Just h -> pure h
     Nothing -> do
-      let gauss = sysGaussHome sys0
+      let home = sysFisherHome sys0
       ledger <-
         if uiOn
-          then either (\(_ :: SomeException) -> Nothing) Just <$> try (openLedger (gauss </> "state.db") uiKey)
+          then either (\(_ :: SomeException) -> Nothing) Just <$> try (openLedger (home </> "state.db") uiKey)
           else pure Nothing
       tag <- sysGetEnv sys0 "FISHER_UI_TAG"
       forM_ ledger $ \l -> forM_ tag $ \t -> unless (T.null t) $ () <$ try @SomeException (recordRun l t (sysPid sys0))
       -- the tag names this process's run only: a chat the tools start
       -- (their subprocesses take this process's environment) is not it
-      () <$ try @SomeException (unsetEnv "FISHER_UI_TAG")
+      () <$ try @SomeException (unsetEnv "FISHER_UI_TAG" *> unsetEnv "GAUSS_UI_TAG")
       -- the run lock, held while this process lives, tells the UI the
       -- session runs here (it then sends through the inbox, never resumes)
-      locked <- holdRunLock gauss uiKey
+      locked <- holdRunLock home uiKey
       unless locked $
-        hPutStrLn stderr ("fisher: session " <> T.unpack uiKey <> " is running in another process too (" <> runPidPath gauss uiKey <> ")")
+        hPutStrLn stderr ("fisher: session " <> T.unpack uiKey <> " is running in another process too (" <> runPidPath home uiKey <> ")")
       -- a step's file is the one the tool wrote: its path through the
       -- tool's own FileOps (TERMINAL_CWD, ~)
-      h <- newUiHooks ledger (stepsPath gauss uiKey) (toolPathResolver (ftOps (atFileTools at)) (cdCwd deps))
+      h <- newUiHooks ledger (stepsPath home uiKey) (toolPathResolver (ftOps (atFileTools at)) (cdCwd deps))
       writeIORef (csUiHooks cs) (Just h)
       -- how this chat was started (its flags and the workflow's variables,
       -- never a key), so the UI can resume it as it ran
       when (uiHasLedger h) $ do
-        vars <- fmap concat . forM resumeVars $ \k -> maybe [] (\v -> [(K.fromText k, A.String v)]) <$> sysGetEnv sys0 k
+        vars <- map (\(k, v) -> (K.fromText k, A.String v)) <$> resumeVarsOf (sysGetEnv sys0)
         let o = csOpts cs
             jtext = maybe A.Null A.String
         uiEmit h "chat"
@@ -551,7 +567,7 @@ buildAgent cs store = do
   -- the inbox is read with or without the ledger: the UI sends to a
   -- session that runs elsewhere through it
   let takeSent = do
-        r <- try @SomeException (takeInbox (inboxPath (sysGaussHome sys0) uiKey))
+        r <- try @SomeException (takeInbox (inboxPath (sysFisherHome sys0) uiKey))
         let ts = either (const []) id r
         forM_ ts $ \t -> uiEmit hooks "inbox" [("text", A.String t)]
         pure ts
@@ -610,7 +626,7 @@ buildAgent cs store = do
           , envCwd = cdCwd deps, envChoice = cdChoice deps
           , envAnimate = tty, envDb = fmap (\s -> uiSessionDB hooks (storeSessionDB s (sysNow sys))) store, envTools = runner
           , envAux = callLlm auxEnv, envAuxEnv = Just auxEnv
-          , envMeta = MetaEnv tr (sysNow sys) (sysGaussHome sys) cache (\_ -> pure ())
+          , envMeta = MetaEnv tr (sysNow sys) (sysFisherHome sys) cache (\_ -> pure ())
           , envSkin = D.Skin (skinBranding (csSkin cs) "tool_prefix" "┊") [] [], envConfig = csConfig cs
           , envCallbacks = uiCallbacks hooks noCallbacks {cbThinking = Just (\_ -> pure ()), cbToolProgress = Just progress}
           , envWarn = \_ -> pure ()
@@ -755,7 +771,7 @@ reasoningBox w reasoning =
 -- left, the text wrapped two columns in from each side.
 responseBox :: Bool -> Skin -> Int -> Text -> [Text]
 responseBox ansi skin w response =
-  let label = skinBranding skin "response_label" "∑ Gauss"
+  let label = skinBranding skin "response_label" "∑ Fisher"
       border = skinColor skin "response_border" "#CD7F32"
       text = skinColor skin "banner_text" "#FFF8DC"
       st = parseStyle
@@ -791,7 +807,7 @@ exitSummaryLines skin sid elapsed hist
             | h > 0 = T.pack (show h) <> "h " <> T.pack (show m) <> "m " <> T.pack (show s) <> "s"
             | m > 0 = T.pack (show m) <> "m " <> T.pack (show s) <> "s"
             | otherwise = T.pack (show s) <> "s"
-       in [ "", "Resume this session with:", "  gauss --resume " <> sid, ""
+       in [ "", "Resume this session with:", "  " <> cliName <> " --resume " <> sid, ""
           , "Session:        " <> sid, "Duration:       " <> dur
           , "Messages:       " <> T.pack (show (length hist)) <> " (" <> T.pack (show users) <> " user, " <> T.pack (show tools) <> " tool calls)" ]
 
@@ -850,7 +866,7 @@ hasAnyProvider sys = do
     then pure True
     else do
       authOk <- try @SomeException $ do
-        let p = sysGaussHome sys </> "auth.json"
+        let p = sysFisherHome sys </> "auth.json"
         ex <- doesFileExist p
         if not ex then pure False else do
           b <- BS.readFile p
@@ -901,7 +917,7 @@ parseQueryArgs = go (QueryArgs Nothing False defaultChatOptions Nothing False)
       (f : r) | f `elem` ["--yolo", "--checkpoints", "-w", "--worktree"] -> go acc r
       (x : _) -> Left ("unrecognized arguments: " <> x)
 
--- | @gauss chat -q QUERY@ (and @-Q@): one turn with the native agent.
+-- | @fisher chat -q QUERY@ (and @-Q@): one turn with the native agent.
 chatMain :: ChatDeps -> Sys -> [Text] -> IO Int
 chatMain deps sys0 args = do
   loadDotenvIntoSys sys0
@@ -911,7 +927,7 @@ chatMain deps sys0 args = do
       outLn sys0 ("fisher chat: error: " <> e)
       pure 2
     Right qa -> do
-      store <- either (const Nothing) Just <$> try @SomeException (openStore (sysGaussHome sys0 </> "state.db"))
+      store <- either (const Nothing) Just <$> try @SomeException (openStore (sysFisherHome sys0 </> "state.db"))
       resume <- case (qaContinue qa, coResume (qaOpts qa), store) of
         (Just (Just name), Nothing, Just st) -> resolveSessionId st name
         (_, Just r, Just st) -> Just . fromMaybe r <$> resolveSessionId st r
@@ -927,10 +943,12 @@ chatMain deps sys0 args = do
       hasProvider <- hasAnyProvider sys0
       if not hasProvider && isJust (qaQuery qa)
         then do
-          mapM_ (outLn sysH) ["", "Gauss query mode needs a configured provider.", "", "  Run:  gauss setup", ""]
+          mapM_ (outLn sysH) ["", "Fisher query mode needs a configured provider.", "", "  Run:  " <> cliName <> " setup", ""]
           when stream $ streamResult events "" Nothing 0 Nothing
           pure 1
         else do
+          -- both names, for tools and children that know only the old one
+          sysSetEnv sys0 "FISHER_INTERACTIVE" "1"
           sysSetEnv sys0 "GAUSS_INTERACTIVE" "1"
           t <- cdNowLocal deps
           h <- sysUuidHex sys0
@@ -1024,9 +1042,10 @@ chatMain deps sys0 args = do
     -- is_error) exits 1, so a headless launch reports it; -q and -Q alone
     -- keep upstream's 0
     failureCode strict res = if strict && runFailed res then 1 else 0
-    -- the shell's own checks for colour: GAUSS_FORCE_PLAIN_OUTPUT, NO_COLOR, TERM=dumb
+    -- the shell's own checks for colour: FISHER_FORCE_PLAIN_OUTPUT (else
+    -- GAUSS_...), NO_COLOR, TERM=dumb
     plainForced = do
-      a <- sysGetEnv sys0 "GAUSS_FORCE_PLAIN_OUTPUT"
+      a <- sysGetEnvCompat sys0 "FISHER_FORCE_PLAIN_OUTPUT"
       b <- sysGetEnv sys0 "NO_COLOR"
       t <- sysGetEnv sys0 "TERM"
       pure (maybe False (\v -> T.toLower v `elem` ["1", "true", "yes", "on"]) a || isJust b || t == Just "dumb")
@@ -1043,7 +1062,7 @@ onStderr sys =
     , sysGetPass = \p -> err (p <> "\n") >> pure Nothing }
   where
     -- UTF-8 whatever the locale, as the banner and the tool lines need it
-    err t = BS.hPut stderr (encodeUtf8 (fisherHints t)) >> hFlush stderr
+    err t = BS.hPut stderr (encodeUtf8 t) >> hFlush stderr
 
 -- | Whether a run failed, as the stream's @is_error@ says: no result (the
 -- agent could not be made), a raise, or a run that did not complete.
@@ -1091,7 +1110,7 @@ streamResult emit sid mag toolCalls mres = do
 replayMain :: Sys -> [Text] -> IO Int
 replayMain sys args = case args of
   [sid] -> do
-    let path = replayPath (sysGaussHome sys) sid
+    let path = replayPath (sysFisherHome sys) sid
     ex <- doesFileExist path
     if not ex
       then outLn sys ("No replay log for " <> sid <> " (" <> T.pack path <> ")") >> pure 1

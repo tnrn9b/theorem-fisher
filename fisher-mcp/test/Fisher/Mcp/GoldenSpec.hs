@@ -113,7 +113,7 @@ spec = do
                       [] -> throwIO (Raised "no canned reply")
                 , meEnviron = pure [("HOME", T.pack work), ("PATH", "/usr/local/bin:/usr/bin:/bin"), ("SHELL", "/bin/sh"), ("TERM", "dumb")]
                 , meHome = T.pack work
-                , meGaussHome = work </> "gauss"
+                , meFisherHome = work </> "fisher"
                 , meHttp = http
                 }
         mc <- newMcpClient env
@@ -127,7 +127,7 @@ spec = do
         tss <- toolsets reg
         sort [(k, dumpsUnicode (PDict [("description", PStr (tsDescription ts)), ("tools", PList (map PStr (tsTools ts))), ("includes", PList [])])) | (k, ts) <- tss, "mcp-" `T.isPrefixOf` k]
           `shouldBe` sort [(k, dumpsUnicode v) | (k, v) <- kvs (f "toolsets" c)]
-        [x | (k, ts) <- tss, k == "gauss-cli", x <- tsTools ts, "mcp_" `T.isPrefixOf` x] `shouldBe` [s | PStr s <- lst (f "gauss_cli_extra" c)]
+        [x | (k, ts) <- tss, k == "fisher-cli", x <- tsTools ts, "mcp_" `T.isPrefixOf` x] `shouldBe` [s | PStr s <- lst (f "gauss_cli_extra" c)]
         let calls = lst (f "calls" c)
             steps = [(n, a) | PList [PStr n, a] <- lst (f "steps" c)]
         results <- forM steps $ \(n, a) -> case n of

@@ -26,7 +26,7 @@ callVal c =
 
 answer :: T.Text -> AuxCall -> Either AuxError PyVal
 answer mode c = case mode of
-  "runtime" -> Left (AuxNoProvider "No LLM provider configured for task=compression provider=auto. Run: gauss setup")
+  "runtime" -> Left (AuxNoProvider "No LLM provider configured for task=compression provider=auto. Run: fisher setup")
   "error" -> Left (AuxFailed "boom")
   "empty" -> content (PStr "")
   "none" -> content PNull

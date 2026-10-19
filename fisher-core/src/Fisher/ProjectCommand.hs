@@ -22,6 +22,7 @@ import qualified Data.Text as T
 import System.Directory (canonicalizePath, doesFileExist)
 import System.FilePath (isAbsolute, takeDirectory, takeFileName, (</>))
 
+import Fisher.Compat (projectDirNames)
 import Fisher.Paths (expandUser)
 import Fisher.Project
 import Fisher.Prover (ProverKind (..), findProverRoot, markerKinds, proverByName, proverTitle, tieMessage)
@@ -104,7 +105,7 @@ statusLines s = do
   pure . (header <>) $ case stateProject st of
     Nothing ->
       [ "  Active project: (none)"
-      , "  Detail: " <> maybe "No active Gauss project found." id (stateError st)
+      , "  Detail: " <> maybe "No active Fisher project found." id (stateError st)
       , "  Next: /project init, /project convert, /project create <path>, or /project use <path>" ]
     Just p ->
       [ "  Active project: " <> projectLabel p <> " [" <> stateSource st <> "]"
@@ -150,7 +151,7 @@ findRoot named root missing = case named of
       markerKinds d >>= \case
         [] -> go ds
         kinds -> do
-          hasManifest <- doesFileExist (d </> ".gauss" </> "project.yaml")
+          hasManifest <- or <$> mapM (\n -> doesFileExist (d </> n </> "project.yaml")) projectDirNames
           case kinds of
             _ | hasManifest -> pure (Nothing, d)
             [k] -> pure (Just k, d)
@@ -194,7 +195,7 @@ handleProjectTokens s tokens = do
         p <- initializeProject lr defaultInitOptions
           { initName = Map.lookup "--name" options, initSourceMode = "init", initProver = kind }
         writeIORef (sessionOverride s) (Just (projectRoot p))
-        say ["(^_^)b Initialized Gauss project: " <> projectLabel p, "  Root: " <> T.pack (projectRoot p)]
+        say ["(^_^)b Initialized Fisher project: " <> projectLabel p, "  Root: " <> T.pack (projectRoot p)]
       "convert" -> do
         root <- resolveCliPath s firstPos
         (kind, lr) <- findRoot (opt "--prover") root $ \case
@@ -207,7 +208,7 @@ handleProjectTokens s tokens = do
           , initBlueprintMarkers = Just markers
           , initProver = kind }
         writeIORef (sessionOverride s) (Just (projectRoot p))
-        say ["(^_^)b Registered existing repository as a Gauss project: " <> projectLabel p, "  Root: " <> T.pack (projectRoot p)]
+        say ["(^_^)b Registered existing repository as a Fisher project: " <> projectLabel p, "  Root: " <> T.pack (projectRoot p)]
         say ["  Blueprint markers: " <> T.intercalate ", " markers | not (null markers)]
       "create" -> do
         rawTarget <- maybe (throwIO (ProjectCommandFailed "`/project create` requires a target directory path.")) pure firstPos
@@ -216,7 +217,7 @@ handleProjectTokens s tokens = do
         if T.null source
           then throwIO . ProjectTemplateUnavailable $
             "Blueprint project creation is blocked until a template source is configured. "
-              <> "Set `gauss.project.template_source` or `GAUSS_BLUEPRINT_TEMPLATE_SOURCE`, then retry."
+              <> "Set `fisher.project.template_source` or `FISHER_BLUEPRINT_TEMPLATE_SOURCE`, then retry."
           else pure ()
         populateFromTemplate target source
         markers <- detectBlueprintMarkers target
@@ -226,7 +227,7 @@ handleProjectTokens s tokens = do
           , initTemplateSource = source
           , initBlueprintMarkers = Just markers }
         writeIORef (sessionOverride s) (Just (projectRoot p))
-        say [ "(^_^)b Created Gauss project from template: " <> projectLabel p
+        say [ "(^_^)b Created Fisher project from template: " <> projectLabel p
             , "  Root: " <> T.pack (projectRoot p)
             , "  Template source: " <> source ]
       _ -> throwIO (ProjectCommandFailed ("Unknown `/project` subcommand: " <> sub))

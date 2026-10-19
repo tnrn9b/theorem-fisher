@@ -9,7 +9,7 @@ import System.FilePath ((</>))
 import Test.Hspec
 
 import Fisher.Doctor
-import Fisher.Paths (ensureGaussHomeAt)
+import Fisher.Paths (ensureFisherHomeAt)
 import Fisher.Term (plainStyle)
 import Fisher.TestUtil (withTmp)
 
@@ -27,14 +27,16 @@ spec = do
       , "│                      Fisher Doctor                      │"
       , "└" <> T.replicate 57 "─" <> "┘" ]
 
-  it "reports a fresh home as issues, with the --fix tip" $ withTmp $ \tmp -> do
-    out <- runDoctor False False (envFor tmp) (tmp </> "gh")
+  it "reports a fresh home as issues, with the --fix tip, naming the home in use" $ withTmp $ \tmp -> do
+    out <- runDoctor False False (envFor tmp) (tmp </> ".gauss")
     out `shouldSatisfy` elem "  ✗ ~/.gauss/.env file missing"
     out `shouldSatisfy` elem "  ⚠ config.yaml not found (using defaults)"
     out `shouldSatisfy` elem "  ⚠ ~/.gauss/skills/ not found (will be created on first use)"
     out `shouldSatisfy` any ("Run 'fisher setup' to create .env" `T.isInfixOf`)
     out `shouldSatisfy` elem "  Tip: run 'fisher doctor --fix' to auto-fix what's possible."
-    doesFileExist (tmp </> "gh" </> ".env") `shouldReturn` False
+    doesFileExist (tmp </> ".gauss" </> ".env") `shouldReturn` False
+    fresh <- runDoctor False False (envFor tmp) (tmp </> ".fisher")
+    fresh `shouldSatisfy` elem "  ✗ ~/.fisher/.env file missing"
 
   it "fixes what it can with --fix" $ withTmp $ \tmp -> do
     let gh = tmp </> "gh"
@@ -47,13 +49,14 @@ spec = do
 
   it "passes the home checks once the home is set up" $ withTmp $ \tmp -> do
     let gh = tmp </> "gh"
-    ensureGaussHomeAt gh
+    ensureFisherHomeAt gh
     createDirectoryIfMissing True (gh </> "skills")
     writeFile (gh </> ".env") "ANTHROPIC_API_KEY=sk\n"
     out <- runDoctor False False (envFor tmp) gh
     out `shouldSatisfy` elem "  ✓ API key or custom endpoint configured"
-    out `shouldSatisfy` elem "  ✓ ~/.gauss/SOUL.md exists (persona configured)"
-    out `shouldSatisfy` elem "  ✓ ~/.gauss/skills/ exists"
+    -- a home elsewhere is named by its path
+    out `shouldSatisfy` elem ("  ✓ " <> T.pack gh <> "/SOUL.md exists (persona configured)")
+    out `shouldSatisfy` elem ("  ✓ " <> T.pack gh <> "/skills/ exists")
 
   describe "provers" proverSpec
 

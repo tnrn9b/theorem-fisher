@@ -14,7 +14,7 @@ import qualified Data.Text as T
 
 import Fisher.Py.Re
 
--- | Redaction is on unless @GAUSS_REDACT_SECRETS@ is 0, false, no or off.
+-- | Redaction is on unless @FISHER_REDACT_SECRETS@ (else @GAUSS_REDACT_SECRETS@) is 0, false, no or off.
 redactEnabled :: Maybe Text -> Bool
 redactEnabled v = maybe True (\x -> T.toLower x `notElem` ["0", "false", "no", "off"]) v
 

@@ -10,6 +10,8 @@ module Fisher.Search.Headless
 import Data.Text (Text)
 import qualified Data.Text as T
 
+import Fisher.Compat (canonicalBackendName, nativeBackend)
+
 -- | The workflow each attempt runs, on the whole file (the prompt narrows
 -- it to one theorem): no planning, review, checkpoints, commits or golf.
 workflowCommand :: Text -> FilePath -> Text
@@ -28,18 +30,19 @@ attemptPrompt goal file = T.unwords
   , "Stop when it is proved or when you cannot make progress." ]
 
 -- | The headless form of a planned child's argv, whose last element is
--- its prompt. claude-code: @-p@ with stream-json and @--max-turns@; fisher,
--- also accepted as gauss (@fisher chat ... -q PROMPT@): the same flags; codex: @codex exec
--- --json@ (no turn limit; the attempt's time limit bounds it).
+-- its prompt. claude-code: @-p@ with stream-json and @--max-turns@; fisher
+-- (the native backend, also accepted by its old name gauss; @fisher chat
+-- ... -q PROMPT@): the same flags; codex: @codex exec --json@ (no turn
+-- limit; the attempt's time limit bounds it).
 headlessArgv :: Text -> [Text] -> Text -> Int -> Either Text [Text]
 headlessArgv backend argv extra maxTurns = case unsnoc argv of
   Nothing -> Left "empty launch argv"
   Just (front, prompt0) ->
     let prompt = prompt0 <> " " <> extra
         turns = T.pack (show maxTurns)
-     in case backend of
+     in case canonicalBackendName backend of
           "claude-code" -> Right (front <> ["-p", prompt, "--output-format", "stream-json", "--verbose", "--max-turns", turns])
-          b | b `elem` ["gauss", "fisher"] -> Right (dropQ front <> ["-p", prompt, "--output-format", "stream-json", "--max-turns", turns])
+          b | b == nativeBackend -> Right (dropQ front <> ["-p", prompt, "--output-format", "stream-json", "--max-turns", turns])
           "codex" -> case front of
             exe : rest -> Right ([exe, "exec", "--json"] <> rest <> [prompt])
             [] -> Left "empty launch argv"

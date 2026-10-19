@@ -70,7 +70,7 @@ withChat home path extra sets act = do
           , meSampling = \_ -> fail "no sampling in tests"
           , meEnviron = pure [("HOME", T.pack home), ("PATH", "/usr/local/bin:/usr/bin:/bin")]
           , meHome = T.pack home
-          , meGaussHome = home </> ".gauss"
+          , meFisherHome = home </> ".gauss"
           , meHttp = Nothing }
   (servers, warnings) <- chatMcpServers [("PATH", T.unpack p) | Just p <- [path]] (PDict []) Nothing Nothing extra
   bracket (newMcpClient env) shutdownMcp $ \mc -> do
@@ -332,4 +332,4 @@ spec = do
       wantsProject (Just ["fisher-lean"]) False `shouldBe` False
 
     it "reads the server's environment from these variables" $
-      chatEnvNames `shouldBe` ["PATH", "GAUSS_AUTOFORMALIZE_ROCQ_MCP_SPEC", "GAUSS_AUTOFORMALIZE_ISABELLE_MCP_SPEC"]
+      chatEnvNames `shouldBe` ["PATH", "FISHER_AUTOFORMALIZE_ROCQ_MCP_SPEC", "GAUSS_AUTOFORMALIZE_ROCQ_MCP_SPEC", "FISHER_AUTOFORMALIZE_ISABELLE_MCP_SPEC", "GAUSS_AUTOFORMALIZE_ISABELLE_MCP_SPEC"]

@@ -1,4 +1,4 @@
--- | The argparse surface of @gauss login@, @logout@, @status@, @setup@ and
+-- | The argparse surface of @fisher login@, @logout@, @status@, @setup@ and
 -- @model@ (main.py): the options each takes, their help (as argparse lays
 -- it out at 100 columns) and argparse's error text. Unique prefixes of
 -- long options are accepted, as argparse accepts them.
@@ -121,11 +121,11 @@ providerChoices = ["nous", "openai-codex"]
 loginParser :: ArgParser
 loginParser =
   ArgParser
-    { apProg = "gauss login"
+    { apProg = "fisher login"
     , apUsage = loginUsage
     , apHelp =
         loginUsage
-          <> "\nRun OAuth device authorization flow for the Gauss CLI\n\noptions:\n\
+          <> "\nRun OAuth device authorization flow for the Fisher CLI\n\noptions:\n\
              \  -h, --help            show this help message and exit\n\
              \  --provider {nous,openai-codex}\n\
              \                        Provider to authenticate with (default: nous)\n\
@@ -155,14 +155,14 @@ loginParser =
     }
   where
     loginUsage =
-      "usage: gauss login [-h] [--provider {nous,openai-codex}] [--portal-url PORTAL_URL]\n\
-      \                   [--inference-url INFERENCE_URL] [--client-id CLIENT_ID] [--scope SCOPE]\n\
-      \                   [--no-browser] [--timeout TIMEOUT] [--ca-bundle CA_BUNDLE] [--insecure]\n"
+      "usage: fisher login [-h] [--provider {nous,openai-codex}] [--portal-url PORTAL_URL]\n\
+      \                    [--inference-url INFERENCE_URL] [--client-id CLIENT_ID] [--scope SCOPE]\n\
+      \                    [--no-browser] [--timeout TIMEOUT] [--ca-bundle CA_BUNDLE] [--insecure]\n"
 
 logoutParser :: ArgParser
 logoutParser =
   ArgParser
-    { apProg = "gauss logout"
+    { apProg = "fisher logout"
     , apUsage = usage
     , apHelp =
         usage
@@ -174,16 +174,16 @@ logoutParser =
     , apPositional = Nothing
     }
   where
-    usage = "usage: gauss logout [-h] [--provider {nous,openai-codex}]\n"
+    usage = "usage: fisher logout [-h] [--provider {nous,openai-codex}]\n"
 
 statusParser :: ArgParser
 statusParser =
   ArgParser
-    { apProg = "gauss status"
+    { apProg = "fisher status"
     , apUsage = usage
     , apHelp =
         usage
-          <> "\nDisplay status of Gauss components\n\noptions:\n\
+          <> "\nDisplay status of Fisher components\n\noptions:\n\
              \  -h, --help  show this help message and exit\n\
              \  --all       Show all details (redacted for sharing)\n\
              \  --deep      Run deep checks (may take longer)\n"
@@ -191,16 +191,16 @@ statusParser =
     , apPositional = Nothing
     }
   where
-    usage = "usage: gauss status [-h] [--all] [--deep]\n"
+    usage = "usage: fisher status [-h] [--all] [--deep]\n"
 
 setupParser :: ArgParser
 setupParser =
   ArgParser
-    { apProg = "gauss setup"
+    { apProg = "fisher setup"
     , apUsage = usage
     , apHelp =
         usage
-          <> "\nConfigure Gauss with an interactive wizard. Run a specific section: gauss setup\n\
+          <> "\nConfigure Fisher with an interactive wizard. Run a specific section: fisher setup\n\
              \model|terminal|gateway|tools|agent\n\n\
              \positional arguments:\n\
              \  {model,terminal,gateway,tools,agent}\n\
@@ -213,12 +213,12 @@ setupParser =
     , apPositional = Just ("section", ["model", "terminal", "gateway", "tools", "agent"])
     }
   where
-    usage = "usage: gauss setup [-h] [--non-interactive] [--reset] [{model,terminal,gateway,tools,agent}]\n"
+    usage = "usage: fisher setup [-h] [--non-interactive] [--reset] [{model,terminal,gateway,tools,agent}]\n"
 
 modelParser :: ArgParser
 modelParser =
   ArgParser
-    { apProg = "gauss model"
+    { apProg = "fisher model"
     , apUsage = usage
     , apHelp =
         usage
@@ -228,4 +228,4 @@ modelParser =
     , apPositional = Nothing
     }
   where
-    usage = "usage: gauss model [-h]\n"
+    usage = "usage: fisher model [-h]\n"

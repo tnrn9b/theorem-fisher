@@ -78,7 +78,7 @@ auxProviderAuxModels =
 
 orHeaders :: [(Text, Text)]
 orHeaders =
-  [ ("http-referer", "https://gauss-agent.nousresearch.com"), ("x-openrouter-title", "Gauss Agent")
+  [ ("http-referer", "https://gauss-agent.nousresearch.com"), ("x-openrouter-title", "Fisher Agent")
   , ("x-openrouter-categories", "productivity,cli-agent") ]
 
 openRouterModel, nousModel, codexAuxModel, codexAuxBaseUrl :: Text
@@ -213,7 +213,7 @@ readMainModel env = do
       go (k : ks) = do
         v <- envStrip env k
         if T.null v then go ks else pure v
-  go ["OPENAI_MODEL", "GAUSS_MODEL", "LLM_MODEL"]
+  go ["OPENAI_MODEL", "FISHER_MODEL", "GAUSS_MODEL", "LLM_MODEL"]
 
 tryCustom :: AuxEnv -> IO (Maybe (Client, Text))
 tryCustom env =
@@ -299,8 +299,8 @@ resolveProviderClient env provider0 model explicitBase explicitKey = do
                 x -> x >>= nonEmptyT
            in pure (Just c, Just (fromMaybe resolved m))
     "openrouter" -> tryOpenRouter env >>= maybe (warnNone "resolve_provider_client: openrouter requested but OPENROUTER_API_KEY not set") (done . Just)
-    "nous" -> tryNous env >>= maybe (warnNone "resolve_provider_client: nous requested but Nous Portal not configured (run: gauss login)") (done . Just)
-    "openai-codex" -> tryCodex env >>= maybe (warnNone "resolve_provider_client: openai-codex requested but no Codex OAuth token found (run: gauss model)") (done . Just)
+    "nous" -> tryNous env >>= maybe (warnNone "resolve_provider_client: nous requested but Nous Portal not configured (run: fisher login)") (done . Just)
+    "openai-codex" -> tryCodex env >>= maybe (warnNone "resolve_provider_client: openai-codex requested but no Codex OAuth token found (run: fisher model)") (done . Just)
     "custom" -> case explicitBase of
       Just b | not (T.null b) -> do
         envKey <- envStrip env "OPENAI_API_KEY"
@@ -364,7 +364,7 @@ callLlm env call = do
       cachedClient env "openrouter" (Just (fromMaybe openRouterModel rm)) Nothing Nothing
     _ -> pure (c0, m0)
   case client of
-    Nothing -> pure (Left (AuxNoProvider ("No LLM provider configured for task=" <> fromMaybe "None" (axTask call) <> " provider=" <> rp <> ". Run: gauss setup")))
+    Nothing -> pure (Left (AuxNoProvider ("No LLM provider configured for task=" <> fromMaybe "None" (axTask call) <> " provider=" <> rp <> ". Run: fisher setup")))
     Just cl -> do
       useCompletion <- case (rp, axMaxTokens call) of
         ("custom", Just _) -> do

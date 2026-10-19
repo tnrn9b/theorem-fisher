@@ -1,4 +1,4 @@
--- | @gauss model@: pick a provider (the active one first), then log in or
+-- | @fisher model@: pick a provider (the active one first), then log in or
 -- enter a key as that provider needs and pick a default model. Ported from
 -- @gauss_cli/main.py@ (@cmd_model@ and every @_model_flow_*@, the saved
 -- custom providers and their removal, the Anthropic OAuth flow). The
@@ -31,7 +31,7 @@ import Fisher.LLM.Auth.Store (deactivateProvider, getProviderAuthState)
 import Fisher.LLM.Sys
 import Fisher.Py.Value
 
--- | @gauss model@.
+-- | @fisher model@.
 modelMain :: Sys -> [Text] -> IO Int
 modelMain sys args = do
   loadDotenvIntoSys sys
@@ -91,7 +91,7 @@ cmdModel ui sys = do
           Just v | truthy v -> Just (pyStrOf v)
           _ -> Nothing
         _ -> Nothing
-  envProvider <- sysGetEnv sys "GAUSS_INFERENCE_PROVIDER"
+  envProvider <- sysGetEnvCompat sys "FISHER_INFERENCE_PROVIDER"
   let effective = fromMaybe "auto" (orNonEmpty [configProvider, envProvider])
   active0 <- try (resolveProvider sys (Just effective) Nothing Nothing) >>= \case
     Right p -> pure p
@@ -317,7 +317,7 @@ flowCustom ui sys = do
                     case prModels probe of
                       Just ms -> say sys ("Verified endpoint via " <> fromMaybe "None" (prProbedUrl probe) <> " (" <> showT (length ms) <> " model(s) visible)")
                       Nothing -> do
-                        say sys ("Warning: could not verify this endpoint via " <> fromMaybe "None" (prProbedUrl probe) <> ". Gauss will still save it.")
+                        say sys ("Warning: could not verify this endpoint via " <> fromMaybe "None" (prProbedUrl probe) <> ". Fisher will still save it.")
                         mapM_ (\s -> say sys ("  If this server expects /v1, try base URL: " <> s)) (prSuggestedBaseUrl probe)
                     pure (url0, baseUrl0)
               unless (T.null baseUrl) $ saveEnvValue sys "OPENAI_BASE_URL" url
@@ -635,7 +635,7 @@ runAnthropicOauthFlow ui sys = do
         then do
           useAnthropicClaudeCodeCredentials sys
           say sys "  ✓ Claude Code credentials linked."
-          say sys "    Gauss will use Claude's credential store directly instead of copying a setup-token into the active home directory."
+          say sys "    Fisher will use Claude's credential store directly instead of copying a setup-token into the active home directory."
           pure True
         else pure False
 

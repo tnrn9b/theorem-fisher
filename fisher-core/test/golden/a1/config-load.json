@@ -5,7 +5,7 @@
       "name": "no-file",
       "input": null,
       "config": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -22,7 +22,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90
@@ -201,7 +201,7 @@
       "name": "empty-file",
       "input": "",
       "config": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -218,7 +218,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90
@@ -397,7 +397,7 @@
       "name": "legacy-max-turns",
       "input": "max_turns: 42\n",
       "config": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -414,7 +414,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 42
@@ -593,7 +593,7 @@
       "name": "agent-max-turns-wins",
       "input": "agent:\n  max_turns: 7\nmax_turns: 42\n",
       "config": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -610,7 +610,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 7
@@ -789,7 +789,7 @@
       "name": "agent-null-max-turns",
       "input": "agent:\n  max_turns: null\nmax_turns: 42\n",
       "config": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -806,7 +806,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 42
@@ -985,7 +985,7 @@
       "name": "partial-nested",
       "input": "model: test/x\nterminal:\n  timeout: 5\n",
       "config": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -1002,7 +1002,7 @@
         },
         "model": "test/x",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90
@@ -1181,7 +1181,7 @@
       "name": "scalar-over-mapping",
       "input": "tts: 3\n",
       "config": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -1198,7 +1198,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90
@@ -1364,7 +1364,7 @@
       "name": "list-file",
       "input": "- a\n- b\n",
       "config": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -1381,7 +1381,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90
@@ -1560,7 +1560,7 @@
       "name": "bad-yaml",
       "input": "model: [unclosed\n",
       "config": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -1577,7 +1577,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90
@@ -1754,9 +1754,9 @@
     },
     {
       "name": "codex-backend",
-      "input": "gauss:\n  autoformalize:\n    backend: codex\n",
+      "input": "fisher:\n  autoformalize:\n    backend: codex\n",
       "config": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -1773,7 +1773,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90
@@ -1952,7 +1952,7 @@
       "name": "null-agent",
       "input": "agent: null\n",
       "config": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -1969,7 +1969,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90

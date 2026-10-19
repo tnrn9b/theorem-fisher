@@ -4,7 +4,8 @@
 --
 --   * @provider@ is @model.provider@ (default @auto@), @model@ is
 --     @model.default@ (or @model@ when it is a plain string),
---     @autoformalizeModel@ is @gauss.autoformalize.model@ (empty: each
+--     @autoformalizeModel@ is @fisher.autoformalize.model@, else
+--     @gauss.autoformalize.model@ (empty: each
 --     backend's own default) and @contextStrategy@ is @fisher.context@
 --     (@compress@, @clm@ or @rlm@). They are written to config.yaml through
 --     'setConfigValueAt' (the user's own file, its key order kept), and only
@@ -49,6 +50,7 @@ import Network.Wai (Request (..), Response)
 import System.Directory (doesFileExist)
 import System.IO.Unsafe (unsafePerformIO)
 
+import Fisher.Compat (lookupConfigCompat)
 import Fisher.Config (getPath, loadConfigAt)
 import Fisher.Config.Set (Coerced (..), SetTarget (..), coerceValue, setConfigValueAt, setTarget)
 import Fisher.Env (loadEnvAt, saveEnvFileAt, validEnvName)
@@ -120,7 +122,10 @@ current home = do
       strategy = case text ["fisher", "context"] of
         Just s | s `elem` strategies -> s
         _ -> "compress"
-  pure (Current provider model (fromMaybe "" (text ["gauss", "autoformalize", "model"])) strategy warnings)
+      auto = case lookupConfigCompat ["autoformalize", "model"] cfg of
+        Just (A.String t) -> T.strip t
+        _ -> ""
+  pure (Current provider model auto strategy warnings)
 
 -- | The GET body.
 settingsView :: FilePath -> IO A.Value
@@ -215,7 +220,7 @@ post home r =
               writes =
                 [ ("model.default", model) | changed "model" (cModel c) || changed "provider" (cProvider c) ]
                   <> [ ("model.provider", p) | changed "provider" (cProvider c), Just p <- [new "provider"] ]
-                  <> [ ("gauss.autoformalize.model", a) | changed "autoformalizeModel" (cAuto c), Just a <- [new "autoformalizeModel"] ]
+                  <> [ ("fisher.autoformalize.model", a) | changed "autoformalizeModel" (cAuto c), Just a <- [new "autoformalizeModel"] ]
                   <> [ ("fisher.context", s) | changed "contextStrategy" (cStrategy c), Just s <- [new "contextStrategy"] ]
           ok <- if null writes then pure True else userFileIsMapping home
           if not ok

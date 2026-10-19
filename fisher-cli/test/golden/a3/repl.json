@@ -13,36 +13,36 @@
           "input": "/help",
           "dispatched": "/help",
           "continue": true,
-          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|               (^_^)? Available Commands               |\n+-------------------------------------------------------+\n\n  No active project — use /chat for inline onboarding, or /project init, /project convert, /project create <path>, or /project use <path>.\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
+          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|               (^_^)? Available Commands               |\n+-------------------------------------------------------+\n\n  No active project — use /chat for inline onboarding, or /project init, /project convert, /project create <path>, or /project use <path>.\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Fisher\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Fisher when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
         },
         {
           "input": "/prove Main.lean",
           "dispatched": "/prove Main.lean",
           "continue": true,
-          "output": "\n⚙️  /prove Main.lean\nGauss needs an active project before `/prove`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n"
+          "output": "\n⚙️  /prove Main.lean\nFisher needs an active project before `/prove`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Fisher project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n"
         },
         {
           "input": "hello there",
           "plain": "blocked",
-          "output": "Gauss needs an active project before `/chat`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n"
+          "output": "Fisher needs an active project before `/chat`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Fisher project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n"
         },
         {
           "input": "/chat status",
           "dispatched": "/chat status",
           "continue": true,
-          "output": "\n⚙️  /chat status\n`/chat` is off. When it is on, plain text goes to the main interactive provider\nin the current Gauss session. Use `/chat off` to return to top-level command\nmode, or `/managed-chat` if you want the configured managed backend child\nsession.\n"
+          "output": "\n⚙️  /chat status\n`/chat` is off. When it is on, plain text goes to the main interactive provider\nin the current Fisher session. Use `/chat off` to return to top-level command\nmode, or `/managed-chat` if you want the configured managed backend child\nsession.\n"
         },
         {
           "input": "/chat",
           "dispatched": "/chat",
           "continue": true,
-          "output": "\n⚙️  /chat\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Gauss project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
+          "output": "\n⚙️  /chat\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Fisher project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
         },
         {
           "input": "/chat status",
           "dispatched": "/chat status",
           "continue": true,
-          "output": "\n⚙️  /chat status\n`/chat` is on. When it is on, plain text goes to the main interactive provider\nin the current Gauss session. Use `/chat off` to return to top-level command\nmode, or `/managed-chat` if you want the configured managed backend child\nsession.\n"
+          "output": "\n⚙️  /chat status\n`/chat` is on. When it is on, plain text goes to the main interactive provider\nin the current Fisher session. Use `/chat off` to return to top-level command\nmode, or `/managed-chat` if you want the configured managed backend child\nsession.\n"
         },
         {
           "input": "hello there",
@@ -53,73 +53,73 @@
           "input": "/chat off",
           "dispatched": "/chat off",
           "continue": true,
-          "output": "\n⚙️  /chat off\n`/chat` is off. Plain text stays at the top-level Open Gauss prompt until you\nrun `/chat` again.\n"
+          "output": "\n⚙️  /chat off\n`/chat` is off. Plain text stays at the top-level Theorem Fisher prompt until\nyou run `/chat` again.\n"
         },
         {
           "input": "/start",
           "dispatched": "/start",
           "continue": true,
-          "output": "\n⚙️  /start\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Gauss project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
+          "output": "\n⚙️  /start\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Fisher project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
         },
         {
           "input": "/chat on",
           "dispatched": "/chat on",
           "continue": true,
-          "output": "\n⚙️  /chat on\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Gauss project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
+          "output": "\n⚙️  /chat on\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Fisher project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
         },
         {
           "input": "/chat make it so",
           "dispatched": "/chat make it so",
           "continue": true,
-          "output": "\n⚙️  /chat make it so\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Gauss project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n`/chat` is sending your message to the main interactive provider.\n"
+          "output": "\n⚙️  /chat make it so\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Fisher project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n`/chat` is sending your message to the main interactive provider.\n"
         },
         {
           "input": "get started",
           "dispatched": "/chat",
           "continue": true,
-          "output": "\n⚙️  /chat\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Gauss project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
+          "output": "\n⚙️  /chat\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Fisher project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
         },
         {
           "input": "chta",
           "dispatched": "/chat",
           "continue": true,
-          "output": "\n⚙️  /chat\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Gauss project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
+          "output": "\n⚙️  /chat\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Fisher project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
         },
         {
           "input": "help",
           "dispatched": "/help",
           "continue": true,
-          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|               (^_^)? Available Commands               |\n+-------------------------------------------------------+\n\n  No active project — use /chat for inline onboarding, or /project init, /project convert, /project create <path>, or /project use <path>.\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
+          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|               (^_^)? Available Commands               |\n+-------------------------------------------------------+\n\n  No active project — use /chat for inline onboarding, or /project init, /project convert, /project create <path>, or /project use <path>.\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Fisher\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Fisher when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
         },
         {
           "input": "begin now",
           "dispatched": "/chat now",
           "continue": true,
-          "output": "\n⚙️  /chat now\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Gauss project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n`/chat` is sending your message to the main interactive provider.\n"
+          "output": "\n⚙️  /chat now\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Fisher project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n`/chat` is sending your message to the main interactive provider.\n"
         },
         {
           "input": "/projetc",
           "dispatched": "/projetc",
           "continue": true,
-          "output": "\n⚙️  /projetc\n  Assuming /project from your input.\n⏳ Updating Gauss project state...\n\n  Project Status\n  CWD: <TMP>/outside\n  Session override: (none)\n  Active project: (none)\n  Detail: No active Gauss project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Next: /project init, /project convert, /project create <path>, or /project use <path>\n"
+          "output": "\n⚙️  /projetc\n  Assuming /project from your input.\n⏳ Updating Fisher project state...\n\n  Project Status\n  CWD: <TMP>/outside\n  Session override: (none)\n  Active project: (none)\n  Detail: No active Fisher project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Next: /project init, /project convert, /project create <path>, or /project use <path>\n"
         },
         {
           "input": "/strat",
           "dispatched": "/strat",
           "continue": true,
-          "output": "\n⚙️  /strat\n  Assuming /chat from your input.\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Gauss project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
+          "output": "\n⚙️  /strat\n  Assuming /chat from your input.\n`/chat` is on. Plain text now goes to the main interactive provider even without\nan active Fisher project.\nNext: use `/project use <path>` for an existing Lean repo, `/project init` in\nthe current repo, `/project create <path> --template-source\n<template-or-git-url>` for a new one, or `/managed-chat` if you want the\nconfigured managed backend child session instead.\nWhen the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or\n`/swarm`.\n"
         },
         {
           "input": "/managed-chat status",
           "dispatched": "/managed-chat status",
           "continue": true,
-          "output": "\n⚙️  /managed-chat status\n`/managed-chat` opens the configured managed backend child session\n(`claude-code`). Use `/autoformalize-backend` to switch backends, or `/chat` for\ninline onboarding in the current Gauss session.\n"
+          "output": "\n⚙️  /managed-chat status\n`/managed-chat` opens the configured managed backend child session\n(`claude-code`). Use `/autoformalize-backend` to switch backends, or `/chat` for\ninline onboarding in the current Fisher session.\n"
         },
         {
           "input": "/managed-chat off",
           "dispatched": "/managed-chat off",
           "continue": true,
-          "output": "\n⚙️  /managed-chat off\n`/managed-chat` is not a persistent mode. Run `/chat` if you want inline\nonboarding in the current Gauss session.\n"
+          "output": "\n⚙️  /managed-chat off\n`/managed-chat` is not a persistent mode. Run `/chat` if you want inline\nonboarding in the current Fisher session.\n"
         },
         {
           "input": "/managed-chat on",
@@ -151,14 +151,14 @@
           "dispatched": "/autoformalize-backend codex",
           "continue": true,
           "output": "\n⚙️  /autoformalize-backend codex\n(^_^)b Autoformalize backend set to: codex (saved to config; active now)\n  The next managed Lean workflow run will use this backend.\n",
-          "config_after": "gauss:\n  autoformalize:\n    backend: codex\n",
+          "config_after": "fisher:\n  autoformalize:\n    backend: codex\n",
           "env_backend": "codex"
         },
         {
           "input": "/autoformalize-backend",
           "dispatched": "/autoformalize-backend",
           "continue": true,
-          "output": "\n⚙️  /autoformalize-backend\n  Autoformalize backend: codex\n  Config backend:        codex\n  Session override:     GAUSS_AUTOFORMALIZE_BACKEND is set for this running CLI\n  Available:            claude-code, codex\n  Usage: /autoformalize-backend <backend>\n",
+          "output": "\n⚙️  /autoformalize-backend\n  Autoformalize backend: codex\n  Config backend:        codex\n  Session override:     FISHER_AUTOFORMALIZE_BACKEND is set for this running CLI\n  Available:            claude-code, codex\n  Usage: /autoformalize-backend <backend>\n",
           "env_backend": "codex"
         },
         {
@@ -166,14 +166,14 @@
           "dispatched": "/autoformalize-backend Claude",
           "continue": true,
           "output": "\n⚙️  /autoformalize-backend Claude\n(^_^)b Autoformalize backend set to: claude-code (saved to config; active now)\n  The next managed Lean workflow run will use this backend.\n",
-          "config_after": "gauss:\n  autoformalize:\n    backend: claude-code\n",
+          "config_after": "fisher:\n  autoformalize:\n    backend: claude-code\n",
           "env_backend": "claude-code"
         },
         {
           "input": "/autoformalize-backend bogus",
           "dispatched": "/autoformalize-backend bogus",
           "continue": true,
-          "output": "\n⚙️  /autoformalize-backend bogus\n(>_<) `gauss.autoformalize.backend` must be one of: claude-code, codex.\n  Available: claude-code, codex\n",
+          "output": "\n⚙️  /autoformalize-backend bogus\n(>_<) `fisher.autoformalize.backend` must be one of: claude-code, codex.\n  Available: claude-code, codex\n",
           "env_backend": "claude-code"
         },
         {
@@ -222,98 +222,98 @@
           "input": "/config",
           "dispatched": "/config",
           "continue": true,
-          "output": "\n⚙️  /config\n\n+--------------------------------------------------+\n|               (^_^) Configuration                |\n+--------------------------------------------------+\n\n  -- Model --\n  Model:     anthropic/claude-opus-4.6\n  Base URL:  https://openrouter.ai/api/v1\n  API Key:   Not set!\n\n  -- Terminal --\n  Environment:  local\n  Working Dir:  <TMP>/outside\n  Timeout:      60s\n  Handoff:      auto\n\n  -- Agent --\n  Max Turns:  90\n  Toolsets:   all\n  Verbose:    False\n\n  -- Session --\n  Started:     <DATETIME>\n  Config File: <GAUSS_HOME>/config.yaml (loaded)\n\n  -- Project --\n  Active:     (none)\n  Detail:     No active Gauss project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n\n",
+          "output": "\n⚙️  /config\n\n+--------------------------------------------------+\n|               (^_^) Configuration                |\n+--------------------------------------------------+\n\n  -- Model --\n  Model:     anthropic/claude-opus-4.6\n  Base URL:  https://openrouter.ai/api/v1\n  API Key:   Not set!\n\n  -- Terminal --\n  Environment:  local\n  Working Dir:  <TMP>/outside\n  Timeout:      60s\n  Handoff:      auto\n\n  -- Agent --\n  Max Turns:  90\n  Toolsets:   all\n  Verbose:    False\n\n  -- Session --\n  Started:     <DATETIME>\n  Config File: <GAUSS_HOME>/config.yaml (loaded)\n\n  -- Project --\n  Active:     (none)\n  Detail:     No active Fisher project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n\n",
           "env_backend": "claude-code"
         },
         {
           "input": "/plan x",
           "dispatched": "/plan x",
           "continue": true,
-          "output": "\n⚙️  /plan x\nGauss needs an active project before `/plan`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "output": "\n⚙️  /plan x\nFisher needs an active project before `/plan`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Fisher project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
           "env_backend": "claude-code"
         },
         {
           "input": "/cron list",
           "dispatched": "/cron list",
           "continue": true,
-          "output": "\n⚙️  /cron list\nGauss needs an active project before `/cron`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "output": "\n⚙️  /cron list\nFisher needs an active project before `/cron`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Fisher project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
           "env_backend": "claude-code"
         },
         {
           "input": "/skills",
           "dispatched": "/skills",
           "continue": true,
-          "output": "\n⚙️  /skills\nGauss needs an active project before `/skills`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "output": "\n⚙️  /skills\nFisher needs an active project before `/skills`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Fisher project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
           "env_backend": "claude-code"
         },
         {
           "input": "/reload-mcp",
           "dispatched": "/reload-mcp",
           "continue": true,
-          "output": "\n⚙️  /reload-mcp\nGauss needs an active project before `/reload-mcp`. Use `/project init`,\n`/project convert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "output": "\n⚙️  /reload-mcp\nFisher needs an active project before `/reload-mcp`. Use `/project init`,\n`/project convert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Fisher project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
           "env_backend": "claude-code"
         },
         {
           "input": "/background x",
           "dispatched": "/background x",
           "continue": true,
-          "output": "\n⚙️  /background x\nGauss needs an active project before `/background`. Use `/project init`,\n`/project convert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "output": "\n⚙️  /background x\nFisher needs an active project before `/background`. Use `/project init`,\n`/project convert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Fisher project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
           "env_backend": "claude-code"
         },
         {
           "input": "/zzz",
           "dispatched": "/zzz",
           "continue": true,
-          "output": "\n⚙️  /zzz\nGauss needs an active project before `/zzz`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "output": "\n⚙️  /zzz\nFisher needs an active project before `/zzz`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Fisher project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
           "env_backend": "claude-code"
         },
         {
           "input": "/he",
           "dispatched": "/he",
           "continue": true,
-          "output": "\n⚙️  /he\nGauss needs an active project before `/he`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "output": "\n⚙️  /he\nFisher needs an active project before `/he`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Fisher project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
           "env_backend": "claude-code"
         },
         {
           "input": "/re",
           "dispatched": "/re",
           "continue": true,
-          "output": "\n⚙️  /re\nGauss needs an active project before `/re`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "output": "\n⚙️  /re\nFisher needs an active project before `/re`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Fisher project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
           "env_backend": "claude-code"
         },
         {
           "input": "/ch",
           "dispatched": "/ch",
           "continue": true,
-          "output": "\n⚙️  /ch\nGauss needs an active project before `/ch`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "output": "\n⚙️  /ch\nFisher needs an active project before `/ch`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Fisher project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
           "env_backend": "claude-code"
         },
         {
           "input": "/HELP",
           "dispatched": "/HELP",
           "continue": true,
-          "output": "\n⚙️  /HELP\n\n+-------------------------------------------------------+\n|               (^_^)? Available Commands               |\n+-------------------------------------------------------+\n\n  No active project — use /chat for inline onboarding, or /project init, /project convert, /project create <path>, or /project use <path>.\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n",
+          "output": "\n⚙️  /HELP\n\n+-------------------------------------------------------+\n|               (^_^)? Available Commands               |\n+-------------------------------------------------------+\n\n  No active project — use /chat for inline onboarding, or /project init, /project convert, /project create <path>, or /project use <path>.\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Fisher\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Fisher when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n",
           "env_backend": "claude-code"
         },
         {
           "input": "/au",
           "dispatched": "/au",
           "continue": true,
-          "output": "\n⚙️  /au\nGauss needs an active project before `/au`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "output": "\n⚙️  /au\nFisher needs an active project before `/au`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Fisher project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
           "env_backend": "claude-code"
         },
         {
           "input": "/autoformalize-b",
           "dispatched": "/autoformalize-b",
           "continue": true,
-          "output": "\n⚙️  /autoformalize-b\nGauss needs an active project before `/autoformalize-b`. Use `/project init`,\n`/project convert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "output": "\n⚙️  /autoformalize-b\nFisher needs an active project before `/autoformalize-b`. Use `/project init`,\n`/project convert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Fisher project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
           "env_backend": "claude-code"
         },
         {
           "input": "/review",
           "dispatched": "/review",
           "continue": true,
-          "output": "\n⚙️  /review\nGauss needs an active project before `/review`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Gauss project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
+          "output": "\n⚙️  /review\nFisher needs an active project before `/review`. Use `/project init`, `/project\nconvert`, `/project create <path>`, or `/project use <path>` first.\nIf you only want orientation first, run `/chat` for inline onboarding chat.\nNo active Fisher project found. Use `/project init`, `/project convert`, or\n`/project use <path>` first.\n",
           "env_backend": "claude-code"
         },
         {
@@ -337,7 +337,7 @@
           "input": "/help",
           "dispatched": "/help",
           "continue": true,
-          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|               (^_^)? Available Commands               |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · blueprint\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
+          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|               (^_^)? Available Commands               |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · blueprint\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Fisher\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Fisher when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
         },
         {
           "input": "/config",
@@ -349,7 +349,7 @@
           "input": "/skin",
           "dispatched": "/skin",
           "continue": true,
-          "output": "\n⚙️  /skin\n\n  Current skin: default\n  Available skins:\n    ● default — Classic Gauss — gold and kawaii\n      ares — War-god theme — crimson and bronze\n      mono — Monochrome — clean grayscale\n      slate — Cool blue — developer-focused\n      poseidon — Ocean-god theme — deep blue and seafoam\n      sisyphus — Sisyphean theme — austere grayscale with persistence\n      charizard — Volcanic theme — burnt orange and ember\n\n  Usage: /skin <name>\n  Custom skins: drop a YAML file in <GAUSS_HOME>/skins/\n\n"
+          "output": "\n⚙️  /skin\n\n  Current skin: default\n  Available skins:\n    ● default — Classic Fisher — gold and kawaii\n      ares — War-god theme — crimson and bronze\n      mono — Monochrome — clean grayscale\n      slate — Cool blue — developer-focused\n      poseidon — Ocean-god theme — deep blue and seafoam\n      sisyphus — Sisyphean theme — austere grayscale with persistence\n      charizard — Volcanic theme — burnt orange and ember\n\n  Usage: /skin <name>\n  Custom skins: drop a YAML file in <GAUSS_HOME>/skins/\n\n"
         },
         {
           "input": "/skin ares",
@@ -362,7 +362,7 @@
           "input": "/help",
           "dispatched": "/help",
           "continue": true,
-          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|                (⚔) Available Commands                 |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · blueprint\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
+          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|                (⚔) Available Commands                 |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · blueprint\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Fisher\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Fisher when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
         },
         {
           "input": "/skin nope",
@@ -381,7 +381,7 @@
           "input": "/clear",
           "dispatched": "/clear",
           "continue": true,
-          "output": "\n⚙️  /clear\n<ERASE-SCREEN>\n\n                         GAUSS · Lean Autoformalization\n\n╭────────────────────────── Gauss v0.2.2 (2026.4.5) ───────────────────────────╮\n│  claude-opus-4.6 · Math Inc.                                                 │\n│  <TMP:73>…  │\n│  Project: Demo Project · blueprint                                           │\n│  Session: <SESSION>                                             │\n│                                                                              │\n│  Start Here                                                                  │\n│  `/chat` — turn on onboarding mode and show the first steps                  │\n│  `/project` — create, convert, inspect, or switch the active project         │\n│  `/prove` — spawn a guided managed proving agent                             │\n│  `/review` — review, checkpoint, refactor, or golf Lean proofs               │\n│  `/draft` — draft Lean declaration skeletons                                 │\n│  `/autoprove` — spawn an autonomous managed proving agent                    │\n│  `/formalize` — spawn an interactive managed formalization agent             │\n│  `/autoformalize` — spawn an autonomous managed formalization agent          │\n│  `/swarm` — track, attach, or cancel workflow agents                         │\n│  `/help` — session and diagnostics commands                                  │\n│  You can ignore MCP and plugin internals at first; Open Gauss stages the     │\n│  default Lean workflow setup for you.                                        │\n│                                                                              │\n│  /chat · /project · /prove · /review · /draft · /autoprove · /formalize ·    │\n│  /autoformalize · /swarm · /help · /help for commands                        │\n╰──────────────────────────────────────────────────────────────────────────────╯\n  ✨ (◕‿◕)✨ Fresh start! Screen cleared and conversation reset.\n\n"
+          "output": "\n⚙️  /clear\n<ERASE-SCREEN>\n\n                        FISHER · Lean Autoformalization\n\n╭────────────────────────── Fisher v0.2.2 (2026.4.5) ──────────────────────────╮\n│  claude-opus-4.6 · Math Inc.                                                 │\n│  <TMP:73>…  │\n│  Project: Demo Project · blueprint                                           │\n│  Session: <SESSION>                                             │\n│                                                                              │\n│  Start Here                                                                  │\n│  `/chat` — turn on onboarding mode and show the first steps                  │\n│  `/project` — create, convert, inspect, or switch the active project         │\n│  `/prove` — spawn a guided managed proving agent                             │\n│  `/review` — review, checkpoint, refactor, or golf Lean proofs               │\n│  `/draft` — draft Lean declaration skeletons                                 │\n│  `/autoprove` — spawn an autonomous managed proving agent                    │\n│  `/formalize` — spawn an interactive managed formalization agent             │\n│  `/autoformalize` — spawn an autonomous managed formalization agent          │\n│  `/swarm` — track, attach, or cancel workflow agents                         │\n│  `/help` — session and diagnostics commands                                  │\n│  You can ignore MCP and plugin internals at first; Theorem Fisher stages     │\n│  the default Lean workflow setup for you.                                    │\n│                                                                              │\n│  /chat · /project · /prove · /review · /draft · /autoprove · /formalize ·    │\n│  /autoformalize · /swarm · /help · /help for commands                        │\n╰──────────────────────────────────────────────────────────────────────────────╯\n  ✨ (◕‿◕)✨ Fresh start! Screen cleared and conversation reset.\n\n"
         },
         {
           "input": "/prove Main.lean",
@@ -614,7 +614,7 @@
           "input": "/help",
           "dispatched": "/help",
           "continue": true,
-          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|               (^_^)? Available Commands               |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · cwd:Math · blueprint\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
+          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|               (^_^)? Available Commands               |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · cwd:Math · blueprint\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Fisher\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Fisher when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
         },
         {
           "input": "/config",
@@ -657,27 +657,27 @@
           "input": "/autoformalize-backend",
           "dispatched": "/autoformalize-backend",
           "continue": true,
-          "output": "\n⚙️  /autoformalize-backend\n  Autoformalize backend: codex\n  Config backend:        claude-code\n  Session override:     GAUSS_AUTOFORMALIZE_BACKEND is set for this running CLI\n  Available:            claude-code, codex\n  Usage: /autoformalize-backend <backend>\n"
+          "output": "\n⚙️  /autoformalize-backend\n  Autoformalize backend: codex\n  Config backend:        claude-code\n  Session override:     FISHER_AUTOFORMALIZE_BACKEND is set for this running CLI\n  Available:            claude-code, codex\n  Usage: /autoformalize-backend <backend>\n"
         },
         {
           "input": "/managed-chat status",
           "dispatched": "/managed-chat status",
           "continue": true,
-          "output": "\n⚙️  /managed-chat status\n`/managed-chat` opens the configured managed backend child session (`codex`).\nUse `/autoformalize-backend` to switch backends, or `/chat` for inline\nonboarding in the current Gauss session.\n"
+          "output": "\n⚙️  /managed-chat status\n`/managed-chat` opens the configured managed backend child session (`codex`).\nUse `/autoformalize-backend` to switch backends, or `/chat` for inline\nonboarding in the current Fisher session.\n"
         },
         {
           "input": "/autoformalize-backend claude-code",
           "dispatched": "/autoformalize-backend claude-code",
           "continue": true,
           "output": "\n⚙️  /autoformalize-backend claude-code\n(^_^)b Autoformalize backend set to: claude-code (saved to config; active now)\n  The next managed Lean workflow run will use this backend.\n",
-          "config_after": "gauss:\n  autoformalize:\n    backend: claude-code\n",
+          "config_after": "fisher:\n  autoformalize:\n    backend: claude-code\n",
           "env_backend": "claude-code"
         },
         {
           "input": "/autoformalize-backend",
           "dispatched": "/autoformalize-backend",
           "continue": true,
-          "output": "\n⚙️  /autoformalize-backend\n  Autoformalize backend: claude-code\n  Config backend:        claude-code\n  Session override:     GAUSS_AUTOFORMALIZE_BACKEND is set for this running CLI\n  Available:            claude-code, codex\n  Usage: /autoformalize-backend <backend>\n",
+          "output": "\n⚙️  /autoformalize-backend\n  Autoformalize backend: claude-code\n  Config backend:        claude-code\n  Session override:     FISHER_AUTOFORMALIZE_BACKEND is set for this running CLI\n  Available:            claude-code, codex\n  Usage: /autoformalize-backend <backend>\n",
           "env_backend": "claude-code"
         }
       ],
@@ -698,13 +698,13 @@
           "input": "/help",
           "dispatched": "/help",
           "continue": true,
-          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|                (⚔) Available Commands                 |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · blueprint\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
+          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|                (⚔) Available Commands                 |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · blueprint\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Fisher\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Fisher when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
         },
         {
           "input": "/skin",
           "dispatched": "/skin",
           "continue": true,
-          "output": "\n⚙️  /skin\n\n  Current skin: ares\n  Available skins:\n      default — Classic Gauss — gold and kawaii\n    ● ares — War-god theme — crimson and bronze\n      mono — Monochrome — clean grayscale\n      slate — Cool blue — developer-focused\n      poseidon — Ocean-god theme — deep blue and seafoam\n      sisyphus — Sisyphean theme — austere grayscale with persistence\n      charizard — Volcanic theme — burnt orange and ember\n\n  Usage: /skin <name>\n  Custom skins: drop a YAML file in <GAUSS_HOME>/skins/\n\n"
+          "output": "\n⚙️  /skin\n\n  Current skin: ares\n  Available skins:\n      default — Classic Fisher — gold and kawaii\n    ● ares — War-god theme — crimson and bronze\n      mono — Monochrome — clean grayscale\n      slate — Cool blue — developer-focused\n      poseidon — Ocean-god theme — deep blue and seafoam\n      sisyphus — Sisyphean theme — austere grayscale with persistence\n      charizard — Volcanic theme — burnt orange and ember\n\n  Usage: /skin <name>\n  Custom skins: drop a YAML file in <GAUSS_HOME>/skins/\n\n"
         },
         {
           "input": "/swarm",
@@ -733,19 +733,19 @@
           "input": "/project use ../project",
           "dispatched": "/project use ../project",
           "continue": true,
-          "output": "\n⚙️  /project use ../project\n⏳ Updating Gauss project state...\n(^_^)b Active project set to: Demo Project\n  Root: <TMP>/project\n"
+          "output": "\n⚙️  /project use ../project\n⏳ Updating Fisher project state...\n(^_^)b Active project set to: Demo Project\n  Root: <TMP>/project\n"
         },
         {
           "input": "/help",
           "dispatched": "/help",
           "continue": true,
-          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|                      (o_o) Mine                       |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · blueprint [override]\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
+          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|                      (o_o) Mine                       |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · blueprint [override]\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Fisher\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Fisher when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
         },
         {
           "input": "/skin",
           "dispatched": "/skin",
           "continue": true,
-          "output": "\n⚙️  /skin\n\n  Current skin: mine\n  Available skins:\n      default — Classic Gauss — gold and kawaii\n      ares — War-god theme — crimson and bronze\n      mono — Monochrome — clean grayscale\n      slate — Cool blue — developer-focused\n      poseidon — Ocean-god theme — deep blue and seafoam\n      sisyphus — Sisyphean theme — austere grayscale with persistence\n      charizard — Volcanic theme — burnt orange and ember\n    ● mine (user) — Mine\n\n  Usage: /skin <name>\n  Custom skins: drop a YAML file in <GAUSS_HOME>/skins/\n\n"
+          "output": "\n⚙️  /skin\n\n  Current skin: mine\n  Available skins:\n      default — Classic Fisher — gold and kawaii\n      ares — War-god theme — crimson and bronze\n      mono — Monochrome — clean grayscale\n      slate — Cool blue — developer-focused\n      poseidon — Ocean-god theme — deep blue and seafoam\n      sisyphus — Sisyphean theme — austere grayscale with persistence\n      charizard — Volcanic theme — burnt orange and ember\n    ● mine (user) — Mine\n\n  Usage: /skin <name>\n  Custom skins: drop a YAML file in <GAUSS_HOME>/skins/\n\n"
         },
         {
           "input": "/skin broken",
@@ -770,7 +770,7 @@
           "input": "/help",
           "dispatched": "/help",
           "continue": true,
-          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|                (Ψ) Available Commands                 |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · blueprint [override]\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Gauss\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Gauss when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
+          "output": "\n⚙️  /help\n\n+-------------------------------------------------------+\n|                (Ψ) Available Commands                 |\n+-------------------------------------------------------+\n\n  Active project: Demo Project · blueprint [override]\n\n  ── Start Here ──\n    /chat           - Show the first-step guide and enable plain-language chat\nmode\n    /project        - Create, convert, inspect, or switch the active Fisher\nproject\n\n  ── Workflow ──\n    /prove          - Spawn a managed backend agent for the guided Lean prove\nworkflow\n    /draft          - Spawn a managed backend agent for the Lean draft workflow\n    /review         - Spawn a managed backend agent for the read-only Lean\nreview workflow\n    /checkpoint     - Spawn a managed backend agent for the Lean checkpoint\nworkflow\n    /refactor       - Spawn a managed backend agent for the Lean refactor\nworkflow\n    /golf           - Spawn a managed backend agent for the Lean proof golfing\nworkflow\n    /autoprove      - Spawn a managed backend agent for the autonomous Lean\nautoprove workflow\n    /formalize      - Spawn a managed backend agent for the interactive Lean\nformalize workflow\n    /autoformalize  - Spawn a managed backend agent for the autonomous Lean\nautoformalize workflow\n    /autoformalize-backend - Show or change the managed workflow backend\n    /swarm          - Show workflow agents · /swarm attach <id> · /swarm cancel\n<id>\n\n  ── Session ──\n    /managed-chat   - Open the configured managed backend child session and\nreturn to Fisher when it exits\n    /clear          - Clear screen and start a new session\n\n  ── Configuration ──\n    /config         - Show current configuration\n\n  ── Info ──\n    /help           - Show this help message\n\n  ── Exit ──\n    /quit           - Exit the CLI (also: /exit, /q)\n\n  Tip: Start with /chat for inline onboarding if you want orientation first. Use /project when you're ready to work in a Lean repo, then launch /prove, /review, /checkpoint, /refactor, /golf, /draft, /autoprove, /formalize, or /autoformalize.\n  Multi-line: Alt+Enter for a new line\n  Paste image: Alt+V (or /paste)\n\n"
         }
       ],
       "goodbye": "\nFair winds! Ψ\n"
@@ -780,7 +780,7 @@
       "cwd": "outside",
       "env": {},
       "config": {
-        "gauss": {
+        "fisher": {
           "autoformalize": {
             "backend": "codex"
           }
@@ -798,7 +798,7 @@
           "input": "/managed-chat status",
           "dispatched": "/managed-chat status",
           "continue": true,
-          "output": "\n⚙️  /managed-chat status\n`/managed-chat` opens the configured managed backend child session (`codex`).\nUse `/autoformalize-backend` to switch backends, or `/chat` for inline\nonboarding in the current Gauss session.\n"
+          "output": "\n⚙️  /managed-chat status\n`/managed-chat` opens the configured managed backend child session (`codex`).\nUse `/autoformalize-backend` to switch backends, or `/chat` for inline\nonboarding in the current Fisher session.\n"
         }
       ],
       "goodbye": "\nGoodbye! @\n"
@@ -808,7 +808,7 @@
       "cwd": "outside",
       "env": {},
       "config": {
-        "gauss": {
+        "fisher": {
           "autoformalize": {
             "backend": "nonsense"
           }
@@ -826,7 +826,7 @@
           "input": "/managed-chat status",
           "dispatched": "/managed-chat status",
           "continue": true,
-          "output": "\n⚙️  /managed-chat status\n`/managed-chat` opens the configured managed backend child session (`nonsense`).\nUse `/autoformalize-backend` to switch backends, or `/chat` for inline\nonboarding in the current Gauss session.\n"
+          "output": "\n⚙️  /managed-chat status\n`/managed-chat` opens the configured managed backend child session (`nonsense`).\nUse `/autoformalize-backend` to switch backends, or `/chat` for inline\nonboarding in the current Fisher session.\n"
         }
       ],
       "goodbye": "\nGoodbye! @\n"

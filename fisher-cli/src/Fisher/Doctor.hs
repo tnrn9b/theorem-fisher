@@ -1,5 +1,5 @@
 -- | @fisher doctor@, ported from @gauss_cli/doctor.py@ for the sections that
--- concern Fisher: configuration files, the ~/.gauss directory, external
+-- concern Fisher: configuration files, the Fisher home, external
 -- tools, and the managed Lean workflows. Fisher adds the Rocq and Isabelle
 -- sections (the prover, coq-lsp's pet, the Isabelle-MCP registration, uvx and
 -- Python) for the project in reach, or for every prover with @--all@.
@@ -31,7 +31,7 @@ import System.Timeout (timeout)
 import Text.Read (readMaybe)
 
 import Fisher.Config (saveConfigAt, defaultConfig)
-import Fisher.Paths (configPathIn, envPathIn, expandUser)
+import Fisher.Paths (configPathIn, envPathIn, expandUser, fisherHomeLabelWith, homeLabel)
 import Fisher.Project
 import Fisher.Prover
 import Fisher.Term
@@ -47,7 +47,7 @@ data DoctorEnv = DoctorEnv
   -- ^ The environment the managed checks read: PATH, HOME and overrides.
   , deActiveCwd :: Maybe FilePath
   , deGetPersisted :: Text -> IO (Maybe Text)
-  -- ^ @get_env_value@: the process environment, then ~/.gauss/.env.
+  -- ^ @get_env_value@: the process environment, then the Fisher home's .env.
   , deKeychain :: IO (Maybe Text)
   , deCliName :: Text
   }
@@ -84,13 +84,13 @@ checkManagedWorkflows de line issue = do
   case (,) <$> resolveBackend cfg env <*> resolveAuthMode cfg env of
     Left e -> do
       failed st o "Managed workflow config" (paren e)
-      issue ("Fix gauss.autoformalize config: " <> e)
+      issue ("Fix fisher.autoformalize config: " <> e)
     Right (backend, auth) -> do
       ok st o "Managed backend" (paren (backendName backend))
       ok st o "Managed auth mode" (paren (authModeName auth))
       let template = resolveTemplateSource cfg env
       if T.null template
-        then warn st o "Project template source" "(`/project create` needs `--template-source` or `gauss.project.template_source`)"
+        then warn st o "Project template source" "(`/project create` needs `--template-source` or `fisher.project.template_source`)"
         else ok st o "Project template source" (paren template)
       resolveUvRunner env >>= \case
         Right [_, "lean-mcp"] -> ok st o "Lean MCP server" "(fisher lean-mcp)"
@@ -115,13 +115,13 @@ checkManagedWorkflows de line issue = do
           ok st o "Active working directory" (paren (T.pack activeDir))
           r <- tryProject (discoverProject activeDir)
           case r of
-            Right p -> ok st o "Active Gauss project" (paren (projectLabel p))
+            Right p -> ok st o "Active Fisher project" (paren (projectLabel p))
             Left (ProjectNotFound _) -> do
-              warn st o "Active Gauss project" (paren ("none under " <> T.pack activeDir))
-              issue "Create or select a Gauss project with `/project init`, `/project convert`, or `/project use <path>`"
+              warn st o "Active Fisher project" (paren ("none under " <> T.pack activeDir))
+              issue "Create or select a Fisher project with `/project init`, `/project convert`, or `/project use <path>`"
             Left (ProjectManifestInvalid m) -> do
-              failed st o "Gauss project manifest" (paren m)
-              issue ("Repair the active Gauss project manifest: " <> m)
+              failed st o "Fisher project manifest" (paren m)
+              issue ("Repair the active Fisher project manifest: " <> m)
             Left _ -> pure ()
         else do
           failed st o "Active working directory" (paren (T.pack activeDir <> " does not exist"))
@@ -140,7 +140,7 @@ checkManagedWorkflows de line issue = do
                 | Just _ <- staged -> ok st o "Claude auth" (paren ("staged via " <> stagedKeys))
                 | otherwise -> do
                     failed st o "Claude auth" "(not found)"
-                    issue "Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `gauss.autoformalize.auth_mode: login`"
+                    issue "Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `fisher.autoformalize.auth_mode: login`"
               AuthLogin
                 | login -> ok st o "Claude auth" "(local Claude login)"
                 | apiKey -> warn st o "Claude auth" "(login mode ignores local Claude API keys; first launch will prompt)"
@@ -150,7 +150,7 @@ checkManagedWorkflows de line issue = do
                 | apiKey -> ok st o "Claude API-key auth" "(local Claude API key)"
                 | otherwise -> do
                     failed st o "Claude API-key auth" "(not found)"
-                    issue "Save `ANTHROPIC_API_KEY` / `ANTHROPIC_TOKEN` / `CLAUDE_CODE_OAUTH_TOKEN`, or switch `gauss.autoformalize.auth_mode` back to `auto` or `login`"
+                    issue "Save `ANTHROPIC_API_KEY` / `ANTHROPIC_TOKEN` / `CLAUDE_CODE_OAUTH_TOKEN`, or switch `fisher.autoformalize.auth_mode` back to `auto` or `login`"
       case backend of
         ClaudeCode -> do
           whichIn path "claude" >>= \case
@@ -162,7 +162,7 @@ checkManagedWorkflows de line issue = do
         Fisher -> case nativeProvider cfg env of
           Left e -> do
             failed st o "Native agent provider" (paren e)
-            issue ("Fix gauss.autoformalize config: " <> e)
+            issue ("Fix fisher.autoformalize config: " <> e)
           Right ("anthropic", model) -> do
             ok st o "Native agent" (paren ("fisher chat, anthropic " <> model))
             claudeAuthChecks
@@ -175,7 +175,8 @@ checkManagedWorkflows de line issue = do
               then ok st o "OpenRouter auth" "(OPENROUTER_API_KEY)"
               else do
                 failed st o "OpenRouter auth" "(not found)"
-                issue "Save `OPENROUTER_API_KEY` in ~/.gauss/.env, or set `gauss.autoformalize.native_provider: anthropic`"
+                label <- T.pack <$> fisherHomeLabelWith (pure . flip lookup (deEnv de))
+                issue ("Save `OPENROUTER_API_KEY` in " <> label <> "/.env, or set `fisher.autoformalize.native_provider: anthropic`")
         Codex -> do
           whichIn path "codex" >>= \case
             Just p -> ok st o "Codex CLI" (paren (T.pack p))
@@ -192,7 +193,7 @@ checkManagedWorkflows de line issue = do
               | not (T.null staged) -> ok st o "Codex auth" "(staged OPENAI_API_KEY)"
               | otherwise -> do
                   failed st o "Codex auth" "(not found)"
-                  issue "Run `codex login`, save `OPENAI_API_KEY`, or set `gauss.autoformalize.auth_mode: login`"
+                  issue "Run `codex login`, save `OPENAI_API_KEY`, or set `fisher.autoformalize.auth_mode: login`"
             AuthLogin
               | localAuth -> ok st o "Codex auth" "(local Codex auth)"
               | otherwise -> warn st o "Codex auth" "(login mode will prompt on first launch)"
@@ -201,7 +202,7 @@ checkManagedWorkflows de line issue = do
               | localKey -> ok st o "Codex API-key auth" "(local Codex API key)"
               | otherwise -> do
                   failed st o "Codex API-key auth" "(not found)"
-                  issue "Save `OPENAI_API_KEY`, or switch `gauss.autoformalize.auth_mode` back to `auto` or `login`"
+                  issue "Save `OPENAI_API_KEY`, or switch `fisher.autoformalize.auth_mode` back to `auto` or `login`"
   where
     tryProject :: IO Project -> IO (Either ProjectError Project)
     tryProject = try
@@ -388,6 +389,8 @@ runDoctor fix allProvers de home = do
       o = Out say
       cli = deCliName de
       title = "Fisher Doctor"
+      -- the home in use, as hints name it ('homeLabel')
+      h = T.pack (homeLabel (fromMaybe "" (lookup "HOME" (deEnv de))) home)
       padL = (55 - T.length title) `div` 2
       padR = 55 - T.length title - padL
 
@@ -401,20 +404,20 @@ runDoctor fix allProvers de home = do
   envExists <- doesPathExist envPath
   if envExists
     then do
-      ok st o "~/.gauss/.env file exists" ""
+      ok st o (h <> "/.env file exists") ""
       content <- readTextLenient envPath
       if any (`T.isInfixOf` content) providerEnvHints
         then ok st o "API key or custom endpoint configured" ""
         else do
-          warn st o "No API key found in ~/.gauss/.env" ""
+          warn st o ("No API key found in " <> h <> "/.env") ""
           issue ("Run '" <> cli <> " setup' to configure API keys")
     else do
-      failed st o "~/.gauss/.env file missing" ""
+      failed st o (h <> "/.env file missing") ""
       if fix
         then do
           createDirectoryIfMissing True home
           TIO.writeFile envPath ""
-          ok st o "Created empty ~/.gauss/.env" ""
+          ok st o ("Created empty " <> h <> "/.env") ""
           info st o ("Run '" <> cli <> " setup' to configure API keys")
           fixed
         else do
@@ -422,34 +425,34 @@ runDoctor fix allProvers de home = do
           issue ("Run '" <> cli <> " setup' to create .env")
   cfgExists <- doesPathExist (configPathIn home)
   if cfgExists
-    then ok st o "~/.gauss/config.yaml exists" ""
+    then ok st o (h <> "/config.yaml exists") ""
     else
       if fix
         then do
           saveConfigAt home defaultConfig
-          ok st o "Created ~/.gauss/config.yaml from defaults" ""
+          ok st o ("Created " <> h <> "/config.yaml from defaults") ""
           fixed
         else warn st o "config.yaml not found" "(using defaults)"
 
   section st o "Directory Structure"
   homeExists <- doesDirectoryExist home
   if homeExists
-    then ok st o "~/.gauss directory exists" ""
+    then ok st o (h <> " directory exists") ""
     else
       if fix
-        then createDirectoryIfMissing True home >> ok st o "Created ~/.gauss directory" "" >> fixed
-        else warn st o "~/.gauss not found" "(will be created on first use)"
+        then createDirectoryIfMissing True home >> ok st o ("Created " <> h <> " directory") "" >> fixed
+        else warn st o (h <> " not found") "(will be created on first use)"
   forM_ ["cron", "sessions", "logs", "skills", "memories"] $ \sub -> do
     present <- doesPathExist (home </> T.unpack sub)
     if present
-      then ok st o ("~/.gauss/" <> sub <> "/ exists") ""
+      then ok st o (h <> "/" <> sub <> "/ exists") ""
       else
         if fix
           then do
             createDirectoryIfMissing True (home </> T.unpack sub)
-            ok st o ("Created ~/.gauss/" <> sub <> "/") ""
+            ok st o ("Created " <> h <> "/" <> sub <> "/") ""
             fixed
-          else warn st o ("~/.gauss/" <> sub <> "/ not found") "(will be created on first use)"
+          else warn st o (h <> "/" <> sub <> "/ not found") "(will be created on first use)"
   let soul = home </> "SOUL.md"
   soulExists <- doesPathExist soul
   if soulExists
@@ -458,21 +461,21 @@ runDoctor fix allProvers de home = do
       let real = [l | l <- T.lines content, not (T.null (T.strip l))
                     , not (any (`T.isPrefixOf` T.strip l) ["<!--", "-->", "#"])]
       if null real
-        then info st o "~/.gauss/SOUL.md exists but is empty — edit it to customize personality"
-        else ok st o "~/.gauss/SOUL.md exists (persona configured)" ""
+        then info st o (h <> "/SOUL.md exists but is empty — edit it to customize personality")
+        else ok st o (h <> "/SOUL.md exists (persona configured)") ""
     else do
-      warn st o "~/.gauss/SOUL.md not found" "(create it to give Gauss a custom voice)"
+      warn st o (h <> "/SOUL.md not found") "(create it to give Fisher a custom voice)"
       when fix $ do
         createDirectoryIfMissing True home
         TIO.writeFile soul
-          "# Gauss Voice\n\n<!-- Edit this file to customize how Gauss communicates. -->\n\nYou are Gauss. Be direct, useful, and brief about your identity.\n"
-        ok st o "Created ~/.gauss/SOUL.md with basic template" ""
+          "# Fisher Voice\n\n<!-- Edit this file to customize how Fisher communicates. -->\n\nYou are Fisher. Be direct, useful, and brief about your identity.\n"
+        ok st o ("Created " <> h <> "/SOUL.md with basic template") ""
         fixed
   let memories = home </> "memories"
   memExists <- doesDirectoryExist memories
   if memExists
     then do
-      ok st o "~/.gauss/memories/ directory exists" ""
+      ok st o (h <> "/memories/ directory exists") ""
       forM_ ["MEMORY.md", "USER.md"] $ \f -> do
         present <- doesPathExist (memories </> T.unpack f)
         if present
@@ -481,15 +484,15 @@ runDoctor fix allProvers de home = do
             ok st o (f <> " exists (" <> T.pack (show size) <> " chars)") ""
           else info st o (f <> " not created yet (will be created when the agent first writes a memory)")
     else do
-      warn st o "~/.gauss/memories/ not found" "(will be created on first use)"
+      warn st o (h <> "/memories/ not found") "(will be created on first use)"
       when fix $ do
         createDirectoryIfMissing True memories
-        ok st o "Created ~/.gauss/memories/" ""
+        ok st o ("Created " <> h <> "/memories/") ""
         fixed
   stateDb <- doesPathExist (home </> "state.db")
   if stateDb
-    then info st o "~/.gauss/state.db exists (this build does not read session counts yet)"
-    else info st o "~/.gauss/state.db not created yet (will be created on first session)"
+    then info st o (h <> "/state.db exists (this build does not read session counts yet)")
+    else info st o (h <> "/state.db not created yet (will be created on first session)")
 
   section st o "External Tools"
   let pathEnv = maybe "" id (lookup "PATH" (deEnv de))

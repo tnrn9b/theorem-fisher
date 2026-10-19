@@ -38,19 +38,28 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
               "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/lib/scripts",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4/references",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md"
             },
             "removed": []
@@ -75,7 +84,7 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/lean-lsp.mcp.json",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude.json",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
           "instructions_path": ""
         },
@@ -256,19 +265,28 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
               "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/fake-plugin/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/fake-plugin/skills/lean4",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/fake-plugin",
               "LEAN4_PLUGIN_ROOT": "<TMP>/fake-plugin",
               "LEAN4_SCRIPTS": "<TMP>/fake-plugin/lib/scripts",
               "LEAN4_REFS": "<TMP>/fake-plugin/skills/lean4/references",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md"
             },
             "removed": []
@@ -293,7 +311,7 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/lean-lsp.mcp.json",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude.json",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/fake-plugin/skills/lean4",
           "instructions_path": ""
         },
@@ -441,19 +459,28 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
               "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/fake-plugin/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/fake-plugin/skills/lean4",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/fake-plugin",
               "LEAN4_PLUGIN_ROOT": "<TMP>/fake-plugin",
               "LEAN4_SCRIPTS": "<TMP>/fake-plugin/lib/scripts",
               "LEAN4_REFS": "<TMP>/fake-plugin/skills/lean4/references",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-draft.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-draft.md"
             },
             "removed": []
@@ -478,7 +505,7 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/lean-lsp.mcp.json",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-draft.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude.json",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/fake-plugin/skills/lean4",
           "instructions_path": ""
         },
@@ -615,19 +642,28 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
               "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/fake-plugin/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/fake-plugin/skills/lean4",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/fake-plugin",
               "LEAN4_PLUGIN_ROOT": "<TMP>/fake-plugin",
               "LEAN4_SCRIPTS": "<TMP>/fake-plugin/lib/scripts",
               "LEAN4_REFS": "<TMP>/fake-plugin/skills/lean4/references",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-review.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-review.md"
             },
             "removed": []
@@ -652,7 +688,7 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/lean-lsp.mcp.json",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-review.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude.json",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/fake-plugin/skills/lean4",
           "instructions_path": ""
         },
@@ -782,19 +818,28 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
               "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/fake-plugin/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/fake-plugin/skills/lean4",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/fake-plugin",
               "LEAN4_PLUGIN_ROOT": "<TMP>/fake-plugin",
               "LEAN4_SCRIPTS": "<TMP>/fake-plugin/lib/scripts",
               "LEAN4_REFS": "<TMP>/fake-plugin/skills/lean4/references",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-golf.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-golf.md"
             },
             "removed": [
@@ -821,7 +866,7 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/lean-lsp.mcp.json",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-golf.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude.json",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/fake-plugin/skills/lean4",
           "instructions_path": ""
         },
@@ -952,19 +997,28 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
               "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/fake-plugin/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/fake-plugin/skills/lean4",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/fake-plugin",
               "LEAN4_PLUGIN_ROOT": "<TMP>/fake-plugin",
               "LEAN4_SCRIPTS": "<TMP>/fake-plugin/lib/scripts",
               "LEAN4_REFS": "<TMP>/fake-plugin/skills/lean4/references",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-checkpoint.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-checkpoint.md"
             },
             "removed": []
@@ -989,7 +1043,7 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/lean-lsp.mcp.json",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-checkpoint.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude.json",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/fake-plugin/skills/lean4",
           "instructions_path": ""
         },
@@ -1118,19 +1172,28 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
               "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/fake-plugin/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/fake-plugin/skills/lean4",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/fake-plugin",
               "LEAN4_PLUGIN_ROOT": "<TMP>/fake-plugin",
               "LEAN4_SCRIPTS": "<TMP>/fake-plugin/lib/scripts",
               "LEAN4_REFS": "<TMP>/fake-plugin/skills/lean4/references",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-refactor.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-refactor.md"
             },
             "removed": [
@@ -1157,7 +1220,7 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/lean-lsp.mcp.json",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-refactor.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude.json",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/fake-plugin/skills/lean4",
           "instructions_path": ""
         },
@@ -1294,19 +1357,28 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
               "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/lib/scripts",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4/references",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-autoprove.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-autoprove.md"
             },
             "removed": []
@@ -1331,7 +1403,7 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/lean-lsp.mcp.json",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-autoprove.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude.json",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
           "instructions_path": ""
         },
@@ -1513,19 +1585,28 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
               "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/lib/scripts",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4/references",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-autoformalize.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-autoformalize.md"
             },
             "removed": []
@@ -1550,7 +1631,7 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/lean-lsp.mcp.json",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-autoformalize.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude.json",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
           "instructions_path": ""
         },
@@ -1732,19 +1813,28 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
               "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/lib/scripts",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4/references",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-autoformalize.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-autoformalize.md"
             },
             "removed": []
@@ -1769,7 +1859,7 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/lean-lsp.mcp.json",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-autoformalize.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude.json",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
           "instructions_path": ""
         },
@@ -1952,19 +2042,28 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
               "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/lib/scripts",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4/references",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md"
             },
             "removed": []
@@ -1989,7 +2088,7 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/lean-lsp.mcp.json",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude.json",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
           "instructions_path": ""
         },
@@ -2183,19 +2282,28 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
               "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/lib/scripts",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4/references",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md"
             },
             "removed": []
@@ -2220,7 +2328,7 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/lean-lsp.mcp.json",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude.json",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
           "instructions_path": ""
         },
@@ -2408,19 +2516,28 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/managed/claude-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
               "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/lib/scripts",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4/references",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/managed/startup/<STAMP>-prove.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/managed/startup/<STAMP>-prove.md"
             },
             "removed": []
@@ -2445,7 +2562,7 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/managed/mcp/lean-lsp.mcp.json",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/managed/startup/<STAMP>-prove.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/managed/claude-home/.claude.json",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/gauss-home/autoformalize/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
           "instructions_path": ""
         },
@@ -2628,19 +2745,28 @@
           "env": {
             "set": {
               "HOME": "<TMP>/custom-state/claude-code/managed/claude-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
               "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/custom-state/claude-code/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/custom-state/claude-code/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/custom-state/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/custom-state/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/custom-state/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_PLUGIN_ROOT": "<TMP>/custom-state/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_SCRIPTS": "<TMP>/custom-state/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/lib/scripts",
               "LEAN4_REFS": "<TMP>/custom-state/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4/references",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/custom-state/claude-code/managed/startup/<STAMP>-prove.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/custom-state/claude-code/managed/startup/<STAMP>-prove.md"
             },
             "removed": []
@@ -2665,7 +2791,7 @@
           "mcp_config_path": "<TMP>/custom-state/claude-code/managed/mcp/lean-lsp.mcp.json",
           "startup_context_path": "<TMP>/custom-state/claude-code/managed/startup/<STAMP>-prove.md",
           "backend_config_path": "<TMP>/custom-state/claude-code/managed/claude-home/.claude.json",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/custom-state/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
           "instructions_path": ""
         },
@@ -2853,19 +2979,28 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
               "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/lib/scripts",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4/references",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md"
             },
             "removed": []
@@ -2890,7 +3025,7 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/lean-lsp.mcp.json",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude.json",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
           "instructions_path": ""
         },
@@ -3077,19 +3212,28 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
               "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/lib/scripts",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4/references",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md"
             },
             "removed": []
@@ -3114,7 +3258,7 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/lean-lsp.mcp.json",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude.json",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
           "instructions_path": ""
         },
@@ -3297,19 +3441,28 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
               "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/claude-code/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
               "CLAUDE_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/lib/scripts",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4/references",
+              "FISHER_YOLO_MODE": "1",
               "GAUSS_YOLO_MODE": "1",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md"
             },
             "removed": []
@@ -3334,7 +3487,7 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/lean-lsp.mcp.json",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude.json",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude/plugins/cache/lean4-skills/lean4/1.2.3/skills/lean4",
           "instructions_path": ""
         },
@@ -3667,7 +3820,7 @@
       },
       "error": {
         "class": "AutoformalizeConfigError",
-        "message": "`gauss.autoformalize.handoff_mode` must be one of: auto, helper, strict."
+        "message": "`fisher.autoformalize.handoff_mode` must be one of: auto, helper, strict."
       },
       "files": {},
       "calls": []
@@ -3680,7 +3833,7 @@
       "extras": {},
       "error": {
         "class": "AutoformalizePreflightError",
-        "message": "Claude Code auth not found. Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `gauss.autoformalize.auth_mode: login` (or `GAUSS_AUTOFORMALIZE_AUTH_MODE=login`) to launch the normal Claude login flow."
+        "message": "Claude Code auth not found. Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `fisher.autoformalize.auth_mode: login` (or `FISHER_AUTOFORMALIZE_AUTH_MODE=login`) to launch the normal Claude login flow."
       },
       "files": {},
       "calls": []
@@ -3693,7 +3846,7 @@
       "extras": {},
       "error": {
         "class": "AutoformalizePreflightError",
-        "message": "Claude Code API-key auth not found. Save `ANTHROPIC_API_KEY`, `ANTHROPIC_TOKEN`, or `CLAUDE_CODE_OAUTH_TOKEN`, or switch `gauss.autoformalize.auth_mode` back to `auto` or `login`."
+        "message": "Claude Code API-key auth not found. Save `ANTHROPIC_API_KEY`, `ANTHROPIC_TOKEN`, or `CLAUDE_CODE_OAUTH_TOKEN`, or switch `fisher.autoformalize.auth_mode` back to `auto` or `login`."
       },
       "files": {},
       "calls": []
@@ -3839,7 +3992,7 @@
       },
       "error": {
         "class": "AutoformalizePreflightError",
-        "message": "No active Gauss project found. Use `/project init`, `/project convert`, or `/project use <path>` first. Run `/project init`, `/project convert`, or `/project use <path>` first."
+        "message": "No active Fisher project found. Use `/project init`, `/project convert`, or `/project use <path>` first. Run `/project init`, `/project convert`, or `/project use <path>` first."
       },
       "files": {},
       "calls": []
@@ -4028,7 +4181,7 @@
       },
       "error": {
         "class": "AutoformalizeConfigError",
-        "message": "`gauss.autoformalize.backend` must be one of: claude-code, codex."
+        "message": "`fisher.autoformalize.backend` must be one of: claude-code, codex."
       },
       "files": {},
       "calls": []
@@ -4067,20 +4220,29 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "codex",
               "GAUSS_AUTOFORMALIZE_BACKEND": "codex",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
               "CODEX_HOME": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/lib/scripts",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/references",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-prove.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-prove.md",
-              "GAUSS_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md"
+              "FISHER_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md",
+              "GAUSS_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md"
             },
             "removed": []
           },
@@ -4104,9 +4266,9 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-prove.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
-          "instructions_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md"
+          "instructions_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md"
         },
         "user_instruction": "Main.lean",
         "workflow_kind": "prove",
@@ -4135,9 +4297,9 @@
           }
         },
         "gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml": {
-          "text": "model_instructions_file = \"<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md\"\n\n[mcp_servers.lean-lsp]\ncommand = \"<TMP>/bin/uvx\"\nargs = [\"--from\", \"lean-lsp-mcp\", \"lean-lsp-mcp\"]\n\n[mcp_servers.lean-lsp.env]\nLEAN_PROJECT_PATH = \"<TMP>/project\"\n"
+          "text": "model_instructions_file = \"<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md\"\n\n[mcp_servers.lean-lsp]\ncommand = \"<TMP>/bin/uvx\"\nargs = [\"--from\", \"lean-lsp-mcp\", \"lean-lsp-mcp\"]\n\n[mcp_servers.lean-lsp.env]\nLEAN_PROJECT_PATH = \"<TMP>/project\"\n"
         },
-        "gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md": {
+        "gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md": {
           "text": "# Fisher Managed Lean Workflow Instructions\n\nYou are in a Fisher-managed Lean workflow session.\n\n- Project root: `<TMP>/project`\n- Lean root: `<TMP>/project`\n- Active working directory: `<TMP>/project`\n- Installed Lean4 skill: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4`\n- Lean4 plugin root: `<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4`\n- Lean4 scripts: `<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/lib/scripts`\n- Lean4 references: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/references`\n- Startup context: `<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-prove.md`\n\n## Codex Skill Contract\n- The staged Lean workflow is exposed as the `$lean4` skill.\n- Skill entrypoint: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/SKILL.md`\n- Requested workflow guide: `<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/commands/prove.md`\n- `/lean4:*` names in the startup context are workflow labels from the skill docs, not shell commands.\n- Start by invoking `$lean4`, then follow the matching workflow guide before running project commands.\n\n## Session Contract\n- Work inside the current Lean project.\n- Use the installed `lean4` skill when you need proving workflow guidance.\n- Prefer Lean/LSP-first workflows and use the `lean-lsp` MCP server for navigation and diagnostics.\n- Keep changes reproducible and explain blockers clearly if the formalization cannot proceed.\n"
         },
         "gauss-home/autoformalize/codex/managed/startup/<STAMP>-prove.md": {
@@ -4173,20 +4335,29 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "codex",
               "GAUSS_AUTOFORMALIZE_BACKEND": "codex",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
               "CODEX_HOME": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/lib/scripts",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/references",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-autoprove.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-autoprove.md",
-              "GAUSS_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md"
+              "FISHER_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md",
+              "GAUSS_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md"
             },
             "removed": [
               "OPENAI_API_KEY"
@@ -4212,9 +4383,9 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-autoprove.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
-          "instructions_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md"
+          "instructions_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md"
         },
         "user_instruction": "",
         "workflow_kind": "autoprove",
@@ -4240,9 +4411,9 @@
           }
         },
         "gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml": {
-          "text": "model_instructions_file = \"<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md\"\n\n[mcp_servers.lean-lsp]\ncommand = \"<TMP>/bin/uvx\"\nargs = [\"--from\", \"lean-lsp-mcp\", \"lean-lsp-mcp\"]\n\n[mcp_servers.lean-lsp.env]\nLEAN_PROJECT_PATH = \"<TMP>/project\"\n"
+          "text": "model_instructions_file = \"<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md\"\n\n[mcp_servers.lean-lsp]\ncommand = \"<TMP>/bin/uvx\"\nargs = [\"--from\", \"lean-lsp-mcp\", \"lean-lsp-mcp\"]\n\n[mcp_servers.lean-lsp.env]\nLEAN_PROJECT_PATH = \"<TMP>/project\"\n"
         },
-        "gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md": {
+        "gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md": {
           "text": "# Fisher Managed Lean Workflow Instructions\n\nYou are in a Fisher-managed Lean workflow session.\n\n- Project root: `<TMP>/project`\n- Lean root: `<TMP>/project`\n- Active working directory: `<TMP>/project`\n- Installed Lean4 skill: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4`\n- Lean4 plugin root: `<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4`\n- Lean4 scripts: `<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/lib/scripts`\n- Lean4 references: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/references`\n- Startup context: `<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-autoprove.md`\n\n## Codex Skill Contract\n- The staged Lean workflow is exposed as the `$lean4` skill.\n- Skill entrypoint: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/SKILL.md`\n- `/lean4:*` names in the startup context are workflow labels from the skill docs, not shell commands.\n- Start by invoking `$lean4`, then follow the matching workflow guide before running project commands.\n\n## Session Contract\n- Work inside the current Lean project.\n- Use the installed `lean4` skill when you need proving workflow guidance.\n- Prefer Lean/LSP-first workflows and use the `lean-lsp` MCP server for navigation and diagnostics.\n- Keep changes reproducible and explain blockers clearly if the formalization cannot proceed.\n"
         },
         "gauss-home/autoformalize/codex/managed/startup/<STAMP>-autoprove.md": {
@@ -4281,20 +4452,29 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "codex",
               "GAUSS_AUTOFORMALIZE_BACKEND": "codex",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
               "CODEX_HOME": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/lib/scripts",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/references",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-draft.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-draft.md",
-              "GAUSS_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md"
+              "FISHER_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md",
+              "GAUSS_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md"
             },
             "removed": []
           },
@@ -4318,9 +4498,9 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-draft.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
-          "instructions_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md"
+          "instructions_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md"
         },
         "user_instruction": "",
         "workflow_kind": "draft",
@@ -4346,9 +4526,9 @@
           }
         },
         "gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml": {
-          "text": "model_instructions_file = \"<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md\"\n\n[mcp_servers.lean-lsp]\ncommand = \"<TMP>/bin/uvx\"\nargs = [\"--from\", \"lean-lsp-mcp\", \"lean-lsp-mcp\"]\n\n[mcp_servers.lean-lsp.env]\nLEAN_PROJECT_PATH = \"<TMP>/project\"\n"
+          "text": "model_instructions_file = \"<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md\"\n\n[mcp_servers.lean-lsp]\ncommand = \"<TMP>/bin/uvx\"\nargs = [\"--from\", \"lean-lsp-mcp\", \"lean-lsp-mcp\"]\n\n[mcp_servers.lean-lsp.env]\nLEAN_PROJECT_PATH = \"<TMP>/project\"\n"
         },
-        "gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md": {
+        "gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md": {
           "text": "# Fisher Managed Lean Workflow Instructions\n\nYou are in a Fisher-managed Lean workflow session.\n\n- Project root: `<TMP>/project`\n- Lean root: `<TMP>/project`\n- Active working directory: `<TMP>/project`\n- Installed Lean4 skill: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4`\n- Lean4 plugin root: `<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4`\n- Lean4 scripts: `<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/lib/scripts`\n- Lean4 references: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/references`\n- Startup context: `<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-draft.md`\n\n## Codex Skill Contract\n- The staged Lean workflow is exposed as the `$lean4` skill.\n- Skill entrypoint: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/SKILL.md`\n- `/lean4:*` names in the startup context are workflow labels from the skill docs, not shell commands.\n- Start by invoking `$lean4`, then follow the matching workflow guide before running project commands.\n\n## Session Contract\n- Work inside the current Lean project.\n- Use the installed `lean4` skill when you need proving workflow guidance.\n- Prefer Lean/LSP-first workflows and use the `lean-lsp` MCP server for navigation and diagnostics.\n- Keep changes reproducible and explain blockers clearly if the formalization cannot proceed.\n"
         },
         "gauss-home/autoformalize/codex/managed/startup/<STAMP>-draft.md": {
@@ -4381,20 +4561,29 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "codex",
               "GAUSS_AUTOFORMALIZE_BACKEND": "codex",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
               "CODEX_HOME": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/lib/scripts",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/references",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-review.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-review.md",
-              "GAUSS_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md"
+              "FISHER_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md",
+              "GAUSS_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md"
             },
             "removed": []
           },
@@ -4418,9 +4607,9 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-review.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
-          "instructions_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md"
+          "instructions_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md"
         },
         "user_instruction": "",
         "workflow_kind": "review",
@@ -4440,9 +4629,9 @@
           "text": "tactics\n"
         },
         "gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml": {
-          "text": "model_instructions_file = \"<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md\"\n\n[mcp_servers.lean-lsp]\ncommand = \"<TMP>/bin/uvx\"\nargs = [\"--from\", \"lean-lsp-mcp\", \"lean-lsp-mcp\"]\n\n[mcp_servers.lean-lsp.env]\nLEAN_PROJECT_PATH = \"<TMP>/project\"\n"
+          "text": "model_instructions_file = \"<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md\"\n\n[mcp_servers.lean-lsp]\ncommand = \"<TMP>/bin/uvx\"\nargs = [\"--from\", \"lean-lsp-mcp\", \"lean-lsp-mcp\"]\n\n[mcp_servers.lean-lsp.env]\nLEAN_PROJECT_PATH = \"<TMP>/project\"\n"
         },
-        "gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md": {
+        "gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md": {
           "text": "# Fisher Managed Lean Workflow Instructions\n\nYou are in a Fisher-managed Lean workflow session.\n\n- Project root: `<TMP>/project`\n- Lean root: `<TMP>/project`\n- Active working directory: `<TMP>/project`\n- Installed Lean4 skill: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4`\n- Lean4 plugin root: `<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4`\n- Lean4 scripts: `<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/lib/scripts`\n- Lean4 references: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/references`\n- Startup context: `<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-review.md`\n\n## Codex Skill Contract\n- The staged Lean workflow is exposed as the `$lean4` skill.\n- Skill entrypoint: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/SKILL.md`\n- `/lean4:*` names in the startup context are workflow labels from the skill docs, not shell commands.\n- Start by invoking `$lean4`, then follow the matching workflow guide before running project commands.\n\n## Session Contract\n- Work inside the current Lean project.\n- Use the installed `lean4` skill when you need proving workflow guidance.\n- Prefer Lean/LSP-first workflows and use the `lean-lsp` MCP server for navigation and diagnostics.\n- Keep changes reproducible and explain blockers clearly if the formalization cannot proceed.\n"
         },
         "gauss-home/autoformalize/codex/managed/startup/<STAMP>-review.md": {
@@ -4466,7 +4655,7 @@
       },
       "error": {
         "class": "AutoformalizePreflightError",
-        "message": "Codex auth not found. Run `codex login`, save `OPENAI_API_KEY`, or set `gauss.autoformalize.auth_mode: login` (or `GAUSS_AUTOFORMALIZE_AUTH_MODE=login`) to launch the normal Codex login flow."
+        "message": "Codex auth not found. Run `codex login`, save `OPENAI_API_KEY`, or set `fisher.autoformalize.auth_mode: login` (or `FISHER_AUTOFORMALIZE_AUTH_MODE=login`) to launch the normal Codex login flow."
       },
       "files": {},
       "calls": []
@@ -4532,19 +4721,28 @@
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home",
               "CODEX_HOME": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "codex",
               "GAUSS_AUTOFORMALIZE_BACKEND": "codex",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/lib/scripts",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/references",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-prove.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-prove.md",
-              "GAUSS_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md"
+              "FISHER_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md",
+              "GAUSS_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md"
             },
             "removed": []
           },
@@ -4568,9 +4766,9 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-prove.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
-          "instructions_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md"
+          "instructions_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md"
         },
         "user_instruction": "",
         "workflow_kind": "prove",
@@ -4599,9 +4797,9 @@
           }
         },
         "gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml": {
-          "text": "model_instructions_file = \"<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md\"\n\n[mcp_servers.lean-lsp]\ncommand = \"<TMP>/bin/uvx\"\nargs = [\"--from\", \"lean-lsp-mcp\", \"lean-lsp-mcp\"]\n\n[mcp_servers.lean-lsp.env]\nLEAN_PROJECT_PATH = \"<TMP>/project\"\n"
+          "text": "model_instructions_file = \"<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md\"\n\n[mcp_servers.lean-lsp]\ncommand = \"<TMP>/bin/uvx\"\nargs = [\"--from\", \"lean-lsp-mcp\", \"lean-lsp-mcp\"]\n\n[mcp_servers.lean-lsp.env]\nLEAN_PROJECT_PATH = \"<TMP>/project\"\n"
         },
-        "gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md": {
+        "gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md": {
           "text": "# Fisher Managed Lean Workflow Instructions\n\nYou are in a Fisher-managed Lean workflow session.\n\n- Project root: `<TMP>/project`\n- Lean root: `<TMP>/project`\n- Active working directory: `<TMP>/project`\n- Installed Lean4 skill: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4`\n- Lean4 plugin root: `<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4`\n- Lean4 scripts: `<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/lib/scripts`\n- Lean4 references: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/references`\n- Startup context: `<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-prove.md`\n\n## Codex Skill Contract\n- The staged Lean workflow is exposed as the `$lean4` skill.\n- Skill entrypoint: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/SKILL.md`\n- Requested workflow guide: `<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/commands/prove.md`\n- `/lean4:*` names in the startup context are workflow labels from the skill docs, not shell commands.\n- Start by invoking `$lean4`, then follow the matching workflow guide before running project commands.\n\n## Session Contract\n- Work inside the current Lean project.\n- Use the installed `lean4` skill when you need proving workflow guidance.\n- Prefer Lean/LSP-first workflows and use the `lean-lsp` MCP server for navigation and diagnostics.\n- Keep changes reproducible and explain blockers clearly if the formalization cannot proceed.\n"
         },
         "gauss-home/autoformalize/codex/managed/startup/<STAMP>-prove.md": {
@@ -4645,20 +4843,29 @@
           "env": {
             "set": {
               "HOME": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home",
+              "FISHER_AUTOFORMALIZE": "1",
               "GAUSS_AUTOFORMALIZE": "1",
+              "FISHER_AUTOFORMALIZE_BACKEND": "codex",
               "GAUSS_AUTOFORMALIZE_BACKEND": "codex",
+              "FISHER_PROJECT_ROOT": "<TMP>/project",
               "GAUSS_PROJECT_ROOT": "<TMP>/project",
-              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.gauss/project.yaml",
+              "FISHER_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
+              "GAUSS_PROJECT_MANIFEST": "<TMP>/project/.fisher/project.yaml",
               "LEAN_PROJECT_PATH": "<TMP>/project",
+              "FISHER_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/managed",
               "GAUSS_MANAGED_STATE_DIR": "<TMP>/gauss-home/autoformalize/codex/managed",
+              "FISHER_REAL_HOME": "<TMP>/home",
               "GAUSS_REAL_HOME": "<TMP>/home",
+              "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
               "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
               "CODEX_HOME": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex",
               "LEAN4_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4",
               "LEAN4_SCRIPTS": "<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/lib/scripts",
               "LEAN4_REFS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/references",
+              "FISHER_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-prove.md",
               "GAUSS_AUTOFORMALIZE_CONTEXT": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-prove.md",
-              "GAUSS_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md"
+              "FISHER_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md",
+              "GAUSS_AUTOFORMALIZE_INSTRUCTIONS": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md"
             },
             "removed": []
           },
@@ -4682,9 +4889,9 @@
           "mcp_config_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml",
           "startup_context_path": "<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-prove.md",
           "backend_config_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml",
-          "project_manifest_path": "<TMP>/project/.gauss/project.yaml",
+          "project_manifest_path": "<TMP>/project/.fisher/project.yaml",
           "skills_root": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4",
-          "instructions_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md"
+          "instructions_path": "<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md"
         },
         "user_instruction": "",
         "workflow_kind": "prove",
@@ -4713,9 +4920,9 @@
           }
         },
         "gauss-home/autoformalize/codex/managed/codex-home/.codex/config.toml": {
-          "text": "model_instructions_file = \"<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md\"\n\n[mcp_servers.lean-lsp]\ncommand = \"<TMP>/bin/uvx\"\nargs = [\"--from\", \"lean-lsp-mcp\", \"lean-lsp-mcp\"]\n\n[mcp_servers.lean-lsp.env]\nLEAN_PROJECT_PATH = \"<TMP>/project\"\n"
+          "text": "model_instructions_file = \"<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md\"\n\n[mcp_servers.lean-lsp]\ncommand = \"<TMP>/bin/uvx\"\nargs = [\"--from\", \"lean-lsp-mcp\", \"lean-lsp-mcp\"]\n\n[mcp_servers.lean-lsp.env]\nLEAN_PROJECT_PATH = \"<TMP>/project\"\n"
         },
-        "gauss-home/autoformalize/codex/managed/codex-home/.codex/gauss-autoformalize-instructions.md": {
+        "gauss-home/autoformalize/codex/managed/codex-home/.codex/fisher-autoformalize-instructions.md": {
           "text": "# Fisher Managed Lean Workflow Instructions\n\nYou are in a Fisher-managed Lean workflow session.\n\n- Project root: `<TMP>/project`\n- Lean root: `<TMP>/project`\n- Active working directory: `<TMP>/project`\n- Installed Lean4 skill: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4`\n- Lean4 plugin root: `<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4`\n- Lean4 scripts: `<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/lib/scripts`\n- Lean4 references: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/references`\n- Startup context: `<TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-prove.md`\n\n## Codex Skill Contract\n- The staged Lean workflow is exposed as the `$lean4` skill.\n- Skill entrypoint: `<TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/lean4/SKILL.md`\n- Requested workflow guide: `<TMP>/gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/commands/prove.md`\n- `/lean4:*` names in the startup context are workflow labels from the skill docs, not shell commands.\n- Start by invoking `$lean4`, then follow the matching workflow guide before running project commands.\n\n## Session Contract\n- Work inside the current Lean project.\n- Use the installed `lean4` skill when you need proving workflow guidance.\n- Prefer Lean/LSP-first workflows and use the `lean-lsp` MCP server for navigation and diagnostics.\n- Keep changes reproducible and explain blockers clearly if the formalization cannot proceed.\n"
         },
         "gauss-home/autoformalize/codex/managed/startup/<STAMP>-prove.md": {

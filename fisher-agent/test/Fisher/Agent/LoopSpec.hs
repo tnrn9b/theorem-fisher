@@ -142,7 +142,7 @@ spec = do
       (db, mdb) <- memorySessionDB
       pure (db, memorySnapshot mdb)
 
--- | Makes the session database for a case (given the Gauss home): the
+-- | Makes the session database for a case (given the Fisher home): the
 -- database and how to read its rows back.
 type DbFactory = FilePath -> IO (SessionDB, IO PyVal)
 

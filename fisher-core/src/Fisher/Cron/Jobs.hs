@@ -1,5 +1,5 @@
 -- | Upstream's cron/jobs.py: schedules, the next run, and the jobs kept in
--- @~/.gauss/cron/jobs.json@ (with each run's output under
+-- @cron/jobs.json@ in the Fisher home (with each run's output under
 -- @cron/output/JOB/TIMESTAMP.md@). Jobs stay Python dicts ('PyVal'), in
 -- upstream's key order, since the file is shared with it.
 module Fisher.Cron.Jobs
@@ -48,7 +48,7 @@ import Fisher.Py.Value
 -- | What the cron code takes from outside.
 data CronEnv = CronEnv
   { ceHome :: FilePath
-  -- ^ GAUSS_HOME
+  -- ^ the Fisher home ('Fisher.Paths.getFisherHome')
   , ceNow :: IO Dt
   -- ^ @gauss_time.now()@
   , ceLocalOffset :: IO Int

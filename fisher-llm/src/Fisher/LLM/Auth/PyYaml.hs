@@ -10,6 +10,7 @@ module Fisher.LLM.Auth.PyYaml
   , deepMergePy
   , loadConfigOrdered
   , saveConfigOrdered
+  , foldLegacyPy
   ) where
 
 import Control.Exception (SomeException, try)
@@ -32,7 +33,7 @@ import Fisher.Atomic (atomicWriteFile, secureFile)
 import Fisher.Config (defaultConfigYaml, loadConfigAt, normalizeMaxTurns, renderConfigWith)
 import qualified Fisher.Config as Config
 import Fisher.LLM.Sys (Sys (..), outLn)
-import Fisher.Paths (configPathIn, ensureGaussHomeAt)
+import Fisher.Paths (configPathIn, ensureFisherHomeAt)
 import Fisher.Py.Json (pyFloatRepr)
 import Fisher.Py.Value
 import Fisher.Yaml.Ordered (encodeOrdered)
@@ -163,14 +164,39 @@ normalizeMaxTurnsPy cfg =
       agent2 = if has "max_turns" agent1 then agent1 else set "max_turns" dflt agent1
    in delete "max_turns" (set "agent" agent2 cfg)
 
+-- | 'Fisher.Compat.normalizeConfigCompat' on a 'PyVal': the @gauss@ section
+-- folded into @fisher@ (@fisher@ winning leaf by leaf; @fisher@ keeps its
+-- place, or takes @gauss@'s when it had none) and @gauss@ dropped.
+foldLegacyPy :: PyVal -> PyVal
+foldLegacyPy cfg = case get "gauss" cfg of
+  Nothing -> cfg
+  Just g ->
+    let merged = maybe g (deepMergePy g) (get "fisher" cfg)
+     in if has "fisher" cfg
+          then delete "gauss" (set "fisher" merged cfg)
+          else case cfg of
+            PDict kvs -> PDict [if k == "gauss" then ("fisher", merged) else (k, v) | (k, v) <- kvs]
+            _ -> cfg
+
+-- | The @gauss@ section of the configuration file at a path, as PyYAML
+-- reads it, when there is one.
+legacySectionPy :: FilePath -> IO (Maybe PyVal)
+legacySectionPy path = do
+  exists <- doesFileExist path
+  if not exists
+    then pure Nothing
+    else either (const Nothing) (get "gauss") <$> (BS.readFile path >>= parsePyYaml)
+
 -- | @load_config()@: the home made sure of, the user file merged over the
--- defaults in Python's order. A file that does not load warns and gives
+-- defaults in Python's order. A @gauss@ section in the file is read as
+-- @fisher@ first ('foldLegacyPy'), so a user's @gauss.*@ setting beats a
+-- @fisher.*@ default. A file that does not load warns and gives
 -- the defaults, as upstream.
 loadConfigOrdered :: Sys -> IO PyVal
 loadConfigOrdered sys = do
-  let home = sysGaussHome sys
+  let home = sysFisherHome sys
       path = configPathIn home
-  ensureGaussHomeAt home
+  ensureFisherHomeAt home
   defaults <- either (const (PDict [])) id <$> parsePyYaml defaultConfigYaml
   exists <- doesFileExist path
   if not exists
@@ -190,7 +216,7 @@ loadConfigOrdered sys = do
                         Just v | v /= PNull -> agent
                         _ -> set "max_turns" mt agent
                    in delete "max_turns" (set "agent" agent' user)
-          pure (normalizeWith defaults (deepMergePy defaults user'))
+          pure (normalizeWith defaults (deepMergePy defaults (foldLegacyPy user')))
         _ -> do
           -- Upstream's own message for the failure; Fisher's loader words it.
           (_, warnings) <- loadConfigAt home
@@ -210,14 +236,20 @@ loadConfigOrdered sys = do
 
 -- | @save_config(config)@: the dict dumped in its own order, the
 -- commented-out security and fallback sections after it when those are
--- not configured, written atomically at 0600.
+-- not configured, written atomically at 0600. Settings go under @fisher@;
+-- the file's existing @gauss@ section, if any, is written back unchanged
+-- (at the end, as a key the defaults lack).
 saveConfigOrdered :: Sys -> PyVal -> IO ()
 saveConfigOrdered sys cfg = do
-  let home = sysGaussHome sys
+  let home = sysFisherHome sys
       path = configPathIn home
-      normalized = normalizeMaxTurnsPy cfg
-      av = normalizeMaxTurns (toAeson normalized)
+  legacy <- legacySectionPy path
+  let normalized0 = normalizeMaxTurnsPy (foldLegacyPy cfg)
+      normalized = maybe normalized0 (\g -> set "gauss" g normalized0) legacy
+      -- The comments depend on security and fallback_model only; the dict
+      -- without the kept gauss section renders the same body both ways.
+      av = normalizeMaxTurns (toAeson normalized0)
       comments = BS.drop (BS.length (encodeOrdered [] av)) (renderConfigWith [] av)
-  ensureGaussHomeAt home
+  ensureFisherHomeAt home
   atomicWriteFile ".config_.tmp" path (dumpPyYaml normalized <> comments)
   secureFile path

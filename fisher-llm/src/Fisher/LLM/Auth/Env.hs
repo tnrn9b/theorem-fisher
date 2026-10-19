@@ -1,4 +1,4 @@
--- | The process environment as upstream's CLI sees it: @<GAUSS_HOME>/.env@
+-- | The process environment as upstream's CLI sees it: the Fisher home's @.env@
 -- laid over it at start-up by python-dotenv (@env_loader.py@, override on),
 -- @get_env_value@ (environment first, then the file) and @save_env_value@
 -- (the file, then the environment), with the Anthropic helpers built on it.
@@ -28,12 +28,12 @@ import Fisher.LLM.Sys
 import Fisher.Paths (envPathIn)
 
 -- | @load_gauss_dotenv()@ as @gauss_cli/main.py@ runs it at import: when
--- @<GAUSS_HOME>/.env@ exists, every binding in it with a value is set in
+-- the Fisher home's @.env@ exists, every binding in it with a value is set in
 -- the environment, over what was there. (The project @.env@ fallback is a
 -- checkout-only path upstream; Fisher has no checkout.)
 loadDotenvIntoSys :: Sys -> IO ()
 loadDotenvIntoSys sys = do
-  let path = envPathIn (sysGaussHome sys)
+  let path = envPathIn (sysFisherHome sys)
   exists <- doesFileExist path
   if not exists
     then pure ()
@@ -176,14 +176,14 @@ getEnvValue :: Sys -> Text -> IO (Maybe Text)
 getEnvValue sys k =
   sysGetEnv sys k >>= \case
     Just v -> pure (Just v)
-    Nothing -> Map.lookup k <$> loadEnvAt (sysGaussHome sys)
+    Nothing -> Map.lookup k <$> loadEnvAt (sysFisherHome sys)
 
 -- | @save_env_value(key, value)@: the file (see 'saveEnvValueAt'), then
 -- @os.environ[key] = value@.
 saveEnvValue :: Sys -> Text -> Text -> IO ()
 saveEnvValue sys k v = do
   if validEnvName k then pure () else throwIO (pyError "ValueError" ("Invalid environment variable name: '" <> k <> "'"))
-  saveEnvFileAt (sysGaussHome sys) k v
+  saveEnvFileAt (sysFisherHome sys) k v
   sysSetEnv sys k (T.filter (\c -> c /= '\n' && c /= '\r') v)
 
 saveAnthropicOauthToken :: Sys -> Text -> IO ()

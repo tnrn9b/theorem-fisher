@@ -38,14 +38,14 @@ data HandoffRequest = HandoffRequest
   }
   deriving (Eq, Show)
 
--- | @gauss.autoformalize.handoff_mode@: auto, helper or strict.
+-- | @fisher.autoformalize.handoff_mode@: auto, helper or strict.
 requestedModeOf :: Value -> Either WorkflowError Text
 requestedModeOf cfg =
   let v = T.toLower (pyStrOr (lookupKey "handoff_mode" (autoformalizeConfig cfg)))
       value = if T.null v then "auto" else v
    in if value `elem` ["auto", "helper", "strict"]
         then Right value
-        else Left (ConfigError "`gauss.autoformalize.handoff_mode` must be one of: auto, helper, strict.")
+        else Left (ConfigError "`fisher.autoformalize.handoff_mode` must be one of: auto, helper, strict.")
 
 -- | Why strict mode cannot run: it needs a controlling terminal whose
 -- foreground process group can be read.

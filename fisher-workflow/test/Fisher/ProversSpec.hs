@@ -136,7 +136,7 @@ data Fixture = Fixture
   , fxConfig :: [(Data.Aeson.Key.Key, Value)]
   -- ^ more top-level config keys
   , fxAuto :: [(Data.Aeson.Key.Key, Value)]
-  -- ^ more @gauss.autoformalize@ keys
+  -- ^ more @fisher.autoformalize@ keys (given under the old @gauss@ root)
   }
 
 fixture :: Text -> ProverKind -> Fixture
@@ -407,8 +407,8 @@ spec = do
         errorText r `shouldBe` "/autoprove is available for Lean projects only."
 
     it "stop the native backend without an OpenRouter key" $
-      plan (fixture "fisher" Rocq) "/prove" $ \_ _ r ->
-        errorText r `shouldBe` "OpenRouter auth not found. Save `OPENROUTER_API_KEY` in ~/.gauss/.env, or set `gauss.autoformalize.native_provider: anthropic`."
+      plan (fixture "fisher" Rocq) "/prove" $ \root _ r ->
+        errorText r `shouldBe` ("OpenRouter auth not found. Save `OPENROUTER_API_KEY` in " <> T.pack (root </> "gauss-home" </> ".env") <> ", or set `fisher.autoformalize.native_provider: anthropic`.")
 
   describe "plans" $ do
     forM_ [Rocq, Isabelle] $ \kind -> do
@@ -426,7 +426,7 @@ spec = do
           let servers = case cfg of
                 Object o -> KM.lookup "mcpServers" o
                 _ -> Nothing
-              keys = ["HOME", "CLAUDE_PLUGIN_ROOT", "GAUSS_AUTOFORMALIZE_BACKEND", "GAUSS_PROJECT_ROOT", "ROCQ_PROJECT_PATH", "ROCQ_WORKSPACE", "ISABELLE_PROJECT_PATH", "LEAN_PROJECT_PATH", "GAUSS_AUTOFORMALIZE_SKILLS_ROOT"]
+              keys = ["HOME", "CLAUDE_PLUGIN_ROOT", "FISHER_AUTOFORMALIZE_BACKEND", "GAUSS_AUTOFORMALIZE_BACKEND", "FISHER_PROJECT_ROOT", "GAUSS_PROJECT_ROOT", "ROCQ_PROJECT_PATH", "ROCQ_WORKSPACE", "ISABELLE_PROJECT_PATH", "LEAN_PROJECT_PATH", "FISHER_AUTOFORMALIZE_SKILLS_ROOT", "GAUSS_AUTOFORMALIZE_SKILLS_ROOT"]
               envView = object [ (Data.Aeson.Key.fromString k, maybe Null (String . normText root . T.pack) (Map.lookup k (hrEnv req))) | k <- keys ]
           startup <- maybe (pure "") TIO.readFile (mcStartupContext c)
           self <- getExecutablePath
@@ -468,7 +468,9 @@ spec = do
           self <- T.pack <$> getExecutablePath
           let c = wpContext p
               req = wpRequest p
-              keys = [ "GAUSS_AUTOFORMALIZE_BACKEND", "GAUSS_AUTOFORMALIZE_CONTEXT", "GAUSS_AUTOFORMALIZE_INSTRUCTIONS", "GAUSS_PROJECT_ROOT"
+              keys = [ "FISHER_AUTOFORMALIZE_BACKEND", "FISHER_AUTOFORMALIZE_CONTEXT", "FISHER_AUTOFORMALIZE_INSTRUCTIONS", "FISHER_PROJECT_ROOT"
+                     , "FISHER_YOLO_MODE", "FISHER_HOME"
+                     , "GAUSS_AUTOFORMALIZE_BACKEND", "GAUSS_AUTOFORMALIZE_CONTEXT", "GAUSS_AUTOFORMALIZE_INSTRUCTIONS", "GAUSS_PROJECT_ROOT"
                      , "ROCQ_PROJECT_PATH", "ROCQ_WORKSPACE", "ISABELLE_PROJECT_PATH", "LEAN_PROJECT_PATH", "GAUSS_YOLO_MODE", "GAUSS_HOME" ]
               envView = object [ (Data.Aeson.Key.fromString k, maybe Null (String . normText root . T.pack) (Map.lookup k (hrEnv req))) | k <- keys ]
           mcp <- readJson (mcMcpConfig c)

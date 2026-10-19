@@ -11,7 +11,7 @@
 -- progress as it was; three in a row switch the attempt to its stream. A
 -- tag with no session yet is a good read for three polls; each poll after
 -- that fails, so an agent that never records its tag (its ledger did not
--- open, another @GAUSS_HOME@) goes to its stream at the sixth poll (30 s),
+-- open, another Fisher home) goes to its stream at the sixth poll (30 s),
 -- whose turns are then counted from its start.
 module Fisher.Cli.Watch
   ( Source (..)
@@ -51,6 +51,7 @@ import Database.SQLite.Simple (Connection, Error (..), Only (..), SQLError (..),
 import System.Directory (canonicalizePath, makeAbsolute)
 import System.Timeout (timeout)
 
+import Fisher.Compat (nativeBackend)
 import Fisher.LLM.Auth.Sha256 (sha256Hex)
 import Fisher.Search.Controller
 
@@ -170,7 +171,7 @@ poll opts ref = do
       r <- try (readLedger db tag (woSince opts) (sSession s) (sSeq s))
       let failedRead why
             | sFails s + 1 >= 3 = do
-                let fallback = FromStream (maybe "" id (woStream opts)) "gauss" target
+                let fallback = FromStream (maybe "" id (woStream opts)) nativeBackend target
                 woUnread opts why
                 s' <- baseline fallback s {sSource = fallback}
                 -- with no session ever read, no turn was counted: the

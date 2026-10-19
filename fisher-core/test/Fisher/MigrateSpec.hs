@@ -26,7 +26,7 @@ spec = interactiveSpec >> do
   describe "migrate.json" $ do
     cases <- runIO (goldenCases "test/golden/a1/migrate.json")
     forM_ cases $ \c -> it (T.unpack (textField "name" c)) $ withTmp $ \tmp -> do
-      let home = tmp </> "gauss-home"
+      let home = tmp </> "fisher-home"
           envVars = case field "env" c :: Value of
             Object o -> [(K.toString k, T.unpack v) | (k, String v) <- KM.toList o]
             _ -> []
@@ -58,7 +58,7 @@ spec = interactiveSpec >> do
 -- to .env.
 interactiveSpec :: Spec
 interactiveSpec = it "bumps the version when every interactive prompt is declined" $ withTmp $ \tmp -> do
-  let home = tmp </> "gauss-home"
+  let home = tmp </> "fisher-home"
   createDirectoryIfMissing True home
   BS.writeFile (home </> "config.yaml") "_config_version: 3\n"
   out <- newIORef []

@@ -160,7 +160,7 @@ libraryKey root = T.take 16 (sha256Hex (TE.encodeUtf8 (T.pack (canon root))))
 canon :: FilePath -> FilePath
 canon = dropTrailingPathSeparator . normalise
 
--- | The project's library directory under a home (@$GAUSS_HOME@):
+-- | The project's library directory under a home (the Fisher home, @$FISHER_HOME@):
 -- @home/fisher/library/<key>@. (@--library-dir DIR@ names the library
 -- directory itself instead.)
 libraryDir :: FilePath -> FilePath -> FilePath

@@ -8,17 +8,20 @@ module Fisher.EnvVars
   , optionalEnvVars
   , envVarsByVersion
   , getEnvValueAt
+  , getEnvValueNamedAt
   ) where
 
 import Data.Aeson (FromJSON (..), Value, eitherDecodeStrict, withObject, (.:), (.:?), (.!=))
 import qualified Data.Aeson.Types
 import Data.ByteString (ByteString)
 import Data.FileEmbed (embedFile, makeRelativeToProject)
+import Data.List (isPrefixOf)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as T
 import System.Environment (lookupEnv)
 
+import Fisher.Compat (envNames, newEnvPrefix, oldEnvPrefix)
 import Fisher.Env (loadEnvAt)
 
 data EnvVar = EnvVar
@@ -71,9 +74,24 @@ envVarsByVersion =
    in Map.fromList [(read (T.unpack k), vs) | (k, vs) <- Map.toList m]
 
 -- | @get_env_value@: the process environment first (an empty value counts),
--- then the home's @.env@.
+-- then the home's @.env@. A @FISHER_X@ or @GAUSS_X@ name is read as
+-- @FISHER_X@ (environment, then @.env@), else @GAUSS_X@ (the same).
 getEnvValueAt :: FilePath -> Text -> IO (Maybe Text)
-getEnvValueAt home key =
-  lookupEnv (T.unpack key) >>= \case
-    Just v -> pure (Just (T.pack v))
-    Nothing -> Map.lookup key <$> loadEnvAt home
+getEnvValueAt home key = fmap snd <$> getEnvValueNamedAt home key
+
+-- | 'getEnvValueAt', with the name the value was found under.
+getEnvValueNamedAt :: FilePath -> Text -> IO (Maybe (Text, Text))
+getEnvValueNamedAt home key =
+  let one name =
+        lookupEnv (T.unpack name) >>= \case
+          Just v -> pure (Just (name, T.pack v))
+          Nothing -> fmap (name,) . Map.lookup name <$> loadEnvAt home
+      k = T.unpack key
+      names
+        | any (`isPrefixOf` k) [newEnvPrefix, oldEnvPrefix] =
+            let (new, old) = envNames k in [T.pack new, T.pack old]
+        | otherwise = [key]
+      firstOf = \case
+        [] -> pure Nothing
+        (n : ns) -> one n >>= maybe (firstOf ns) (pure . Just)
+   in firstOf names

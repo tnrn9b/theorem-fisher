@@ -18,10 +18,10 @@ import Control.Exception (Exception, SomeException, fromException)
 import Data.Text (Text)
 import qualified Data.Text as T
 
--- | @get_cli_command_name()@: always @gauss@ upstream, and every message
--- that names the command uses it.
+-- | @get_cli_command_name()@ (@gauss@ upstream): the command's name,
+-- which every message that names the command uses.
 cliName :: Text
-cliName = "gauss"
+cliName = "fisher"
 
 data AuthError = AuthError
   { aeMessage :: Text

@@ -57,6 +57,7 @@ library
     , containers
     , directory
     , filepath
+    , fisher-core
     , fisher-llm
     , process
     , scientific
@@ -122,6 +123,7 @@ test-suite fisher-search-test
     , containers
     , directory
     , filepath
+    , fisher-core
     , fisher-llm
     , fisher-search
     , hspec

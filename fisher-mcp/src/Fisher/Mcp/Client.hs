@@ -48,7 +48,7 @@ data McpEnv = McpEnv
   , meSampling :: SamplingLLM
   , meEnviron :: IO [(Text, Text)]
   , meHome :: Text
-  , meGaussHome :: FilePath
+  , meFisherHome :: FilePath
   , meHttp :: Maybe HttpClient
   }
 
@@ -161,7 +161,7 @@ connectOnce env sv = do
           v -> throwIO (McpFailure "ValidationError" (pydanticOne "StdioServerParameters" "env" "Input should be a valid dictionary" "dict_type" v))
         environ <- meEnviron env
         let safeE = safeEnv environ userEnv
-        (cmd, safeE') <- resolveCommand (meHome env) (meGaussHome env) command safeE
+        (cmd, safeE') <- resolveCommand (meHome env) (meFisherHome env) command safeE
         let finalEnv = if null safeE' then sdkDefaultEnv environ else foldl put (sdkDefaultEnv environ) safeE'
         -- Fisher only: the server's working directory (a prover server's
         -- project root), with ~ expanded
@@ -570,7 +570,7 @@ discover mc servers = do
           meLog env "WARNING" ("Failed to connect to MCP server '" <> k <> "'" <> (case cfgGet "command" v of PStr c | not (T.null c) -> " (command=" <> c <> ")"; _ -> "") <> ": " <> e)
         when (not (null okNames) || not (null failed)) $
           meLog env "INFO" ("  MCP: " <> tshow (length okNames) <> " tool(s) from " <> tshow (length fresh - length failed) <> " server(s)" <> (if null failed then "" else " (" <> tshow (length failed) <> " failed)"))
-        unless (null okNames) (appendToToolsets (meRegistry env) "gauss-" okNames)
+        unless (null okNames) (appendToToolsets (meRegistry env) "fisher-" okNames)
       allNames
     PDict _ -> do
       meLog env "DEBUG" "MCP tool discovery failed: an mcp_servers entry is not a mapping"

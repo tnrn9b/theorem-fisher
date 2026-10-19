@@ -69,7 +69,7 @@ spec = do
       let session = ProjectSession cwd (fill tmp (field "config" c)) (envPairs (fill tmp (field "env" c))) ref
       forM_ (zip [0 :: Int ..] (field "steps" c :: [Value])) $ \(i, step) -> do
         when (textField "name" c == "override-broken" && i == 1) $
-          writeFile (tmp </> "A" </> ".gauss" </> "project.yaml") "schema_version: 7\nname: A\n"
+          writeFile (tmp </> "A" </> ".fisher" </> "project.yaml") "schema_version: 7\nname: A\n"
         out <- handleProjectCommand session (retmp tmp (textField "command" step))
         let printed = T.replace (T.pack tmp) "<TMP>" (T.unlines out)
         printed `shouldBe` textField "stdout" step

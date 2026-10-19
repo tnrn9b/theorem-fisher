@@ -70,7 +70,7 @@ import System.Process (ProcessHandle)
 -- | Where the server reads from, and its caches.
 data UiEnv = UiEnv
   { ueHome :: FilePath
-  -- ^ GAUSS_HOME: state.db, fisher/replays, fisher/ctx
+  -- ^ the Fisher home: state.db, fisher/replays, fisher/ctx
   , ueBench :: FilePath
   -- ^ the bench root (~/.cache/fisher/bench)
   , ueRepo :: FilePath

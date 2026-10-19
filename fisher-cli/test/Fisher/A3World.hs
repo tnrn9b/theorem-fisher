@@ -28,7 +28,7 @@ import Fisher.Project (Project, defaultInitOptions, discoverProject, formatProje
 
 data World = World
   { wRoot :: FilePath
-  , wGaussHome :: FilePath
+  , wFisherHome :: FilePath
   , wHome :: FilePath
   , wBin :: FilePath
   }
@@ -83,17 +83,18 @@ makeWorld tmp tmpg = do
   createDirectoryIfMissing True (root </> "fake-plugin" </> "skills" </> "lean4")
   pure (World root gh home b)
 
--- | The world's PATH, HOME, GAUSS_HOME and plugin dir in this process, as
--- the harness set them; put back afterwards.
+-- | The world's PATH, HOME, GAUSS_HOME (the recordings' name for the home,
+-- read as the fallback for FISHER_HOME, which is unset here) and plugin dir
+-- in this process, as the harness set them; put back afterwards.
 withWorldEnv :: World -> [(String, String)] -> IO a -> IO a
 withWorldEnv w extra act = bracket set restore (const act)
   where
     vars =
-      [ ("PATH", wBin w), ("HOME", wHome w), ("GAUSS_HOME", wGaussHome w)
+      [ ("PATH", wBin w), ("HOME", wHome w), ("GAUSS_HOME", wFisherHome w)
       , ("FAKE_PLUGIN_DIR", wRoot w </> "fake-plugin")
         -- the recordings are upstream's, whose MCP server is uvx lean-lsp-mcp
       , ("FISHER_LEAN_MCP", "uvx") ] <> extra
-    set = forM (map fst vars <> ["GAUSS_AUTOFORMALIZE_BACKEND", "TERMINAL_CWD", "TERMINAL_ENV", "TERMINAL_TIMEOUT"]) $ \k -> do
+    set = forM (map fst vars <> ["FISHER_HOME", "FISHER_AUTOFORMALIZE_BACKEND", "GAUSS_AUTOFORMALIZE_BACKEND", "TERMINAL_CWD", "TERMINAL_ENV", "TERMINAL_TIMEOUT"]) $ \k -> do
       old <- lookupEnv k
       maybe (unsetEnv k) (setEnv k) (lookup k vars)
       pure (k, old)
@@ -108,7 +109,7 @@ projectSummaryAt _ cwd = do
 
 -- | The harness's @norm@: scratch roots masked, then the clock stamps.
 normalizeWorld :: World -> Text -> Text
-normalizeWorld w = maskTimes . mask (T.pack (wRoot w)) "<TMP>" . mask (T.pack (wGaussHome w)) "<GAUSS_HOME>"
+normalizeWorld w = maskTimes . mask (T.pack (wRoot w)) "<TMP>" . mask (T.pack (wFisherHome w)) "<GAUSS_HOME>"
 
 -- | @DATETIME@, @STAMP@ and @SESSION@, in that order.
 maskTimes :: Text -> Text
