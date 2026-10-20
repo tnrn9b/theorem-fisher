@@ -108,7 +108,7 @@ spec = do
       T.length (libraryKey "/a/b") `shouldBe` 16
       T.unpack (libraryKey "/a/b") `shouldSatisfy` all isHexDigit
   describe "libraryDir" $
-    it "is GAUSS_HOME/fisher/library/<key>" $
+    it "is FISHER_HOME/fisher/library/<key>" $
       libraryDir "/g" "/home/u/proj" `shouldBe` "/g/fisher/library/9c09f8055a26c277"
 
   describe "harvest" $ do

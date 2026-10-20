@@ -16,6 +16,8 @@ import System.Directory (createDirectoryIfMissing, doesDirectoryExist, listDirec
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Aeson as A
+import qualified Data.Aeson.Key as K
+import Data.Char (toUpper)
 import qualified Data.Map.Strict as Map
 import Test.Hspec
 
@@ -35,6 +37,7 @@ import System.FilePath (takeDirectory, (</>))
 import System.IO.Temp (withSystemTempDirectory)
 import Fisher.Search.GraphRun (AskError (..))
 import Fisher.Search.Scheduler (GoalState (..), GoalStatus (..), SearchConfig (..), SearchReport (..))
+import Fisher.TestUtil (oldName)
 
 -- | Parse, then the refusals, as the command does; Nothing for a usage error.
 run :: [String] -> Maybe (Either Text RunArgs)
@@ -80,7 +83,7 @@ spec = do
     it "--library-read-only" $ do
       raLibraryReadOnly (ok ["F.lean"]) `shouldBe` False
       raLibraryReadOnly (ok ["F.lean", "--library-read-only"]) `shouldBe` True
-    it "the library directory: per project under GAUSS_HOME by default" $ do
+    it "the library directory: per project under the Fisher home by default" $ do
       let ra = ok ["F.lean"]
       libraryDirFor ra "/home/g" "/w/a" `shouldBe` libraryDir "/home/g" "/w/a"
       libraryDirFor ra "/home/g" "/w/a" `shouldNotBe` libraryDirFor ra "/home/g" "/w/b"
@@ -102,7 +105,7 @@ spec = do
       withSystemTempDirectory "pf" $ \d -> do
         let root = d </> "proj"
             lib = d </> "lib"
-            home = d </> "gauss"
+            home = d </> ".fisher"
         createDirectoryIfMissing True root
         BS.writeFile (root </> "lakefile.lean") "import Lake\nopen Lake DSL\npackage p\n"
         BS.writeFile (root </> "F.lean") "theorem t : True := by\n  sorry\n"
@@ -125,7 +128,7 @@ spec = do
         snapshot `shouldReturn` before
         listDirectory tmpd `shouldReturn` []
         maybe (unsetEnv "TMPDIR") (setEnv "TMPDIR") oldTmp
-        -- without --library-dir, nothing under GAUSS_HOME either
+        -- without --library-dir, nothing under the Fisher home either
         (mre2, _) <- buildRetrievalAt True home (ok ["F.lean", "--print-facts"]) root ""
         isJust mre2 `shouldBe` True
         doesDirectoryExist (home </> "fisher") `shouldReturn` False
@@ -169,7 +172,7 @@ spec = do
       serverWanted (ok ["F.lean"]) `shouldBe` True
       serverWanted (ok ["F.lean", "--graph"]) `shouldBe` True
       serverWanted (ok ["F.lean", "--no-auto"]) `shouldBe` False
-      serverWanted (ok ["F.lean", "--single", "gauss"]) `shouldBe` False
+      serverWanted (ok ["F.lean", "--single", "fisher"]) `shouldBe` False
     it "bad values are usage errors" $ do
       run ["F.lean", "--auto-seconds", "0"] `shouldBe` Nothing
       run ["F.lean", "--auto-seconds", "-3"] `shouldBe` Nothing
@@ -194,7 +197,7 @@ spec = do
       let ra = ok ["F.lean", "--graph"]
       raFile ra `shouldBe` Just "F.lean"
       raGraph ra `shouldBe` True
-      raBackends ra `shouldBe` ["gauss"]
+      raBackends ra `shouldBe` ["fisher"]
       raSlots ra `shouldBe` 4
       raMaxDepth ra `shouldBe` 3
       raMaxSplits ra `shouldBe` 2
@@ -208,13 +211,12 @@ spec = do
     it "today's flags still apply" $ do
       let ra = ok ["F.lean", "--graph", "--parallel", "2", "--budget", "1h", "--attempt-minutes", "10", "--max-turns", "20", "--apply", "--out", "/tmp/o"]
       (raSlots ra, raBudget ra, raAttemptSecs ra, raMaxTurns ra, raApply ra, raOut ra) `shouldBe` (2, 3600, 600, 20, True, Just "/tmp/o")
-    it "--backends gauss" $ raBackends (ok ["F.lean", "--graph", "--backends", "gauss"]) `shouldBe` ["gauss"]
-    it "--backends fisher is passed on as gauss" $ raBackends (ok ["F.lean", "--graph", "--backends", "fisher"]) `shouldBe` ["gauss"]
-    it "--backends fisher,gauss" $ raBackends (ok ["F.lean", "--graph", "--backends", "fisher,gauss"]) `shouldBe` ["gauss"]
+    it "--backends fisher" $ raBackends (ok ["F.lean", "--graph", "--backends", "fisher"]) `shouldBe` ["fisher"]
+    it "--backends fisher,fisher" $ raBackends (ok ["F.lean", "--graph", "--backends", "fisher,fisher"]) `shouldBe` ["fisher"]
     it "refuses another backend" $
-      run ["F.lean", "--graph", "--backends", "gauss,claude-code"] `shouldBe` Just (Left "--graph runs on the native backend only (gauss or fisher)")
+      run ["F.lean", "--graph", "--backends", "fisher,claude-code"] `shouldBe` Just (Left "--graph runs on the native backend only (fisher)")
     it "refuses --single" $
-      run ["F.lean", "--graph", "--single", "gauss"] `shouldBe` Just (Left "--graph does not take --single or --one-per-goal")
+      run ["F.lean", "--graph", "--single", "fisher"] `shouldBe` Just (Left "--graph does not take --single or --one-per-goal")
     it "refuses --one-per-goal" $
       run ["F.lean", "--one-per-goal", "--graph"] `shouldBe` Just (Left "--graph does not take --single or --one-per-goal")
     it "the graph flags need --graph" $
@@ -224,12 +226,34 @@ spec = do
       run ["F.lean", "--graph", "--max-depth", "x"] `shouldBe` Nothing
       run ["F.lean", "--graph", "--max-splits", "-1"] `shouldBe` Nothing
       run ["F.lean", "--graph", "--cap-usd", "0"] `shouldBe` Nothing
-  describe "without --graph" $
+  describe "without --graph" $ do
     it "is today's run" $ do
       let ra = ok ["F.lean", "--backends", "claude-code,codex"]
       raGraph ra `shouldBe` False
       raBackends ra `shouldBe` ["claude-code", "codex"]
-      raBackends (ok ["F.lean"]) `shouldBe` ["claude-code", "gauss"]
+      raBackends (ok ["F.lean"]) `shouldBe` ["claude-code", "fisher"]
+    it "takes the native backend as fisher" $ do
+      let ra = ok ["F.lean", "--backends", "claude-code,fisher,codex"]
+      raBackends ra `shouldBe` ["claude-code", "fisher", "codex"]
+      map isNative (raBackends ra) `shouldBe` [False, True, False]
+      raSingle (ok ["F.lean", "--single", "codex"]) `shouldBe` Just "codex"
+    it "refuses the native backend's previous name, and any unknown backend, with the list" $ do
+      let refusal b = Just (Left ("unknown backend `" <> b <> "`; the backends are: claude-code, codex, fisher"))
+      run ["F.lean", "--backends", oldName] `shouldBe` refusal (T.pack oldName)
+      run ["F.lean", "--backends", "claude-code," <> oldName] `shouldBe` refusal (T.pack oldName)
+      run ["F.lean", "--graph", "--backends", oldName] `shouldBe` refusal (T.pack oldName)
+      run ["F.lean", "--single", map toUpper oldName] `shouldBe` refusal (T.pack (map toUpper oldName))
+      run ["F.lean", "--backends", "nope"] `shouldBe` refusal "nope"
+      isNative (T.pack oldName) `shouldBe` False
+  describe "attemptEnv" $
+    it "sets the backend and the state directory, over their old values, under Fisher's names only" $ do
+      let base = Map.fromList [("FISHER_AUTOFORMALIZE_BACKEND", "codex"), ("FISHER_AUTOFORMALIZE_MANAGED_STATE_DIR", "/old"), ("PATH", "/bin")]
+          env = attemptEnv "fisher" (Just "/attempt/managed") base
+      Map.lookup "FISHER_AUTOFORMALIZE_BACKEND" env `shouldBe` Just "fisher"
+      Map.lookup "FISHER_AUTOFORMALIZE_MANAGED_STATE_DIR" env `shouldBe` Just "/attempt/managed"
+      Map.lookup "PATH" env `shouldBe` Just "/bin"
+      Map.keys env `shouldBe` ["FISHER_AUTOFORMALIZE_BACKEND", "FISHER_AUTOFORMALIZE_MANAGED_STATE_DIR", "PATH"]
+      Map.lookup "FISHER_AUTOFORMALIZE_MANAGED_STATE_DIR" (attemptEnv "fisher" Nothing base) `shouldBe` Just "/old"
   describe "setModel" $ do
     it "replaces the value after -m" $
       setModel "M" ["fisher", "chat", "--provider", "openrouter", "-m", "old", "-t", "x"]
@@ -306,13 +330,14 @@ spec = do
       scTiers (searchConfigFor ra c) `shouldBe` ["example/model-a", "example/model-b"]
       -- the default backends: claude-code is outside the tiers
       scUntiered (searchConfigFor ra c) `shouldBe` ["claude-code"]
-      scUntiered (searchConfigFor (ok ["F.lean", "--backends", "gauss,codex,fisher", "--tiers", "example/model-a,example/model-b"]) c) `shouldBe` ["codex"]
+      scUntiered (searchConfigFor (ok ["F.lean", "--backends", "fisher,codex", "--tiers", "example/model-a,example/model-b"]) c) `shouldBe` ["codex"]
       attemptWatched c "t1" `shouldBe` True
       attemptWatched c "*" `shouldBe` False
-    it "searchTiersConfig reads gauss.search.tiers" $ do
-      searchTiersConfig (A.object ["gauss" A..= A.object ["search" A..= A.object ["tiers" A..= (["a", "b"] :: [Text])]]]) `shouldBe` ["a", "b"]
+    it "searchTiersConfig reads fisher.search.tiers only" $ do
+      searchTiersConfig (A.object ["fisher" A..= A.object ["search" A..= A.object ["tiers" A..= (["a", "b"] :: [Text])]]]) `shouldBe` ["a", "b"]
+      searchTiersConfig (A.object [K.fromString oldName A..= A.object ["search" A..= A.object ["tiers" A..= (["a", "b"] :: [Text])]]]) `shouldBe` []
       searchTiersConfig (A.object []) `shouldBe` []
-      searchTiersConfig (A.object ["gauss" A..= A.object ["search" A..= A.object ["tiers" A..= ("a" :: Text)]]]) `shouldBe` []
+      searchTiersConfig (A.object ["fisher" A..= A.object ["search" A..= A.object ["tiers" A..= ("a" :: Text)]]]) `shouldBe` []
     it "the usage names each flag" $
       mapM_ (\f -> runUsageText `shouldSatisfy` isInfixOf f) ["--tiers", "--no-cascade", "--stall-turns", "--stall-dollars", "--no-early-stop"]
   describe "per attempt models and the ledger" $ do

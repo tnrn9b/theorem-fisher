@@ -1,6 +1,6 @@
 -- | @fisher chat --context clm@ (docs/clm.md sections 3, 9 to 11): a
 -- scripted turn through the CLI, then what it leaves behind: the context
--- file and @state.json@ under @$GAUSS_HOME/fisher/ctx/<session>/@, the
+-- file and @state.json@ under @$FISHER_HOME/fisher/ctx/<session>/@, the
 -- prompt section in the system prompt, the context line on the result,
 -- the full transcript in @state.db@, and a replay log that replays bit
 -- for bit. Also the flag's errors and the local-backend requirement.
@@ -36,6 +36,7 @@ import Fisher.Py.Value
 import Fisher.Store (closeStore, openStore, snapshotRows)
 import Fisher.Tools.Agent (AgentTools (..), newAgentTools)
 import Fisher.Tools.Registry (getToolDefinitions)
+import Fisher.TestUtil (oldName)
 
 completion :: PyVal -> PyVal
 completion msg =
@@ -66,7 +67,7 @@ priced cost msg =
           <> [("cost", PFloat c) | Just c <- [cost]] )
     (completion msg)
 
-data Run = Run {rCode :: Int, rOut :: Text, rReqs :: [HttpReq], rGauss :: FilePath, rSys :: Sys}
+data Run = Run {rCode :: Int, rOut :: Text, rReqs :: [HttpReq], rFisher :: FilePath, rSys :: Sys}
 
 runChat :: FilePath -> [(Text, Text)] -> [Text] -> IO Run
 runChat = runChatWith answers
@@ -78,9 +79,9 @@ runChatWith = runChatWithDeps id
 runChatWithDeps :: (ChatDeps -> ChatDeps) -> [PyVal] -> FilePath -> [(Text, Text)] -> [Text] -> IO Run
 runChatWithDeps change answers' tmp extraEnv argv = do
   let home = tmp </> "home"
-      gauss = home </> ".gauss"
+      fisher = home </> ".fisher"
       work = tmp </> "work"
-  createDirectoryIfMissing True gauss
+  createDirectoryIfMissing True fisher
   createDirectoryIfMissing True work
   offset <- newIORef (0 :: Double)
   uuidN <- newIORef (0 :: Int)
@@ -89,7 +90,7 @@ runChatWithDeps change answers' tmp extraEnv argv = do
   queue <- newIORef answers'
   env <-
     newIORef . M.fromList $
-      [("HOME", T.pack home), ("COLUMNS", "60"), ("GAUSS_FORCE_PLAIN_OUTPUT", "1"), ("GAUSS_TIMEZONE", "UTC"), ("OPENROUTER_API_KEY", "sk-or-test-1234567890")]
+      [("HOME", T.pack home), ("COLUMNS", "60"), ("FISHER_FORCE_PLAIN_OUTPUT", "1"), ("FISHER_TIMEZONE", "UTC"), ("OPENROUTER_API_KEY", "sk-or-test-1234567890")]
         <> extraEnv
   let clock = (1790000000 +) <$> readIORef offset
       sleep d = modifyIORef offset (+ d)
@@ -102,7 +103,7 @@ runChatWithDeps change answers' tmp extraEnv argv = do
           , sysOpenBrowser = \_ -> pure False, sysRun = \_ -> pure (Left "no"), sysRunInteractive = \_ -> pure (Left "no")
           , sysWhich = \_ -> pure Nothing, sysPlatform = "linux"
           , sysUuidHex = atomicModifyIORef' uuidN (\n -> (n + 1, T.justifyRight 32 '0' (T.pack (showHex (n + 1) ""))))
-          , sysTimeZoneAt = \_ -> pure utc, sysHome = home, sysGaussHome = gauss
+          , sysTimeZoneAt = \_ -> pure utc, sysHome = home, sysFisherHome = fisher
           , sysOut = \t -> modifyIORef outBuf (<> [t]), sysInput = \_ -> pure Nothing, sysGetPass = \_ -> pure Nothing
           , sysStdinTty = pure False, sysStdoutTty = pure False, sysPid = 4242 }
       respond hr = do
@@ -114,8 +115,8 @@ runChatWithDeps change answers' tmp extraEnv argv = do
             case q of
               [] -> pure (Right (HttpResp 500 [] "{\"error\": {\"message\": \"no canned answer\"}}"))
               (r : rest) -> writeIORef queue rest >> pure (Right (HttpResp 200 [] (TE.encodeUtf8 (dumpsAscii r))))
-  at <- newAgentTools gauss
-  (defs, _) <- getToolDefinitions (atRegistry at) (Just ["gauss-cli"]) Nothing
+  at <- newAgentTools fisher
+  (defs, _) <- getToolDefinitions (atRegistry at) (Just ["fisher-cli"]) Nothing
   let scripted tr = tr {trCall = \_ _ _ _ -> pure "{\"content\": \"     1|theorem foo : True := trivial\", \"total_lines\": 1}", trReadFilesSummary = \_ -> pure []}
       deps =
         ChatDeps
@@ -131,7 +132,7 @@ runChatWithDeps change answers' tmp extraEnv argv = do
   code <- chatMain (change deps) sys argv
   o <- T.concat <$> readIORef outBuf
   rs <- readIORef reqs
-  pure (Run code o rs gauss sys)
+  pure (Run code o rs fisher sys)
 
 bodyOf :: HttpReq -> PyVal
 bodyOf = maybe PNull id . hrBody
@@ -160,9 +161,16 @@ capturingStderr dir act = do
   t <- TE.decodeUtf8 <$> BS.readFile file
   pure (a, t)
 
+-- | What an action prints through the Sys it is given.
+capturedOut :: Sys -> (Sys -> IO a) -> IO (a, Text)
+capturedOut sys act = do
+  buf <- newIORef []
+  a <- act sys {sysOut = \t -> modifyIORef' buf (<> [t])}
+  (,) a . T.concat <$> readIORef buf
+
 onlySession :: FilePath -> IO Text
-onlySession gauss = do
-  fs <- listDirectory (gauss </> "fisher" </> "replays")
+onlySession fisher = do
+  fs <- listDirectory (fisher </> "fisher" </> "replays")
   case fs of
     [f] -> pure (T.pack (dropExtension f))
     _ -> fail ("replay logs: " <> show fs)
@@ -174,7 +182,7 @@ spec = do
       tmp <- canonicalizePath tmp0
       r <- runChat tmp [] ["-q", "Check that the project builds.", "-Q", "--context", "clm"]
       rCode r `shouldBe` 0
-      let ctxRoot = rGauss r </> "fisher" </> "ctx"
+      let ctxRoot = rFisher r </> "fisher" </> "ctx"
       sids <- listDirectory ctxRoot
       length sids `shouldBe` 1
       let sid = head sids
@@ -192,13 +200,13 @@ spec = do
       let lastTool = last [m | m <- messagesOf (last posts), get "role" m == Just (PStr "tool")]
       textOf lastTool `shouldSatisfy` T.isInfixOf "[context "
       -- state.db keeps the transcript: the tool result as the tool gave it
-      store <- openStore (rGauss r </> "state.db")
+      store <- openStore (rFisher r </> "state.db")
       (_, ms) <- snapshotRows store
       closeStore store
       let contents = [c | m <- ms, Just (PStr c) <- [lookup "content" m]]
       contents `shouldSatisfy` elem "{\"content\": \"     1|theorem foo : True := trivial\", \"total_lines\": 1}"
       -- the replay log has CLM's events, and replays bit for bit
-      lg <- BS.readFile (rGauss r </> "fisher" </> "replays" </> (sid <> ".jsonl"))
+      lg <- BS.readFile (rFisher r </> "fisher" </> "replays" </> (sid <> ".jsonl"))
       let kinds = [maybe "" pyStrOf (get "kind" v) | l <- BC.lines lg, Right v <- [loads l]]
       kinds `shouldSatisfy` (\ks -> all (`elem` ks) ["clm", "clm_write", "clm_read"])
       code <- replayMain (rSys r) [T.pack sid]
@@ -210,12 +218,33 @@ spec = do
     it "needs the local terminal backend" $ withSystemTempDirectory "fisher-clm-cli" $ \tmp -> do
       r <- runChat tmp [("TERMINAL_ENV", "docker")] ["-q", "x", "-Q", "--context", "clm"]
       T.unwords (T.words (rOut r)) `shouldSatisfy` T.isInfixOf "Failed to initialize agent: --context clm needs the local terminal backend for now (TERMINAL_ENV is docker)"
+  -- a session logged before the clean break: the product's previous name in
+  -- its system prompt and requests, its toolset and its variables
+  describe "fisher replay of a session logged under the previous names" $
+    it "reports the differences and does not crash" $ withSystemTempDirectory "fisher-replay-old" $ \tmp0 -> do
+      tmp <- canonicalizePath tmp0
+      r <- runChat tmp [] ["-q", "Check that the project builds.", "-Q"]
+      rCode r `shouldBe` 0
+      sid <- onlySession (rFisher r)
+      let lgPath = rFisher r </> "fisher" </> "replays" </> T.unpack (sid <> ".jsonl")
+      lg <- TE.decodeUtf8 <$> BS.readFile lgPath
+      let old0 = T.pack oldName
+          -- the variables, the capitalised name, then every lower-case
+          -- form: the toolset, the home and project directories, paths
+          oldStyle = T.replace "fisher" old0 . T.replace "Fisher" (T.toTitle old0) . T.replace "FISHER_" (T.toUpper old0 <> "_")
+          old = oldStyle lg
+      old `shouldNotBe` lg
+      BS.writeFile lgPath (TE.encodeUtf8 old)
+      (code, out) <- capturedOut (rSys r) (\sys -> replayMain sys [sid])
+      code `shouldBe` 1
+      out `shouldSatisfy` T.isInfixOf ("replay " <> sid <> ": ")
+      out `shouldSatisfy` T.isInfixOf "difference(s)"
   -- CLM with a store (docs/superpowers/specs/2026-10-14-clm-store-design.md
   -- section 4); the scripted chat's which finds no python3
   describe "fisher chat --context clm with fisher.clm.store" $ do
     let storeOn tmp = do
-          createDirectoryIfMissing True (tmp </> "home" </> ".gauss")
-          BS.writeFile (tmp </> "home" </> ".gauss" </> "config.yaml") "fisher:\n  clm:\n    store: true\n"
+          createDirectoryIfMissing True (tmp </> "home" </> ".fisher")
+          BS.writeFile (tmp </> "home" </> ".fisher" </> "config.yaml") "fisher:\n  clm:\n    store: true\n"
     it "without python3 runs with the store and no recall, warns on stderr, saves store.json and replays" $ withSystemTempDirectory "fisher-clm-store" $ \tmp0 -> do
       tmp <- canonicalizePath tmp0
       storeOn tmp
@@ -223,9 +252,9 @@ spec = do
       rCode r `shouldBe` 0
       rOut r `shouldNotSatisfy` T.isInfixOf "works without recall"
       T.lines err `shouldSatisfy` (== 1) . length . filter (== "fisher: python3 not found; CLM's store works without recall")
-      sid <- onlySession (rGauss r)
-      doesFileExist (rGauss r </> "fisher" </> "ctx" </> T.unpack sid </> "store.json") `shouldReturn` True
-      lg <- BS.readFile (rGauss r </> "fisher" </> "replays" </> (T.unpack sid <> ".jsonl"))
+      sid <- onlySession (rFisher r)
+      doesFileExist (rFisher r </> "fisher" </> "ctx" </> T.unpack sid </> "store.json") `shouldReturn` True
+      lg <- BS.readFile (rFisher r </> "fisher" </> "replays" </> (T.unpack sid <> ".jsonl"))
       let clms = [v | l <- BC.lines lg, Right v <- [loads l], get "kind" v == Just (PStr "clm")]
       [get "config" c >>= get "store" | c <- clms] `shouldBe` [Just (PBool True)]
       [get "recall" c | c <- clms] `shouldBe` [Nothing]
@@ -235,8 +264,8 @@ spec = do
       storeOn tmp
       r1 <- runChat tmp [] ["-q", "Check that the project builds.", "-Q", "--context", "clm"]
       rCode r1 `shouldBe` 0
-      sid <- onlySession (rGauss r1)
-      BS.writeFile (rGauss r1 </> "fisher" </> "ctx" </> T.unpack sid </> "store.json") "{\"items\": [oops"
+      sid <- onlySession (rFisher r1)
+      BS.writeFile (rFisher r1 </> "fisher" </> "ctx" </> T.unpack sid </> "store.json") "{\"items\": [oops"
       (r2, err) <- capturingStderr tmp (runChatWith answers tmp [] ["-q", "Check again.", "-Q", "--context", "clm", "--resume", sid])
       rCode r2 `shouldBe` 0
       rOut r2 `shouldNotSatisfy` T.isInfixOf "store.json is not valid"

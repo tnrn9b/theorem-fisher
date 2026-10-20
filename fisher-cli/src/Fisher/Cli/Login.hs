@@ -1,8 +1,8 @@
--- | @gauss login ...@: upstream removed the command; argparse still checks
--- the flags, then it points at @gauss model@ and @gauss setup@. The login
--- flows themselves ('Fisher.LLM.Auth.Nous.loginNous',
--- 'Fisher.LLM.Auth.Codex.loginOpenAICodex') are reached from model and
--- setup.
+-- | @fisher login ...@: upstream removed the command; argparse still checks
+-- the flags, then it points at @fisher model@ and @fisher setup@. The login
+-- flow itself ('Fisher.LLM.Auth.Codex.loginOpenAICodex') is reached from
+-- model and setup. Upstream's flags that only a removed provider's login
+-- read (portal and inference URLs, client id, scope) are gone.
 module Fisher.Cli.Login
   ( loginMain
   ) where

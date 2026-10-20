@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
--- | @~/.gauss/config.yaml@: the defaults, the merge of a user file over
--- them, and the save. Ported from @gauss_cli/config.py@ at the commit in
--- @UPSTREAM@.
+-- | @config.yaml@ in the Fisher home: the defaults, the merge of a user
+-- file over them, and the save. Ported from upstream @cli/config.py@ at the
+-- commit in @UPSTREAM@.
 --
 -- Keys are written in upstream's order: the defaults' order, then the order
 -- of the file being replaced for keys the defaults lack (where Python's
@@ -38,7 +38,7 @@ import System.Directory (doesFileExist)
 import System.IO.Unsafe (unsafePerformIO)
 
 import Fisher.Atomic (atomicWriteFile, secureFile)
-import Fisher.Paths (configPathIn, ensureGaussHome, ensureGaussHomeAt)
+import Fisher.Paths (configPathIn, ensureFisherHome, ensureFisherHomeAt)
 import Fisher.Py (lookupKey, pyTruthy)
 import Fisher.Yaml.Ordered (KeyOrder, encodeOrdered, keyOrderOf, keyOrderOfFile)
 
@@ -112,12 +112,11 @@ liftLegacyMaxTurns u = case KM.lookup "max_turns" u of
           _ -> KM.insert "max_turns" mt agent
      in KM.delete "max_turns" (KM.insert "agent" (Object agent') u)
 
--- | Load the configuration under a given home. Returns the configuration and
--- any warnings; upstream prints the same warning and falls back to the
+-- | Load the configuration under a given home. Returns the configuration and any warnings; upstream prints the same warning and falls back to the
 -- defaults when the file cannot be read.
 loadConfigAt :: FilePath -> IO (Value, [Text])
 loadConfigAt home = do
-  ensureGaussHomeAt home
+  ensureFisherHomeAt home
   let path = configPathIn home
   exists <- doesFileExist path
   if not exists
@@ -136,7 +135,7 @@ loadConfigAt home = do
 -- | 'loadConfigAt' on the active home, printing warnings as upstream does.
 loadConfig :: IO Value
 loadConfig = do
-  home <- ensureGaussHome
+  home <- ensureFisherHome
   (cfg, warnings) <- loadConfigAt home
   mapM_ TIO.putStrLn warnings
   pure cfg
@@ -168,9 +167,11 @@ renderConfigWith orders cfg =
       extra = [securityComment | needsSecurity] <> [fallbackComment | needsFallback]
    in encodeOrdered orders normalized <> BS.concat extra
 
+-- | The save: the configuration as given, keys in the defaults' order and
+-- then the existing file's.
 saveConfigAt :: FilePath -> Value -> IO ()
 saveConfigAt home cfg = do
-  ensureGaussHomeAt home
+  ensureFisherHomeAt home
   let path = configPathIn home
   existing <- keyOrderOfFile path
   atomicWriteFile ".config_.tmp" path (renderConfigWith [defaultKeyOrder, existing] cfg)
@@ -178,5 +179,5 @@ saveConfigAt home cfg = do
 
 saveConfig :: Value -> IO ()
 saveConfig cfg = do
-  home <- ensureGaussHome
+  home <- ensureFisherHome
   saveConfigAt home cfg

@@ -1,4 +1,4 @@
--- | Upstream's terminal rendering (@gauss_cli/colors.py@): colour only on a
+-- | Upstream's terminal rendering (@cli/colors.py@): colour only on a
 -- terminal that wants it, and an ASCII fallback for symbols when the output
 -- encoding is not UTF-8.
 module Fisher.Term
@@ -18,6 +18,7 @@ import qualified Data.Text.Normalize as N
 import System.Environment (lookupEnv)
 import System.IO (hGetEncoding, hIsTerminalDevice, stdout)
 
+
 data Style = Style { styleAnsi :: Bool, styleUnicode :: Bool }
   deriving (Eq, Show)
 
@@ -25,16 +26,17 @@ data Style = Style { styleAnsi :: Bool, styleUnicode :: Bool }
 plainStyle :: Style
 plainStyle = Style False True
 
+-- | A variable read as a yes.
 truthyEnv :: String -> IO Bool
 truthyEnv name = maybe False ((`elem` ["1", "true", "yes", "on"]) . T.toLower . T.strip . T.pack) <$> lookupEnv name
 
 detectStyle :: IO Style
 detectStyle = do
-  forcePlain <- truthyEnv "GAUSS_FORCE_PLAIN_OUTPUT"
+  forcePlain <- truthyEnv "FISHER_FORCE_PLAIN_OUTPUT"
   noColor <- lookupEnv "NO_COLOR"
   tty <- hIsTerminalDevice stdout
   term <- maybe "" (T.toLower . T.strip . T.pack) <$> lookupEnv "TERM"
-  forceAscii <- truthyEnv "GAUSS_FORCE_ASCII"
+  forceAscii <- truthyEnv "FISHER_FORCE_ASCII"
   enc <- hGetEncoding stdout
   let ansi = not forcePlain && noColor == Nothing && tty && term /= "dumb"
       utf = maybe False (T.isInfixOf "utf" . T.toLower . T.pack . show) enc

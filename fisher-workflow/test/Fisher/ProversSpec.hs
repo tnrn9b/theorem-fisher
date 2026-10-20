@@ -136,7 +136,7 @@ data Fixture = Fixture
   , fxConfig :: [(Data.Aeson.Key.Key, Value)]
   -- ^ more top-level config keys
   , fxAuto :: [(Data.Aeson.Key.Key, Value)]
-  -- ^ more @gauss.autoformalize@ keys
+  -- ^ more @fisher.autoformalize@ keys
   }
 
 fixture :: Text -> ProverKind -> Fixture
@@ -167,15 +167,20 @@ plan fx command k = do
     forM_ ["coqc", "rocq"] $ \b -> when (b `elem` fxBins fx) $ writeExe (root </> "bin" </> T.unpack b) fakeCoqc
     proj <- maybe (makeProject root (fxKind fx)) ($ root) (fxProjectDir fx)
     let name = if fxKind fx == Rocq then "rocq" else "isabelle"
-        pluginDir = root </> "gauss-home" </> "autoformalize" </> "assets" </> "fisher-provers" </> name
+        pluginDir = root </> "fisher-home" </> "autoformalize" </> "assets" </> "fisher-provers" </> name
         base =
           foldr (uncurry Map.insert) (Map.delete "OPENROUTER_API_KEY" base0) $
             [ ("FAKE_PLUGIN_ID", name <> "@fisher-provers"), ("FAKE_PLUGIN_DIR", pluginDir)
             , ("ANTHROPIC_API_KEY", "sk-ant-test"), ("OPENAI_API_KEY", "sk-test") ]
               <> fxEnv fx
-        cfg = object (("gauss" .= object ["autoformalize" .= object (("backend" .= fxBackend fx) : fxAuto fx)]) : [k .= v | (k, v) <- fxConfig fx])
+        -- the fixture's own fisher section, with autoformalize put in it
+        ownFisher = case lookup "fisher" (fxConfig fx) of
+          Just (Object o) -> o
+          _ -> KM.empty
+        auto = object (("backend" .= fxBackend fx) : fxAuto fx)
+        cfg = object (("fisher" .= Object (KM.insert "autoformalize" auto ownFisher)) : [k .= v | (k, v) <- fxConfig fx, k /= "fisher"])
         -- the launch's notes and warnings go to notes.log
-        machine = (machineFor file (root </> "gauss-home")) {mNote = \t -> TIO.appendFile (root </> "notes.log") (t <> "\n")}
+        machine = (machineFor file (root </> "fisher-home")) {mNote = \t -> TIO.appendFile (root </> "notes.log") (t <> "\n")}
         li = LaunchInputs machine cfg base False (const (pure Nothing)) (Just (proj </> fxSubdir fx))
     createDirectoryIfMissing True (proj </> fxSubdir fx)
     r <- withProcessEnv base (resolveWorkflowRequest li command)
@@ -187,7 +192,7 @@ serverTools k = svTools (pvServer (prover k))
 
 -- | The staged directory holding only the @fisher@ link, for a backend.
 fisherBinOf :: FilePath -> Text -> FilePath
-fisherBinOf root b = root </> "gauss-home" </> "autoformalize" </> T.unpack b </> "managed" </> "fisher-bin"
+fisherBinOf root b = root </> "fisher-home" </> "autoformalize" </> T.unpack b </> "managed" </> "fisher-bin"
 
 -- | This test executable's path as @<EXE>@ in every string.
 normSelf :: FilePath -> Value -> Value
@@ -278,10 +283,10 @@ spec = do
           [ "rocq" .= entry Rocq []
           , "isabelle" .= entry Isabelle []
           , "isabelle-no-shim" .= entryWith Nothing Isabelle []
-          , "rocq-override" .= entry Rocq [("GAUSS_AUTOFORMALIZE_ROCQ_MCP_SPEC", "rocq-mcp==0.3")]
-          , "isabelle-override" .= entry Isabelle [("GAUSS_AUTOFORMALIZE_ISABELLE_MCP_SPEC", "git+https://example.org/isabelle-mcp")]
-          , "blank-override" .= entry Rocq [("GAUSS_AUTOFORMALIZE_ROCQ_MCP_SPEC", "  ")]
-          , "bad-override" .= entry Rocq [("GAUSS_AUTOFORMALIZE_ROCQ_MCP_SPEC", "uvx rocq-mcp")] ]
+          , "rocq-override" .= entry Rocq [("FISHER_AUTOFORMALIZE_ROCQ_MCP_SPEC", "rocq-mcp==0.3")]
+          , "isabelle-override" .= entry Isabelle [("FISHER_AUTOFORMALIZE_ISABELLE_MCP_SPEC", "git+https://example.org/isabelle-mcp")]
+          , "blank-override" .= entry Rocq [("FISHER_AUTOFORMALIZE_ROCQ_MCP_SPEC", "  ")]
+          , "bad-override" .= entry Rocq [("FISHER_AUTOFORMALIZE_ROCQ_MCP_SPEC", "uvx rocq-mcp")] ]
 
     it "start Isabelle-MCP through the shim: uvx --from isabelle-mcp==0.6.0 python <shim>" $ do
       proverServerCommand Isabelle [] (Just "/s/isabelle_mcp_shim.py")
@@ -407,8 +412,8 @@ spec = do
         errorText r `shouldBe` "/autoprove is available for Lean projects only."
 
     it "stop the native backend without an OpenRouter key" $
-      plan (fixture "fisher" Rocq) "/prove" $ \_ _ r ->
-        errorText r `shouldBe` "OpenRouter auth not found. Save `OPENROUTER_API_KEY` in ~/.gauss/.env, or set `gauss.autoformalize.native_provider: anthropic`."
+      plan (fixture "fisher" Rocq) "/prove" $ \root _ r ->
+        errorText r `shouldBe` ("OpenRouter auth not found. Save `OPENROUTER_API_KEY` in " <> T.pack (root </> "fisher-home" </> ".env") <> ", or set `fisher.autoformalize.native_provider: anthropic`.")
 
   describe "plans" $ do
     forM_ [Rocq, Isabelle] $ \kind -> do
@@ -418,7 +423,7 @@ spec = do
           p <- ok r
           let c = wpContext p
               req = wpRequest p
-              market = root </> "gauss-home" </> "autoformalize" </> "assets" </> "fisher-provers"
+              market = root </> "fisher-home" </> "autoformalize" </> "assets" </> "fisher-provers"
           files <- filesUnder market
           mcp <- readJson (mcMcpConfig c)
           cfg <- readJson (mcBackendHome c </> ".claude.json")
@@ -426,7 +431,7 @@ spec = do
           let servers = case cfg of
                 Object o -> KM.lookup "mcpServers" o
                 _ -> Nothing
-              keys = ["HOME", "CLAUDE_PLUGIN_ROOT", "GAUSS_AUTOFORMALIZE_BACKEND", "GAUSS_PROJECT_ROOT", "ROCQ_PROJECT_PATH", "ROCQ_WORKSPACE", "ISABELLE_PROJECT_PATH", "LEAN_PROJECT_PATH", "GAUSS_AUTOFORMALIZE_SKILLS_ROOT"]
+              keys = ["HOME", "CLAUDE_PLUGIN_ROOT", "FISHER_AUTOFORMALIZE_BACKEND", "FISHER_PROJECT_ROOT", "ROCQ_PROJECT_PATH", "ROCQ_WORKSPACE", "ISABELLE_PROJECT_PATH", "LEAN_PROJECT_PATH", "FISHER_AUTOFORMALIZE_SKILLS_ROOT"]
               envView = object [ (Data.Aeson.Key.fromString k, maybe Null (String . normText root . T.pack) (Map.lookup k (hrEnv req))) | k <- keys ]
           startup <- maybe (pure "") TIO.readFile (mcStartupContext c)
           self <- getExecutablePath
@@ -468,8 +473,9 @@ spec = do
           self <- T.pack <$> getExecutablePath
           let c = wpContext p
               req = wpRequest p
-              keys = [ "GAUSS_AUTOFORMALIZE_BACKEND", "GAUSS_AUTOFORMALIZE_CONTEXT", "GAUSS_AUTOFORMALIZE_INSTRUCTIONS", "GAUSS_PROJECT_ROOT"
-                     , "ROCQ_PROJECT_PATH", "ROCQ_WORKSPACE", "ISABELLE_PROJECT_PATH", "LEAN_PROJECT_PATH", "GAUSS_YOLO_MODE", "GAUSS_HOME" ]
+              keys = [ "FISHER_AUTOFORMALIZE_BACKEND", "FISHER_AUTOFORMALIZE_CONTEXT", "FISHER_AUTOFORMALIZE_INSTRUCTIONS", "FISHER_PROJECT_ROOT"
+                     , "FISHER_YOLO_MODE", "FISHER_HOME"
+                     , "ROCQ_PROJECT_PATH", "ROCQ_WORKSPACE", "ISABELLE_PROJECT_PATH", "LEAN_PROJECT_PATH" ]
               envView = object [ (Data.Aeson.Key.fromString k, maybe Null (String . normText root . T.pack) (Map.lookup k (hrEnv req))) | k <- keys ]
           mcp <- readJson (mcMcpConfig c)
           startup <- maybe (pure "") TIO.readFile (mcStartupContext c)
@@ -564,7 +570,7 @@ spec = do
         wsBackend (wpSpec p) `shouldBe` "/rocq:prove theories/Main.v"
         wsArgs (wpSpec p) `shouldBe` "theories/Main.v"
         mcBackend (wpContext p) `shouldBe` "claude-code"
-        mcMcpConfig (wpContext p) `shouldBe` root </> "gauss-home" </> "autoformalize" </> "claude-code" </> "managed" </> "mcp" </> "rocq.mcp.json"
+        mcMcpConfig (wpContext p) `shouldBe` root </> "fisher-home" </> "autoformalize" </> "claude-code" </> "managed" </> "mcp" </> "rocq.mcp.json"
         mcpServerKeys <$> readJson (mcMcpConfig (wpContext p)) `shouldReturn` ["rocq"]
         T.isInfixOf "/rocq:prove theories/Main.v" (last (hrArgv (wpRequest p))) `shouldBe` True
 
@@ -578,7 +584,7 @@ spec = do
         writeExe (root </> "bin" </> "coqc") fakeCoqc
         rocqProj <- makeProject root Rocq
         let home = root </> "home"
-            managedHome = root </> "gauss-home" </> "autoformalize" </> "claude-code" </> "managed" </> "claude-home"
+            managedHome = root </> "fisher-home" </> "autoformalize" </> "claude-code" </> "managed" </> "claude-home"
             settings = managedHome </> ".claude" </> "settings.json"
         -- a server and a plugin added to the managed home, which every
         -- session keeps (the user's own .claude.json has no servers, so the
@@ -589,11 +595,11 @@ spec = do
         BL.writeFile settings (Data.Aeson.encode (object
           [ "enabledPlugins" .= object ["other@x" .= True]
           , "extraKnownMarketplaces" .= object ["x" .= object []] ]))
-        let cfg = object ["gauss" .= object ["autoformalize" .= object ["backend" .= ("claude-code" :: Text)]]]
+        let cfg = object ["fisher" .= object ["autoformalize" .= object ["backend" .= ("claude-code" :: Text)]]]
             run cwd pid pdir = do
               let base = foldr (uncurry Map.insert) base0
                     [ ("FAKE_PLUGIN_ID", pid), ("FAKE_PLUGIN_DIR", pdir), ("ANTHROPIC_API_KEY", "sk-ant-test") ]
-                  li = LaunchInputs (machineFor file (root </> "gauss-home")) cfg base False (const (pure Nothing)) (Just cwd)
+                  li = LaunchInputs (machineFor file (root </> "fisher-home")) cfg base False (const (pure Nothing)) (Just cwd)
               r <- withProcessEnv base (resolveWorkflowRequest li "/prove Main")
               _ <- ok r
               cj <- readJson (managedHome </> ".claude.json")
@@ -601,7 +607,7 @@ spec = do
               pure (mcpServerKeys cj, keysAt ["enabledPlugins"] st, keysAt ["extraKnownMarketplaces"] st)
             lean = run (root </> "project") "lean4@lean4-skills" (root </> "fake-plugin")
             rocq = run rocqProj "rocq@fisher-provers"
-                     (root </> "gauss-home" </> "autoformalize" </> "assets" </> "fisher-provers" </> "rocq")
+                     (root </> "fisher-home" </> "autoformalize" </> "assets" </> "fisher-provers" </> "rocq")
             leanView = (["lean-lsp", "mine"], ["lean4@lean4-skills", "other@x"], ["lean4-skills", "x"])
         lean `shouldReturn` leanView
         rocq `shouldReturn` (["mine", "rocq"], ["other@x", "rocq@fisher-provers"], ["fisher-provers", "x"])
@@ -673,7 +679,7 @@ spec = do
         plan fx "/prove" $ \root _ r -> do
           _ <- ok r
           calls <- filter ("uvx " `T.isPrefixOf`) . T.lines <$> TIO.readFile (root </> "fake.log")
-          let shim = root </> "gauss-home" </> "autoformalize" </> T.unpack b </> "managed" </> "isabelle-mcp" </> "isabelle_mcp_shim.py"
+          let shim = root </> "fisher-home" </> "autoformalize" </> T.unpack b </> "managed" </> "isabelle-mcp" </> "isabelle_mcp_shim.py"
               server = if k == Rocq then "[--from] [git+https://github.com/LLM4Rocq/rocq-mcp@6983113d0844c0b7f987c79dab13988445109bfb] [rocq-mcp]" else "[--from] [isabelle-mcp==0.6.0] [python] [" <> T.pack shim <> "]"
           calls `shouldBe` ["uvx " <> server <> " [--help]"]
           when (k == Isabelle) $ BS.readFile shim `shouldReturn` isabelleShim
@@ -725,7 +731,7 @@ spec = do
 
   describe "Rocq-MCP's coqc" $ do
     let rocqOnly fx = fx {fxBins = filter (/= "coqc") (fxBins fx) <> ["rocq"]}
-        wrapperFor root b = root </> "gauss-home" </> "autoformalize" </> b </> "managed" </> "rocq-bin" </> "coqc"
+        wrapperFor root b = root </> "fisher-home" </> "autoformalize" </> b </> "managed" </> "rocq-bin" </> "coqc"
         checkWrapper root w = do
           TIO.readFile w `shouldReturn` coqcWrapper (root </> "bin" </> "rocq")
           executable <$> getPermissions w `shouldReturn` True

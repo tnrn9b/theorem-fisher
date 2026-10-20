@@ -94,7 +94,7 @@ newNetTools :: Sys -> Runtime -> Transport -> (Text -> IO (Maybe Text)) -> IO Bo
 newNetTools sys rt tr which record ui at = do
   aux <- AuxEnv sys rt tr (loadConfigOrdered sys) (\_ -> pure ()) <$> newAuxState
   let intr = Sb.isInterrupted (seInterrupt (atSandboxEnv at))
-      gh = sysGaussHome sys
+      gh = sysFisherHome sys
   web <- newWebEnv tr (sysGetEnv sys) (rtSleep rt) (callLlm aux) intr
   tmp <- getTemporaryDirectory
   browser <-
@@ -120,7 +120,7 @@ newNetTools sys rt tr which record ui at = do
           { tiGetEnv = sysGetEnv sys, tiSecurity = configSecurity gh, tiWhich = fmap (fmap T.pack) . findExecutable . T.unpack
           , tiIsExecutable = isExec
           , tiExpandUser = \p -> pure (if "~/" `T.isPrefixOf` p || p == "~" then T.pack home <> T.drop 1 p else p)
-          , tiGaussHome = gh
+          , tiFisherHome = gh
           , tiRun = \argv secs -> do
               -- a missing binary fails as Python's spawn does
               ok <- case argv of

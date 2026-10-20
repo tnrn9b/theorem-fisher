@@ -32,6 +32,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Numeric (showFFloat)
 
+import Fisher.Search.Headless (nativeBackend)
 import Fisher.Search.Child
 import Fisher.Search.Controller (Stop (..), stopReasonText)
 import Fisher.Search.Disprove (Disproof (..))
@@ -495,14 +496,13 @@ sorryLemmas g base =
 applyAllowed :: Graph -> Text -> Bool
 applyAllowed g base = null (sorryLemmas g base)
 
--- | The backends of a graph run: the native one, by either of its names,
--- passed on to the child as gauss.
+-- | The backends of a graph run: the native one, fisher, only.
 graphBackends :: Maybe [Text] -> Either Text [Text]
 graphBackends = \case
-  Nothing -> Right ["gauss"]
+  Nothing -> Right [nativeBackend]
   Just bs
-    | not (null bs), all (`elem` ["gauss", "fisher"]) bs -> Right ["gauss"]
-    | otherwise -> Left "--graph runs on the native backend only (gauss or fisher)"
+    | not (null bs), all (== nativeBackend) bs -> Right [nativeBackend]
+    | otherwise -> Left "--graph runs on the native backend only (fisher)"
 
 -- | The mark on a retrieval event's line when the retrieval was cut off.
 cutOff :: Bool -> Text

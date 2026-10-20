@@ -3,7 +3,7 @@
     "attempts": [
         {
             "attempt": 1,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 294,
             "goal": "Step.Summary.machineClose_of_bodyClose",
             "outcome": "closed",
@@ -27,7 +27,7 @@
         }
     ],
     "backends": [
-        "gauss"
+        "fisher"
     ],
     "budget_s": 3600,
     "cap_usd": 6,

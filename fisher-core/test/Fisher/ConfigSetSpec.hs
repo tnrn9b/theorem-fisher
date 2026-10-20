@@ -23,7 +23,7 @@ spec :: Spec
 spec = describe "config-set.json" $ do
   cases <- runIO (goldenCases "test/golden/a1/config-set.json")
   forM_ cases $ \c -> it (T.unpack (textField "name" c)) $ withTmp $ \tmp -> do
-    let home = tmp </> "gauss-home"
+    let home = tmp </> "fisher-home"
     createDirectoryIfMissing True home
     forM_ (field "input" c :: Maybe Text) $ \t -> BS.writeFile (home </> "config.yaml") (TE.encodeUtf8 t)
     r <- setConfigValueAt home (textField "key" c) (textField "value" c)
@@ -39,7 +39,7 @@ spec = describe "config-set.json" $ do
     env `shouldBe` (field "env" c :: Maybe Text)
   describe "setConfigValueAt's write (Fisher: a temporary file renamed over it)" $ do
     it "keeps an existing file's mode" $ withTmp $ \tmp -> do
-      let home = tmp </> "gauss-home"
+      let home = tmp </> "fisher-home"
           cfg = home </> "config.yaml"
       createDirectoryIfMissing True home
       BS.writeFile cfg "model: a\n"
@@ -47,12 +47,12 @@ spec = describe "config-set.json" $ do
       _ <- setConfigValueAt home "fisher.context" "clm"
       ((.&. 0o777) . fileMode <$> getFileStatus cfg) `shouldReturn` 0o644
     it "gives a new file mode 0600" $ withTmp $ \tmp -> do
-      let home = tmp </> "gauss-home"
+      let home = tmp </> "fisher-home"
       createDirectoryIfMissing True home
       _ <- setConfigValueAt home "fisher.context" "clm"
       ((.&. 0o777) . fileMode <$> getFileStatus (home </> "config.yaml")) `shouldReturn` 0o600
     it "writes through a link to the file it names, and the link stays" $ withTmp $ \tmp -> do
-      let home = tmp </> "gauss-home"
+      let home = tmp </> "fisher-home"
           real = tmp </> "dotfiles" </> "fisher.yaml"
           cfg = home </> "config.yaml"
       createDirectoryIfMissing True home

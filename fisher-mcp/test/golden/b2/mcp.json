@@ -553,7 +553,7 @@
      "includes": []
     }
    },
-   "gauss_cli_extra": [
+   "fisher_cli_extra": [
     "mcp_my_srv_x_echo_it_now",
     "mcp_my_srv_x_nodesc",
     "mcp_my_srv_x_typed",
@@ -1553,7 +1553,7 @@
      "includes": []
     }
    },
-   "gauss_cli_extra": [
+   "fisher_cli_extra": [
     "mcp_inc_typed",
     "mcp_inc_nodesc",
     "mcp_inc_list_prompts",
@@ -1976,7 +1976,7 @@
      "includes": []
     }
    },
-   "gauss_cli_extra": [
+   "fisher_cli_extra": [
     "mcp_slow_slow",
     "mcp_slow_fast",
     "mcp_slow_list_resources",
@@ -2281,7 +2281,7 @@
      "includes": []
     }
    },
-   "gauss_cli_extra": [
+   "fisher_cli_extra": [
     "mcp_d_die",
     "mcp_d_ok",
     "mcp_d_list_resources",
@@ -2623,7 +2623,7 @@
      "includes": []
     }
    },
-   "gauss_cli_extra": [
+   "fisher_cli_extra": [
     "mcp_good_t",
     "mcp_good_list_resources",
     "mcp_good_read_resource",
@@ -3259,7 +3259,7 @@
      "includes": []
     }
    },
-   "gauss_cli_extra": [
+   "fisher_cli_extra": [
     "mcp_s_good",
     "mcp_s_badtype",
     "mcp_s_missingfield",
@@ -4233,7 +4233,7 @@
      "includes": []
     }
    },
-   "gauss_cli_extra": [
+   "fisher_cli_extra": [
     "mcp_smp_text",
     "mcp_smp_tool",
     "mcp_smp_bad_model",
@@ -5053,7 +5053,7 @@
      "includes": []
     }
    },
-   "gauss_cli_extra": [
+   "fisher_cli_extra": [
     "mcp_rl_s",
     "mcp_rl_list_resources",
     "mcp_rl_read_resource",
@@ -5333,7 +5333,7 @@
      "includes": []
     }
    },
-   "gauss_cli_extra": [
+   "fisher_cli_extra": [
     "mcp_e_t",
     "mcp_e_list_resources",
     "mcp_e_read_resource",
@@ -5544,7 +5544,7 @@
      "includes": []
     }
    },
-   "gauss_cli_extra": [
+   "fisher_cli_extra": [
     "mcp_g_t",
     "mcp_g_list_resources",
     "mcp_g_read_resource",
@@ -5872,7 +5872,7 @@
      "includes": []
     }
    },
-   "gauss_cli_extra": [
+   "fisher_cli_extra": [
     "mcp_web_t",
     "mcp_web_json",
     "mcp_web_gone",
@@ -6432,7 +6432,7 @@
      "includes": []
     }
    },
-   "gauss_cli_extra": [
+   "fisher_cli_extra": [
     "mcp_web_boom",
     "mcp_web_ok",
     "mcp_web_list_resources",
@@ -6770,7 +6770,7 @@
    "names": [],
    "schemas": {},
    "toolsets": {},
-   "gauss_cli_extra": [],
+   "fisher_cli_extra": [],
    "calls": [],
    "logs": [
     [

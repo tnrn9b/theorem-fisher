@@ -19,6 +19,7 @@ import Fisher.Search.Golden
 import Fisher.Search.Graph
 import Fisher.Search.GraphRun
 import Fisher.Search.Report
+import Fisher.Search.OldName (oldName)
 import Fisher.Search.Scheduler (AttemptRecord (..), GoalState (..), GoalStatus (..), SearchReport (..), plainRecord)
 
 -- | Roots t (1) and u (2). t splits into l1 (3, proved) and l2 (4, open,
@@ -63,7 +64,7 @@ report = GraphReport
   , grStopped = Just "dollars"
   , grBase = openBase
   , grClosedRoots = 0
-  , grAttempts = [plainRecord 1 "t" "gauss" "rejected: no" 0 12.34 Nothing]
+  , grAttempts = [plainRecord 1 "t" "fisher" "rejected: no" 0 12.34 Nothing]
   , grAutoRan = False, grAutoOff = Nothing, grRetrieval = Nothing, grControl = False, grEscalations = 0 }
 
 -- | A flat run on two tiers: t stopped on tier 0, then closed on tier 1
@@ -183,10 +184,9 @@ spec = do
       sorryLemmas qualified nsBase `shouldBe` ["N.l2"]
       sorryLemmas qualified (T.unlines ["namespace M.N", "", "lemma l2 : 2 = 2 := by sorry", "", "end M.N"]) `shouldBe` []
   describe "graphBackends" $ do
-    let refusal = "--graph runs on the native backend only (gauss or fisher)"
-    it "defaults to gauss" $ graphBackends Nothing `shouldBe` Right ["gauss"]
-    it "gauss" $ graphBackends (Just ["gauss"]) `shouldBe` Right ["gauss"]
-    it "fisher is gauss" $ graphBackends (Just ["fisher"]) `shouldBe` Right ["gauss"]
-    it "both names, once" $ graphBackends (Just ["fisher", "gauss"]) `shouldBe` Right ["gauss"]
-    it "another backend" $ graphBackends (Just ["gauss", "claude-code"]) `shouldBe` Left refusal
+    let refusal = "--graph runs on the native backend only (fisher)"
+    it "defaults to fisher" $ graphBackends Nothing `shouldBe` Right ["fisher"]
+    it "fisher" $ graphBackends (Just ["fisher"]) `shouldBe` Right ["fisher"]
+    it "the native backend's previous name" $ graphBackends (Just [oldName]) `shouldBe` Left refusal
+    it "another backend" $ graphBackends (Just ["fisher", "claude-code"]) `shouldBe` Left refusal
     it "none" $ graphBackends (Just []) `shouldBe` Left refusal

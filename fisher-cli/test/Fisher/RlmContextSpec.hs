@@ -53,7 +53,7 @@ data World = World
   , wDeps :: ChatDeps
   , wOut :: IO Text
   , wReqs :: IO [HttpReq]
-  , wGauss :: FilePath
+  , wFisher :: FilePath
   }
 
 -- | A scripted world under @tmp@: its Sys's @which@ searches the PATH in
@@ -62,9 +62,9 @@ data World = World
 world :: FilePath -> [(Text, Text)] -> IO World
 world tmp extraEnv = do
   let home = tmp </> "home"
-      gauss = home </> ".gauss"
+      fisher = home </> ".fisher"
       work = tmp </> "work"
-  createDirectoryIfMissing True gauss
+  createDirectoryIfMissing True fisher
   createDirectoryIfMissing True work
   py <- findExecutable "python3" >>= maybe (fail "no python3 on this machine") (pure . takeDirectory)
   offset <- newIORef (0 :: Double)
@@ -74,7 +74,7 @@ world tmp extraEnv = do
   queue <- newIORef answers
   env <-
     newIORef . M.fromList $
-      [ ("HOME", T.pack home), ("COLUMNS", "60"), ("GAUSS_FORCE_PLAIN_OUTPUT", "1"), ("GAUSS_TIMEZONE", "UTC")
+      [ ("HOME", T.pack home), ("COLUMNS", "60"), ("FISHER_FORCE_PLAIN_OUTPUT", "1"), ("FISHER_TIMEZONE", "UTC")
       , ("OPENROUTER_API_KEY", "sk-or-test-1234567890"), ("PATH", T.pack py) ]
         <> extraEnv
   let clock = (1790000000 +) <$> readIORef offset
@@ -92,7 +92,7 @@ world tmp extraEnv = do
           , sysOpenBrowser = \_ -> pure False, sysRun = \_ -> pure (Left "no"), sysRunInteractive = \_ -> pure (Left "no")
           , sysWhich = which, sysPlatform = "linux"
           , sysUuidHex = atomicModifyIORef' uuidN (\n -> (n + 1, T.justifyRight 32 '0' (T.pack (showHex (n + 1) ""))))
-          , sysTimeZoneAt = \_ -> pure utc, sysHome = home, sysGaussHome = gauss
+          , sysTimeZoneAt = \_ -> pure utc, sysHome = home, sysFisherHome = fisher
           , sysOut = \t -> modifyIORef outBuf (<> [t]), sysInput = \_ -> pure Nothing, sysGetPass = \_ -> pure Nothing
           , sysStdinTty = pure False, sysStdoutTty = pure False, sysPid = 4242 }
       respond hr = do
@@ -104,8 +104,8 @@ world tmp extraEnv = do
             case q of
               [] -> pure (Right (HttpResp 500 [] "{\"error\": {\"message\": \"no canned answer\"}}"))
               (r : rest) -> writeIORef queue rest >> pure (Right (HttpResp 200 [] (TE.encodeUtf8 (dumpsAscii r))))
-  at <- newAgentTools gauss
-  (defs, _) <- getToolDefinitions (atRegistry at) (Just ["gauss-cli"]) Nothing
+  at <- newAgentTools fisher
+  (defs, _) <- getToolDefinitions (atRegistry at) (Just ["fisher-cli"]) Nothing
   let scripted tr = tr {trCall = \_ _ _ _ -> pure "{\"content\": \"     1|theorem foo : True := trivial\", \"total_lines\": 1}", trReadFilesSummary = \_ -> pure []}
       deps =
         ChatDeps
@@ -118,9 +118,9 @@ world tmp extraEnv = do
           , cdCwd = pure work
           , cdWhich = \_ -> pure Nothing
           , cdBannerInfo = pure ("<WORK>", Nothing, True) }
-  pure (World sys deps (T.concat <$> readIORef outBuf) (readIORef reqs) gauss)
+  pure (World sys deps (T.concat <$> readIORef outBuf) (readIORef reqs) fisher)
 
-data Run = Run {rCode :: Int, rOut :: Text, rReqs :: [HttpReq], rGauss :: FilePath, rSys :: Sys}
+data Run = Run {rCode :: Int, rOut :: Text, rReqs :: [HttpReq], rFisher :: FilePath, rSys :: Sys}
 
 runChat :: FilePath -> [(Text, Text)] -> [Text] -> IO Run
 runChat tmp extraEnv argv = do
@@ -128,18 +128,18 @@ runChat tmp extraEnv argv = do
   code <- chatMain (wDeps w) (wSys w) argv
   o <- wOut w
   rs <- wReqs w
-  pure (Run code o rs (wGauss w) (wSys w))
+  pure (Run code o rs (wFisher w) (wSys w))
 
 -- | The kinds of the events in a session's replay log.
 logKinds :: FilePath -> Text -> IO [Text]
-logKinds gauss sid = do
-  lg <- BS.readFile (gauss </> "fisher" </> "replays" </> T.unpack (sid <> ".jsonl"))
+logKinds fisher sid = do
+  lg <- BS.readFile (fisher </> "fisher" </> "replays" </> T.unpack (sid <> ".jsonl"))
   pure [maybe "" pyStrOf (get "kind" v) | l <- BC.lines lg, Right v <- [loads l]]
 
 -- | The one session a run left a replay log for.
 onlySession :: FilePath -> IO Text
-onlySession gauss = do
-  fs <- listDirectory (gauss </> "fisher" </> "replays")
+onlySession fisher = do
+  fs <- listDirectory (fisher </> "fisher" </> "replays")
   case fs of
     [f] -> pure (T.pack (dropExtension f))
     _ -> fail ("replay logs: " <> show fs)
@@ -172,21 +172,21 @@ spec = do
       r <- runChat tmp [] ["-q", "Check that the project builds.", "-Q", "--context", "rlm"]
       rCode r `shouldBe` 0
       rOut r `shouldSatisfy` T.isInfixOf "It builds."
-      sid <- onlySession (rGauss r)
-      kinds <- logKinds (rGauss r) sid
+      sid <- onlySession (rFisher r)
+      kinds <- logKinds (rFisher r) sid
       kinds `shouldSatisfy` elem "rlm"
       replayMain (rSys r) [sid] `shouldReturn` 0
     it "is chosen by fisher.context: rlm in config.yaml" $ withSystemTempDirectory "fisher-rlm-cli" $ \tmp -> do
-      createDirectoryIfMissing True (tmp </> "home" </> ".gauss")
-      BS.writeFile (tmp </> "home" </> ".gauss" </> "config.yaml") "fisher:\n  context: rlm\n"
+      createDirectoryIfMissing True (tmp </> "home" </> ".fisher")
+      BS.writeFile (tmp </> "home" </> ".fisher" </> "config.yaml") "fisher:\n  context: rlm\n"
       r <- runChat tmp [] ["-q", "Check that the project builds.", "-Q"]
       rCode r `shouldBe` 0
-      sid <- onlySession (rGauss r)
-      logKinds (rGauss r) sid >>= (`shouldSatisfy` elem "rlm")
+      sid <- onlySession (rFisher r)
+      logKinds (rFisher r) sid >>= (`shouldSatisfy` elem "rlm")
     it "is not chosen otherwise" $ withSystemTempDirectory "fisher-rlm-cli" $ \tmp -> do
       r <- runChat tmp [] ["-q", "Check that the project builds.", "-Q"]
-      sid <- onlySession (rGauss r)
-      logKinds (rGauss r) sid >>= (`shouldNotSatisfy` elem "rlm")
+      sid <- onlySession (rFisher r)
+      logKinds (rFisher r) sid >>= (`shouldNotSatisfy` elem "rlm")
     it "rejects an unknown strategy, listing compress, clm and rlm" $ withSystemTempDirectory "fisher-rlm-cli" $ \tmp -> do
       r <- runChat tmp [] ["-q", "x", "--context", "bogus"]
       rCode r `shouldBe` 2
@@ -204,8 +204,8 @@ spec = do
     it "a resume over an invalid rlm.json warns on stderr, not stdout, and carries on" $ withSystemTempDirectory "fisher-rlm-cli" $ \tmp -> do
       r1 <- runChat tmp [] ["-q", "Check that the project builds.", "-Q", "--context", "rlm"]
       rCode r1 `shouldBe` 0
-      sid <- onlySession (rGauss r1)
-      let dir = rGauss r1 </> "fisher" </> "ctx" </> T.unpack sid
+      sid <- onlySession (rFisher r1)
+      let dir = rFisher r1 </> "fisher" </> "ctx" </> T.unpack sid
       createDirectoryIfMissing True dir
       BS.writeFile (dir </> "rlm.json") "{\"store\": [oops"
       r2 <- runChat tmp [] ["-q", "Check again.", "-Q", "--context", "rlm", "--resume", sid]
@@ -217,12 +217,12 @@ spec = do
     it "rebuilds the history from the transcript: the stub, then the turns after the stored range" $ withSystemTempDirectory "fisher-rlm-cli" $ \tmp -> do
       r1 <- runChat tmp [] ["-q", "Check that the project builds.", "-Q", "--context", "rlm"]
       rCode r1 `shouldBe` 0
-      sid <- onlySession (rGauss r1)
+      sid <- onlySession (rFisher r1)
       -- the first three messages (the task, the call, its result) stored
       let firstThree = take 3 [m | m <- firstMessagesOfLast r1, get "role" m /= Just (PStr "system")]
           turn i m = StoredTurn i (maybe "" pyStrOf (get "role" m)) (if get "role" m == Just (PStr "tool") then Just "read_file" else Nothing) m
           st = RlmState (zipWith turn [1 ..] firstThree) 1 (Just (1, 3))
-          dir = rGauss r1 </> "fisher" </> "ctx" </> T.unpack sid
+          dir = rFisher r1 </> "fisher" </> "ctx" </> T.unpack sid
       length firstThree `shouldBe` 3
       createDirectoryIfMissing True dir
       BS.writeFile (dir </> "rlm.json") (TE.encodeUtf8 (dumpsAscii (stateToPy st)))
@@ -244,12 +244,12 @@ spec = do
       _ <- scExit sc
       o <- wOut w
       o `shouldNotSatisfy` T.isInfixOf "Failed to initialize agent"
-      logKinds (wGauss w) "20261013_101500_ab12cd" >>= (`shouldSatisfy` elem "rlm")
+      logKinds (wFisher w) "20261013_101500_ab12cd" >>= (`shouldSatisfy` elem "rlm")
   describe "ACP and cron (buildNative)" $
     mapM_
       ( \strategy -> it ("warn once for fisher.context: " <> T.unpack strategy <> " and keep the compressor") $ withSystemTempDirectory "fisher-rlm-native" $ \tmp -> do
           w <- world tmp []
-          BS.writeFile (wGauss w </> "config.yaml") (TE.encodeUtf8 ("fisher:\n  context: " <> strategy <> "\n"))
+          BS.writeFile (wFisher w </> "config.yaml") (TE.encodeUtf8 ("fisher:\n  context: " <> strategy <> "\n"))
           logged <- newIORef []
           sh <- newNativeShared (wSys w) (wDeps w) (\_ -> pure ())
           let spec' = (nativeSpec "acp" "s1") {nsApiKey = "sk-or-test-1234567890", nsReplay = False, nsOut = \t -> modifyIORef logged (<> [t])}

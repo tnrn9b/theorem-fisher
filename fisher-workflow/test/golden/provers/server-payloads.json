@@ -1,5 +1,5 @@
 {
-  "bad-override": "error: GAUSS_AUTOFORMALIZE_ROCQ_MCP_SPEC must be a package spec, without spaces.",
+  "bad-override": "error: FISHER_AUTOFORMALIZE_ROCQ_MCP_SPEC must be a package spec, without spaces.",
   "blank-override": {
     "args": [
       "--from",

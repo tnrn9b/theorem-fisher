@@ -3,7 +3,7 @@
     "attempts": [
         {
             "attempt": 1,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 489.4,
             "goal": "Step.Graft.runS_graft",
             "outcome": "closed (helpers: GraftCtx.reads_ok, GraftCtx.writes_ok, Relabel.fixed_of_other, enqueue_buf_other, runS'_head, runS'_bufLen, runS'_graft_aux)",
@@ -28,7 +28,7 @@
         }
     ],
     "backends": {
-        "gauss": [
+        "fisher": [
             1,
             1
         ]
@@ -41,10 +41,10 @@
     "goals": [
         {
             "attempts": [
-                "gauss"
+                "fisher"
             ],
             "by_attempt": 1,
-            "by_backend": "gauss",
+            "by_backend": "fisher",
             "closed_at_s": 489.4,
             "goal": "Step.Graft.runS_graft",
             "status": "closed"

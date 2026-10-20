@@ -2309,10 +2309,10 @@
     {
      "tool": "write_file",
      "args": {
-      "path": "~/.gauss/.env",
+      "path": "~/.fisher/.env",
       "content": "x"
      },
-     "result": "{\"bytes_written\": 0, \"dirs_created\": false, \"error\": \"Write denied: '/tmp/b2home-sclpx424/.gauss/.env' is a protected system/credential file.\"}",
+     "result": "{\"bytes_written\": 0, \"dirs_created\": false, \"error\": \"Write denied: '/tmp/b2home-sclpx424/.fisher/.env' is a protected system/credential file.\"}",
      "calls": [
       {
        "command": "echo $HOME",

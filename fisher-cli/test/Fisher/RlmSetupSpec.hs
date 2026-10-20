@@ -27,7 +27,7 @@ import Fisher.RLM.Config (RlmConfig (..))
 -- | A Sys over an environment, whose @which@ searches that environment's
 -- PATH (as the real one searches the process's); what it prints.
 pathSys :: FilePath -> [(Text, Text)] -> IO (Sys, IO Text)
-pathSys gauss env0 = do
+pathSys fisher env0 = do
   env <- newIORef (M.fromList env0)
   printed <- newIORef []
   let which cmd = do
@@ -44,7 +44,7 @@ pathSys gauss env0 = do
           , sysOpenBrowser = \_ -> pure False, sysRun = \_ -> pure (Left "no"), sysRunInteractive = \_ -> pure (Left "no")
           , sysWhich = which, sysPlatform = "linux"
           , sysUuidHex = pure "00000000000000000000000000000001"
-          , sysTimeZoneAt = \_ -> pure utc, sysHome = takeDirectory gauss, sysGaussHome = gauss
+          , sysTimeZoneAt = \_ -> pure utc, sysHome = takeDirectory fisher, sysFisherHome = fisher
           , sysOut = \t -> modifyIORef printed (<> [t]), sysInput = \_ -> pure Nothing, sysGetPass = \_ -> pure Nothing
           , sysStdinTty = pure False, sysStdoutTty = pure False, sysPid = 4242 }
   pure (sys, T.concat <$> readIORef printed)
@@ -74,14 +74,14 @@ spec = do
     let sid = "20261013_101500_ab12cd"
         -- what was printed: stdout, then each warning as "stderr: " and its line
         setupIn tmp env cfg = do
-          let gauss = tmp </> ".gauss"
-          createDirectoryIfMissing True gauss
-          (sys, printedOut) <- pathSys gauss env
+          let fisher = tmp </> ".fisher"
+          createDirectoryIfMissing True fisher
+          (sys, printedOut) <- pathSys fisher env
           warned <- newIORef []
           r <- rlmSetupFor sys (\w -> modifyIORef warned (<> [w])) cfg sid "openai/gpt-5" Nothing
           o <- printedOut
           ws <- readIORef warned
-          pure (r, o <> T.concat ["stderr: " <> w <> "\n" | w <- ws], ctxDir gauss sid </> "rlm.json")
+          pure (r, o <> T.concat ["stderr: " <> w <> "\n" | w <- ws], ctxDir fisher sid </> "rlm.json")
     it "refuses with phase 1's message when the session's PATH has no python3" $ withSystemTempDirectory "rlm-setup" $ \tmp -> do
       createDirectoryIfMissing True (tmp </> "empty")
       (r, _, _) <- setupIn tmp [("PATH", T.pack (tmp </> "empty"))] (PDict [])
@@ -108,7 +108,7 @@ spec = do
       either id (const "set up") r `shouldBe` "fisher.rlm: unknown key colour"
     it "loads rlm.json, and saves it so it loads back" $ withSystemTempDirectory "rlm-setup" $ \tmp -> do
       py <- pythonDir
-      let file = ctxDir (tmp </> ".gauss") sid </> "rlm.json"
+      let file = ctxDir (tmp </> ".fisher") sid </> "rlm.json"
       createDirectoryIfMissing True (takeDirectory file)
       BS.writeFile file (TE.encodeUtf8 (dumpsAscii (stateToPy stored)))
       (r, o, _) <- setupIn tmp [("PATH", T.pack py)] (PDict [])
@@ -124,7 +124,7 @@ spec = do
           fmap snd r2 `shouldBe` Right (Just next)
     it "an invalid rlm.json warns once, on stderr, and resumes with an empty store" $ withSystemTempDirectory "rlm-setup" $ \tmp -> do
       py <- pythonDir
-      let file = ctxDir (tmp </> ".gauss") sid </> "rlm.json"
+      let file = ctxDir (tmp </> ".fisher") sid </> "rlm.json"
       createDirectoryIfMissing True (takeDirectory file)
       BS.writeFile file "{\"store\": [oops"
       (r, o, _) <- setupIn tmp [("PATH", T.pack py)] (PDict [])

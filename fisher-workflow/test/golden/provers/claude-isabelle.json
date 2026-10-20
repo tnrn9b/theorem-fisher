@@ -5,11 +5,11 @@
     "claude-opus-4-6",
     "--permission-mode",
     "bypassPermissions",
-    "You are in a Fisher-managed Isabelle workflow session. Read the startup context at <TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md first. Then run this command inside the active project as your first workflow action: /isabelle:prove Main"
+    "You are in a Fisher-managed Isabelle workflow session. Read the startup context at <TMP>/fisher-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md first. Then run this command inside the active project as your first workflow action: /isabelle:prove Main"
   ],
   "backend_command": "/isabelle:prove Main",
   "claude_calls": [
-    "claude [plugin] [marketplace] [add] [<TMP>/gauss-home/autoformalize/assets/fisher-provers]",
+    "claude [plugin] [marketplace] [add] [<TMP>/fisher-home/autoformalize/assets/fisher-provers]",
     "claude [plugin] [install] [isabelle]",
     "claude [plugin] [list] [--json]"
   ],
@@ -19,7 +19,7 @@
         "--from",
         "isabelle-mcp==0.6.0",
         "python",
-        "<TMP>/gauss-home/autoformalize/claude-code/managed/isabelle-mcp/isabelle_mcp_shim.py"
+        "<TMP>/fisher-home/autoformalize/claude-code/managed/isabelle-mcp/isabelle_mcp_shim.py"
       ],
       "command": "<TMP>/bin/uvx",
       "env": {
@@ -30,11 +30,11 @@
   },
   "cwd": "<TMP>/isaproj",
   "env": {
-    "CLAUDE_PLUGIN_ROOT": "<TMP>/gauss-home/autoformalize/assets/fisher-provers/isabelle",
-    "GAUSS_AUTOFORMALIZE_BACKEND": "claude-code",
-    "GAUSS_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/gauss-home/autoformalize/assets/fisher-provers/isabelle/skills/isabelle",
-    "GAUSS_PROJECT_ROOT": "<TMP>/isaproj",
-    "HOME": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+    "CLAUDE_PLUGIN_ROOT": "<TMP>/fisher-home/autoformalize/assets/fisher-provers/isabelle",
+    "FISHER_AUTOFORMALIZE_BACKEND": "claude-code",
+    "FISHER_AUTOFORMALIZE_SKILLS_ROOT": "<TMP>/fisher-home/autoformalize/assets/fisher-provers/isabelle/skills/isabelle",
+    "FISHER_PROJECT_ROOT": "<TMP>/isaproj",
+    "HOME": "<TMP>/fisher-home/autoformalize/claude-code/managed/claude-home",
     "ISABELLE_PROJECT_PATH": "<TMP>/isaproj",
     "LEAN_PROJECT_PATH": null,
     "ROCQ_PROJECT_PATH": null,
@@ -58,7 +58,7 @@
           "--from",
           "isabelle-mcp==0.6.0",
           "python",
-          "<TMP>/gauss-home/autoformalize/claude-code/managed/isabelle-mcp/isabelle_mcp_shim.py"
+          "<TMP>/fisher-home/autoformalize/claude-code/managed/isabelle-mcp/isabelle_mcp_shim.py"
         ],
         "command": "<TMP>/bin/uvx",
         "env": {
@@ -70,20 +70,20 @@
   },
   "staged_paths": {
     "backend_command": "/isabelle:prove Main",
-    "backend_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home/.claude.json",
-    "backend_home": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+    "backend_config_path": "<TMP>/fisher-home/autoformalize/claude-code/managed/claude-home/.claude.json",
+    "backend_home": "<TMP>/fisher-home/autoformalize/claude-code/managed/claude-home",
     "backend_name": "claude-code",
-    "claude_home": "<TMP>/gauss-home/autoformalize/claude-code/managed/claude-home",
+    "claude_home": "<TMP>/fisher-home/autoformalize/claude-code/managed/claude-home",
     "frontend_command": "/prove",
     "instructions_path": "",
     "lean_root": "<TMP>/isaproj",
-    "managed_root": "<TMP>/gauss-home/autoformalize/claude-code/managed",
-    "mcp_config_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/isabelle.mcp.json",
-    "plugin_root": "<TMP>/gauss-home/autoformalize/assets/fisher-provers/isabelle",
-    "project_manifest_path": "<TMP>/isaproj/.gauss/project.yaml",
+    "managed_root": "<TMP>/fisher-home/autoformalize/claude-code/managed",
+    "mcp_config_path": "<TMP>/fisher-home/autoformalize/claude-code/managed/mcp/isabelle.mcp.json",
+    "plugin_root": "<TMP>/fisher-home/autoformalize/assets/fisher-provers/isabelle",
+    "project_manifest_path": "<TMP>/isaproj/.fisher/project.yaml",
     "project_root": "<TMP>/isaproj",
-    "skills_root": "<TMP>/gauss-home/autoformalize/assets/fisher-provers/isabelle/skills/isabelle",
-    "startup_context_path": "<TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",
+    "skills_root": "<TMP>/fisher-home/autoformalize/assets/fisher-provers/isabelle/skills/isabelle",
+    "startup_context_path": "<TMP>/fisher-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md",
     "workflow_kind": "prove"
   },
   "startup_context": [
@@ -96,9 +96,9 @@
     "- Project root: `<TMP>/isaproj`",
     "- Isabelle root: `<TMP>/isaproj`",
     "- Active working directory: `<TMP>/isaproj`",
-    "- Isabelle skill: `<TMP>/gauss-home/autoformalize/assets/fisher-provers/isabelle/skills/isabelle/SKILL.md`",
-    "- Workflow guide: `<TMP>/gauss-home/autoformalize/assets/fisher-provers/isabelle/commands/prove.md`",
-    "- MCP config: `<TMP>/gauss-home/autoformalize/claude-code/managed/mcp/isabelle.mcp.json` (server `isabelle`)",
+    "- Isabelle skill: `<TMP>/fisher-home/autoformalize/assets/fisher-provers/isabelle/skills/isabelle/SKILL.md`",
+    "- Workflow guide: `<TMP>/fisher-home/autoformalize/assets/fisher-provers/isabelle/commands/prove.md`",
+    "- MCP config: `<TMP>/fisher-home/autoformalize/claude-code/managed/mcp/isabelle.mcp.json` (server `isabelle`)",
     "- Fisher check command: `<EXE> check`",
     "",
     "## Workflow Request",

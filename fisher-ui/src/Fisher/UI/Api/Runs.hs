@@ -263,10 +263,17 @@ c3Goals root dir = do
   pure
     [ GoalRow
         { grGoal = fromMaybe "" (txt "id" e)
-        , grArm = root <> "/" <> T.intercalate "-" (mapMaybe (`txt` e) ["backend", "workflow", "context"])
+        , grArm = root <> "/" <> T.intercalate "-" (c3ArmParts e)
         , grSolved = at ["solved"] e == Just (A.Bool True)
         , grTurns = int ["turns"] e, grDollars = num ["cost_usd"] e, grClosedBy = Nothing, grRetrieval = Nothing }
     | e <- recs ]
+
+-- | The parts of a c3 arm label: backend, workflow, context, as the results
+-- file names them.
+c3ArmParts :: A.Value -> [Text]
+c3ArmParts e = mapMaybe part ["backend", "workflow", "context"]
+  where
+    part k = txt k e
 
 -- | One goal of a g or h arm.
 searchGoal :: Text -> Text -> FilePath -> IO GoalRow

@@ -1,6 +1,7 @@
 -- | Loading the B3 goldens.
 module Fisher.Agent.TestUtil
   ( loadDoc
+  , withIsolatedHome
   , loadCases
   , txt
   , field
@@ -11,6 +12,9 @@ module Fisher.Agent.TestUtil
   , registerOfflineTools
   ) where
 
+import Control.Exception (finally)
+import System.Environment (lookupEnv, setEnv, unsetEnv)
+import System.IO.Temp (withSystemTempDirectory)
 import qualified Data.ByteString as BS
 import Data.Text (Text)
 
@@ -83,3 +87,14 @@ registerOfflineTools reg gh = do
   registerBrowserTools reg
     =<< newBrowserEnv (\_ _ _ -> pure (RunFailed "offline")) (\_ -> pure Nothing) (\_ -> pure Nothing) offline noAux (pure False)
       (pure "0") gh "/tmp" (\_ -> pure False) (\_ -> pure ()) (pure 0) (pure "") (pure False)
+
+-- | Run with HOME at a fresh empty directory and FISHER_HOME unset (both
+-- restored afterwards), so a hint that names the Fisher home says
+-- ~/.fisher whatever the machine has. It mutates the process
+-- environment; hspec runs these examples one at a time (no @parallel@).
+withIsolatedHome :: IO a -> IO a
+withIsolatedHome act = withSystemTempDirectory "fisher-home" $ \tmp -> do
+  let names = ["HOME", "FISHER_HOME"]
+  saved <- mapM (\k -> (,) k <$> lookupEnv k) names
+  let restore = mapM_ (\(k, v) -> maybe (unsetEnv k) (setEnv k) v) saved
+  (do setEnv "HOME" tmp; unsetEnv "FISHER_HOME"; act) `finally` restore

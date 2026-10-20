@@ -3,7 +3,7 @@
     "attempts": [
         {
             "attempt": 1,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 60.5,
             "goal": "Demo.main_thm",
             "outcome": "exit 0",
@@ -22,7 +22,7 @@
         },
         {
             "attempt": 2,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 41,
             "goal": "Demo.side_thm",
             "outcome": "closed",
@@ -44,7 +44,7 @@
     "auto_ran": true,
     "auto_requested": true,
     "backends": [
-        "gauss"
+        "fisher"
     ],
     "budget_s": 3600,
     "cap_usd": 6,

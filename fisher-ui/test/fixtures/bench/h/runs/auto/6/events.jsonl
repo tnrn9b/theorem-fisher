@@ -1,4 +1,4 @@
 {"event":"auto missed","goal":"Step.Cone.rel_kept","seconds":25.8,"t":25.8}
-{"attempt":1,"backend":"gauss","event":"launched","goal":"Step.Cone.rel_kept","t":25.8}
-{"attempt":1,"backend":"gauss","event":"finished","goal":"Step.Cone.rel_kept","outcome":"closed (helpers: RecvSliced.entry, keptCell_buf_live, fireCand_change, fireCand_frame_step)","stats":{"cost_usd":0.9525895999999999,"exit":0,"input_tokens":2413450,"output_tokens":32211,"tools":{"mcp_lean_lsp_lean_diagnostic_messages":4,"mcp_lean_lsp_lean_verify":1,"patch":2,"read_file":10,"search_files":3,"terminal":8,"write_file":3},"turns":22,"wall_s":296.9},"t":347.6}
+{"attempt":1,"backend":"fisher","event":"launched","goal":"Step.Cone.rel_kept","t":25.8}
+{"attempt":1,"backend":"fisher","event":"finished","goal":"Step.Cone.rel_kept","outcome":"closed (helpers: RecvSliced.entry, keptCell_buf_live, fireCand_change, fireCand_frame_step)","stats":{"cost_usd":0.9525895999999999,"exit":0,"input_tokens":2413450,"output_tokens":32211,"tools":{"mcp_lean_lsp_lean_diagnostic_messages":4,"mcp_lean_lsp_lean_verify":1,"patch":2,"read_file":10,"search_files":3,"terminal":8,"write_file":3},"turns":22,"wall_s":296.9},"t":347.6}
 {"attempt":1,"event":"closed","goal":"Step.Cone.rel_kept","t":347.6}

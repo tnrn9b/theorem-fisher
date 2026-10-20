@@ -203,7 +203,7 @@
    "includes": []
   },
   "autoformalize": {
-   "description": "Minimal Gauss workflow for papers, source files, and browser-driven research",
+   "description": "Minimal Fisher workflow for papers, source files, and browser-driven research",
    "tools": [],
    "includes": [
     "web",
@@ -211,8 +211,8 @@
     "browser"
    ]
   },
-  "gauss-acp": {
-   "description": "Editor integration (VS Code, Zed, JetBrains) — minimal file, web, and browser tools for Gauss work",
+  "fisher-acp": {
+   "description": "Editor integration (VS Code, Zed, JetBrains) — minimal file, web, and browser tools for Fisher work",
    "tools": [
     "read_file",
     "write_file",
@@ -232,8 +232,8 @@
    ],
    "includes": []
   },
-  "gauss-cli": {
-   "description": "Minimal interactive Gauss toolset for autoformalization workflows",
+  "fisher-cli": {
+   "description": "Minimal interactive Fisher toolset for autoformalization workflows",
    "tools": [
     "read_file",
     "write_file",
@@ -253,8 +253,8 @@
    ],
    "includes": []
   },
-  "gauss-telegram": {
-   "description": "Telegram bot toolset - minimal Gauss file, web, and browser access",
+  "fisher-telegram": {
+   "description": "Telegram bot toolset - minimal Fisher file, web, and browser access",
    "tools": [
     "read_file",
     "write_file",
@@ -274,8 +274,8 @@
    ],
    "includes": []
   },
-  "gauss-discord": {
-   "description": "Discord bot toolset - minimal Gauss file, web, and browser access",
+  "fisher-discord": {
+   "description": "Discord bot toolset - minimal Fisher file, web, and browser access",
    "tools": [
     "read_file",
     "write_file",
@@ -295,8 +295,8 @@
    ],
    "includes": []
   },
-  "gauss-whatsapp": {
-   "description": "WhatsApp bot toolset - minimal Gauss file, web, and browser access",
+  "fisher-whatsapp": {
+   "description": "WhatsApp bot toolset - minimal Fisher file, web, and browser access",
    "tools": [
     "read_file",
     "write_file",
@@ -316,8 +316,8 @@
    ],
    "includes": []
   },
-  "gauss-slack": {
-   "description": "Slack bot toolset - minimal Gauss file, web, and browser access",
+  "fisher-slack": {
+   "description": "Slack bot toolset - minimal Fisher file, web, and browser access",
    "tools": [
     "read_file",
     "write_file",
@@ -337,8 +337,8 @@
    ],
    "includes": []
   },
-  "gauss-signal": {
-   "description": "Signal bot toolset - minimal Gauss file, web, and browser access",
+  "fisher-signal": {
+   "description": "Signal bot toolset - minimal Fisher file, web, and browser access",
    "tools": [
     "read_file",
     "write_file",
@@ -358,8 +358,8 @@
    ],
    "includes": []
   },
-  "gauss-homeassistant": {
-   "description": "Home Assistant bot toolset - minimal Gauss file, web, and browser access",
+  "fisher-homeassistant": {
+   "description": "Home Assistant bot toolset - minimal Fisher file, web, and browser access",
    "tools": [
     "read_file",
     "write_file",
@@ -379,8 +379,8 @@
    ],
    "includes": []
   },
-  "gauss-email": {
-   "description": "Email bot toolset - minimal Gauss file, web, and browser access",
+  "fisher-email": {
+   "description": "Email bot toolset - minimal Fisher file, web, and browser access",
    "tools": [
     "read_file",
     "write_file",
@@ -400,17 +400,17 @@
    ],
    "includes": []
   },
-  "gauss-gateway": {
+  "fisher-gateway": {
    "description": "Gateway toolset - union of the minimal messaging-platform tool surfaces",
    "tools": [],
    "includes": [
-    "gauss-telegram",
-    "gauss-discord",
-    "gauss-whatsapp",
-    "gauss-slack",
-    "gauss-signal",
-    "gauss-homeassistant",
-    "gauss-email"
+    "fisher-telegram",
+    "fisher-discord",
+    "fisher-whatsapp",
+    "fisher-slack",
+    "fisher-signal",
+    "fisher-homeassistant",
+    "fisher-email"
    ]
   }
  },
@@ -457,7 +457,7 @@
    "web_search",
    "write_file"
   ],
-  "gauss-acp": [
+  "fisher-acp": [
    "browser_back",
    "browser_click",
    "browser_close",
@@ -474,7 +474,7 @@
    "web_search",
    "write_file"
   ],
-  "gauss-cli": [
+  "fisher-cli": [
    "browser_back",
    "browser_click",
    "browser_close",
@@ -491,7 +491,7 @@
    "web_search",
    "write_file"
   ],
-  "gauss-telegram": [
+  "fisher-telegram": [
    "browser_back",
    "browser_click",
    "browser_close",
@@ -508,7 +508,7 @@
    "web_search",
    "write_file"
   ],
-  "gauss-discord": [
+  "fisher-discord": [
    "browser_back",
    "browser_click",
    "browser_close",
@@ -525,7 +525,7 @@
    "web_search",
    "write_file"
   ],
-  "gauss-whatsapp": [
+  "fisher-whatsapp": [
    "browser_back",
    "browser_click",
    "browser_close",
@@ -542,7 +542,7 @@
    "web_search",
    "write_file"
   ],
-  "gauss-slack": [
+  "fisher-slack": [
    "browser_back",
    "browser_click",
    "browser_close",
@@ -559,7 +559,7 @@
    "web_search",
    "write_file"
   ],
-  "gauss-signal": [
+  "fisher-signal": [
    "browser_back",
    "browser_click",
    "browser_close",
@@ -576,7 +576,7 @@
    "web_search",
    "write_file"
   ],
-  "gauss-homeassistant": [
+  "fisher-homeassistant": [
    "browser_back",
    "browser_click",
    "browser_close",
@@ -593,7 +593,7 @@
    "web_search",
    "write_file"
   ],
-  "gauss-email": [
+  "fisher-email": [
    "browser_back",
    "browser_click",
    "browser_close",
@@ -610,7 +610,7 @@
    "web_search",
    "write_file"
   ],
-  "gauss-gateway": [
+  "fisher-gateway": [
    "browser_back",
    "browser_click",
    "browser_close",
@@ -744,7 +744,7 @@
   },
   "autoformalize": {
    "name": "autoformalize",
-   "description": "Minimal Gauss workflow for papers, source files, and browser-driven research",
+   "description": "Minimal Fisher workflow for papers, source files, and browser-driven research",
    "direct_tools": [],
    "includes": [
     "web",
@@ -771,9 +771,9 @@
    "tool_count": 15,
    "is_composite": true
   },
-  "gauss-acp": {
-   "name": "gauss-acp",
-   "description": "Editor integration (VS Code, Zed, JetBrains) — minimal file, web, and browser tools for Gauss work",
+  "fisher-acp": {
+   "name": "fisher-acp",
+   "description": "Editor integration (VS Code, Zed, JetBrains) — minimal file, web, and browser tools for Fisher work",
    "direct_tools": [
     "read_file",
     "write_file",
@@ -812,9 +812,9 @@
    "tool_count": 15,
    "is_composite": false
   },
-  "gauss-cli": {
-   "name": "gauss-cli",
-   "description": "Minimal interactive Gauss toolset for autoformalization workflows",
+  "fisher-cli": {
+   "name": "fisher-cli",
+   "description": "Minimal interactive Fisher toolset for autoformalization workflows",
    "direct_tools": [
     "read_file",
     "write_file",
@@ -853,9 +853,9 @@
    "tool_count": 15,
    "is_composite": false
   },
-  "gauss-telegram": {
-   "name": "gauss-telegram",
-   "description": "Telegram bot toolset - minimal Gauss file, web, and browser access",
+  "fisher-telegram": {
+   "name": "fisher-telegram",
+   "description": "Telegram bot toolset - minimal Fisher file, web, and browser access",
    "direct_tools": [
     "read_file",
     "write_file",
@@ -894,9 +894,9 @@
    "tool_count": 15,
    "is_composite": false
   },
-  "gauss-discord": {
-   "name": "gauss-discord",
-   "description": "Discord bot toolset - minimal Gauss file, web, and browser access",
+  "fisher-discord": {
+   "name": "fisher-discord",
+   "description": "Discord bot toolset - minimal Fisher file, web, and browser access",
    "direct_tools": [
     "read_file",
     "write_file",
@@ -935,9 +935,9 @@
    "tool_count": 15,
    "is_composite": false
   },
-  "gauss-whatsapp": {
-   "name": "gauss-whatsapp",
-   "description": "WhatsApp bot toolset - minimal Gauss file, web, and browser access",
+  "fisher-whatsapp": {
+   "name": "fisher-whatsapp",
+   "description": "WhatsApp bot toolset - minimal Fisher file, web, and browser access",
    "direct_tools": [
     "read_file",
     "write_file",
@@ -976,9 +976,9 @@
    "tool_count": 15,
    "is_composite": false
   },
-  "gauss-slack": {
-   "name": "gauss-slack",
-   "description": "Slack bot toolset - minimal Gauss file, web, and browser access",
+  "fisher-slack": {
+   "name": "fisher-slack",
+   "description": "Slack bot toolset - minimal Fisher file, web, and browser access",
    "direct_tools": [
     "read_file",
     "write_file",
@@ -1017,9 +1017,9 @@
    "tool_count": 15,
    "is_composite": false
   },
-  "gauss-signal": {
-   "name": "gauss-signal",
-   "description": "Signal bot toolset - minimal Gauss file, web, and browser access",
+  "fisher-signal": {
+   "name": "fisher-signal",
+   "description": "Signal bot toolset - minimal Fisher file, web, and browser access",
    "direct_tools": [
     "read_file",
     "write_file",
@@ -1058,9 +1058,9 @@
    "tool_count": 15,
    "is_composite": false
   },
-  "gauss-homeassistant": {
-   "name": "gauss-homeassistant",
-   "description": "Home Assistant bot toolset - minimal Gauss file, web, and browser access",
+  "fisher-homeassistant": {
+   "name": "fisher-homeassistant",
+   "description": "Home Assistant bot toolset - minimal Fisher file, web, and browser access",
    "direct_tools": [
     "read_file",
     "write_file",
@@ -1099,9 +1099,9 @@
    "tool_count": 15,
    "is_composite": false
   },
-  "gauss-email": {
-   "name": "gauss-email",
-   "description": "Email bot toolset - minimal Gauss file, web, and browser access",
+  "fisher-email": {
+   "name": "fisher-email",
+   "description": "Email bot toolset - minimal Fisher file, web, and browser access",
    "direct_tools": [
     "read_file",
     "write_file",
@@ -1140,18 +1140,18 @@
    "tool_count": 15,
    "is_composite": false
   },
-  "gauss-gateway": {
-   "name": "gauss-gateway",
+  "fisher-gateway": {
+   "name": "fisher-gateway",
    "description": "Gateway toolset - union of the minimal messaging-platform tool surfaces",
    "direct_tools": [],
    "includes": [
-    "gauss-telegram",
-    "gauss-discord",
-    "gauss-whatsapp",
-    "gauss-slack",
-    "gauss-signal",
-    "gauss-homeassistant",
-    "gauss-email"
+    "fisher-telegram",
+    "fisher-discord",
+    "fisher-whatsapp",
+    "fisher-slack",
+    "fisher-signal",
+    "fisher-homeassistant",
+    "fisher-email"
    ],
    "resolved_tools": [
     "browser_back",
@@ -1189,7 +1189,7 @@
   },
   {
    "enabled": [
-    "gauss-cli"
+    "fisher-cli"
    ],
    "disabled": null,
    "names": [
@@ -1198,7 +1198,7 @@
     "search_files",
     "write_file"
    ],
-   "printed": "✅ Enabled toolset 'gauss-cli': write_file, search_files, browser_scroll, browser_get_images, read_file, browser_click, browser_vision, web_search, browser_press, browser_type, browser_close, browser_navigate, browser_snapshot, browser_back, patch\n🛠️  Final tool selection (4 tools): patch, read_file, search_files, write_file\n",
+   "printed": "✅ Enabled toolset 'fisher-cli': write_file, search_files, browser_scroll, browser_get_images, read_file, browser_click, browser_vision, web_search, browser_press, browser_type, browser_close, browser_navigate, browser_snapshot, browser_back, patch\n🛠️  Final tool selection (4 tools): patch, read_file, search_files, write_file\n",
    "same_quiet": true
   },
   {

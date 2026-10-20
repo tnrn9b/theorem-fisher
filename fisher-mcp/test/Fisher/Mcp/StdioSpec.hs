@@ -51,7 +51,7 @@ withServer extra act = withSystemTempDirectory "fisher-mcp-stdio" $ \d0 -> do
           , meSampling = \_ -> fail "no sampling"
           , meEnviron = pure [("HOME", T.pack d), ("PATH", "/usr/local/bin:/usr/bin:/bin")]
           , meHome = T.pack d
-          , meGaussHome = d </> "gauss"
+          , meFisherHome = d </> "fisher"
           , meHttp = Nothing }
       entry = PDict ([("command", PStr "python3"), ("args", PList (map PStr [T.pack server, T.pack scen, T.pack wire, "--log-cwd"])), ("sampling", PDict [("enabled", PBool False)])] <> extra)
   bracket (newMcpClient env) shutdownMcp $ \mc -> do

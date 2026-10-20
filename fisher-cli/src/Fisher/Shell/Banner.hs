@@ -1,4 +1,4 @@
--- | The welcome banner (@gauss_cli/banner.py@'s @build_welcome_banner@ and
+-- | The welcome banner (upstream @cli/banner.py@'s @build_welcome_banner@ and
 -- @cli.py@'s @_build_compact_banner@), drawn with Fisher.Rich so it lays
 -- out as upstream's does at every width.
 module Fisher.Shell.Banner
@@ -95,7 +95,7 @@ welcomeBanner bi =
       item c d = "[" <> textC <> "]`" <> c <> "`[/] " <> dimT d
       items
         | simplified =
-            [ item "/chat" "turn on onboarding mode and see the first steps", item "/project" "select or create a Gauss project"
+            [ item "/chat" "turn on onboarding mode and see the first steps", item "/project" "select or create a Fisher project"
             , item "/prove" "guided Lean workflow", item "/review" "review, checkpoint, refactor, golf"
             , item "/draft" "draft Lean declaration skeletons", item "/autoprove" "autonomous Lean workflow"
             , item "/formalize" "interactive draft plus prove", item "/autoformalize" "autonomous draft plus autoprove"
@@ -111,13 +111,13 @@ welcomeBanner bi =
             , item "/autoformalize" (dash <> " spawn an autonomous managed formalization agent")
             , item "/swarm" (dash <> " track, attach, or cancel workflow agents")
             , item "/help" (dash <> " session and diagnostics commands")
-            , dimT "You can ignore MCP and plugin internals at first; Open Gauss stages the default Lean workflow setup for you." ]
+            , dimT "You can ignore MCP and plugin internals at first; Theorem Fisher stages the default Lean workflow setup for you." ]
       summary = T.intercalate (" " <> sep <> " ")
         ["/chat", "/project", "/prove", "/review", "/draft", "/autoprove", "/formalize", "/autoformalize", "/swarm", "/help", "/help for commands"]
       behind = case biBehind bi of
         Just n | n > 0 ->
           ["[bold yellow]" <> warn <> " " <> T.pack (show n) <> " " <> (if n == 1 then "commit" else "commits") <> " behind[/][dim yellow] "
-             <> dash <> " run [bold]gauss update[/bold] to update[/]"]
+             <> dash <> " run [bold]fisher update[/bold] to update[/]"]
         _ -> []
       right =
         ["[bold " <> accent <> "]Start Here[/]"] <> items <> maybe [] pure (biSwarmLine bi) <> [""] <> [dimT summary] <> behind
@@ -126,7 +126,7 @@ welcomeBanner bi =
       layout
         | split = grid (0, 2, 0, 2) [column "left", column "right"] [[leftCell, rightCell]]
         | otherwise = grid (0, 1, 0, 1) [column "content"] [[leftCell], [markup ""], [rightCell]]
-      agent = skinBranding skin "agent_name" "Gauss"
+      agent = skinBranding skin "agent_name" "Fisher"
       titleC = skinColor skin "banner_title" "#FFD700"
       borderC = skinColor skin "banner_border" "#CD7F32"
       outer =
@@ -147,7 +147,7 @@ compactBanner w uni skin =
       dimC = skinColor skin "banner_dim" "#B8860B"
       logo
         | not (T.null (skBannerLogoCompact skin)) = skBannerLogoCompact skin
-        | otherwise = "[bold " <> accent <> "]GAUSS[/] [dim " <> dimC <> "]" <> (if uni then "·" else "-") <> " Lean Autoformalization[/]"
+        | otherwise = "[bold " <> accent <> "]FISHER[/] [dim " <> dimC <> "]" <> (if uni then "·" else "-") <> " Lean Autoformalization[/]"
       body = "\n" <> logo <> "\n[dim " <> dimC <> "]Managed Claude Code Lean handoff[/]\n"
    in chatLines (printLines w Nothing (markup body))
 

@@ -1,4 +1,4 @@
--- | @gauss setup@ against upstream's recorded pty runs
+-- | @fisher setup@ against upstream's recorded pty runs
 -- (@tools/corpus/b1_auth.py@, @setup.json@): each case is replayed through
 -- a scripted 'Sys' (typed input, HTTP answers, subprocess results, clock)
 -- and compared on the transcript, exit code, HTTP requests, subprocesses,

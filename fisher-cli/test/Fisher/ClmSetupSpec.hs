@@ -45,22 +45,22 @@ gappy =
     3
     (S.fromList [2, 3, 5])
 
--- | Set up in a fresh GAUSS_HOME under tmp: the result, every warning, and
+-- | Set up in a fresh FISHER_HOME under tmp: the result, every warning, and
 -- store.json's path.
 setupIn :: FilePath -> [(Text, Text)] -> PyVal -> IO (Either Text ClmSetup, [Text], FilePath)
 setupIn tmp env cfg = do
-  let gauss = tmp </> ".gauss"
-  createDirectoryIfMissing True gauss
-  (sys, _) <- pathSys gauss env
+  let fisher = tmp </> ".fisher"
+  createDirectoryIfMissing True fisher
+  (sys, _) <- pathSys fisher env
   warned <- newIORef []
   r <- clmSetupFor sys (\w -> modifyIORef warned (<> [w])) cfg sid "openai/gpt-5" Nothing
   ws <- readIORef warned
-  pure (fmap fst r, ws, ctxDir gauss sid </> "store.json")
+  pure (fmap fst r, ws, ctxDir fisher sid </> "store.json")
 
 -- | Write store.json before the setup.
 seed :: FilePath -> BS.ByteString -> IO ()
 seed tmp bytes = do
-  let file = ctxDir (tmp </> ".gauss") sid </> "store.json"
+  let file = ctxDir (tmp </> ".fisher") sid </> "store.json"
   createDirectoryIfMissing True (takeDirectory file)
   BS.writeFile file bytes
 
@@ -128,8 +128,8 @@ spec = describe "clmSetupFor with the store" $ do
       env <- withPython
       seed tmp "{\"items\": [oops"
       warned <- newIORef []
-      let gauss = tmp </> ".gauss"
-      (sys, _) <- pathSys gauss env
+      let fisher = tmp </> ".fisher"
+      (sys, _) <- pathSys fisher env
       r <- clmSetupFor sys (\w -> modifyIORef warned (<> [w])) storeCfg sid "openai/gpt-5" Nothing
       setup <- ok (fmap fst r)
       csStoreLoad setup `shouldReturn` Nothing
@@ -159,13 +159,13 @@ spec = describe "clmSetupFor with the store" $ do
     it "a write failure warns once and does not stop the session" $ withSystemTempDirectory "clm-setup" $ \tmp -> do
       env <- withPython
       warned <- newIORef []
-      let gauss = tmp </> ".gauss"
-      createDirectoryIfMissing True gauss
-      (sys, _) <- pathSys gauss env
+      let fisher = tmp </> ".fisher"
+      createDirectoryIfMissing True fisher
+      (sys, _) <- pathSys fisher env
       r <- clmSetupFor sys (\w -> modifyIORef warned (<> [w])) storeCfg sid "openai/gpt-5" Nothing
       setup <- ok (fmap fst r)
       -- store.json is a directory: the rename onto it fails
-      createDirectoryIfMissing True (ctxDir gauss sid </> "store.json" </> "x")
+      createDirectoryIfMissing True (ctxDir fisher sid </> "store.json" </> "x")
       csStoreSave setup emptyStore
       csStoreSave setup gappy
       ws <- readIORef warned
@@ -173,17 +173,17 @@ spec = describe "clmSetupFor with the store" $ do
   describe "the replay log" $
     it "records each spill and archive step" $ withSystemTempDirectory "clm-setup" $ \tmp -> do
       env <- withPython
-      let gauss = tmp </> ".gauss"
-      createDirectoryIfMissing True gauss
-      (sys, _) <- pathSys gauss env
-      lg <- openReplayLog gauss sid
+      let fisher = tmp </> ".fisher"
+      createDirectoryIfMissing True fisher
+      (sys, _) <- pathSys fisher env
+      lg <- openReplayLog fisher sid
       r <- clmSetupFor sys (\_ -> pure ()) storeCfg sid "openai/gpt-5" (Just lg)
       setup <- ok (fmap fst r)
       let it1 = head (sItems gappy)
       csOnSpill setup it1
       csOnArchive setup (drop 1 (sItems gappy)) "deleted"
       closeReplayLog lg
-      ls <- BC.lines <$> BS.readFile (replayPath gauss sid)
+      ls <- BC.lines <$> BS.readFile (replayPath fisher sid)
       let vs = [v | l <- ls, Right v <- [loads l]]
       [get "kind" v | v <- vs] `shouldBe` [Just (PStr "clm_spill"), Just (PStr "clm_archive")]
       (get "item" (head vs)) `shouldBe` Just (PInt 1)

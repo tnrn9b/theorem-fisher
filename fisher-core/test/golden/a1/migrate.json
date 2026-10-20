@@ -44,7 +44,7 @@
       },
       "stdout": "  ✓ Migrated tool progress to config.yaml: all\nConfig version: 3 → 9\n",
       "saved": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -61,7 +61,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90
@@ -240,19 +240,19 @@
       "name": "v3-progress-false",
       "input": "_config_version: 3\n",
       "env": {
-        "GAUSS_TOOL_PROGRESS": "No"
+        "FISHER_TOOL_PROGRESS": "No"
       },
       "persisted_env": "",
       "results": {
         "env_added": [],
         "config_added": [
-          "display.tool_progress=off (from GAUSS_TOOL_PROGRESS=false)"
+          "display.tool_progress=off (from FISHER_TOOL_PROGRESS=false)"
         ],
         "warnings": []
       },
       "stdout": "  ✓ Migrated tool progress to config.yaml: off\nConfig version: 3 → 9\n",
       "saved": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -269,7 +269,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90
@@ -448,17 +448,17 @@
       "name": "v3-progress-mode-persisted",
       "input": "_config_version: 3\n",
       "env": {},
-      "persisted_env": "GAUSS_TOOL_PROGRESS_MODE=NEW\n",
+      "persisted_env": "FISHER_TOOL_PROGRESS_MODE=NEW\n",
       "results": {
         "env_added": [],
         "config_added": [
-          "display.tool_progress=new (from GAUSS_TOOL_PROGRESS_MODE)"
+          "display.tool_progress=new (from FISHER_TOOL_PROGRESS_MODE)"
         ],
         "warnings": []
       },
       "stdout": "  ✓ Migrated tool progress to config.yaml: new\nConfig version: 3 → 9\n",
       "saved": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -475,7 +475,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90
@@ -654,7 +654,7 @@
       "name": "v3-progress-mode-bogus",
       "input": "_config_version: 3\n",
       "env": {
-        "GAUSS_TOOL_PROGRESS_MODE": "some"
+        "FISHER_TOOL_PROGRESS_MODE": "some"
       },
       "persisted_env": "",
       "results": {
@@ -666,7 +666,7 @@
       },
       "stdout": "  ✓ Migrated tool progress to config.yaml: all\nConfig version: 3 → 9\n",
       "saved": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -683,7 +683,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90
@@ -870,7 +870,7 @@
       },
       "stdout": "Config version: 3 → 9\n",
       "saved": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -887,7 +887,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90
@@ -1076,7 +1076,7 @@
       },
       "stdout": "  ✓ Migrated tool progress to config.yaml: all\nConfig version: 3 → 9\n",
       "saved": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -1093,7 +1093,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90
@@ -1272,7 +1272,7 @@
       "name": "v4-timezone-env",
       "input": "_config_version: 4\n",
       "env": {
-        "GAUSS_TIMEZONE": " America/New_York "
+        "FISHER_TIMEZONE": " America/New_York "
       },
       "persisted_env": "",
       "results": {
@@ -1282,7 +1282,7 @@
       },
       "stdout": "Config version: 4 → 9\n",
       "saved": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -1299,7 +1299,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90
@@ -1477,7 +1477,7 @@
       "name": "v4-timezone-set",
       "input": "_config_version: 4\ntimezone: UTC\n",
       "env": {
-        "GAUSS_TIMEZONE": "X"
+        "FISHER_TIMEZONE": "X"
       },
       "persisted_env": "",
       "results": {
@@ -1487,7 +1487,7 @@
       },
       "stdout": "Config version: 4 → 9\n",
       "saved": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -1504,7 +1504,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90
@@ -1682,7 +1682,7 @@
       "name": "v4-timezone-blank",
       "input": "_config_version: 4\n",
       "env": {
-        "GAUSS_TIMEZONE": "   "
+        "FISHER_TIMEZONE": "   "
       },
       "persisted_env": "",
       "results": {
@@ -1692,7 +1692,7 @@
       },
       "stdout": "Config version: 4 → 9\n",
       "saved": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -1709,7 +1709,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90
@@ -1895,7 +1895,7 @@
       },
       "stdout": "Config version: 5 → 9\n",
       "saved": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -1912,7 +1912,7 @@
         },
         "model": "anthropic/claude-opus-4.6",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90
@@ -2100,7 +2100,7 @@
       },
       "stdout": "  ✓ Migrated tool progress to config.yaml: all\nConfig version: 0 → 9\n",
       "saved": {
-        "gauss": {
+        "fisher": {
           "compatibility": {
             "legacy_skill_surface": false,
             "legacy_cli_surface": false
@@ -2117,7 +2117,7 @@
         },
         "model": "m",
         "toolsets": [
-          "gauss-cli"
+          "fisher-cli"
         ],
         "agent": {
           "max_turns": 90

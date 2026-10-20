@@ -57,6 +57,7 @@ library
     , containers
     , directory
     , filepath
+    , fisher-core
     , fisher-llm
     , process
     , scientific
@@ -88,6 +89,7 @@ test-suite fisher-search-test
       Fisher.Search.IndexSpec
       Fisher.Search.LeanSpec
       Fisher.Search.LibrarySpec
+      Fisher.Search.OldName
       Fisher.Search.RepairSpec
       Fisher.Search.ReportSpec
       Fisher.Search.RetrievalFixture
@@ -122,6 +124,7 @@ test-suite fisher-search-test
     , containers
     , directory
     , filepath
+    , fisher-core
     , fisher-llm
     , fisher-search
     , hspec

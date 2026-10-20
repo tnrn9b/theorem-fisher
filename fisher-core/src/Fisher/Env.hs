@@ -1,5 +1,5 @@
--- | @~/.gauss/.env@: reading it, and setting one key in it. Ported from
--- @load_env@ and @save_env_value@ in @gauss_cli/config.py@.
+-- | @.env@ in the Fisher home: reading it, and setting one key in it. Ported from
+-- @load_env@ and @save_env_value@ in upstream @cli/config.py@.
 module Fisher.Env
   ( parseEnv
   , updateEnvText
@@ -23,7 +23,7 @@ import System.Directory (doesFileExist)
 import System.Posix.Env (setEnv)
 
 import Fisher.Atomic (atomicWriteFile, secureFile)
-import Fisher.Paths (ensureGaussHomeAt, envPathIn)
+import Fisher.Paths (ensureFisherHomeAt, envPathIn)
 
 newtype EnvError = InvalidEnvName Text
   deriving (Eq, Show)
@@ -103,7 +103,7 @@ saveEnvFileAt :: FilePath -> Text -> Text -> IO ()
 saveEnvFileAt home key value0 = do
   if validEnvName key then pure () else throwIO (InvalidEnvName key)
   let value = T.filter (\c -> c /= '\n' && c /= '\r') value0
-  ensureGaussHomeAt home
+  ensureFisherHomeAt home
   let path = envPathIn home
   exists <- doesFileExist path
   old <- if exists then readText path else pure ""

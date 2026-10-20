@@ -25,13 +25,13 @@ spec = do
       let width = case obj "columns" c of
             Number n -> round n
             _ -> 80
-          ascii = str "GAUSS_FORCE_ASCII" (obj "env" c) == "1"
+          ascii = str "FISHER_FORCE_ASCII" (obj "env" c) == "1"
           cfg = obj "config" c
           skinName = case str "skin" (obj "display" cfg) of
             "" -> "default"
             s -> s
           cwd = wRoot w </> T.unpack (str "cwd" c)
-      skin <- loadSkin (wGaussHome w) skinName
+      skin <- loadSkin (wFisherHome w) skinName
       project <- projectSummaryAt w cwd
       let ls
             | width < 34 = compactBanner width (not ascii) skin

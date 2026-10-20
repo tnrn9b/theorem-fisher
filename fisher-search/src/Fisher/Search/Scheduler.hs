@@ -77,6 +77,7 @@ import qualified Fisher.Search.Check as C
 import Fisher.Search.Child (ChildStats (..))
 import Fisher.Search.Controller (Health, ModelFailure, Stop (..), cap2000, emptyHealth, modelFailureText, noteResult, skipped, stopReasonText, tierFor)
 import Fisher.Search.Disprove (Disproof (..), disprove)
+import Fisher.Search.Headless (nativeBackend)
 import Fisher.Search.Lean
 import qualified Fisher.Search.Repair as R
 import Fisher.Search.Retrieval
@@ -103,7 +104,7 @@ data SearchConfig = SearchConfig
 
 defaultSearchConfig :: SearchConfig
 defaultSearchConfig = SearchConfig
-  { scBackends = ["claude-code", "gauss"], scSlots = 4, scMaxAttempts = 3, scBudget = 7200, scParallelPerGoal = True
+  { scBackends = ["claude-code", nativeBackend], scSlots = 4, scMaxAttempts = 3, scBudget = 7200, scParallelPerGoal = True
   , scTiers = [], scControl = False, scUntiered = [] }
 
 data AttemptSpec = AttemptSpec

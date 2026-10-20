@@ -30,10 +30,10 @@ spec = do
     forM_ [c | c <- b3 <> b4, not (hasInterrupts c)] $ \c -> it (T.unpack (txt "name" c)) $
       withSystemTempDirectory "fisher-replay" $ \tmp -> do
         let home = tmp </> "home"
-        createDirectoryIfMissing True (home </> ".gauss")
+        createDirectoryIfMissing True (home </> ".fisher")
         -- the replay reads the same config.yaml the run did
         case get "config" (field "scenario" c) of
-          Just (PStr y) -> BS.writeFile (home </> ".gauss" </> "config.yaml") (TE.encodeUtf8 y)
+          Just (PStr y) -> BS.writeFile (home </> ".fisher" </> "config.yaml") (TE.encodeUtf8 y)
           _ -> pure ()
         lg <- openReplayLog tmp "case"
         runCaseWith (\_ -> do (db, m) <- memorySessionDB; pure (db, memorySnapshot m)) (Just lg) c
@@ -51,7 +51,7 @@ spec = do
       withSystemTempDirectory "fisher-replay" $ \tmp -> do
         let home = tmp </> "home"
             plain = [c | c <- cases, not (hasInterrupts c)]
-        createDirectoryIfMissing True (home </> ".gauss")
+        createDirectoryIfMissing True (home </> ".fisher")
         forM_ (take 2 plain) $ \c -> do
           lg <- openReplayLog tmp "two"
           runCaseWith (\_ -> do (db, m) <- memorySessionDB; pure (db, memorySnapshot m)) (Just lg) c

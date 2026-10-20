@@ -38,7 +38,7 @@ spec = do
   describe "fisher ui --prune" $
     it "deletes the ledger rows, step and inbox files of old sessions not running, and old run logs; keeps the rest" $
       withSystemTempDirectory "fisher-ui-prune" $ \tmp -> do
-        let home = tmp </> "gauss"
+        let home = tmp </> "fisher"
             sd = stepsDir home
             ib = inboxDir home
             logs = home </> "fisher" </> "ui-runs"
@@ -90,7 +90,7 @@ spec = do
 
   describe "the repository for the gates" $ do
     it "is the config key fisher.repo when it names a directory" $ withSystemTempDirectory "fisher-ui-repo" $ \tmp -> do
-      let home = tmp </> "gauss"
+      let home = tmp </> "fisher"
           repo = tmp </> "elsewhere"
       createDirectoryIfMissing True home
       createDirectoryIfMissing True repo
@@ -98,7 +98,7 @@ spec = do
       findRepo home "/nonexistent/bin/fisher" `shouldReturn` repo
     it "else the directory at or above the executable's with tools/bench" $ withSystemTempDirectory "fisher-ui-repo" $ \tmp0 -> do
       tmp <- canonicalizePath tmp0
-      let home = tmp </> "gauss"
+      let home = tmp </> "home"
           bin = tmp </> "Fisher" </> ".stack-work" </> "install" </> "bin"
       createDirectoryIfMissing True home
       createDirectoryIfMissing True bin

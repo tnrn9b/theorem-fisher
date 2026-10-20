@@ -13,10 +13,10 @@
    "goal": "Step.Latency.a",
    "status": "closed",
    "attempts": [
-    "gauss"
+    "fisher"
    ],
    "by_attempt": 1,
-   "by_backend": "gauss",
+   "by_backend": "fisher",
    "closed_at_s": 200.0,
    "facts": 20,
    "offered": [],
@@ -26,10 +26,10 @@
    "goal": "Step.Latency.b",
    "status": "closed",
    "attempts": [
-    "gauss"
+    "fisher"
    ],
    "by_attempt": 2,
-   "by_backend": "gauss",
+   "by_backend": "fisher",
    "closed_at_s": 500.0,
    "facts": 12,
    "offered": [],
@@ -51,7 +51,7 @@
   {
    "attempt": 1,
    "goal": "Step.Latency.a",
-   "backend": "gauss",
+   "backend": "fisher",
    "stats": {
     "cost_usd": 0.25,
     "turns": 8
@@ -60,7 +60,7 @@
   {
    "attempt": 2,
    "goal": "Step.Latency.b",
-   "backend": "gauss",
+   "backend": "fisher",
    "stats": {
     "cost_usd": 0.5,
     "turns": 9

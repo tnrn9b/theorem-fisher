@@ -43,7 +43,7 @@ spec = do
   describe "tools/process_registry.py" $
     forM_ cases $ \c -> it (T.unpack (txt "name" c)) $
       withSystemTempDirectory "fisher-process" $ \root -> do
-        let gh = root </> "gauss"
+        let gh = root </> "fisher"
             work = root </> "work"
             opts = field "opts" c
         createDirectoryIfMissing True gh

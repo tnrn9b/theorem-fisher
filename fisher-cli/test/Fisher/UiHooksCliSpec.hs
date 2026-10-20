@@ -109,8 +109,8 @@ runIn tmp term env extra onCall = do
   runChatWithDeps change (answersFor work) tmp env (["-q", "Prove a and b.", "-Q"] <> extra)
 
 onlySession :: FilePath -> IO Text
-onlySession gauss = do
-  fs <- listDirectory (gauss </> "fisher" </> "replays")
+onlySession fisher = do
+  fs <- listDirectory (fisher </> "fisher" </> "replays")
   case fs of
     [f] -> pure (T.pack (dropExtension f))
     _ -> fail ("replay logs: " <> show fs)
@@ -141,8 +141,8 @@ spec = describe "fisher chat with the UI's hooks" $ do
     tmp <- canonicalizePath tmp0
     r <- runWith tmp [] (\_ -> pure ())
     rCode r `shouldBe` 0
-    sid <- onlySession (rGauss r)
-    steps <- readSteps (stepsPath (rGauss r) sid)
+    sid <- onlySession (rFisher r)
+    steps <- readSteps (stepsPath (rFisher r) sid)
     let work = tmp </> "work"
         a1 = "theorem a : True := sorry\n"
         b1 = "theorem b : True := trivial\n"
@@ -162,8 +162,8 @@ spec = describe "fisher chat with the UI's hooks" $ do
     rCode r `shouldBe` 0
     doesFileExist (term </> "B.lean") `shouldReturn` True
     doesFileExist (work </> "B.lean") `shouldReturn` False
-    sid <- onlySession (rGauss r)
-    steps <- readSteps (stepsPath (rGauss r) sid)
+    sid <- onlySession (rFisher r)
+    steps <- readSteps (stepsPath (rFisher r) sid)
     [(stCallId s, stPath s) | s <- steps]
       `shouldBe` [("call_w1", work </> "A.lean"), ("call_w2", term </> "B.lean"), ("call_p1", work </> "A.lean")]
     stText (steps !! 1) `shouldBe` "theorem b : True := trivial\n"
@@ -171,8 +171,8 @@ spec = describe "fisher chat with the UI's hooks" $ do
     tmp <- canonicalizePath tmp0
     r <- runWith tmp [("FISHER_UI_LEDGER", "1"), ("FISHER_UI_TAG", "run-7"), ("LEAN_PROJECT_PATH", "/lean/project")] (\_ -> pure ())
     rCode r `shouldBe` 0
-    sid <- onlySession (rGauss r)
-    let db = rGauss r </> "state.db"
+    sid <- onlySession (rFisher r)
+    let db = rFisher r </> "state.db"
     es <- ledgerEvents db sid 0
     map (\(n, _, _) -> n) es `shouldBe` [1 .. length es]
     let kinds = [k | (_, k, _) <- es]
@@ -201,8 +201,8 @@ spec = describe "fisher chat with the UI's hooks" $ do
     createDirectoryIfMissing True (tmp </> "on")
     off <- runWith (tmp </> "off") [] (\_ -> pure ())
     on <- runWith (tmp </> "on") [("FISHER_UI_LEDGER", "1")] (\_ -> pure ())
-    uiTables (rGauss off </> "state.db") `shouldReturn` []
-    uiTables (rGauss on </> "state.db") `shouldReturn` ["ui_events", "ui_runs"]
+    uiTables (rFisher off </> "state.db") `shouldReturn` []
+    uiTables (rFisher on </> "state.db") `shouldReturn` ["ui_events", "ui_runs"]
     let rows g = do
           st <- openStore (g </> "state.db")
           x <- snapshotRows st
@@ -210,32 +210,32 @@ spec = describe "fisher chat with the UI's hooks" $ do
           pure x
         noPaths = T.replace (T.pack (tmp </> "on")) (T.pack (tmp </> "off"))
         scrub (ss, ms) = (ss, [[(k, case v of PStr t -> PStr (noPaths t); _ -> v) | (k, v) <- m] | m <- ms])
-    a <- rows (rGauss off)
-    b <- scrub <$> rows (rGauss on)
+    a <- rows (rFisher off)
+    b <- scrub <$> rows (rFisher on)
     b `shouldBe` a
   it "keys a resumed compression child's steps, ledger and inbox on its chain's root" $ withSystemTempDirectory "fisher-ui-root" $ \tmp0 -> do
     tmp <- canonicalizePath tmp0
-    let gauss = tmp </> "home" </> ".gauss"
-    createDirectoryIfMissing True gauss
-    st <- openStore (gauss </> "state.db")
+    let fisher = tmp </> "home" </> ".fisher"
+    createDirectoryIfMissing True fisher
+    st <- openStore (fisher </> "state.db")
     createSessionFull st 1789990000 "20261001_000000_root00" "cli" (Just "example/model-a") Nothing Nothing
     endSession st 1789990001 "20261001_000000_root00" "compression"
     createSessionFull st 1789990002 "20261001_000001_kid000" "cli" (Just "example/model-a") Nothing (Just "20261001_000000_root00")
     closeStore st
-    appendInbox (inboxPath gauss "20261001_000000_root00") "Also check B."
+    appendInbox (inboxPath fisher "20261001_000000_root00") "Also check B."
     r <- runWithArgs tmp [("FISHER_UI_LEDGER", "1"), ("FISHER_UI_TAG", "run-r")] ["-r", "20261001_000001_kid000"] (\_ -> pure ())
     rCode r `shouldBe` 0
-    map stCallId <$> readSteps (stepsPath gauss "20261001_000000_root00") `shouldReturn` ["call_w1", "call_w2", "call_p1"]
-    doesFileExist (stepsPath gauss "20261001_000001_kid000") `shouldReturn` False
-    ledgerRun (gauss </> "state.db") "run-r" `shouldReturn` Just ("20261001_000000_root00", 4242)
-    es <- ledgerEvents (gauss </> "state.db") "20261001_000000_root00" 0
+    map stCallId <$> readSteps (stepsPath fisher "20261001_000000_root00") `shouldReturn` ["call_w1", "call_w2", "call_p1"]
+    doesFileExist (stepsPath fisher "20261001_000001_kid000") `shouldReturn` False
+    ledgerRun (fisher </> "state.db") "run-r" `shouldReturn` Just ("20261001_000000_root00", 4242)
+    es <- ledgerEvents (fisher </> "state.db") "20261001_000000_root00" 0
     [key "text" v | (_, "inbox", v) <- es] `shouldBe` [Just (A.String "Also check B.")]
   it "replays bit-exact a session stopped mid-turn (after its first tool call) and then resumed with chat -c" $ withSystemTempDirectory "fisher-ui-cut" $ \tmp0 -> do
     tmp <- canonicalizePath tmp0
     r1 <- runWith tmp [("FISHER_UI_LEDGER", "1")] (\_ -> pure ())
     rCode r1 `shouldBe` 0
-    sid <- onlySession (rGauss r1)
-    let lg = rGauss r1 </> "fisher" </> "replays" </> T.unpack (sid <> ".jsonl")
+    sid <- onlySession (rFisher r1)
+    let lg = rFisher r1 </> "fisher" </> "replays" </> T.unpack (sid <> ".jsonl")
         kindOf l = either (const "") (maybe "" pyStrOf . get "kind") (loads l)
     ls <- BC.lines <$> BS.readFile lg
     -- the log as a SIGTERM after the first tool call leaves it (written line by line)
@@ -263,16 +263,16 @@ spec = describe "fisher chat with the UI's hooks" $ do
       pure x
     rCode r `shouldBe` 0
     readIORef seen `shouldReturn` Just Nothing
-    sid <- onlySession (rGauss r)
-    ledgerRun (rGauss r </> "state.db") "run-env" `shouldReturn` Just (sid, 4242)
-    (code, _, _) <- readProcessWithExitCode "python3" ["-c", "import fcntl,sys\nf=open(sys.argv[1],'a')\ntry:\n fcntl.lockf(f, fcntl.LOCK_EX | fcntl.LOCK_NB)\nexcept OSError:\n sys.exit(1)\n", runLockPath (rGauss r) sid] ""
+    sid <- onlySession (rFisher r)
+    ledgerRun (rFisher r </> "state.db") "run-env" `shouldReturn` Just (sid, 4242)
+    (code, _, _) <- readProcessWithExitCode "python3" ["-c", "import fcntl,sys\nf=open(sys.argv[1],'a')\ntry:\n fcntl.lockf(f, fcntl.LOCK_EX | fcntl.LOCK_NB)\nexcept OSError:\n sys.exit(1)\n", runLockPath (rFisher r) sid] ""
     code `shouldBe` ExitFailure 1
     pid <- getProcessID
-    readFile (runPidPath (rGauss r) sid) `shouldReturn` (show pid <> "\n")
+    readFile (runPidPath (rFisher r) sid) `shouldReturn` (show pid <> "\n")
   where
    inboxRun ledger extra = withSystemTempDirectory "fisher-ui-inbox" $ \tmp0 -> do
     tmp <- canonicalizePath tmp0
-    let gauss = tmp </> "home" </> ".gauss"
+    let fisher = tmp </> "home" </> ".fisher"
     sent <- newIORef False
     let onCall _ = do
           done <- readIORef sent
@@ -280,11 +280,11 @@ spec = describe "fisher chat with the UI's hooks" $ do
             then pure ()
             else do
               writeIORef sent True
-              sid <- onlySession gauss
-              appendInbox (inboxPath gauss sid) "Also check B."
+              sid <- onlySession fisher
+              appendInbox (inboxPath fisher sid) "Also check B."
     r <- runWithArgs tmp [("FISHER_UI_LEDGER", "1") | ledger] extra onCall
     rCode r `shouldBe` 0
-    sid <- onlySession (rGauss r)
+    sid <- onlySession (rFisher r)
     let ps = posts r
         -- (prompt caching sends the last messages' content as blocks)
         textOf m = case get "content" m of
@@ -299,13 +299,13 @@ spec = describe "fisher chat with the UI's hooks" $ do
         upTo = takeWhile (not . isInbox) ms2
     get "role" (last upTo) `shouldBe` Just (PStr "tool")
     get "tool_call_id" (last upTo) `shouldBe` Just (PStr "call_w1")
-    lg <- BS.readFile (rGauss r </> "fisher" </> "replays" </> T.unpack (sid <> ".jsonl"))
+    lg <- BS.readFile (rFisher r </> "fisher" </> "replays" </> T.unpack (sid <> ".jsonl"))
     let inboxes = [v | l <- BC.lines lg, Right v <- [loads l], get "kind" v == Just (PStr "inbox")]
     [(get "boundary" v, get "text" v) | v <- inboxes] `shouldBe` [(Just (PInt 1), Just (PStr "Also check B."))]
     replayMain (rSys r) [sid] `shouldReturn` 0
-    takeInbox (inboxPath gauss sid) `shouldReturn` []
+    takeInbox (inboxPath fisher sid) `shouldReturn` []
     if ledger
       then do
-        es <- ledgerEvents (rGauss r </> "state.db") sid 0
+        es <- ledgerEvents (rFisher r </> "state.db") sid 0
         [key "text" v | (_, "inbox", v) <- es] `shouldBe` [Just (A.String "Also check B.")]
-      else uiTables (rGauss r </> "state.db") `shouldReturn` []
+      else uiTables (rFisher r </> "state.db") `shouldReturn` []

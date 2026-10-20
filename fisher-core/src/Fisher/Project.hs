@@ -1,8 +1,9 @@
--- | A Gauss project: a Lean 4, Rocq or Isabelle repository with a
--- @.gauss/project.yaml@ manifest. Discovery, loading, initialization and
--- template population, ported from @gauss_cli/project.py@ at the commit in
--- @UPSTREAM@. The error messages for Lean projects are upstream's, word for
--- word; Rocq and Isabelle (kinds @rocq@ and @isabelle@, with the manifest
+-- | A Fisher project: a Lean 4, Rocq or Isabelle repository with a
+-- @.fisher/project.yaml@ manifest. Discovery,
+-- loading, initialization and template population, ported from
+-- upstream @cli/project.py@ at the commit in @UPSTREAM@. The error messages
+-- for Lean projects are upstream's, word for word but for the product and
+-- directory names; Rocq and Isabelle (kinds @rocq@ and @isabelle@, with the manifest
 -- key @root@) are Fisher's own.
 module Fisher.Project
   ( Project (..)
@@ -28,14 +29,14 @@ module Fisher.Project
   , renderManifest
   ) where
 
-import Control.Exception (Exception, throwIO)
+import Control.Exception (Exception, IOException, throwIO, try)
 import Control.Monad (filterM, forM_, unless, when)
 import Data.Aeson (Value (..), object, (.=))
 import qualified Data.Aeson.KeyMap as KM
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy.Char8 as BL8
-import Data.List (elemIndex, isPrefixOf)
+import Data.List (elemIndex, isPrefixOf, sort)
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -50,16 +51,16 @@ import System.FilePath
   ( isAbsolute, makeRelative, splitDirectories, takeDirectory, takeFileName, (</>) )
 import System.Process.Typed (proc, readProcess)
 
-import Fisher.Config (getPath)
-import Fisher.Paths (expandUser)
+import Fisher.Paths (expandUser, fisherDirName)
 import Fisher.Prover (Marker (..), Prover (..), ProverKind (..), detectProver, findProverRoot, isProverRoot, markerKinds, prover, proverByName, proverTitle, tieMessage, withArticle)
 import Fisher.Py (lookupKey, pyIter, pyRepr, pyStr, pyStrOr, pyTruthy)
 
--- | Upstream's @GaussProject@. Two projects are equal when every field,
+-- | Upstream's project class. Two projects are equal when every field,
 -- the raw manifest included, is equal, as with the frozen dataclass.
 data Project = Project
   { projectRoot :: FilePath
-  , projectGaussDir :: FilePath
+  , projectFisherDir :: FilePath
+  -- ^ The project directory, @.fisher@.
   , projectManifestPath :: FilePath
   , projectName :: Text
   , projectKind :: Text
@@ -104,15 +105,15 @@ isCommandError = \case
   ProjectTemplateUnavailable _ -> True
   _ -> False
 
-gaussDirName, manifestFileName :: FilePath
-gaussDirName = ".gauss"
+manifestFileName :: FilePath
 manifestFileName = "project.yaml"
 
 schemaVersion :: Int
 schemaVersion = 1
 
+-- | The template variable.
 templateEnvVar :: String
-templateEnvVar = "GAUSS_BLUEPRINT_TEMPLATE_SOURCE"
+templateEnvVar = "FISHER_BLUEPRINT_TEMPLATE_SOURCE"
 
 blueprintMarkerFiles :: [FilePath]
 blueprintMarkerFiles =
@@ -120,7 +121,7 @@ blueprintMarkerFiles =
   , "lakefile.lean"
   , "lakefile.toml"
   , "templates/blueprint.yml"
-  , ".github/workflows/gauss.yml"
+  , ".github/workflows/fisher.yml"
   ]
 
 -- | @self.name or self.root.name@.
@@ -159,13 +160,13 @@ detectBlueprintMarkers root =
   map T.pack <$> filterM (doesPathExist . (root </>)) blueprintMarkerFiles
 
 -- | The environment variable when set and non-blank, else
--- @gauss.project.template_source@ from the configuration, else empty.
+-- @fisher.project.template_source@ from the configuration, else empty.
 resolveTemplateSource :: Value -> [(String, String)] -> Text
 resolveTemplateSource config env =
   let fromEnv = T.strip (T.pack (fromMaybe "" (lookup templateEnvVar env)))
    in if not (T.null fromEnv)
         then fromEnv
-        else case getPath ["gauss", "project"] config of
+        else case lookupKey "fisher" config >>= lookupKey "project" of
           Just pc@(Object _) -> pyStrOr (lookupKey "template_source" pc)
           _ -> ""
 
@@ -187,21 +188,22 @@ resolveRelative root value field = do
     manifestErr ("Project manifest field `" <> field <> "` points outside the project root.")
   pure resolved
 
--- | Load from a project root, its @.gauss@ directory, or the manifest
--- itself. Creates the runtime, cache and workflows directories if missing.
+-- | Load from a project root, its project directory (@.fisher@), or the
+-- manifest itself. Creates the runtime, cache and
+-- workflows directories if missing.
 loadProject :: FilePath -> IO Project
 loadProject target = do
   candidate <- resolve target
   isFile <- doesFileExist candidate
   let (gdir, mpath, root)
         | isFile = (takeDirectory candidate, candidate, takeDirectory (takeDirectory candidate))
-        | takeFileName candidate == gaussDirName =
+        | takeFileName candidate == fisherDirName =
             (candidate, candidate </> manifestFileName, takeDirectory candidate)
         | otherwise =
-            (candidate </> gaussDirName, candidate </> gaussDirName </> manifestFileName, candidate)
+            (candidate </> fisherDirName, candidate </> fisherDirName </> manifestFileName, candidate)
       mp = tshow mpath
   gdirOk <- doesDirectoryExist gdir
-  unless gdirOk $ throwIO (ProjectNotFound ("Gauss project directory not found at " <> tshow gdir <> "."))
+  unless gdirOk $ throwIO (ProjectNotFound ("Fisher project directory not found at " <> tshow gdir <> "."))
   mOk <- doesFileExist mpath
   unless mOk $
     manifestErr ("Found `" <> tshow gdir <> "` but `" <> T.pack manifestFileName <> "` is missing.")
@@ -252,7 +254,8 @@ loadProject target = do
   pathsV <- case getOr (Object KM.empty) "paths" payload of
     v@(Object _) -> pure v
     _ -> manifestErr (mp <> " has invalid `paths` metadata.")
-  let pathField k = getOr (String (T.pack (gaussDirName </> T.unpack k))) k pathsV
+  -- Unset paths default to the project directory.
+  let pathField k = getOr (String (T.pack (fisherDirName </> T.unpack k))) k pathsV
   runtimeDir <- resolveRelative root (pathField "runtime") "paths.runtime"
   cacheDir <- resolveRelative root (pathField "cache") "paths.cache"
   workflowsDir <- resolveRelative root (pathField "workflows") "paths.workflows"
@@ -273,7 +276,7 @@ loadProject target = do
   let sourceMode = let s = pyStrOr (lookupKey "mode" sourceV) in if T.null s then "init" else s
   pure Project
     { projectRoot = root
-    , projectGaussDir = gdir
+    , projectFisherDir = gdir
     , projectManifestPath = mpath
     , projectName = name
     , projectKind = kind
@@ -291,17 +294,38 @@ loadProject target = do
     , projectManifest = payload
     }
 
--- | The nearest directory at or above @start@ holding a @.gauss@ entry. An
--- entry that is not a valid project is an error, not a reason to keep
+-- | The nearest directory at or above @start@ holding a @.fisher@ entry.
+-- An entry that is not a valid project is an error, not a reason to keep
 -- climbing, as upstream.
+--
+-- When none is found but a directory on the way holds a project directory
+-- from before the rename (a hidden directory other than @.fisher@ with a
+-- @project.yaml@), the error says to rename it.
 discoverProject :: FilePath -> IO Project
-discoverProject start = resolve start >>= go . selfAndParents
+discoverProject start = resolve start >>= \s -> go (selfAndParents s) (selfAndParents s)
   where
-    go [] =
+    go dirs [] = do
+      previous <- firstJustM previousProjectDir dirs
       throwIO . ProjectNotFound $
-        "No active Gauss project found. Use `/project init`, `/project convert`, "
+        "No active Fisher project found. Use `/project init`, `/project convert`, "
           <> "or `/project use <path>` first."
-    go (c : cs) = doesPathExist (c </> gaussDirName) >>= \yes -> if yes then loadProject c else go cs
+          <> maybe "" (\d -> " `" <> T.pack d <> "` looks like a project directory from before the rename: rename it to `.fisher`.") previous
+    go dirs (c : cs) = do
+      yes <- doesPathExist (c </> fisherDirName)
+      if yes then loadProject c else go dirs cs
+    firstJustM _ [] = pure Nothing
+    firstJustM f (x : xs) = f x >>= maybe (firstJustM f xs) (pure . Just)
+
+-- | A hidden directory of @dir@, other than @.fisher@, that holds a
+-- @project.yaml@: a project directory under a previous name.
+previousProjectDir :: FilePath -> IO (Maybe FilePath)
+previousProjectDir dir = do
+  entries <- either (const []) id <$> (try (listDirectory dir) :: IO (Either IOException [FilePath]))
+  let hidden = [dir </> e | e <- sort entries, "." `isPrefixOf` e, e `notElem` [".", "..", fisherDirName]]
+  found <- filterM (\d -> doesFileExist (d </> manifestFileName)) hidden
+  pure (case found of
+    d : _ -> Just d
+    [] -> Nothing)
 
 data InitOptions = InitOptions
   { initName :: Maybe Text
@@ -340,7 +364,7 @@ initializeProject :: FilePath -> InitOptions -> IO Project
 initializeProject root0 opts = do
   root <- resolve root0
   createDirectoryIfMissing True root
-  let mpath = root </> gaussDirName </> manifestFileName
+  let mpath = root </> fisherDirName </> manifestFileName
   existing <- doesFileExist mpath
   if existing
     then loadProject root
@@ -371,14 +395,14 @@ initializeProject root0 opts = do
       unless rootOk $
         throwIO . ProjectCommandFailed $
           rootWord <> " root " <> tshow lr <> " is missing " <> markerText pk <> "."
-      let gdir = root </> gaussDirName
+      let gdir = root </> fisherDirName
       forM_ [gdir, gdir </> "runtime", gdir </> "cache", gdir </> "workflows"] (createDirectoryIfMissing True)
       markers <- maybe (detectBlueprintMarkers root) pure (initBlueprintMarkers opts)
       now <- getCurrentTime
       let name = T.strip $ case initName opts of
             Just n | not (T.null n) -> n
             _ | not (null (takeFileName root)) -> T.pack (takeFileName root)
-            _ -> "gauss-project"
+            _ -> "fisher-project"
           rel = makeRelative root lr
           mode = let m = T.strip (if T.null (initSourceMode opts) then "init" else initSourceMode opts)
                   in if T.null m then "init" else m
@@ -392,9 +416,9 @@ initializeProject root0 opts = do
               , "source" .= object ["mode" .= mode, "template_source" .= T.strip (initTemplateSource opts)]
               , "blueprint" .= object ["markers" .= markers]
               , "paths" .= object
-                  [ "runtime" .= (".gauss/runtime" :: Text)
-                  , "cache" .= (".gauss/cache" :: Text)
-                  , "workflows" .= (".gauss/workflows" :: Text) ]
+                  [ "runtime" .= T.pack (fisherDirName </> "runtime")
+                  , "cache" .= T.pack (fisherDirName </> "cache")
+                  , "workflows" .= T.pack (fisherDirName </> "workflows") ]
               ]
       BS.writeFile mpath (renderManifest payload)
       loadProject root

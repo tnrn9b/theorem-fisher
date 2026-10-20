@@ -234,7 +234,7 @@ searchResultWeb kvs =
 
 -- | @Document(**normalize_document_input(item)).model_dump()@ for a search
 -- result that carries scraped content (only with scrape options, which
--- Gauss never sends): the document's fields, raw.
+-- Fisher never sends): the document's fields, raw.
 documentDump :: [(Text, PyVal)] -> PyVal
 documentDump kvs =
   let ren k = case k of "rawHtml" -> "raw_html"; "changeTracking" -> "change_tracking"; _ -> k

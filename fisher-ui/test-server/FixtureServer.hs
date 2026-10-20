@@ -1,5 +1,5 @@
 -- | The page tests' server: the read routes over Task 2's fixtures (the
--- scripted GAUSS_HOME of "Fisher.UI.Fixture" and the copied bench g and h
+-- scripted FISHER_HOME of "Fisher.UI.Fixture" and the copied bench g and h
 -- runs) with the embedded ui/dist, on 127.0.0.1.
 --
 -- It is a test suite so that it is built with the tests and never
@@ -85,7 +85,7 @@ serveOn want =
       t <- TIO.readFile p
       TIO.writeFile p (T.replace "\"/fixture/lean\"" (T.pack (show proj)) t)
     -- the settings page's config.yaml and .env (a made-up key ending 1234)
-    B.writeFile (fxHome fx </> "config.yaml") "model:\n  default: example/model-a\n  provider: openrouter\nfisher:\n  context: clm\ngauss:\n  autoformalize:\n    model: example/model-b\n"
+    B.writeFile (fxHome fx </> "config.yaml") "model:\n  default: example/model-a\n  provider: openrouter\nfisher:\n  context: clm\n  autoformalize:\n    model: example/model-b\n"
     B.writeFile (fxHome fx </> ".env") "# fixture\nOTHER=1\nOPENROUTER_API_KEY=sk-fixture-0000000000001234\nTERMINAL_SSH_HOST=box.local\n"
     -- a step's Lean check: an error on a line with BAD, else clean
     TIO.writeFile lake "#!/bin/sh\nif grep -n BAD \"$3\" > /dev/null; then echo \"$3:$(grep -n BAD \"$3\" | head -1 | cut -d: -f1):2: error: unknown tactic\"; exit 1; fi\nexit 0\n"

@@ -43,7 +43,7 @@
 --     and library default to on: no flag)
 --     (FILE relative to it; DIR a new @~/.cache/fisher/search/<stamp>@),
 --     stdin from /dev/null, in its own process group ("Fisher.UI.Children"),
---     output to @$GAUSS_HOME/fisher/ui-runs/search-<stamp>.log@: @{run}@.
+--     output to @$FISHER_HOME/fisher/ui-runs/search-<stamp>.log@: @{run}@.
 --     A retry of a goal is this on the same file: @fisher search@ has no
 --     single-goal flag, so it searches the file as it is now.
 --   * @POST /api/search/:run/stop@: the run's process tree stopped
@@ -697,7 +697,7 @@ launch env proj rel flags = do
         argv = [leFisher (seLive env), "search", rel] <> flagArgs flags <> ["--out", out]
     createDirectory out
     original <- either (\(_ :: SomeException) -> Nothing) (Just . fileHash) <$> try (B.readFile (proj </> rel))
-    res <- try (spawnChild (Just logp) proj argv [("GAUSS_HOME", home)])
+    res <- try (spawnChild (Just logp) proj argv [("FISHER_HOME", home)])
     case res of
       Left (e :: SomeException) -> pure (Left (T.pack (show e)))
       Right (ch, exited) -> do

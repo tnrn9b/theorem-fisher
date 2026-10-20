@@ -3,7 +3,7 @@
     "attempts": [
         {
             "attempt": 1,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 474.6,
             "goal": "Step.Graft.runBody_subst",
             "outcome": "closed (helpers: payload_f_congr, tie_store, enqueue_tie, sendEffect_tie, commEffect_sendAny_tie)",
@@ -28,7 +28,7 @@
         }
     ],
     "backends": {
-        "gauss": [
+        "fisher": [
             1,
             1
         ]
@@ -41,10 +41,10 @@
     "goals": [
         {
             "attempts": [
-                "gauss"
+                "fisher"
             ],
             "by_attempt": 1,
-            "by_backend": "gauss",
+            "by_backend": "fisher",
             "closed_at_s": 474.6,
             "goal": "Step.Graft.runBody_subst",
             "status": "closed"

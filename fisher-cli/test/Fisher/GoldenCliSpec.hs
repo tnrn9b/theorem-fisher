@@ -1,5 +1,5 @@
 -- | @/project@ transcripts and doctor's managed-workflow section against
--- what the pinned OpenGauss printed for the same setups.
+-- what the pinned upstream printed for the same setups.
 module Fisher.GoldenCliSpec (spec) where
 
 import Control.Monad (forM_, when)
@@ -69,7 +69,7 @@ spec = do
       let session = ProjectSession cwd (fill tmp (field "config" c)) (envPairs (fill tmp (field "env" c))) ref
       forM_ (zip [0 :: Int ..] (field "steps" c :: [Value])) $ \(i, step) -> do
         when (textField "name" c == "override-broken" && i == 1) $
-          writeFile (tmp </> "A" </> ".gauss" </> "project.yaml") "schema_version: 7\nname: A\n"
+          writeFile (tmp </> "A" </> ".fisher" </> "project.yaml") "schema_version: 7\nname: A\n"
         out <- handleProjectCommand session (retmp tmp (textField "command" step))
         let printed = T.replace (T.pack tmp) "<TMP>" (T.unlines out)
         printed `shouldBe` textField "stdout" step
@@ -81,8 +81,8 @@ spec = do
     forM_ cases $ \c -> it (T.unpack (textField "name" c)) $ withTmp $ \tmp -> do
       let bin = tmp </> "bin"
           home = tmp </> "home"
-          gaussHome = tmp </> "gauss-home"
-      mapM_ (createDirectoryIfMissing True) [bin, home, gaussHome]
+          fisherHome = tmp </> "fisher-home"
+      mapM_ (createDirectoryIfMissing True) [bin, home, fisherHome]
       forM_ (field "bins" c :: [Text]) $ \b -> do
         let p = bin </> T.unpack b
         writeFile p "#!/usr/bin/env bash\nexit 0\n"
@@ -96,20 +96,20 @@ spec = do
             v -> BL8.writeFile p (encode v)
         _ -> pure ()
       let persisted = textField "persisted_env" c
-      when (not (T.null persisted)) $ TIO.writeFile (gaussHome </> ".env") persisted
+      when (not (T.null persisted)) $ TIO.writeFile (fisherHome </> ".env") persisted
       lean (tmp </> "project") []
       _ <- initializeProject (tmp </> "project") defaultInitOptions { initName = Just "Demo Project" }
       lean (tmp </> "broken") []
-      createDirectoryIfMissing True (tmp </> "broken" </> ".gauss")
-      writeFile (tmp </> "broken" </> ".gauss" </> "project.yaml") "name: x\n"
+      createDirectoryIfMissing True (tmp </> "broken" </> ".fisher")
+      writeFile (tmp </> "broken" </> ".fisher" </> "project.yaml") "name: x\n"
       createDirectoryIfMissing True (tmp </> "outside")
       let extra = [(k, T.unpack (T.replace "<HOME>" (T.pack home) (T.pack v))) | (k, v) <- envPairs (field "env" c)]
           -- upstream's doctor checks for uv, so its recordings are matched
           -- with upstream's MCP server chosen
           env = [("PATH", bin), ("HOME", home), ("FISHER_LEAN_MCP", "uvx")] <> extra
-          persistedLookup k = Map.lookup k <$> loadEnvAt gaussHome
+          persistedLookup k = Map.lookup k <$> loadEnvAt fisherHome
           de = DoctorEnv plainStyle (field "config" c) env (Just (tmp </> T.unpack (textField "cwd" c)))
-                 persistedLookup (pure Nothing) "gauss"
+                 persistedLookup (pure Nothing) "fisher"
       linesRef <- newIORef []
       issuesRef <- newIORef []
       checkManagedWorkflows de (\l -> modifyIORef' linesRef (<> [l])) (\i -> modifyIORef' issuesRef (<> [i]))

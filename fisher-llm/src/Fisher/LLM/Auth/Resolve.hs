@@ -1,10 +1,11 @@
 -- | Which provider to use and with what credentials: @resolve_provider@,
 -- the status dispatcher, API-key providers, named custom providers and
 -- @resolve_runtime_provider@, whose result dict (in upstream's key order)
--- is what the agent is built from. Ported from @gauss_cli/auth.py@ and
--- @gauss_cli/runtime_provider.py@.
+-- is what the agent is built from. Ported from upstream @cli/auth.py@ and
+-- upstream @cli/runtime_provider.py@.
 module Fisher.LLM.Auth.Resolve
   ( resolveProvider
+  , detectProvider
   , getAuthStatus
   , getApiKeyProviderStatus
   , resolveApiKeyProviderCredentials
@@ -18,6 +19,7 @@ module Fisher.LLM.Auth.Resolve
   ) where
 
 import Control.Exception (SomeException, throwIO, try)
+import Control.Monad (when)
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -27,7 +29,6 @@ import Fisher.LLM.Auth.Anthropic (resolveAnthropicToken)
 import Fisher.LLM.Auth.Codex
 import Fisher.LLM.Auth.Config (loadConfigPy, modelConfig)
 import Fisher.LLM.Auth.Error
-import Fisher.LLM.Auth.Nous
 import Fisher.LLM.Auth.Registry
 import Fisher.LLM.Auth.Store
 import Fisher.LLM.Auth.Util
@@ -51,27 +52,43 @@ resolveProvider sys requested explicitKey explicitUrl = do
   let n0 = T.toLower (T.strip (fromMaybe "auto" (nonEmpty requested)))
       normalized = fromMaybe n0 (lookup n0 authProviderAliases)
   case () of
-    _ | normalized `elem` ["openrouter", "custom"] -> pure "openrouter"
+    _ | isRemovedProvider normalized -> throwIO (removedProviderError normalized)
+      | normalized `elem` ["openrouter", "custom"] -> pure "openrouter"
       | Just _ <- lookupProvider normalized -> pure normalized
       | normalized /= "auto" -> throwIO (AuthError ("Unknown provider '" <> normalized <> "'.") "" (Just "invalid_provider") False)
       | Just _ <- nonEmpty explicitKey -> pure "openrouter"
       | Just _ <- nonEmpty explicitUrl -> pure "openrouter"
       | otherwise -> do
-          fromActive <- (try :: IO a -> IO (Either SomeException a)) $ do
-            store <- loadAuthStore sys
-            case get "active_provider" store of
-              Just (PStr a) | not (T.null a), Just _ <- lookupProvider a -> do
-                st <- getAuthStatus sys (Just a)
-                pure (if maybe False truthy (get "logged_in" st) then Just a else Nothing)
-              _ -> pure Nothing
-          case fromActive of
-            Right (Just a) -> pure a
-            _ -> do
-              openai <- envTruthy sys "OPENAI_API_KEY"
-              orKey <- envTruthy sys "OPENROUTER_API_KEY"
-              if openai || orKey
-                then pure "openrouter"
-                else scan [p | p <- providerRegistry, pcAuthType p == ApiKey]
+          -- An active provider Fisher removed is an error, as in
+          -- 'resolveRuntimeProvider', not a silent fall-through.
+          stored <- (try :: IO a -> IO (Either SomeException a)) (loadAuthStore sys)
+          case stored of
+            Right store | Just (PStr a) <- get "active_provider" store, isRemovedProvider a -> throwIO (removedProviderError a)
+            _ -> pure ()
+          detectProvider sys
+
+-- | The auto detection of 'resolveProvider': the active provider in
+-- @auth.json@ when it is logged in, else @openrouter@ for an OpenAI or
+-- OpenRouter key, else the first API-key provider with a key. An active
+-- provider Fisher removed is passed over here; 'resolveProvider' reports
+-- it. For a caller that has shown that error and goes on (@fisher model@).
+detectProvider :: Sys -> IO Text
+detectProvider sys = do
+  fromActive <- (try :: IO a -> IO (Either SomeException a)) $ do
+    store <- loadAuthStore sys
+    case get "active_provider" store of
+      Just (PStr a) | not (T.null a), Just _ <- lookupProvider a -> do
+        st <- getAuthStatus sys (Just a)
+        pure (if maybe False truthy (get "logged_in" st) then Just a else Nothing)
+      _ -> pure Nothing
+  case fromActive of
+    Right (Just a) -> pure a
+    _ -> do
+      openai <- envTruthy sys "OPENAI_API_KEY"
+      orKey <- envTruthy sys "OPENROUTER_API_KEY"
+      if openai || orKey
+        then pure "openrouter"
+        else scan [p | p <- providerRegistry, pcAuthType p == ApiKey]
   where
     scan [] = pure "openrouter"
     scan (p : ps) = do
@@ -89,10 +106,14 @@ getAuthStatus sys mpid = do
         PStr a | not (T.null a) -> pure (Just a)
         _ -> pure Nothing
   case target of
-    Just "nous" -> getNousAuthStatus sys
     Just "openai-codex" -> getCodexAuthStatus sys
     Just t | isApiKeyProvider t -> getApiKeyProviderStatus sys t
     _ -> pure (obj [("logged_in", PBool False)])
+
+-- | The error for a provider Fisher removed, named by a config, an
+-- environment variable, an argument or the auth store.
+removedProviderError :: Text -> AuthError
+removedProviderError p = AuthError removedProviderMessage p (Just "provider_removed") False
 
 firstKey :: Sys -> [Text] -> IO (Text, Text)
 firstKey _ [] = pure ("", "")
@@ -134,7 +155,7 @@ resolveApiKeyProviderCredentials sys pid = case lookupProvider pid of
   _ -> throwIO (AuthError ("Provider '" <> pid <> "' is not an API-key provider.") pid (Just "invalid_provider") False)
 
 -- | @resolve_requested_provider(requested)@: the argument, then
--- @model.provider@ in the config, then @GAUSS_INFERENCE_PROVIDER@, then
+-- @model.provider@ in the config, then @FISHER_INFERENCE_PROVIDER@, then
 -- @auto@ (all lower-cased).
 resolveRequestedProvider :: Sys -> Maybe Text -> IO Text
 resolveRequestedProvider sys requested = case requested of
@@ -144,7 +165,7 @@ resolveRequestedProvider sys requested = case requested of
     case get "provider" (modelConfig cfg) of
       Just (PStr p) | not (T.null (T.strip p)) -> pure (T.toLower (T.strip p))
       _ -> do
-        e <- T.toLower <$> envStrip sys "GAUSS_INFERENCE_PROVIDER"
+        e <- T.toLower <$> (maybe "" T.strip <$> sysGetEnv sys "FISHER_INFERENCE_PROVIDER")
         pure (if T.null e then "auto" else e)
 
 -- | @_normalize_custom_provider_name@.
@@ -204,28 +225,17 @@ resolveRuntimeProvider sys req = do
   case custom of
     Just rt -> pure (set "requested_provider" (str requested) rt)
     Nothing -> do
+      removedActive requested
       provider <- resolveProvider sys (Just requested) (rrExplicitApiKey req) (rrExplicitBaseUrl req)
       let tail' kvs = obj (kvs <> [("requested_provider", str requested)])
       case provider of
-        "nous" -> do
-          ttlEnv <- fromMaybe "1800" <$> sysGetEnv sys "GAUSS_NOUS_MIN_KEY_TTL_SECONDS"
-          ttl <- maybe (throwIO (intError ttlEnv)) pure (pyIntText ttlEnv)
-          toEnv <- fromMaybe "15" <$> sysGetEnv sys "GAUSS_NOUS_TIMEOUT_SECONDS"
-          to <- maybe (throwIO (pyError "ValueError" ("could not convert string to float: " <> pyRepr (str toEnv)))) pure (pyFloatText toEnv)
-          creds <- resolveNousRuntimeCredentials sys defaultNousOpts {noMinKeyTtl = fromInteger (max 60 ttl), noTimeout = to}
-          pure $ tail'
-            [ ("provider", str "nous"), ("api_mode", str "chat_completions")
-            , ("base_url", str (rstripSlash (strOr "" (get "base_url" creds))))
-            , ("api_key", fromMaybe (str "") (get "api_key" creds))
-            , ("source", fromMaybe (str "portal") (get "source" creds))
-            , ("expires_at", fromMaybe PNull (get "expires_at" creds)) ]
         "openai-codex" -> do
           creds <- resolveCodexRuntimeCredentials sys defaultCodexOpts
           pure $ tail'
             [ ("provider", str "openai-codex"), ("api_mode", str "codex_responses")
             , ("base_url", str (rstripSlash (strOr "" (get "base_url" creds))))
             , ("api_key", fromMaybe (str "") (get "api_key" creds))
-            , ("source", fromMaybe (str "gauss-auth-store") (get "source" creds))
+            , ("source", fromMaybe (str "fisher-auth-store") (get "source" creds))
             , ("last_refresh", fromMaybe PNull (get "last_refresh" creds)) ]
         "anthropic" -> do
           tok <- resolveAnthropicToken sys
@@ -247,7 +257,15 @@ resolveRuntimeProvider sys req = do
             , ("source", fromMaybe (str "env") (get "source" creds)) ]
         _ -> set "requested_provider" (str requested) <$> openrouterRuntime requested
   where
-    intError v = pyError "ValueError" ("invalid literal for int() with base 10: " <> pyRepr (str v))
+    -- Auto-detection would pick the auth store's active provider; one
+    -- Fisher removed is an error, not a silent fall-through.
+    removedActive requested =
+      when (requested == "auto" && null (nonEmpty explicitKey) && null (nonEmpty explicitUrl)) $ do
+        r <- try (loadAuthStore sys)
+        case r of
+          Right store | Just (PStr a) <- get "active_provider" store, isRemovedProvider a -> throwIO (removedProviderError a)
+          Right _ -> pure ()
+          Left (_ :: SomeException) -> pure ()
     explicitKey = rrExplicitApiKey req
     explicitUrl = rrExplicitBaseUrl req
     namedCustomRuntime requested =

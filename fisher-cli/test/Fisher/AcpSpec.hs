@@ -1,4 +1,4 @@
--- | @fisher acp@ against upstream's @gauss acp@ (@test/golden/e1/acp.json@,
+-- | @fisher acp@ against upstream's @acp@ command (@test/golden/e1/acp.json@,
 -- from tools/corpus/e1.py): the scripted client's messages go in one at a
 -- time, each request waiting for its answer, and every message the server
 -- sends back must be the one upstream sent, in order, with the HTTP
@@ -82,15 +82,15 @@ isCancel m = get "method" m == Just (PStr "session/cancel")
 spec :: Spec
 spec = do
   doc <- runIO (either fail pure . loads =<< BS.readFile "test/golden/e1/acp.json")
-  describe "gauss acp" $
+  describe "fisher acp" $
     forM_ (lst "cases" doc) $ \c -> it (T.unpack (txt "name" c)) $ withSystemTempDirectory "fisher-acp" $ \tmp0 -> do
       tmp <- canonicalizePath tmp0
       let sc = fld "scenario" c
           home = tmp </> "home"
-          gauss = home </> ".gauss"
+          fisher = home </> ".fisher"
           work = tmp </> "work"
           record = fld "record" c
-      createDirectoryIfMissing True (gauss </> "memories")
+      createDirectoryIfMissing True (fisher </> "memories")
       createDirectoryIfMissing True work
       offset <- newIORef (0 :: Double)
       uuidN <- newIORef (0 :: Int)
@@ -101,7 +101,7 @@ spec = do
       answers <- newIORef (lst "answers" sc)
       toolQ <- newIORef (lst "tools" record)
       env <- newIORef . M.fromList $
-        [("HOME", T.pack home), ("GAUSS_TIMEZONE", "UTC")]
+        [("HOME", T.pack home), ("FISHER_TIMEZONE", "UTC")]
           <> [("OPENROUTER_API_KEY", "sk-or-test-1234567890") | fld "no_key" sc /= PBool True]
       -- the connection: lines in, messages out
       inbox <- newChan'
@@ -119,11 +119,11 @@ spec = do
               , sysOpenBrowser = \_ -> pure False, sysRun = \_ -> pure (Left "no"), sysRunInteractive = \_ -> pure (Left "no")
               , sysWhich = \_ -> pure Nothing, sysPlatform = "linux"
               , sysUuidHex = atomicModifyIORef' uuidN (\n -> (n + 1, uuidAt (n + 1)))
-              , sysTimeZoneAt = \_ -> pure utc, sysHome = home, sysGaussHome = gauss
+              , sysTimeZoneAt = \_ -> pure utc, sysHome = home, sysFisherHome = fisher
               , sysOut = \_ -> pure (), sysInput = \_ -> pure Nothing, sysGetPass = \_ -> pure Nothing
               , sysStdinTty = pure False, sysStdoutTty = pure False, sysPid = 4242 }
           sub t = T.replace "<WORK>" (T.pack work) t
-          mask t = T.replace (T.pack gauss) "<GAUSS_HOME>" (T.replace (T.pack work) "<WORK>" t)
+          mask t = T.replace (T.pack fisher) "<FISHER_HOME>" (T.replace (T.pack work) "<WORK>" t)
           cancelMsg = case filter isCancel [fld "msg" m | m <- lst "messages" c, fld "dir" m == PStr "in"] of
             (m : _) -> m
             [] -> PNull
@@ -157,8 +157,8 @@ spec = do
                       if get "connect_error" resp == Just (PBool True)
                         then Left ConnectionError
                         else Right (HttpResp (case fld "status" resp of PInt s -> fromIntegral s; _ -> 200) [] (TE.encodeUtf8 (dumpsAscii (fld "body" resp))))
-      at <- newAgentTools gauss
-      (defs, _) <- getToolDefinitions (atRegistry at) (Just ["gauss-acp"]) Nothing
+      at <- newAgentTools fisher
+      (defs, _) <- getToolDefinitions (atRegistry at) (Just ["fisher-acp"]) Nothing
       let scripted tr =
             tr
               { trCall = \name args _ _ -> do

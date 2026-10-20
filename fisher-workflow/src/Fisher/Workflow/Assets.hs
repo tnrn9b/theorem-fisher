@@ -55,7 +55,7 @@ checkoutIsComplete :: FilePath -> IO Bool
 checkoutIsComplete co = null <$> missingPaths co
 
 revisionFile :: FilePath -> FilePath
-revisionFile co = co </> ".gauss-managed-revision"
+revisionFile co = co </> ".fisher-managed-revision"
 
 readCheckoutRevision :: FilePath -> IO (Maybe Text)
 readCheckoutRevision co = do
@@ -110,12 +110,12 @@ ensureGitCheckout url revision dest git = do
   T.strip <$> runStaging [git, "-C", dest, "rev-parse", "HEAD"] "Failed to read managed asset revision" Nothing Nothing
 
 -- | @_ensure_lean4_checkout_assets@: refresh when asked, when a revision is
--- requested by @GAUSS_AUTOFORMALIZE_LEAN4_SKILLS_REF@, or when the checkout
+-- requested by @FISHER_AUTOFORMALIZE_LEAN4_SKILLS_REF@, or when the checkout
 -- is incomplete; otherwise reuse it and its recorded revision.
 ensureLean4Checkout :: FilePath -> Env -> FilePath -> Bool -> IO (FilePath, Text)
 ensureLean4Checkout assets env git refresh = do
   let co = checkoutRoot assets
-      ref = case T.strip (T.pack (Map.findWithDefault "" "GAUSS_AUTOFORMALIZE_LEAN4_SKILLS_REF" env)) of
+      ref = case T.strip (T.pack (fromMaybe "" (Map.lookup "FISHER_AUTOFORMALIZE_LEAN4_SKILLS_REF" env))) of
         t | T.null t -> Nothing
         t -> Just t
   complete <- checkoutIsComplete co

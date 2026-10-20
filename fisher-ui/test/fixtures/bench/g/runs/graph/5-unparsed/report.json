@@ -2,7 +2,7 @@
     "attempt_s": 1200,
     "attempts": [],
     "backends": [
-        "gauss"
+        "fisher"
     ],
     "budget_s": 3600,
     "cap_usd": 6,

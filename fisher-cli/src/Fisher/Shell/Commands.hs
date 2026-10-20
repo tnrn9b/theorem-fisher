@@ -1,4 +1,4 @@
--- | The fisher shell's slash commands: upstream's @GaussCLI.process_command@
+-- | The fisher shell's slash commands: upstream's CLI class's @process_command@
 -- (@cli.py@) for the commands Fisher has, over a 'ShellDeps' record so the
 -- same code runs against the real swarm and against the tests' fakes.
 module Fisher.Shell.Commands
@@ -102,7 +102,7 @@ data ShellDeps = ShellDeps
   , dAnsi :: Bool
   , dUnicode :: Bool
   , dRenderTerminal :: Text -> Text -- ^ @render_terminal_text@ for _cprint and print
-  , dGaussHome :: FilePath
+  , dFisherHome :: FilePath
   , dConfigPath :: FilePath
   , dProject :: IO ProjectInfo
   , dProjectCommand :: [Text] -> IO [Text]
@@ -125,7 +125,7 @@ data ShellDeps = ShellDeps
   , dStartedAt :: Text -- ^ the session start, @%Y-%m-%d %H:%M:%S@
   , dRunQuick :: Text -> IO (Either Text Text)
   , dForgiving :: Text -> Maybe Text -- ^ @rewrite_forgiving_managed_command@
-  , dChat :: Text -> Text -> IO () -- ^ @GaussCLI.chat@: session id, message
+  , dChat :: Text -> Text -> IO () -- ^ upstream's CLI class's @chat@: session id, message
   , dChatExit :: IO Bool -- ^ @_print_exit_summary@ when there was a conversation
   }
 
@@ -143,7 +143,7 @@ newShellState deps cfg sessionId = do
   let skinName = case at ["display", "skin"] cfg of
         Just (String s) | not (T.null (T.strip s)) -> T.strip s
         _ -> "default"
-  skin <- loadSkin (dGaussHome deps) skinName
+  skin <- loadSkin (dFisherHome deps) skinName
   ShellState <$> newIORef False <*> newIORef skinName <*> newIORef skin <*> newIORef cfg <*> newIORef sessionId <*> newIORef False
 
 at :: [Text] -> Value -> Maybe Value
@@ -278,23 +278,23 @@ dispatch d s original lower
   | any (matchesCmd lower) managedWorkflows = workflow d s original False >> pure True
   | matchesCmd lower "/swarm" = swarmCommand d s original >> pure True
   | matchesCmd lower "/plan" = do
-      notice d "[bold yellow]`/plan` is no longer part of the default Gauss workflow.[/] [dim]Use `/prove`, `/review`, `/checkpoint`, `/refactor`, `/golf`, `/autoprove`, `/formalize`, or `/autoformalize` for Lean work.[/]"
+      notice d "[bold yellow]`/plan` is no longer part of the default Fisher workflow.[/] [dim]Use `/prove`, `/review`, `/checkpoint`, `/refactor`, `/golf`, `/autoprove`, `/formalize`, or `/autoformalize` for Lean work.[/]"
       pure True
   | "/cron" `T.isPrefixOf` lower = do
-      notice d "[bold yellow]Cron automation is not part of the default Gauss surface.[/] [dim]Use the top-level `gauss cron` command only if you intentionally need the legacy workflow.[/]"
+      notice d "[bold yellow]Cron automation is not part of the default Fisher surface.[/] [dim]Use the top-level `fisher cron` command only if you intentionally need the legacy workflow.[/]"
       pure True
   | "/skills" `T.isPrefixOf` lower = do
-      notice d "[bold yellow]Bundled skills are not part of the default Gauss distribution.[/] [dim]Gauss stages `/prove`, `/review`, `/checkpoint`, `/refactor`, `/golf`, `/draft`, `/autoprove`, `/formalize`, and `/autoformalize` automatically.[/]"
+      notice d "[bold yellow]Bundled skills are not part of the default Fisher distribution.[/] [dim]Fisher stages `/prove`, `/review`, `/checkpoint`, `/refactor`, `/golf`, `/draft`, `/autoprove`, `/formalize`, and `/autoformalize` automatically.[/]"
       pure True
   | lower == "/reload-mcp" = do
-      notice d "[bold yellow]User-managed MCP reload is not part of the default Gauss surface.[/] [dim]Managed Lean workflows use an isolated Lean MCP config automatically.[/]"
+      notice d "[bold yellow]User-managed MCP reload is not part of the default Fisher surface.[/] [dim]Managed Lean workflows use an isolated Lean MCP config automatically.[/]"
       pure True
   | matchesCmd lower "/handoff" = do
       notice d "[dim]`/handoff` now forwards to `/autoformalize`.[/]"
       workflow d s ("/autoformalize" <> T.drop 8 original) False
       pure True
   | "/background" `T.isPrefixOf` lower = do
-      notice d "[bold yellow]`/background` is not part of the default Gauss workflow surface.[/] [dim]Stay in the current session or use `/prove`, `/review`, `/checkpoint`, `/refactor`, `/golf`, `/draft`, `/autoprove`, `/formalize`, or `/autoformalize` for Lean work.[/]"
+      notice d "[bold yellow]`/background` is not part of the default Fisher workflow surface.[/] [dim]Stay in the current session or use `/prove`, `/review`, `/checkpoint`, `/refactor`, `/golf`, `/draft`, `/autoprove`, `/formalize`, or `/autoformalize` for Lean work.[/]"
       pure True
   | "/skin" `T.isPrefixOf` lower = skinCommand d s original >> pure True
   | Just c <- agentCommand lower = do
@@ -346,9 +346,9 @@ fallback d s original lower = do
 lockNotice :: ShellDeps -> Text -> IO ()
 lockNotice d label = do
   info <- dProject d
-  let detail0 = fromMaybe "No active Gauss project found." (piError info)
+  let detail0 = fromMaybe "No active Fisher project found." (piError info)
       detail = if piSource info == Just "override" then "Session override is invalid: " <> detail0 else detail0
-  notice d ("[bold yellow]Gauss needs an active project before `" <> label <> "`.[/] [dim]Use `/project init`, `/project convert`, `/project create <path>`, or `/project use <path>` first.[/]")
+  notice d ("[bold yellow]Fisher needs an active project before `" <> label <> "`.[/] [dim]Use `/project init`, `/project convert`, `/project create <path>`, or `/project use <path>` first.[/]")
   notice d "[dim]If you only want orientation first, run `/chat` for inline onboarding chat.[/]"
   notice d ("[dim]" <> detail <> "[/]")
 
@@ -374,7 +374,7 @@ slowStatus command
       [ "/autoformalize", "/auto_formalize", "/auto-formalize", "/chat", "/draft", "/formalize", "/prove", "/review"
       , "/checkpoint", "/refactor", "/golf", "/autoprove", "/auto-proof", "/auto_proof", "/handoff" ] =
       "Preparing managed Lean workflow session..."
-  | "/project" `T.isPrefixOf` c = "Updating Gauss project state..."
+  | "/project" `T.isPrefixOf` c = "Updating Fisher project state..."
   | "/skills" `T.isPrefixOf` c = "Processing skills command..."
   | c == "/reload-mcp" = "Reloading MCP servers..."
   | "/browser" `T.isPrefixOf` c = "Configuring browser..."
@@ -398,14 +398,14 @@ chatCommand d s cmd = do
       | lowered == "status" -> do
           on <- readIORef (ssChatMode s)
           let st = if on then "on" else "off"
-          notice d ("[dim]`/chat` is " <> st <> ". When it is on, plain text goes to the main interactive provider in the current Gauss session. Use `/chat off` to return to top-level command mode, or `/managed-chat` if you want the configured managed backend child session.[/]")
+          notice d ("[dim]`/chat` is " <> st <> ". When it is on, plain text goes to the main interactive provider in the current Fisher session. Use `/chat off` to return to top-level command mode, or `/managed-chat` if you want the configured managed backend child session.[/]")
       | lowered `elem` ["off", "disable", "stop"] -> do
           writeIORef (ssChatMode s) False
-          notice d "[dim]`/chat` is off. Plain text stays at the top-level Open Gauss prompt until you run `/chat` again.[/]"
+          notice d "[dim]`/chat` is off. Plain text stays at the top-level Theorem Fisher prompt until you run `/chat` again.[/]"
       | otherwise -> do
           let payload = if lowered `elem` ["on", "enable", "start"] then "" else payload0
           writeIORef (ssChatMode s) True
-          notice d "[bold green]`/chat` is on.[/] [dim]Plain text now goes to the main interactive provider even without an active Gauss project.[/]"
+          notice d "[bold green]`/chat` is on.[/] [dim]Plain text now goes to the main interactive provider even without an active Fisher project.[/]"
           notice d "[dim]Next: use `/project use <path>` for an existing Lean repo, `/project init` in the current repo, `/project create <path> --template-source <template-or-git-url>` for a new one, or `/managed-chat` if you want the configured managed backend child session instead.[/]"
           notice d "[dim]When the project is ready, run `/prove`, `/review`, `/draft`, `/autoprove`, or `/swarm`.[/]"
           unless (T.null payload) $ do
@@ -417,11 +417,11 @@ chatCommand d s cmd = do
 
 activeBackend :: ShellDeps -> ShellState -> IO Text
 activeBackend d s = do
-  env <- dEnv d "GAUSS_AUTOFORMALIZE_BACKEND"
+  env <- dEnv d "FISHER_AUTOFORMALIZE_BACKEND"
   cfg <- readIORef (ssConfig s)
   let raw = case env of
         Just e | not (T.null e) -> e
-        _ -> case atText ["gauss", "autoformalize", "backend"] cfg of
+        _ -> case atText ["fisher", "autoformalize", "backend"] cfg of
           Just b | not (T.null b) -> b
           _ -> head (dBackends d)
   pure (either (const raw) id (dNormalizeBackend d raw))
@@ -434,9 +434,9 @@ managedChatCommand d s cmd = do
     _
       | lowered == "status" -> do
           b <- activeBackend d s
-          notice d ("[dim]`/managed-chat` opens the configured managed backend child session (`" <> b <> "`). Use `/autoformalize-backend` to switch backends, or `/chat` for inline onboarding in the current Gauss session.[/]")
+          notice d ("[dim]`/managed-chat` opens the configured managed backend child session (`" <> b <> "`). Use `/autoformalize-backend` to switch backends, or `/chat` for inline onboarding in the current Fisher session.[/]")
       | lowered `elem` ["off", "disable", "stop"] ->
-          notice d "[dim]`/managed-chat` is not a persistent mode. Run `/chat` if you want inline onboarding in the current Gauss session.[/]"
+          notice d "[dim]`/managed-chat` is not a persistent mode. Run `/chat` if you want inline onboarding in the current Fisher session.[/]"
       | otherwise -> managedChat d s "/managed-chat" (if lowered `elem` ["on", "enable", "start"] then "" else payload0)
 
 -- | Spawn a managed chat child and attach, or say how to.
@@ -653,21 +653,21 @@ backendCommand d s cmd = do
   cfg <- readIORef (ssConfig s)
   if T.null arg
     then do
-      let configured0 = fromMaybe (head (dBackends d)) (atText ["gauss", "autoformalize", "backend"] cfg)
+      let configured0 = fromMaybe (head (dBackends d)) (atText ["fisher", "autoformalize", "backend"] cfg)
           configured = either (const configured0) id (dNormalizeBackend d configured0)
-      env <- dEnv d "GAUSS_AUTOFORMALIZE_BACKEND"
+      env <- dEnv d "FISHER_AUTOFORMALIZE_BACKEND"
       plainPrint d ("  Autoformalize backend: " <> active)
       plainPrint d ("  Config backend:        " <> configured)
       when (maybe False (not . T.null . T.strip) env) $
-        plainPrint d "  Session override:     GAUSS_AUTOFORMALIZE_BACKEND is set for this running CLI"
+        plainPrint d "  Session override:     FISHER_AUTOFORMALIZE_BACKEND is set for this running CLI"
       plainPrint d ("  Available:            " <> avail)
       plainPrint d "  Usage: /autoformalize-backend <backend>"
     else case dNormalizeBackend d arg of
       Left e -> plainPrint d ("(>_<) " <> e) >> plainPrint d ("  Available: " <> avail)
       Right b -> do
-        modifyIORef' (ssConfig s) (setPath ["gauss", "autoformalize", "backend"] (String b))
-        dSetEnv d "GAUSS_AUTOFORMALIZE_BACKEND" b
-        saved <- dSaveConfigValue d ["gauss", "autoformalize", "backend"] (String b)
+        modifyIORef' (ssConfig s) (setPath ["fisher", "autoformalize", "backend"] (String b))
+        dSetEnv d "FISHER_AUTOFORMALIZE_BACKEND" b
+        saved <- dSaveConfigValue d ["fisher", "autoformalize", "backend"] (String b)
         plainPrint d $
           if saved
             then "(^_^)b Autoformalize backend set to: " <> b <> " (saved to config; active now)"
@@ -688,7 +688,7 @@ setPath ks v _ = setPath ks v (Object KM.empty)
 skinCommand :: ShellDeps -> ShellState -> Text -> IO ()
 skinCommand d s cmd = do
   let arg = T.strip (T.drop 1 (T.dropWhile (/= ' ') (T.strip cmd)))
-  entries <- listSkins (dGaussHome d)
+  entries <- listSkins (dFisherHome d)
   if T.null arg
     then do
       current <- readIORef (ssSkinName s)
@@ -699,7 +699,7 @@ skinCommand d s cmd = do
             source = if seUser e then " (user)" else ""
         plainPrint d ("   " <> marker <> " " <> seName e <> source <> " — " <> seDescription e)
       plainPrint d "\n  Usage: /skin <name>"
-      plainPrint d ("  Custom skins: drop a YAML file in " <> T.pack (dGaussHome d) <> "/skins/\n")
+      plainPrint d ("  Custom skins: drop a YAML file in " <> T.pack (dFisherHome d) <> "/skins/\n")
     else do
       let new = T.toLower arg
           names = map seName entries
@@ -708,7 +708,7 @@ skinCommand d s cmd = do
           plainPrint d ("  Unknown skin: " <> new)
           plainPrint d ("  Available: " <> T.intercalate ", " (sort (dedupe names)))
         else do
-          skin <- loadSkin (dGaussHome d) new
+          skin <- loadSkin (dFisherHome d) new
           writeIORef (ssSkinName s) new
           writeIORef (ssSkin s) skin
           modifyIORef' (ssConfig s) (setPath ["display", "skin"] (String new))
@@ -806,7 +806,7 @@ showCliConfig d s = do
   case piProject info of
     Nothing -> do
       p "  Active:     (none)"
-      p ("  Detail:     " <> fromMaybe "No active Gauss project found" (piError info))
+      p ("  Detail:     " <> fromMaybe "No active Fisher project found" (piError info))
     Just pv -> do
       p ("  Active:     " <> pvLabel pv <> " [" <> fromMaybe "" (piSource info) <> "]")
       p ("  Root:       " <> pvRoot pv)
@@ -840,7 +840,7 @@ apiKeyOf d url = do
 
 maxTurnsOf :: ShellDeps -> Value -> IO Text
 maxTurnsOf d cfg = do
-  env <- dEnv d "GAUSS_MAX_ITERATIONS"
+  env <- dEnv d "FISHER_MAX_ITERATIONS"
   pure $ case (at ["agent", "max_turns"] cfg, at ["max_turns"] cfg, env) of
     (Just v, _, _) | truthy v -> showV v
     (_, Just v, _) | truthy v -> showV v
@@ -912,7 +912,7 @@ summaryLineFor skin ts
 welcome :: ShellDeps -> ShellState -> IO ()
 welcome d s = do
   skin <- readIORef (ssSkin s)
-  let text = skinBranding skin "welcome" "Welcome to Gauss! Type /chat for inline onboarding, /project for project setup, or /help for commands."
+  let text = skinBranding skin "welcome" "Welcome to Fisher! Type /chat for inline onboarding, /project for project setup, or /help for commands."
       colour = skinColor skin "banner_text" "#FFF8DC"
   consolePrint d ("[" <> colour <> "]" <> text <> "[/]")
   consolePrint d ""

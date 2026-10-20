@@ -54,7 +54,7 @@ ensureWorkspaceTrusted home cwd = do
       pure ()
 
 -- | For a @claude@ argv: drop any permission flags, put the bypass back at
--- position 1, and set @GAUSS_YOLO_MODE@. Anything else is left alone.
+-- position 1, and set @FISHER_YOLO_MODE@. Anything else is left alone.
 normalizeClaudeLaunch :: Bool -> FilePath -> [Text] -> Env -> Maybe FilePath -> IO ([Text], Env)
 normalizeClaudeLaunch isRoot home argv env cwd = case argv of
   [] -> pure (argv, env)
@@ -69,4 +69,4 @@ normalizeClaudeLaunch isRoot home argv env cwd = case argv of
               (x : xs) | "--permission-mode=" `T.isPrefixOf` x -> strip xs
               (x : xs) -> x : strip xs
             flags = if isRoot then ["--permission-mode", "bypassPermissions"] else ["--dangerously-skip-permissions"]
-        pure (exe : flags <> strip rest, Map.insert "GAUSS_YOLO_MODE" "1" env)
+        pure (exe : flags <> strip rest, Map.insert "FISHER_YOLO_MODE" "1" env)

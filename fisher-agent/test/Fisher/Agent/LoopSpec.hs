@@ -87,7 +87,7 @@ uuidAt n = T.justifyRight 32 '0' (T.pack (showHex (toInteger n * 0x1F2E3D * 2 ^ 
 scenarioToolsets :: PyVal -> [Text]
 scenarioToolsets sc = case get "toolsets" sc of
   Just (PList ts) -> [t | PStr t <- ts]
-  _ -> ["gauss-cli"]
+  _ -> ["fisher-cli"]
 
 scenarioConfig :: PyVal -> Text -> AgentConfig
 scenarioConfig sc _ =
@@ -142,7 +142,7 @@ spec = do
       (db, mdb) <- memorySessionDB
       pure (db, memorySnapshot mdb)
 
--- | Makes the session database for a case (given the Gauss home): the
+-- | Makes the session database for a case (given the Fisher home): the
 -- database and how to read its rows back.
 type DbFactory = FilePath -> IO (SessionDB, IO PyVal)
 
@@ -158,15 +158,15 @@ runCaseWith mkDb rec c = withSystemTempDirectory "fisher-loop" $ \tmp0 -> do
   tmp <- canonicalizePath tmp0
   let sc = field "scenario" c
       home = tmp </> "home"
-      gauss = home </> ".gauss"
+      fisher = home </> ".fisher"
       work = tmp </> "work"
-  createDirectoryIfMissing True (gauss </> "memories")
+  createDirectoryIfMissing True (fisher </> "memories")
   createDirectoryIfMissing True work
   case get "memories" sc of
-    Just (PDict kvs) -> forM_ kvs $ \(n, v) -> BS.writeFile (gauss </> "memories" </> T.unpack n) (TE.encodeUtf8 (pyStrOf v))
+    Just (PDict kvs) -> forM_ kvs $ \(n, v) -> BS.writeFile (fisher </> "memories" </> T.unpack n) (TE.encodeUtf8 (pyStrOf v))
     _ -> pure ()
   case get "config" sc of
-    Just (PStr y) -> BS.writeFile (gauss </> "config.yaml") (TE.encodeUtf8 y)
+    Just (PStr y) -> BS.writeFile (fisher </> "config.yaml") (TE.encodeUtf8 y)
     _ -> pure ()
   case get "fixture_extra" sc of
     Just (PDict kvs) -> forM_ kvs $ \(n, v) -> BS.writeFile (work </> T.unpack n) (TE.encodeUtf8 (pyStrOf v))
@@ -183,7 +183,7 @@ runCaseWith mkDb rec c = withSystemTempDirectory "fisher-loop" $ \tmp0 -> do
   agentRef <- newIORef Nothing
   readHistory <- newIORef []
   let envVars =
-        [("HOME", T.pack home), ("GAUSS_TIMEZONE", "UTC")]
+        [("HOME", T.pack home), ("FISHER_TIMEZONE", "UTC")]
           <> [("OPENROUTER_API_KEY", "sk-or-test-1234567890") | not (maybe False truthy (get "no_aux_key" sc))]
       base = testSys home envVars (\t -> modifyIORef outBuf (<> [t]))
       clock = (clock0 +) <$> readIORef offset
@@ -225,8 +225,8 @@ runCaseWith mkDb rec c = withSystemTempDirectory "fisher-loop" $ \tmp0 -> do
       tr0 = Transport (\hr _ -> respond hr) (\_ _ _ -> pure (Left ConnectionError))
       tr = maybe tr0 (`recordTransport` tr0) rec
       sys = maybe sys0 (`recordUuids` sys0) rec
-  at <- newAgentTools gauss
-  registerOfflineTools (atRegistry at) gauss
+  at <- newAgentTools fisher
+  registerOfflineTools (atRegistry at) fisher
   -- todo and memory, as a process's second agent sees them
   register (atRegistry at) todoToolDef
   register (atRegistry at) memoryToolDef
@@ -268,7 +268,7 @@ runCaseWith mkDb rec c = withSystemTempDirectory "fisher-loop" $ \tmp0 -> do
           , trSetInterrupt = \_ -> pure ()
           , trRequirements = withUnportedToolsets <$> checkToolsetRequirements (atRegistry at) }
       runner = maybe runner0 (`recordToolRunner` runner0) rec
-  (db, snapshotDb) <- mkDb gauss
+  (db, snapshotDb) <- mkDb fisher
   cache <- newModelCache
   auxState <- newAuxState
   let cfgLoad = loadConfigOrdered sys
@@ -281,7 +281,7 @@ runCaseWith mkDb rec c = withSystemTempDirectory "fisher-loop" $ \tmp0 -> do
           , envNowLocal = pure fixedTime, envPromptNow = pure fixedTime, envCwd = pure work
           , envChoice = \_ -> pure 0, envAnimate = False, envDb = Just db, envTools = runner
           , envAux = callLlm auxEnv, envAuxEnv = Just auxEnv
-          , envMeta = MetaEnv tr clock gauss cache (\_ -> pure ())
+          , envMeta = MetaEnv tr clock fisher cache (\_ -> pure ())
           , envSkin = defaultSkin, envConfig = config
           , envCallbacks =
               Callbacks
@@ -292,7 +292,7 @@ runCaseWith mkDb rec c = withSystemTempDirectory "fisher-loop" $ \tmp0 -> do
           , envPromptHook = maybe pure recordPromptHook rec
           , envWriteFiles = True, envLocalTool = maybe (\_ _ act -> act) recordLocalTool rec, envInbox = pure [] }
       cfg = scenarioConfig sc ""
-      mask t = T.replace (T.pack gauss) "<GAUSS_HOME>" (T.replace (T.pack work) "<WORK>" t)
+      mask t = T.replace (T.pack fisher) "<FISHER_HOME>" (T.replace (T.pack work) "<WORK>" t)
       takeOut = do
         o <- T.concat <$> readIORef outBuf
         writeIORef outBuf []
@@ -340,12 +340,12 @@ runCaseWith mkDb rec c = withSystemTempDirectory "fisher-loop" $ \tmp0 -> do
     shouldMatch (label "db") snap (field "db" turn)
     sid <- agentSessionId agent
     (label "session id", PStr sid) `shouldBe` (label "session id", field "session_id_after" turn)
-    let logPath = gauss </> "sessions" </> "session_20261002_045007_abc123.json"
+    let logPath = fisher </> "sessions" </> "session_20261002_045007_abc123.json"
     exists <- doesFileExist logPath
     logV <- if exists then either (const PNull) id . loads <$> BS.readFile logPath else pure PNull
     shouldMatch (label "log") logV (field "log" turn)
     when (has "memories" turn) $ do
-      let memDir = gauss </> "memories"
+      let memDir = fisher </> "memories"
       names <- sortOn id . filter (".md" `T.isSuffixOf`) . map T.pack <$> listDirectory memDir
       files <- forM names $ \n -> (,) n . PStr . TE.decodeUtf8 <$> BS.readFile (memDir </> T.unpack n)
       shouldMatch (label "memories") (PDict files) (field "memories" turn)

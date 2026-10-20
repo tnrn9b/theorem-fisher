@@ -70,7 +70,7 @@ data Machine = Machine
   , mNow :: IO UTCTime
   , mStamp :: IO String
   -- ^ The local-time stamp in startup-context file names.
-  , mGaussHome :: FilePath
+  , mFisherHome :: FilePath
   , mArxivScript :: Maybe FilePath
   -- ^ Where the arXiv helper is installed, if it is.
   , mNote :: Text -> IO ()
@@ -88,7 +88,7 @@ liveMachine home arxiv strict = do
     , mKeychain = readKeychainClaudeCredentials
     , mNow = getCurrentTime
     , mStamp = formatTime defaultTimeLocale "%Y%m%d-%H%M%S" <$> getZonedTime
-    , mGaussHome = home
+    , mFisherHome = home
     , mArxivScript = arxiv
     , mNote = TIO.hPutStrLn stderr
     }

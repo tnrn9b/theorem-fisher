@@ -1,4 +1,4 @@
--- | Upstream's forgiving input (@gauss_cli/commands.py@): onboarding words
+-- | Upstream's forgiving input (@cli/commands.py@): onboarding words
 -- typed without a slash, and near misses of the onboarding commands.
 module Fisher.Shell.Rewrite
   ( rewriteFriendlyEntry

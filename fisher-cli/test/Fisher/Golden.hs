@@ -1,4 +1,4 @@
--- | Reading the reference outputs recorded from the pinned OpenGauss by
+-- | Reading the reference outputs recorded from the pinned upstream by
 -- @tools/corpus/a1.py@, and the @<TMP>@ substitution they were written with.
 module Fisher.Golden
   ( goldenCases

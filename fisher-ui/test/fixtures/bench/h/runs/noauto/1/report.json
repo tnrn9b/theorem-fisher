@@ -3,7 +3,7 @@
     "attempts": [
         {
             "attempt": 1,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 413.1,
             "goal": "Step.Diamond.fireDiamond_of'",
             "outcome": "closed (helpers: joinFire_swap)",
@@ -26,7 +26,7 @@
         }
     ],
     "backends": {
-        "gauss": [
+        "fisher": [
             1,
             1
         ]
@@ -39,10 +39,10 @@
     "goals": [
         {
             "attempts": [
-                "gauss"
+                "fisher"
             ],
             "by_attempt": 1,
-            "by_backend": "gauss",
+            "by_backend": "fisher",
             "closed_at_s": 413.1,
             "goal": "Step.Diamond.fireDiamond_of'",
             "status": "closed"

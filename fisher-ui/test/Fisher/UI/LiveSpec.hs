@@ -145,12 +145,12 @@ kinds = map (\(_, k, _) -> k)
 schema :: [Text]
 schema = ledgerSchema <> ["CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY, parent_session_id TEXT)"]
 
--- | A GAUSS_HOME, a project directory and the live server over them, with
+-- | A FISHER_HOME, a project directory and the live server over them, with
 -- a fake fisher whose run is the given shell text and a 1 s stop grace.
 withLive :: Text -> (FilePath -> FilePath -> LiveEnv -> Application -> IO a) -> IO a
 withLive body k = withSystemTempDirectory "fisher-ui-live" $ \tmp0 -> do
   tmp <- canonicalizePath tmp0
-  let home = tmp </> "gauss"
+  let home = tmp </> "fisher"
       proj = tmp </> "proj"
       fake = tmp </> "fake-fisher"
   mapM_ (createDirectoryIfMissing True) [home, proj]
@@ -286,7 +286,7 @@ spec = describe "Fisher.UI.Api.Live" $ do
       code `shouldBe` 204
 
   it "stops a run that ignores SIGTERM after the grace, its children too, and takes a message first" $
-    withLive "trap '' TERM; { hdr; ev 1 tool_start '{\"name\":\"terminal\"}'; } | sql; sleep 300 & echo $! > \"$GAUSS_HOME/kid.pid\"; wait; wait; wait" $ \home proj _ app -> do
+    withLive "trap '' TERM; { hdr; ev 1 tool_start '{\"name\":\"terminal\"}'; } | sql; sleep 300 & echo $! > \"$FISHER_HOME/kid.pid\"; wait; wait; wait" $ \home proj _ app -> do
       tag <- startRun app proj
       sid <- sessionOf app tag
       -- a message to the compression child goes to the root's inbox
@@ -358,7 +358,7 @@ spec = describe "Fisher.UI.Api.Live" $ do
       kinds rest `shouldSatisfy` ((== "end") . last)
 
   it "stops a run's grandchild that left its process group for a session of its own" $
-    withLive "trap '' TERM; { hdr; ev 1 tool_start '{\"name\":\"t\"}'; } | sql; perl -MPOSIX -e 'POSIX::setsid(); open(F, \">$ENV{GAUSS_HOME}/gkid.pid\"); print F $$; close F; exec \"sleep\", \"300\"' & wait; wait" $ \home proj _ app -> do
+    withLive "trap '' TERM; { hdr; ev 1 tool_start '{\"name\":\"t\"}'; } | sql; perl -MPOSIX -e 'POSIX::setsid(); open(F, \">$ENV{FISHER_HOME}/gkid.pid\"); print F $$; close F; exec \"sleep\", \"300\"' & wait; wait" $ \home proj _ app -> do
       tag <- startRun app proj
       sid <- sessionOf app tag
       kid <- waitPid (home </> "gkid.pid")

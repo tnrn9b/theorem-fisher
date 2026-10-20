@@ -1,4 +1,4 @@
--- | @GET@ and @POST /api/settings@ over a scratch GAUSS_HOME: config.yaml
+-- | @GET@ and @POST /api/settings@ over a scratch FISHER_HOME: config.yaml
 -- through Fisher's config module, credentials in .env shown only as their
 -- last four characters, and never in the server's output.
 module Fisher.UI.SettingsSpec (spec) where
@@ -50,12 +50,11 @@ fixtureEnv = "# keys for the fixture\nFOO=1\nOPENROUTER_API_KEY=sk-fixture-old-0
 fixtureConfig :: B.ByteString
 fixtureConfig =
   "model:\n  default: example/model-a\n  provider: openrouter\n\
-  \fisher:\n  context: clm\n\
-  \gauss:\n  autoformalize:\n    model: example/model-b\n"
+  \fisher:\n  context: clm\n  autoformalize:\n    model: example/model-b\n"
 
 withHome :: Bool -> (FilePath -> IO a) -> IO a
 withHome seeded k = withSystemTempDirectory "fisher-ui-settings" $ \tmp -> do
-  let home = tmp </> "gauss"
+  let home = tmp </> "fisher"
   createDirectoryIfMissing True home
   if seeded
     then B.writeFile (home </> "config.yaml") fixtureConfig >> B.writeFile (home </> ".env") fixtureEnv
@@ -188,7 +187,7 @@ spec = describe "/api/settings" $ do
     configAt home ["model", "default"] `shouldReturn` Just (A.String "example/model-c")
     configAt home ["model", "provider"] `shouldReturn` Just (A.String "anthropic")
     configAt home ["fisher", "context"] `shouldReturn` Just (A.String "rlm")
-    configAt home ["gauss", "autoformalize", "model"] `shouldReturn` Just (A.String "")
+    configAt home ["fisher", "autoformalize", "model"] `shouldReturn` Just (A.String "")
     (_, v2, _) <- getS home
     key "provider" v2 `shouldBe` A.String "anthropic"
     key "contextStrategy" v2 `shouldBe` A.String "rlm"

@@ -1,7 +1,7 @@
--- | @gauss status [--all] [--deep]@: every section upstream prints, from
+-- | @fisher status [--all] [--deep]@: every section upstream prints, from
 -- the environment and keys through the auth providers, terminal backend,
 -- messaging, gateway service, scheduled jobs and sessions. Ported from
--- @gauss_cli/status.py@. Like upstream it is not read-only: loading the
+-- upstream @cli/status.py@. Like upstream it is not read-only: loading the
 -- config makes the home, and the Codex check takes the auth lock and may
 -- migrate or refresh Codex tokens.
 module Fisher.Cli.Status
@@ -9,7 +9,6 @@ module Fisher.Cli.Status
   , statusMain
   , showStatus
   , sysStyle
-  , gatewayServiceName
   , redactKey
   , formatIsoTimestamp
   ) where
@@ -20,19 +19,16 @@ import qualified Data.ByteString as BS
 import Data.Maybe (fromMaybe, isJust)
 import Data.Text (Text)
 import qualified Data.Text as T
-import qualified Data.Text.Encoding as TE
-import System.Directory (canonicalizePath, doesFileExist)
+import System.Directory (doesFileExist)
 import System.FilePath ((</>))
 
 import Fisher.Cli.AuthArgs
 import Fisher.LLM.Auth.Codex (getCodexAuthStatus)
 import Fisher.LLM.Auth.Config (loadConfigPy)
 import Fisher.LLM.Auth.Env (getEnvValue, loadDotenvIntoSys)
-import Fisher.LLM.Auth.Error (AuthError, cliName)
-import Fisher.LLM.Auth.Nous (getNousAuthStatus)
+import Fisher.LLM.Auth.Error (AuthError (..), cliName, formatAuthError)
 import Fisher.LLM.Auth.Registry (openrouterModelsUrl, providerLabel)
 import Fisher.LLM.Auth.Resolve (resolveProvider, resolveRequestedProvider)
-import Fisher.LLM.Auth.Sha256 (sha256Hex)
 import Fisher.LLM.Auth.Util (Client (..), formatLocalTime, parseIsoTimestamp, send)
 import Fisher.LLM.Sys
 import Fisher.Paths (envPathIn)
@@ -47,7 +43,7 @@ data StatusInfo = StatusInfo
   }
   deriving (Eq, Show)
 
--- | @gauss status ...@ from its arguments: the home's @.env@ loaded as
+-- | @fisher status ...@ from its arguments: the home's @.env@ loaded as
 -- the CLI does at start-up, then argparse, then the report.
 statusMain :: StatusInfo -> Sys -> [Text] -> IO Int
 statusMain info sys args = do
@@ -62,12 +58,12 @@ statusMain info sys args = do
 sysStyle :: Sys -> IO Style
 sysStyle sys = do
   let envT k = sysGetEnv sys k
-      truthyEnv k = maybe False ((`elem` ["1", "true", "yes", "on"]) . T.toLower . T.strip) <$> envT k
-  forcePlain <- truthyEnv "GAUSS_FORCE_PLAIN_OUTPUT"
+      truthyEnv k = maybe False ((`elem` ["1", "true", "yes", "on"]) . T.toLower . T.strip) <$> sysGetEnv sys k
+  forcePlain <- truthyEnv "FISHER_FORCE_PLAIN_OUTPUT"
   noColor <- envT "NO_COLOR"
   tty <- sysStdoutTty sys
   term <- maybe "" (T.toLower . T.strip) <$> envT "TERM"
-  forceAscii <- truthyEnv "GAUSS_FORCE_ASCII"
+  forceAscii <- truthyEnv "FISHER_FORCE_ASCII"
   ioEnc <- envT "PYTHONIOENCODING"
   locs <- mapM envT ["LC_ALL", "LC_CTYPE", "LANG"]
   let loc = case [l | Just l <- locs, not (T.null l)] of
@@ -97,19 +93,6 @@ formatIsoTimestamp sys = \case
         Just t -> (`formatLocalTime` t) <$> sysTimeZoneAt sys t
   _ -> pure "(unknown)"
 
--- | @gateway.get_service_name()@: @gauss-gateway@ for the default home,
--- else suffixed with the first 8 hex digits of the resolved home's SHA-256.
-gatewayServiceName :: Sys -> IO Text
-gatewayServiceName sys = do
-  env <- sysGetEnv sys "GAUSS_HOME"
-  let dflt = sysHome sys </> ".gauss"
-  home <- canonicalizePath (maybe dflt T.unpack env)
-  dflt' <- canonicalizePath dflt
-  pure $
-    if home == dflt'
-      then "gauss-gateway"
-      else "gauss-gateway-" <> T.take 8 (sha256Hex (TE.encodeUtf8 (T.pack home)))
-
 readJsonFile :: FilePath -> IO (Maybe (Either () PyVal))
 readJsonFile p = do
   exists <- doesFileExist p
@@ -129,7 +112,7 @@ showStatus info sys showAll deep = do
       c codes t = color st codes t
       check ok = if ok then c [green] "✓" else c [red] "✗"
       header t = p "" >> p (c [cyan, bold] ("◆ " <> t))
-      title = "Gauss Status" :: Text
+      title = "Fisher Status" :: Text
       centred = let w = 55; n = T.length title; l = (w - n) `div` 2 in T.replicate l " " <> title <> T.replicate (w - n - l) " "
       envOr k = fromMaybe "" <$> sysGetEnv sys k
       valueOr k = fromMaybe "" <$> getEnvValue sys k
@@ -141,7 +124,7 @@ showStatus info sys showAll deep = do
   header "Environment"
   p ("  Project:      " <> siProject info)
   p ("  Python:       " <> siPython info)
-  envExists <- doesFileExist (envPathIn (sysGaussHome sys))
+  envExists <- doesFileExist (envPathIn (sysFisherHome sys))
   p ("  .env file:    " <> check envExists <> " " <> (if envExists then "exists" else "not found"))
   cfg <- either (\(_ :: SomeException) -> PDict []) id <$> try (loadConfigPy sys)
   let modelLabel = case get "model" cfg of
@@ -172,22 +155,10 @@ showStatus info sys showAll deep = do
   keyLine "Anthropic" anthropicValue
 
   header "Auth Providers"
-  statuses <- try ((,) <$> getNousAuthStatus sys <*> getCodexAuthStatus sys)
-  let (nous, codex) = either (\(_ :: SomeException) -> (PDict [], PDict [])) id statuses
+  statuses <- try (getCodexAuthStatus sys)
+  let codex = either (\(_ :: SomeException) -> PDict []) id statuses
       flag k d = maybe False truthy (get k d)
       notLoggedIn = "not logged in (run: " <> cliName <> " model)"
-      nousIn = flag "logged_in" nous
-  p ("  " <> T.justifyLeft 12 ' ' "Nous Portal" <> "  " <> check nousIn <> " " <> (if nousIn then "logged in" else notLoggedIn))
-  when nousIn $ do
-    let portal = case get "portal_base_url" nous of
-          Just v | truthy v -> pyStrOf v
-          _ -> "(unknown)"
-    accessExp <- formatIsoTimestamp sys (get "access_expires_at" nous)
-    keyExp <- formatIsoTimestamp sys (get "agent_key_expires_at" nous)
-    p ("    Portal URL: " <> portal)
-    p ("    Access exp: " <> accessExp)
-    p ("    Key exp:    " <> keyExp)
-    p ("    Refresh:    " <> (if flag "has_refresh_token" nous then "yes" else "no"))
   let codexIn = flag "logged_in" codex
   p ("  " <> T.justifyLeft 12 ' ' "OpenAI Codex" <> "  " <> check codexIn <> " " <> (if codexIn then "logged in" else notLoggedIn))
   forM_ (get "auth_store" codex) $ \v -> when (truthy v) (p ("    Auth file:  " <> pyStrOf v))
@@ -247,83 +218,52 @@ showStatus info sys showAll deep = do
         status = if T.null home then status0 else status0 <> " (home: " <> home <> ")"
     p ("  " <> T.justifyLeft 12 ' ' name <> "  " <> check (not (T.null t)) <> " " <> status)
 
+  -- Upstream's messaging gateway is not ported, and no Fisher command
+  -- installs a service for it, so there is nothing to probe.
   header "Gateway Service"
-  gateway <-
-    if "linux" `T.isPrefixOf` sysPlatform sys
-      then do
-        svc <- either (\(_ :: SomeException) -> "gauss-gateway") id <$> try (gatewayServiceName sys)
-        sysRun sys ["systemctl", "--user", "is-active", svc] >>= \case
-          Left err -> pure (Left ("FileNotFoundError: " <> err <> ": 'systemctl'"))
-          Right r -> do
-            let active = T.strip (rrStdout r) == "active"
-            p ("  Status:       " <> check active <> " " <> (if active then "running" else "stopped"))
-            p "  Manager:      systemd (user)"
-            pure (Right ())
-      else
-        if sysPlatform sys == "darwin"
-          then
-            sysRun sys ["launchctl", "list", "ai.gauss.gateway"] >>= \case
-              Left err -> pure (Left ("FileNotFoundError: " <> err <> ": 'launchctl'"))
-              Right r -> do
-                let loaded = rrCode r == 0
-                p ("  Status:       " <> check loaded <> " " <> (if loaded then "loaded" else "not loaded"))
-                p "  Manager:      launchd"
-                pure (Right ())
-          else do
-            p ("  Status:       " <> c [dim] "N/A")
-            p "  Manager:      (not supported on this platform)"
-            pure (Right ())
-  case gateway of
-    Left exc -> do
-      -- Upstream does not catch a missing systemctl/launchctl: the
-      -- traceback ends the command with status 1.
-      p "Traceback (most recent call last):"
-      p "  File \"gauss_cli/status.py\", line 286, in show_status"
-      p "    result = subprocess.run("
-      p exc
-      pure 1
-    Right () -> do
-      header "Scheduled Jobs"
-      jobs <- readJsonFile (sysGaussHome sys </> "cron" </> "jobs.json")
-      p $ "  Jobs:         " <> case jobs of
-        Nothing -> "0"
-        Just (Right d@(PDict _)) -> case fromMaybe (PList []) (get "jobs" d) of
-          PList js | all isDict js ->
-            let enabled = [j | j <- js, maybe True truthy (get "enabled" j)]
-             in tshow (length enabled) <> " active, " <> tshow (length js) <> " total"
-          PDict [] -> "0 active, 0 total"
-          PStr "" -> "0 active, 0 total"
-          _ -> "(error reading jobs file)"
-        _ -> "(error reading jobs file)"
+  p ("  Status:       " <> c [dim] "not part of Fisher")
 
-      header "Sessions"
-      sessions <- readJsonFile (sysGaussHome sys </> "sessions" </> "sessions.json")
-      p $ "  Active:       " <> case sessions of
-        Nothing -> "0"
-        Just (Right (PDict kvs)) -> tshow (length kvs) <> " session(s)"
-        Just (Right (PList xs)) -> tshow (length xs) <> " session(s)"
-        Just (Right (PStr s)) -> tshow (T.length s) <> " session(s)"
-        _ -> "(error reading sessions file)"
+  header "Scheduled Jobs"
+  jobs <- readJsonFile (sysFisherHome sys </> "cron" </> "jobs.json")
+  p $ "  Jobs:         " <> case jobs of
+    Nothing -> "0"
+    Just (Right d@(PDict _)) -> case fromMaybe (PList []) (get "jobs" d) of
+      PList js | all isDict js ->
+        let enabled = [j | j <- js, maybe True truthy (get "enabled" j)]
+         in tshow (length enabled) <> " active, " <> tshow (length js) <> " total"
+      PDict [] -> "0 active, 0 total"
+      PStr "" -> "0 active, 0 total"
+      _ -> "(error reading jobs file)"
+    _ -> "(error reading jobs file)"
 
-      when deep $ do
-        header "Deep Checks"
-        orKey <- envOr "OPENROUTER_API_KEY"
-        when (not (T.null orKey)) $ do
-          r <- try (send sys (Client ViaHttpx [] 10) "GET" openrouterModelsUrl [("Authorization", "Bearer " <> orKey)] NoBody)
-          case r of
-            Right resp -> do
-              let ok = aStatus resp == 200
-              p ("  OpenRouter:   " <> check ok <> " " <> (if ok then "reachable" else "error (" <> tshow (aStatus resp) <> ")"))
-            Left (e :: SomeException) -> p ("  OpenRouter:   " <> check False <> " error: " <> T.pack (show e))
-      -- The 127.0.0.1:18789 port probe of --deep needs a socket, which
-      -- 'Sys' does not offer; it is left out.
+  header "Sessions"
+  sessions <- readJsonFile (sysFisherHome sys </> "sessions" </> "sessions.json")
+  p $ "  Active:       " <> case sessions of
+    Nothing -> "0"
+    Just (Right (PDict kvs)) -> tshow (length kvs) <> " session(s)"
+    Just (Right (PList xs)) -> tshow (length xs) <> " session(s)"
+    Just (Right (PStr s)) -> tshow (T.length s) <> " session(s)"
+    _ -> "(error reading sessions file)"
 
-      p ""
-      p (c [dim] (T.replicate 60 "─"))
-      p (c [dim] ("  Run '" <> cliName <> " doctor' for detailed diagnostics"))
-      p (c [dim] ("  Run '" <> cliName <> " setup' to configure"))
-      p ""
-      pure 0
+  when deep $ do
+    header "Deep Checks"
+    orKey <- envOr "OPENROUTER_API_KEY"
+    when (not (T.null orKey)) $ do
+      r <- try (send sys (Client ViaHttpx [] 10) "GET" openrouterModelsUrl [("Authorization", "Bearer " <> orKey)] NoBody)
+      case r of
+        Right resp -> do
+          let ok = aStatus resp == 200
+          p ("  OpenRouter:   " <> check ok <> " " <> (if ok then "reachable" else "error (" <> tshow (aStatus resp) <> ")"))
+        Left (e :: SomeException) -> p ("  OpenRouter:   " <> check False <> " error: " <> T.pack (show e))
+  -- The 127.0.0.1:18789 port probe of --deep needs a socket, which
+  -- 'Sys' does not offer; it is left out.
+
+  p ""
+  p (c [dim] (T.replicate 60 "─"))
+  p (c [dim] ("  Run '" <> cliName <> " doctor' for detailed diagnostics"))
+  p (c [dim] ("  Run '" <> cliName <> " setup' to configure"))
+  p ""
+  pure 0
   where
     tshow :: Show a => a -> Text
     tshow = T.pack . show
@@ -337,9 +277,14 @@ effectiveProviderLabel :: Sys -> IO Text
 effectiveProviderLabel sys = do
   requested <- resolveRequestedProvider sys Nothing
   r <- try (resolveProvider sys (Just requested) Nothing Nothing)
-  let effective0 = case r of
-        Right e -> e
-        Left (_ :: AuthError) -> if T.null requested then "auto" else requested
-  base <- getEnvValue sys "OPENAI_BASE_URL"
-  let effective = if effective0 == "openrouter" && maybe False (not . T.null) base then "custom" else effective0
-  pure (providerLabel (Just effective))
+  case r of
+    -- A provider Fisher removed (named, or active in auth.json): the
+    -- removal message, not a label.
+    Left e | aeCode e == Just "provider_removed" -> pure (formatAuthError e)
+    _ -> do
+      let effective0 = case r of
+            Right e -> e
+            Left (_ :: AuthError) -> if T.null requested then "auto" else requested
+      base <- getEnvValue sys "OPENAI_BASE_URL"
+      let effective = if effective0 == "openrouter" && maybe False (not . T.null) base then "custom" else effective0
+      pure (providerLabel (Just effective))

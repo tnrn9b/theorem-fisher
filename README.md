@@ -1,11 +1,54 @@
-# Fisher
+# Theorem Fisher
 
-This is a workflow orchestrator for formal methods. The plan is the "OpenGauss Haskell Rewrite Plan"
-doc.
+Theorem Fisher (Fisher for short) is a Haskell rewrite of a Lean workflow
+orchestrator: the upstream repository named in `UPSTREAM`, pinned there at
+one commit. The plan is the Haskell rewrite plan doc.
 
-The executable is `fisher`. It reads and writes the same files as OpenGauss
-(`~/.gauss/config.yaml`, `~/.gauss/.env`, `.gauss/project.yaml`, moved by
-`GAUSS_HOME`), so the two can be used on the same machine and projects.
+New here? Start with `docs/quickstart.md` (the terminal) or
+`docs/quickstart-ui.md` (the web app).
+
+The executable is `fisher`. It keeps upstream's file formats (`config.yaml`,
+`.env`, `auth.json`, `state.db` in the home; `project.yaml` in a project)
+under Fisher's own names.
+
+### Names
+
+| | Fisher |
+| --- | --- |
+| home directory | `$FISHER_HOME`, else `~/.fisher` |
+| project directory | `.fisher/project.yaml` |
+| environment variables | `FISHER_X` |
+| config root | `fisher:` (keys `fisher.<path>`) |
+| native backend | `fisher` |
+| default toolset | `fisher-cli` (and `fisher-X` for the platform toolsets) |
+
+Fisher reads and writes only these names. There is no fallback to the names
+the product had before the rename: a home, project directory, environment
+variable, config section, backend or toolset under a previous name is not
+read. A machine whose only home is a previous one behaves as a fresh
+install (no config, no key) and says how to set up; a project whose only
+project directory is a previous one is not a Fisher project until
+`fisher project init` makes `.fisher`; a previous backend name on the
+command line is refused with the list of valid backends. When Fisher sets
+a variable for a child process (a managed workflow, a session, a tool), it
+sets only `FISHER_*`. A save of `config.yaml` writes only `fisher:`; any other
+root section is kept as any unknown key is.
+
+To keep a home from before the rename, move your previous home directory to
+`~/.fisher`, rename its config root to `fisher:` (the first key of
+`config.yaml`), and in its `.env` rename each variable's previous prefix to
+`FISHER_` (keys such as `OPENROUTER_API_KEY` stay as they are). In each
+project, rename the previous project directory (the hidden directory that
+holds `project.yaml`) to `.fisher`, or run `fisher project init` there;
+until then `fisher` says it found no active project and points at the
+directory to rename. In the moved home, `autoformalize/` may still hold the
+managed state of the native backend under the previous name (a directory
+named after it, whose `managed/` holds a home directory under the previous
+name). Fisher keeps its own under `autoformalize/fisher/` and never reads
+the old one, so it can be deleted.
+
+Run directories are data: bench reports and events, and the UI, show a run
+under the backend name it recorded, also when that is the previous one.
 
 ## Layout
 
@@ -14,7 +57,7 @@ The executable is `fisher`. It reads and writes the same files as OpenGauss
 | `fisher-core` | config defaults, load, merge, save, `set` and migration; `.env`; the project model; the `/project` command; shlex; terminal styling; `state.db` (`Fisher.Store`); the part of rich the shell draws with (`Fisher.Rich.*`); difflib; Python's `json.dumps` and float formatting; YAML written in a given key order |
 | `fisher-workflow` | backend and auth-mode resolution; local Claude Code and Codex auth detection; workflow command parsing; staging of the managed Lean assets, credentials, MCP and Codex config and startup context; the launch plan (argv, cwd, environment) for each workflow and for `/chat` |
 | `fisher-swarm` | sessions behind a PTY or on pipes, held in an STM task table; stream-json progress; attach, detach on Ctrl-] and the folder-trust answer; process-group cancel; the swarm table and detail views |
-| `fisher-llm` | the LLM clients: OpenAI chat completions, Anthropic messages and Codex responses (request building, message preparation and cache breakpoints, SSE, normalization to the stored assistant message, the SDKs' retry rules and error text); providers and credentials (`auth.json`, Nous Portal and Codex OAuth, Claude Code tokens, runtime provider resolution); `Sys`, the effects record the credential code runs on, and `Replay`, which replays upstream's recorded runs through it |
+| `fisher-llm` | the LLM clients: OpenAI chat completions, Anthropic messages and Codex responses (request building, message preparation and cache breakpoints, SSE, normalization to the stored assistant message, the SDKs' retry rules and error text); providers and credentials (`auth.json`, Codex OAuth, Claude Code tokens, runtime provider resolution); `Sys`, the effects record the credential code runs on, and `Replay`, which replays upstream's recorded runs through it |
 | `fisher-tools` | the agent's tools: the registry and toolsets, the four file tools (read_file, write_file, patch, search_files) on upstream's shell file layer, fuzzy matching, V4A patches, secret redaction, the read-loop guard; the sandboxes (local oneshot and persistent, docker, ssh), their `TERMINAL_*` config and a per-task cache |
 | `fisher-lean` | the Lean language-server client (leanclient's aio client): `lake serve` over a process group, documents and versions, `waitForDiagnostics` barriers, stale-import rebuilds, the file watcher, scratch slots, Lean RPC and widgets; all 22 of lean-lsp-mcp's tools on it (the 17 LSP-backed ones, local search and the four remote search services), and its MCP server (`fisher lean-mcp`), which managed workflows launch |
 | `fisher-mcp` | the MCP client: `mcp_servers` from config, stdio and streamable HTTP transports, JSON-RPC sessions, tools and the four resource/prompt helpers in the registry, output-schema checks, sampling, status, shutdown |
@@ -23,8 +66,10 @@ The executable is `fisher`. It reads and writes the same files as OpenGauss
 | `fisher-ui` | `fisher ui`: the local web app's server (Warp on 127.0.0.1, the token cookie, Host and Origin rules, the JSON and event-stream routes over sessions, step logs, context, search runs, benchmarks and settings, the children it starts) with the React page from `ui/` embedded; see `docs/ui.md` |
 
 `fisher-core/data/` and `fisher-workflow/data/search_arxiv.py` are generated
-from the pinned upstream by `tools/gen-defaults.py /path/to/OpenGauss`; do
-not edit them by hand.
+from the pinned upstream by `tools/gen-defaults.py /path/to/upstream-checkout`,
+which applies the rename on the way (`tools/gen_defaults_rename.py`: the text,
+the `fisher:` config root, `fisher-cli`, `FISHER_*`, the FISHER banner logo)
+and leaves out the removed Nous Portal provider; do not edit them by hand.
 
 ## Building
 
@@ -71,12 +116,12 @@ runs `fisher plan` and `fisher launch` end to end against fake `git`,
 shell: banner, `/help`, `/skin`, `/project`, a workflow into the swarm,
 detach, `/swarm` and `/quit`, then the one-shot subcommands.
 `tools/e2e-b2.sh` runs `fisher tools-check` on a throwaway project and
-`GAUSS_HOME`: the file tools on the local sandbox (oneshot and persistent),
+`FISHER_HOME`: the file tools on the local sandbox (oneshot and persistent),
 an MCP server over stdio and one over HTTP from `config.yaml`, a failing
 server, docker when a daemon answers, and a real npm MCP server
 (`@modelcontextprotocol/server-filesystem`) when `npx` is installed.
-`tools/e2e-b3.sh` runs real sessions against the provider in `~/.gauss`
-(copied into a throwaway `GAUSS_HOME`; a few short requests): `chat -Q -q`
+`tools/e2e-b3.sh` runs real sessions against the provider in `~/.fisher`
+(copied into a throwaway `FISHER_HOME`; a few short requests): `chat -Q -q`
 and `chat -q` with no tools, `read_file`, `search_files` and `patch`, a
 resumed session, plain text in the shell, then `fisher replay` on each, and
 one log with a changed answer that replay must refuse.
@@ -98,7 +143,7 @@ stages a managed `/prove` for claude-code with `fisher plan`, runs that
 child headless and checks it called the Lean tools on Fisher's server.
 
 `tools/bench-c3.sh` is the C3 benchmark, run on demand: the Lean
-workflows on 60 pinned goals per backend (claude-code, gauss), scored
+workflows on 60 pinned goals per backend (claude-code, fisher), scored
 outside the agent, with a report (`tools/bench/c3/`: `prepare.py` pins and
 builds the goals, `run.py` runs one backend, `score.py` judges a proof,
 `rescore.py` scores a finished run again, `report.py` writes the report).
@@ -115,7 +160,7 @@ result and checks the replay reports each offline step as different.
 
 Every session of Fisher's agent (`fisher chat -q`, plain text in the shell)
 writes a replay log, one JSONL file per session in
-`$GAUSS_HOME/fisher/replays/SESSION_ID.jsonl`: the agent's configuration,
+`$FISHER_HOME/fisher/replays/SESSION_ID.jsonl`: the agent's configuration,
 the environment it read, every HTTP exchange, tool call and result, files
 the read tracker saw, the built system prompt, uuids, and each turn's input
 and outcome. Keys are written masked (first 8 and last 4 characters). A
@@ -176,7 +221,7 @@ fisher chat -q "..." --context clm     # one turn under CLM
 fisher --context clm                   # the shell's native sessions
 ```
 
-The context file and its backup are `$GAUSS_HOME/fisher/ctx/<session>/
+The context file and its backup are `$FISHER_HOME/fisher/ctx/<session>/
 context.txt` and `context.prev.txt`, with `state.json` beside them;
 `--resume` picks the live context up from there, while `state.db` keeps
 the full transcript. The prompt section is added to the system prompt,
@@ -230,7 +275,7 @@ tools/release.sh test                  # or any of the stages on their own
   see them fail, and puts them back (it says NOT RESTORED if it could not).
 - `e2e`: the end-to-end checks that need no paid model or public service:
   `e2e-a2`, `e2e-a3`, `e2e-b2` and `e2e-c1`. The live ones (`e2e-b3`,
-  `e2e-b4`, `e2e-c2`, `gate-a3`, `gate-c2`, `e2e-e1`, `e2e-e2`) are run by
+  `e2e-b4`, `e2e-c2`, `gate-c2`, `e2e-e1`, `e2e-e2`) are run by
   hand.
 - `package`: `dist/fisher-VERSION-macos-arm64.tar.gz` (the binary, README,
   LICENSE, CHANGELOG and UPSTREAM) with a `.sha256`. The tarball is
@@ -248,20 +293,46 @@ checks.
 
 ## Reference outputs from upstream
 
-`tools/corpus/a1.py` runs the pinned OpenGauss over fixed inputs and records
+`tools/corpus/a1.py` runs the pinned upstream over fixed inputs and records
 what it does: config load, save and `set`, `.env` parsing and updates,
 manifest loading (37 manifests), `/project` transcripts (16), the doctor's
 managed-workflow section (26 setups) and `config migrate` (13). The JSON
 lives in `fisher-*/test/golden/a1/`, with scratch paths written as `<TMP>`,
 and the golden specs require Fisher to reproduce it exactly. To re-record,
-with a Python 3.11+ that has OpenGauss installed (`pip install -e`):
+with a Python 3.11+ that has upstream installed (`pip install -e`):
 
 ```
-python tools/corpus/a1.py /path/to/OpenGauss OUTDIR
+UPSTREAM_CLI=/path/to/venv/bin/<upstream program> \
+  python tools/corpus/a1.py /path/to/upstream-checkout OUTDIR
 ```
 
 The checkout must be at the commit in `UPSTREAM`; the script refuses
-otherwise. Recording twice gives byte-identical files.
+otherwise. Recording twice gives byte-identical files. Every recorder under
+`tools/corpus/` takes the upstream program from `UPSTREAM_CLI`, which is
+required (there is no default name; in-process recorders use its basename
+as the program name), and builds upstream's own names (its package, modules,
+classes, environment variables and directories) at run time from the
+repository name in `UPSTREAM` (`tools/corpus/upstream_names.py`). What they
+write goes through the same rename as `tools/gen-defaults.py`, so the
+recordings say Fisher's names. Upstream still has the Nous Portal provider,
+which Fisher removed: the recorders that meet it (B1 requests and
+credentials, B3, B4, E1, E2) pass what they write through
+`tools/corpus/post.py`, which drops its cases, menu entries, status line and
+login options, renumbers the menus and the typed answers, rewrites
+upstream's OpenRouter referer to Fisher's `https://fisher.invalid`, and
+replaces the gateway service probe in `status` (Fisher has no gateway) with
+the line Fisher prints, so a
+re-record reproduces the committed goldens on these points. A recording
+that still mentions Nous after that stops with an error. Checked against
+the pinned upstream: B1 requests, responses, SDK, prepare, resolve, login
+and logout, E2 schedules, croniter and tool, and B3 aux, metadata and
+prompt re-record byte for byte. What still differs is not about Nous or the
+referer: the program name is one letter longer than upstream's, so
+argparse continuation indents and the padding of Rich titles in `status`,
+`setup` and `cron` help are laid out the way Fisher prints them, a few B1
+`setup` and `model` lines show the home as `<FISHER_HOME>` where the
+recording says `~/.fisher`, and timings, token estimates and spinner frames
+vary from run to run.
 
 `tools/corpus/a2.py` does the same for A2: the staged files and launch
 request of every workflow and `/chat` setup (fake `git`, `uvx`, `rg`,
@@ -277,20 +348,12 @@ table (`repl.json`), the friendly and forgiving rewrites with difflib
 (`dispatch.json`), skins, the welcome banner at each width, 640 random rich
 renders, and `sessions`, `config show` and `config edit` over a fixture
 `state.db` on a fixed clock (`subcommands.json`). Scratch roots have fixed
-lengths (100 characters, 90 for `GAUSS_HOME`) so widths reproduce; paths
+lengths (100 characters, 90 for upstream's home) so widths reproduce; paths
 are masked as `<TMP>`, or `<TMP:k>` where an ellipsis cut one short.
 
-The A3 gate (switching between `gauss` and `fisher` needs no edits) runs in
-two halves. `tools/corpus/a3_gate.py make ROOT`, with upstream's own `gauss`,
-builds a full state (setup's config, `config set` values, `.env`, a user
-skin, a project, four sessions) and records what gauss shows of it.
-`tools/gate-a3.sh IN.tgz OUT.tgz` takes that state to fisher, records the
-same views and the shell, checks no file was changed, then changes the
-state with fisher (`config set`, `sessions rename` and `delete`, `project
-init`) and records again; `a3_gate.py views ROOT` reads the result back with
-gauss. At the last run every view matched apart from the install path and
-the `fisher` hints, neither side changed a file it found, and the config
-diff after fisher's edits was exactly the two values set.
+The A3 gate, which checked that upstream and Fisher could share one home and
+project, was retired with the clean break: Fisher no longer reads upstream's
+names, so there is no shared state to check.
 
 `tools/corpus/b1.py` records B1's LLM layer through upstream's own call
 paths with the HTTP transport mocked: the exact request of every wire format
@@ -365,8 +428,8 @@ printed line, result, raise and `state.db` row; tool calls, parallel tools,
 retries and fallback, invalid responses, length and context-limit errors,
 compression, interrupts, reasoning, prefill, the iteration limit). Browser
 and web tools are switched off; file tools run for real on a fixture tree.
-`tools/corpus/b3_cli.py` records ten `gauss chat -q` and `-Q` runs through
-`gauss_cli.main` with the same mocks (`fisher-cli/test/golden/b3/cli.json`):
+`tools/corpus/b3_cli.py` records ten upstream `chat -q` and `-Q` runs through
+its CLI main with the same mocks (`fisher-cli/test/golden/b3/cli.json`):
 stdout at 60 columns with the banner, the exit code, requests and session
 rows.
 
@@ -459,14 +522,14 @@ steps, `tools/e2e-c2.sh` matched upstream on all 54 calls, and the other
 suites were unchanged (their upstream recordings run with
 `FISHER_LEAN_MCP=uvx`), with no warnings.
 
-C3 adds a native backend, `gauss.autoformalize.backend: fisher` (the old name `gauss` still selects it): the managed
+C3 adds a native backend, `fisher.autoformalize.backend: fisher`: the managed
 workflows run on `fisher chat` (Fisher's own agent loop) with what the
 claude-code backend gets, which is the lean4 skill and the workflow's
 command doc (inlined in a system prompt file, where Claude Code would expand
 the slash command), the Lean MCP server (`--mcp-config`) and the same Opus.
 The model goes through OpenRouter (`anthropic/claude-opus-4.6`) by default;
-`gauss.autoformalize.native_provider: anthropic` (or
-`GAUSS_AUTOFORMALIZE_NATIVE_PROVIDER`) takes a Console key or token
+`fisher.autoformalize.native_provider: anthropic` (or
+`FISHER_AUTOFORMALIZE_NATIVE_PROVIDER`) takes a Console key or token
 instead, since a Claude subscription login is served to Claude Code only.
 The tools are the `fisher-lean` toolset: files, terminal, web search and the
 MCP server's. `fisher chat` gained the flags a headless run needs: `-p`,
@@ -485,23 +548,23 @@ changed, and `#print axioms` shows only propext, Classical.choice and
 Quot.sound (TWISTED goals may also use native_decide, which Lean 4.33 makes
 one axiom per use). Every run is 40 turns and 20 minutes at most.
 
-The C3 gate (gauss solves at least as many as claude-code) held on 3 Oct
+The C3 gate (fisher solves at least as many as claude-code) held on 3 Oct
 2026, `/prove`, 56 of 60 each: miniF2F 36/40 each (the same four missed),
-TWISTED 20/20 each; median 116 s per goal for gauss against 333 s.
+TWISTED 20/20 each; median 116 s per goal for fisher against 333 s.
 `tools/bench/c3/gate-report.md` has every goal. Caveats: claude-code's
 first 52 goals were scored during the run by an older scorer (stricter on
 added lines, without the type check; its files were later overwritten, so
-they could not be scored again), which can only have helped it; 22 gauss
+they could not be scored again), which can only have helped it; 22 fisher
 goals (OpenRouter credits ran out) and 4 claude-code goals (its login
 dropped) were run again; and the scorer was fixed after the run to let a
-term-mode proof drop the statement's trailing `by`, which turned gauss's
+term-mode proof drop the statement's trailing `by`, which turned fisher's
 `WCL.Symmetry.orbit_invariance` into a solve (55 to 56).
 
 D adds the proof-search swarm, `fisher search FILE` (package
 `fisher-search`). Each open goal (a declaration whose proof is `sorry`) is
 an attempt on one backend in its own copy of the Lake project (APFS clone,
 `.lake/build` cloned, `.lake/packages` linked), running the managed
-workflow headless: claude-code `-p` with stream-json, gauss `fisher chat
+workflow headless: claude-code `-p` with stream-json, fisher `fisher chat
 -p`, codex `codex exec --json` (built, not yet run: codex is not
 installed). The agent's proof of its goal, and any helpers it added, are
 spliced into the shared base (its edits to other declarations are dropped;
@@ -520,13 +583,13 @@ back. `fisher search check` judges one saved proof the same way.
 The D gate (the swarm closes more goals per hour than a single claude-code
 child) held on 4 Oct 2026, on TWISTED's `Step/Kernel.lean` with all 12
 eligible proofs erased (122 lines): the single claude-code `/prove` closed
-12/12 in 1588 s (27.2 per hour), the swarm (claude-code and gauss, 4
+12/12 in 1588 s (27.2 per hour), the swarm (claude-code and fisher, 4
 slots) 12/12 in 1368 s (31.6 per hour), 14 attempts, 6 of them waiting on
 a goal another attempt closed. `judge.py` agrees with both reports.
 Caveats: one run each; both finished every goal long before the 2 h
 budget, so the rate is the finishing time and the margin is 16 %; the
 swarm spent 2.4 times the agent time (3780 s across attempts) and about 8 M
-input tokens on gauss's side.
+input tokens on fisher's side.
 
 `fisher search FILE --graph` searches the file's open goals as a lemma
 graph (docs/superpowers/specs/2026-10-14-lemma-graph-design.md). Each goal
@@ -565,7 +628,7 @@ nothing. Its flags, with today's `--parallel`, `--budget`,
   native workers, whose `-m` it replaces. It also works without `--graph`,
   for the native backend's attempts.
 - `--backends` defaults to the native backend and may name only it, as
-  `gauss` or `fisher`; `--single` and `--one-per-goal` are refused.
+  `fisher`; `--single` and `--one-per-goal` are refused.
 
 ### Automation before the models
 
@@ -690,7 +753,7 @@ own facts and the lemmas earlier runs proved
   `facts_mean`, `offered_total`,
   `used_total`, `saved_lemmas`, `saved_notes`.
 
-The library lives in `$GAUSS_HOME/fisher/library/<key>/` (`root.txt`,
+The library lives in `$FISHER_HOME/fisher/library/<key>/` (`root.txt`,
 `index.json`, `lemmas.jsonl`, `notes.jsonl`), the key the first 16 hex
 characters of the sha256 of the package root's absolute path. Nothing here
 can stop a search or mark a goal proved. `--single` uses none of it.
@@ -708,14 +771,14 @@ can stop a search or mark a goal proved. `--single` uses none of it.
 - `fisher search FILE --print-facts`: build the index, compile the file
   once for the goals' types (keyword facts only if it does not compile),
   print each open goal's facts and library section, and stop; no attempt,
-  and nothing written to the library directory or under `$GAUSS_HOME`
+  and nothing written to the library directory or under `$FISHER_HOME`
   (the library is read without its lock, the index cache goes to a
   private temporary directory, mode 700, removed once the index is built).
 
 E adds `fisher acp`: the native agent behind the Agent Client Protocol
 (JSON-RPC on stdio), for editors such as Zed, VS Code and JetBrains, as
-upstream's `gauss acp`. A session holds an agent (platform `acp`, toolset
-`gauss-acp`) and its conversation; a prompt streams the spinner's lines as
+upstream's `acp` command. A session holds an agent (platform `acp`, toolset
+`fisher-acp`) and its conversation; a prompt streams the spinner's lines as
 thoughts, each tool as a `tool_call` and its `tool_call_update`, then the
 answer; `session/cancel` interrupts the turn; /help /model /tools /context
 /reset /compact /version are answered without the model. Upstream's
@@ -729,12 +792,12 @@ fail. `tools/e2e-e1.py` drives `fisher acp` against the real model: it
 reads a file through a tool call, answers /context and cancels a long
 turn, with nothing but JSON-RPC on stdout.
 
-E also adds `fisher cron`, upstream's `gauss cron` (list, create, edit,
-pause, resume, run, remove, status, tick) on the same `~/.gauss/cron/jobs.json`
+E also adds `fisher cron`, upstream's `cron` command (list, create, edit,
+pause, resume, run, remove, status, tick) on the same `cron/jobs.json` of the Fisher home
 and output files, with upstream's text. Schedules are upstream's: a
 duration once, `every N` (minutes, hours, days), a cron expression (a port
 of croniter 6.0.0, daylight-saving quirks included) or an ISO timestamp,
-in the zone `GAUSS_TIMEZONE` or config.yaml's `timezone` names (read from
+in the zone `FISHER_TIMEZONE` or config.yaml's `timezone` names (read from
 the system's tz database) or else the system's local offset. A due job
 runs on the native agent (platform `cron`, every toolset but `cronjob`,
 the session saved in state.db). Upstream fires jobs from its messaging
@@ -774,15 +837,15 @@ started.
 Behaviour is upstream's unless listed here.
 
 - `str()` of a YAML float that is a whole number (`1.0`) renders as `1`.
-  No field OpenGauss reads as text holds one.
+  No field upstream reads as text holds one.
 - Every Lean project that `project init` detects markers for is flagged as a
   blueprint, because upstream lists `lakefile.lean` as a blueprint marker.
   This is upstream's behaviour, kept and pinned by a test.
 - `fisher project use`, `init`, `convert` and `create` set an override that
-  later `fisher` commands see, kept in `$GAUSS_HOME/fisher/project-override`
+  later `fisher` commands see, kept in `$FISHER_HOME/fisher/project-override`
   until `fisher project clear`. Upstream keeps it in the REPL session; a
   one-shot command has nowhere else to keep it.
-- `fisher doctor` covers configuration files, the `~/.gauss` directory,
+- `fisher doctor` covers configuration files, the Fisher home directory,
   external tools (git, rg) and the managed Lean workflows. Upstream's
   Python, package, provider-portal, API, submodule, tool and skills-hub
   sections are for machinery Fisher does not have yet. It does not read the
@@ -796,7 +859,7 @@ Behaviour is upstream's unless listed here.
 - A hand-written manifest with an unquoted `created_at` keeps the text as
   written; Python reads it as a datetime and prints it with a space for the
   `T`. Manifests either side writes are quoted.
-- Hints name `fisher`, not `gauss` (`fisher setup`, `fisher doctor --fix`).
+- Hints name `fisher`, not upstream's program (`fisher setup`, `fisher doctor --fix`).
   `fisher setup` is not written yet (see A3 below).
 
 From A2:
@@ -810,7 +873,7 @@ From A2:
   stream's progress.
 - Cancel stops the session's whole process group, so tools a session
   started go too; upstream signals only the direct child.
-- The arXiv helper is installed to `$GAUSS_HOME/fisher/scripts/` rather than
+- The arXiv helper is installed to `$FISHER_HOME/fisher/scripts/` rather than
   read from the Python package's directory.
 - Progress events are parsed while a session is attached as well as while
   it runs in the background.
@@ -819,7 +882,7 @@ From A2:
   closes while the session runs (or stdin is not a terminal), the session
   is cancelled, since nothing could reach it again. `fisher launch
   --print` runs it headless instead (see the provers follow-ups below).
-- The terminal title says `Fisher`, not `Gauss`.
+- The terminal title says `Fisher`, not upstream's name.
 - Whether to pass root-safe permission flags comes from the machine
   record, which the tests set from the recording, rather than from
   `os.geteuid()` at the call site.
@@ -834,7 +897,7 @@ From A3:
   upstream's own agent's providers; moved to B1), and `gateway`, `cron`,
   `pairing`, `skills`, `tools`, `model`, `whatsapp`, ACP and claw (later
   phases).
-- `fisher version` prints Fisher's version and the OpenGauss release it
+- `fisher version` prints Fisher's version and the upstream release it
   matches. `config show` gives the `fisher` executable's directory as the
   install path.
 - Without `config.yaml` the shell uses its built-in defaults; upstream reads
@@ -843,7 +906,7 @@ From A3:
 - Kept from upstream, pinned by the recordings: `display.compact` in the
   config is ignored (only `--compact` counts), and the `[task-id]` in the
   `/swarm` usage line is eaten as markup.
-- Fisher keeps its own files under `$GAUSS_HOME/fisher/` (the project
+- Fisher keeps its own files under `$FISHER_HOME/fisher/` (the project
   override, the arXiv helper); upstream never reads them.
 
 From B1:
@@ -855,7 +918,7 @@ From B1:
   and Anthropic, 600 s for Codex); the SDKs' separate connect limits are not
   enforced.
 - On a terminal, command hints say `fisher` (`fisher model`, `fisher setup`);
-  the port prints upstream's `gauss` and the terminal output is rewritten,
+  the port prints upstream's program name and the terminal output is rewritten,
   so the recordings still compare.
 - `fisher status` shows Fisher's executable directory as the project and
   "n/a (Fisher)" for Python, and `--deep` leaves out the port 18789 probe.
@@ -863,8 +926,7 @@ From B1:
   unavailable; there is no arrow-key menu yet.
 - Kept from upstream, pinned by the recordings: `fisher login` only says the
   command was removed (the logins live in `fisher model` and `fisher setup
-  model`); setup's Codex "Keep current" asks for a model name and its Nous
-  path asks for the model twice; Claude Code credentials are read from
+  model`); setup's Codex "Keep current" asks for a model name; Claude Code credentials are read from
   `~/.claude/.credentials.json` only (macOS keeps them in the keychain, so
   there `fisher model` does not see a Claude Code login); `status` writes the
   home directories and `auth.lock`, and migrates `~/.codex` tokens.
@@ -915,7 +977,7 @@ From B3:
   lists invisible characters in code-point order; upstream's comes from a
   set.
 - A 401 inside the loop is not retried with refreshed credentials (Codex,
-  Nous, Anthropic); it is handled as a client error, as upstream does when a
+  Anthropic); it is handled as a client error, as upstream does when a
   refresh fails.
 - Not yet: `errors.log`, trajectory files, checkpoints, session search and
   skills, and the agent's slash commands.
@@ -971,13 +1033,13 @@ From E:
 - Every ACP session writes a replay log, as `fisher chat` does (a
   cancelled turn cannot be replayed: interrupts are not in the log).
 - `fisher cron` points at `fisher cron serve` where upstream points at
-  its gateway (`gauss gateway install`), and adds `serve`. Delivery to a
+  its gateway (upstream's `gateway install`), and adds `serve`. Delivery to a
   chat platform (telegram, discord, `platform:chat_id`, origin) needs the
   gateway, which is not ported: the result stays in the job's output file
   and a warning says so. A failed run's output file ends without
   upstream's Python traceback.
 - The terminal's approval prompt is not bridged to
-  `session/request_permission`: upstream's `gauss-acp` toolset has no
+  `session/request_permission`: upstream's ACP toolset has no
   terminal tool, so the bridge never runs there.
 
 From D:
@@ -986,7 +1048,7 @@ From D:
 
 From C3:
 
-- `gauss` is a backend of Fisher's own. It is accepted but not listed in
+- `fisher` is a backend of Fisher's own. It is not listed in
   the "must be one of" and "Available" messages, which stay upstream's;
   `/chat` with it is refused (talk to Fisher itself).
 - `fisher chat -p`, `--max-turns`, `--mcp-config`, `--system-prompt-file`
@@ -1044,7 +1106,7 @@ From the CLM4 fixes:
   `.summary_provider` are copied into the environment over
   `CONTEXT_COMPRESSION_*` when a session starts, so a per-run threshold
   goes through `fisher config set compression.threshold` in that run's
-  `GAUSS_HOME`.
+  `FISHER_HOME`.
 - Kept from upstream: no `max_tokens` is sent, so OpenRouter checks a
   key's remaining credit against the model's whole output limit, and a key
   near its limit gets a 402 early. A 402 ends a headless session with
@@ -1066,7 +1128,7 @@ From the provers follow-ups:
   `result` also carries `num_tool_calls`, the tool calls the agent ran.
 - The managed workflows' model can be chosen (upstream's is fixed):
   `fisher launch --model M` (or `--model M` in the command, as the shell
-  takes it), else `gauss.autoformalize.model`, else the old default. Each
+  takes it), else `fisher.autoformalize.model`, else the old default. Each
   backend's child gets it in its own flag; codex gets `-m` only when one
   is chosen.
 - `fisher launch --print` (`-p`; upstream has no such flag) runs the

@@ -1,3 +1,3 @@
-{"attempt":1,"backend":"gauss","event":"launched","goal":"Step.Diamond.runBody_pop","t":0}
-{"attempt":1,"backend":"gauss","event":"finished","goal":"Step.Diamond.runBody_pop","outcome":"closed","stats":{"cost_usd":0.3442322,"exit":0,"input_tokens":802130,"output_tokens":7649,"tools":{"mcp_lean_lsp_lean_diagnostic_messages":3,"patch":6,"read_file":6,"search_files":3,"terminal":1},"turns":13,"wall_s":132.7},"t":156.4}
+{"attempt":1,"backend":"fisher","event":"launched","goal":"Step.Diamond.runBody_pop","t":0}
+{"attempt":1,"backend":"fisher","event":"finished","goal":"Step.Diamond.runBody_pop","outcome":"closed","stats":{"cost_usd":0.3442322,"exit":0,"input_tokens":802130,"output_tokens":7649,"tools":{"mcp_lean_lsp_lean_diagnostic_messages":3,"patch":6,"read_file":6,"search_files":3,"terminal":1},"turns":13,"wall_s":132.7},"t":156.4}
 {"attempt":1,"event":"closed","goal":"Step.Diamond.runBody_pop","t":156.4}

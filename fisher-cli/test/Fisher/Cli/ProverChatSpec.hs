@@ -60,7 +60,7 @@ data Chat = Chat
 -- ('chatMcpServers'), connect them, and register the toolset in use.
 withChat :: FilePath -> Maybe Text -> [(Text, PyVal)] -> [Text] -> (Chat -> IO a) -> IO a
 withChat home path extra sets act = do
-  at <- newAgentTools (home </> ".gauss")
+  at <- newAgentTools (home </> ".fisher")
   logs <- newIORef []
   let reg = atRegistry at
       env =
@@ -70,7 +70,7 @@ withChat home path extra sets act = do
           , meSampling = \_ -> fail "no sampling in tests"
           , meEnviron = pure [("HOME", T.pack home), ("PATH", "/usr/local/bin:/usr/bin:/bin")]
           , meHome = T.pack home
-          , meGaussHome = home </> ".gauss"
+          , meFisherHome = home </> ".fisher"
           , meHttp = Nothing }
   (servers, warnings) <- chatMcpServers [("PATH", T.unpack p) | Just p <- [path]] (PDict []) Nothing Nothing extra
   bracket (newMcpClient env) shutdownMcp $ \mc -> do
@@ -127,7 +127,7 @@ spec = do
 
     it "are registered only when asked for" $ do
       reg <- newRegistry
-      registerChatToolsets reg ["gauss-cli"]
+      registerChatToolsets reg ["fisher-cli"]
       tss <- toolsets reg
       filter (`elem` ["fisher-lean", "fisher-rocq", "fisher-isabelle"]) (map fst tss) `shouldBe` []
 
@@ -270,16 +270,16 @@ spec = do
     it "honours the override variable" $ withTmp $ \tmp -> do
       i <- project Isabelle tmp
       env <- binWith tmp ["uvx"]
-      (servers, warnings) <- chatMcpServers (env <> [("GAUSS_AUTOFORMALIZE_ISABELLE_MCP_SPEC", "isabelle-mcp==0.6.1")]) (PDict []) Nothing (Just (Isabelle, i)) []
+      (servers, warnings) <- chatMcpServers (env <> [("FISHER_AUTOFORMALIZE_ISABELLE_MCP_SPEC", "isabelle-mcp==0.6.1")]) (PDict []) Nothing (Just (Isabelle, i)) []
       get "args" (entryOf servers "isabelle") `shouldBe` Just (PList (map PStr ["--from", "isabelle-mcp==0.6.1", "isabelle-mcp"]))
       warnings `shouldBe` []
 
     it "warns and adds no server for a malformed override" $ withTmp $ \tmp -> do
       r <- project Rocq tmp
       env <- binWith tmp ["uvx", "pet"]
-      (servers, warnings) <- chatMcpServers (env <> [("GAUSS_AUTOFORMALIZE_ROCQ_MCP_SPEC", "uvx rocq-mcp")]) (PDict []) Nothing (Just (Rocq, r)) []
+      (servers, warnings) <- chatMcpServers (env <> [("FISHER_AUTOFORMALIZE_ROCQ_MCP_SPEC", "uvx rocq-mcp")]) (PDict []) Nothing (Just (Rocq, r)) []
       servers `shouldBe` []
-      warnings `shouldBe` ["GAUSS_AUTOFORMALIZE_ROCQ_MCP_SPEC must be a package spec, without spaces."]
+      warnings `shouldBe` ["FISHER_AUTOFORMALIZE_ROCQ_MCP_SPEC must be a package spec, without spaces."]
 
     it "warns and adds no server when neither uvx nor uv is on PATH" $ withTmp $ \tmp -> do
       i <- project Isabelle tmp
@@ -319,7 +319,7 @@ spec = do
     it "defaults to the prover's toolset" $ do
       defaultToolsets (Just (Rocq, "/p")) Nothing `shouldBe` Just ["fisher-rocq"]
       defaultToolsets (Just (Isabelle, "/p")) Nothing `shouldBe` Just ["fisher-isabelle"]
-      defaultToolsets (Just (Rocq, "/p")) (Just ["gauss-cli"]) `shouldBe` Just ["gauss-cli"]
+      defaultToolsets (Just (Rocq, "/p")) (Just ["fisher-cli"]) `shouldBe` Just ["fisher-cli"]
       defaultToolsets Nothing Nothing `shouldBe` Nothing
 
     it "looks for the project without -t, or with a prover toolset and no --mcp-config" $ do
@@ -328,8 +328,8 @@ spec = do
       wantsProject (Just ["fisher-rocq"]) False `shouldBe` True
       wantsProject (Just ["fisher-isabelle", "web"]) False `shouldBe` True
       wantsProject (Just ["fisher-rocq"]) True `shouldBe` False
-      wantsProject (Just ["gauss-cli"]) False `shouldBe` False
+      wantsProject (Just ["fisher-cli"]) False `shouldBe` False
       wantsProject (Just ["fisher-lean"]) False `shouldBe` False
 
     it "reads the server's environment from these variables" $
-      chatEnvNames `shouldBe` ["PATH", "GAUSS_AUTOFORMALIZE_ROCQ_MCP_SPEC", "GAUSS_AUTOFORMALIZE_ISABELLE_MCP_SPEC"]
+      chatEnvNames `shouldBe` ["PATH", "FISHER_AUTOFORMALIZE_ROCQ_MCP_SPEC", "FISHER_AUTOFORMALIZE_ISABELLE_MCP_SPEC"]

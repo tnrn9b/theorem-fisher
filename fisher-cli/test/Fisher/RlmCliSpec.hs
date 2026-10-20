@@ -94,14 +94,14 @@ data Run = Run
   , rErr :: Text
   , rReqs :: [HttpReq]
   , rOpened :: [PyVal]
-  , rGauss :: FilePath
+  , rFisher :: FilePath
   }
 
 runRlm :: Setup -> FilePath -> [Text] -> IO Run
 runRlm su tmp argv = do
   let home = tmp </> "home"
-      gauss = home </> ".gauss"
-  createDirectoryIfMissing True gauss
+      fisher = home </> ".fisher"
+  createDirectoryIfMissing True fisher
   uuidN <- newIORef (0 :: Int)
   outBuf <- newIORef []
   errBuf <- newIORef []
@@ -110,7 +110,7 @@ runRlm su tmp argv = do
   opened <- newIORef []
   env <-
     newIORef . M.fromList $
-      [("HOME", T.pack home), ("COLUMNS", "60"), ("GAUSS_FORCE_PLAIN_OUTPUT", "1"), ("OPENROUTER_API_KEY", "sk-or-test-1234567890")]
+      [("HOME", T.pack home), ("COLUMNS", "60"), ("FISHER_FORCE_PLAIN_OUTPUT", "1"), ("OPENROUTER_API_KEY", "sk-or-test-1234567890")]
         <> suEnv su
   let sys =
         Sys
@@ -121,7 +121,7 @@ runRlm su tmp argv = do
           , sysOpenBrowser = \_ -> pure False, sysRun = \_ -> pure (Left "no"), sysRunInteractive = \_ -> pure (Left "no")
           , sysWhich = \_ -> pure Nothing, sysPlatform = "linux"
           , sysUuidHex = atomicModifyIORef' uuidN (\n -> (n + 1, T.justifyRight 32 '0' (T.pack (showHex (n + 1) ""))))
-          , sysTimeZoneAt = \_ -> pure utc, sysHome = home, sysGaussHome = gauss
+          , sysTimeZoneAt = \_ -> pure utc, sysHome = home, sysFisherHome = fisher
           , sysOut = \t -> modifyIORef outBuf (<> [t]), sysInput = \_ -> pure Nothing, sysGetPass = \_ -> pure Nothing
           , sysStdinTty = pure False, sysStdoutTty = pure False, sysPid = 4242 }
       respond hr = do
@@ -139,7 +139,7 @@ runRlm su tmp argv = do
           , rdStdin = pure (suStdin su)
           , rdErr = \t -> modifyIORef errBuf (<> [t <> "\n"]) }
   code <- rlmMainWith deps sys argv
-  Run code <$> (T.concat <$> readIORef outBuf) <*> (T.concat <$> readIORef errBuf) <*> readIORef reqs <*> readIORef opened <*> pure gauss
+  Run code <$> (T.concat <$> readIORef outBuf) <*> (T.concat <$> readIORef errBuf) <*> readIORef reqs <*> readIORef opened <*> pure fisher
 
 -- | Write a file under the directory and give its path.
 file :: FilePath -> FilePath -> BS.ByteString -> IO Text
@@ -324,7 +324,7 @@ spec = do
   describe "settings" $ do
     it "come from fisher.rlm in config.yaml, and flags win" $ withTmp $ \tmp -> do
       a <- file tmp "a.txt" "alpha"
-      _ <- file tmp "home/.gauss/config.yaml" "fisher:\n  rlm:\n    model: x/from-config\n    max_iterations: 1\n"
+      _ <- file tmp "home/.fisher/config.yaml" "fisher:\n  rlm:\n    model: x/from-config\n    max_iterations: 1\n"
       r <- runRlm setup {suAnswers = [ok (completion "talk"), ok (completion "fallback")]} tmp ["--context", a, "--json"]
       rCode r `shouldBe` 0
       [hrBody h >>= get "model" | h <- rReqs r] `shouldBe` replicate 2 (Just (PStr "x/from-config"))
@@ -346,7 +346,7 @@ spec = do
       [hrBody h >>= get "model" | h <- rReqs r2] `shouldBe` map (Just . PStr) ["x/root", "x/root", "x/root"]
     it "a config.yaml that cannot be read warns on stderr and leaves --json clean" $ withTmp $ \tmp -> do
       a <- file tmp "a.txt" "alpha"
-      _ <- file tmp "home/.gauss/config.yaml" "fisher: [unclosed\n  rlm: {\n"
+      _ <- file tmp "home/.fisher/config.yaml" "fisher: [unclosed\n  rlm: {\n"
       s <- script tmp (replies [fenced "ANSWER ok"])
       r <- runRlm setup tmp ["--script", s, "--context", a, "--json"]
       rCode r `shouldBe` 0
@@ -355,7 +355,7 @@ spec = do
       rErr r `shouldSatisfy` T.isInfixOf "Failed to load config"
     it "in live mode too, a config.yaml that cannot be read leaves --json clean" $ withTmp $ \tmp -> do
       a <- file tmp "a.txt" "alpha"
-      _ <- file tmp "home/.gauss/config.yaml" "fisher: [unclosed\n  rlm: {\n"
+      _ <- file tmp "home/.fisher/config.yaml" "fisher: [unclosed\n  rlm: {\n"
       r <- runRlm setup {suAnswers = [ok (completion (fenced "ANSWER ok"))]} tmp ["--context", a, "--json"]
       rCode r `shouldBe` 0
       length (rReqs r) `shouldBe` 1
@@ -364,7 +364,7 @@ spec = do
       T.count "Failed to load config" (rErr r) `shouldBe` 1
     it "a bad fisher.rlm section exits 2 with its text" $ withTmp $ \tmp -> do
       a <- file tmp "a.txt" "alpha"
-      _ <- file tmp "home/.gauss/config.yaml" "fisher:\n  rlm:\n    max_depth: 0\n"
+      _ <- file tmp "home/.fisher/config.yaml" "fisher:\n  rlm:\n    max_depth: 0\n"
       r <- runRlm setup tmp ["--context", a]
       rCode r `shouldBe` 2
       rErr r `shouldSatisfy` T.isInfixOf "fisher.rlm: max_depth must be a positive integer"
@@ -416,7 +416,7 @@ spec = do
       rOut r `shouldBe` ""
 
   describe "the replay log" $ do
-    it "holds every model call under $GAUSS_HOME/fisher/replays/" $ withTmp $ \tmp -> do
+    it "holds every model call under $FISHER_HOME/fisher/replays/" $ withTmp $ \tmp -> do
       a <- file tmp "a.txt" "alpha"
       let answers = map (ok . completion) [fenced "LLMS one|two|three", "s1", "s2", "s3", fenced "ANSWER done"]
       r <- runRlm setup {suAnswers = answers} tmp ["--context", a, "--json"]
@@ -425,7 +425,7 @@ spec = do
       lg <- case get "replay_log" v of
         Just (PStr p) -> pure (T.unpack p)
         _ -> fail "no replay_log"
-      takeDirectory lg `shouldBe` rGauss r </> "fisher" </> "replays"
+      takeDirectory lg `shouldBe` rFisher r </> "fisher" </> "replays"
       takeFileName lg `shouldSatisfy` ("rlm_" `isPrefixOf`)
       evs <- events lg
       map kindOf evs `shouldBe` ["rlm", "http", "http", "http", "http", "http"]

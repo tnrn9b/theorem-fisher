@@ -1,7 +1,7 @@
 -- | The errors the credential code raises, in upstream's terms:
 -- @AuthError@ (with its provider, code and re-login flag), any other Python
 -- exception upstream lets escape (kept as its type, module and @str()@),
--- and @SystemExit@ from the login flows. Ported from @gauss_cli/auth.py@.
+-- and @SystemExit@ from the login flows. Ported from upstream @cli/auth.py@.
 module Fisher.LLM.Auth.Error
   ( cliName
   , AuthError (..)
@@ -18,10 +18,10 @@ import Control.Exception (Exception, SomeException, fromException)
 import Data.Text (Text)
 import qualified Data.Text as T
 
--- | @get_cli_command_name()@: always @gauss@ upstream, and every message
--- that names the command uses it.
+-- | @get_cli_command_name()@ (upstream's own command name there): the command's name,
+-- which every message that names the command uses.
 cliName :: Text
-cliName = "gauss"
+cliName = "fisher"
 
 data AuthError = AuthError
   { aeMessage :: Text
@@ -61,10 +61,6 @@ instance Exception SystemExit
 formatAuthError :: AuthError -> Text
 formatAuthError e
   | aeRelogin e = aeMessage e <> " Run `" <> cliName <> " model` to re-authenticate."
-  | aeCode e == Just "subscription_required" =
-      "No active paid subscription found on Nous Portal. Please purchase/activate a subscription, then retry."
-  | aeCode e == Just "insufficient_credits" =
-      "Subscription credits are exhausted. Top up/renew credits in Nous Portal, then retry."
   | aeCode e == Just "temporarily_unavailable" = aeMessage e <> " Please retry in a few seconds."
   | otherwise = aeMessage e
 

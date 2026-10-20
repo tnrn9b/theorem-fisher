@@ -31,6 +31,7 @@ import qualified Data.Text.Encoding as TE
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import System.Directory (doesDirectoryExist, makeAbsolute)
 
+import Fisher.Paths (fisherHomeLabelWith)
 import Fisher.Py.Value (PyVal (..), loads, reprStr)
 import Fisher.Tools.Py
 import Fisher.Tools.Sandbox
@@ -102,9 +103,11 @@ getEnvConfig getenv cwdNow = do
   let parseWith :: (Text -> Maybe a) -> Text -> Text -> Text -> IO (Either Text a)
       parseWith conv label name def = do
         raw <- env name def
-        pure $ case conv raw of
-          Just v -> Right v
-          Nothing -> Left ("Invalid value for " <> name <> ": " <> reprStr raw <> " (expected " <> label <> "). Check ~/.gauss/.env or environment variables.")
+        case conv raw of
+          Just v -> pure (Right v)
+          Nothing -> do
+            home <- T.pack <$> fisherHomeLabelWith (fmap (fmap T.unpack) . getenv . T.pack)
+            pure (Left ("Invalid value for " <> name <> ": " <> reprStr raw <> " (expected " <> label <> "). Check " <> home <> "/.env or environment variables."))
       int = parseWith pyInt "integer"
   sshHost <- env "TERMINAL_SSH_HOST" ""
   sshUser <- env "TERMINAL_SSH_USER" ""

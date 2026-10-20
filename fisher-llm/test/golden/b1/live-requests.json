@@ -14,9 +14,9 @@
         "headers": {
           "accept": "application/json",
           "content-type": "application/json",
-          "http-referer": "https://gauss-agent.nousresearch.com",
+          "http-referer": "https://fisher.invalid",
           "x-openrouter-categories": "productivity,cli-agent",
-          "x-openrouter-title": "Gauss Agent"
+          "x-openrouter-title": "Fisher Agent"
         },
         "body": {
           "messages": [
@@ -66,9 +66,9 @@
         "headers": {
           "accept": "application/json",
           "content-type": "application/json",
-          "http-referer": "https://gauss-agent.nousresearch.com",
+          "http-referer": "https://fisher.invalid",
           "x-openrouter-categories": "productivity,cli-agent",
-          "x-openrouter-title": "Gauss Agent"
+          "x-openrouter-title": "Fisher Agent"
         },
         "body": {
           "messages": [
@@ -115,9 +115,9 @@
         "headers": {
           "accept": "application/json",
           "content-type": "application/json",
-          "http-referer": "https://gauss-agent.nousresearch.com",
+          "http-referer": "https://fisher.invalid",
           "x-openrouter-categories": "productivity,cli-agent",
-          "x-openrouter-title": "Gauss Agent"
+          "x-openrouter-title": "Fisher Agent"
         },
         "body": {
           "messages": [
@@ -183,9 +183,9 @@
         "headers": {
           "accept": "application/json",
           "content-type": "application/json",
-          "http-referer": "https://gauss-agent.nousresearch.com",
+          "http-referer": "https://fisher.invalid",
           "x-openrouter-categories": "productivity,cli-agent",
-          "x-openrouter-title": "Gauss Agent"
+          "x-openrouter-title": "Fisher Agent"
         },
         "body": {
           "messages": [

@@ -105,6 +105,7 @@ test-suite fisher-agent-test
       Fisher.Agent.LoopSpec
       Fisher.Agent.MemorySpec
       Fisher.Agent.MetadataSpec
+      Fisher.Agent.NamesSpec
       Fisher.Agent.ProcessSpec
       Fisher.Agent.PromptSpec
       Fisher.Agent.RecallSpec

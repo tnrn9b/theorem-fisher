@@ -185,32 +185,32 @@ spec = describe "model tiers and model failures in flat search" $ do
 
   it "a mixed backend list: tiers for the native backend only" $ do
     -- claude-code outside the tiers, every one of its attempts unavailable:
-    -- no tier, no tier event, and no tier skipped for gauss
-    let cfg = cfgT {scBackends = ["claude-code", "gauss"], scUntiered = ["claude-code"]}
+    -- no tier, no tier event, and no tier skipped for fisher
+    let cfg = cfgT {scBackends = ["claude-code", "fisher"], scUntiered = ["claude-code"]}
         cc sp = if asBackend sp == "claude-code" then Just Unavailable else Nothing
     r <- searchF cc cfg Nothing fake0 one Map.empty
     let byBackend b = [sp | sp <- rSpecs r, asBackend sp == b]
     map asBackend (rSpecs r) `shouldSatisfy` elem "claude-code"
     [(asModel sp, asTier sp) | sp <- byBackend "claude-code"] `shouldSatisfy` all (== (Nothing, Nothing))
-    take 1 (map asTier (byBackend "gauss")) `shouldBe` [Just 0]
-    map asTier (byBackend "gauss") `shouldSatisfy` all (`elem` [Just 0, Just 1])
-    map asModel (byBackend "gauss") `shouldBe` map (fmap (tiers !!) . asTier) (byBackend "gauss")
+    take 1 (map asTier (byBackend "fisher")) `shouldBe` [Just 0]
+    map asTier (byBackend "fisher") `shouldSatisfy` all (`elem` [Just 0, Just 1])
+    map asModel (byBackend "fisher") `shouldBe` map (fmap (tiers !!) . asTier) (byBackend "fisher")
     [() | TierSkipped {} <- rEvents r] `shouldBe` []
-    sort [i | TierChosen _ i _ _ _ <- rEvents r] `shouldBe` sort (map asId (byBackend "gauss"))
+    sort [i | TierChosen _ i _ _ _ <- rEvents r] `shouldBe` sort (map asId (byBackend "fisher"))
 
   it "a mixed backend list with every tier skipped: the backend outside the tiers still runs" $ do
-    let cfg = cfgT {scBackends = ["claude-code", "gauss"], scUntiered = ["claude-code"]}
-        gaussOut sp = if asBackend sp == "gauss" then Just Unavailable else Nothing
-    r <- searchF gaussOut cfg Nothing fake0 one (Map.fromList [("t", replicate 5 ("exact BAD", Nothing, 5) <> [("ok", Nothing, 5)])])
+    let cfg = cfgT {scBackends = ["claude-code", "fisher"], scUntiered = ["claude-code"]}
+        nativeOut sp = if asBackend sp == "fisher" then Just Unavailable else Nothing
+    r <- searchF nativeOut cfg Nothing fake0 one (Map.fromList [("t", replicate 5 ("exact BAD", Nothing, 5) <> [("ok", Nothing, 5)])])
     sort [m | TierSkipped _ m _ <- rEvents r] `shouldBe` ["example/model-a", "example/model-b"]
     [() | GoalGaveUp {} <- rEvents r, statusOf "t" r /= GaveUp] `shouldBe` []
     -- after both skips only claude-code launches, with no tier
-    length [() | sp <- rSpecs r, asBackend sp == "gauss"] `shouldBe` 2
+    length [() | sp <- rSpecs r, asBackend sp == "fisher"] `shouldBe` 2
     [asTier sp | sp <- rSpecs r, asBackend sp == "claude-code"] `shouldSatisfy` all (== Nothing)
     length [() | sp <- rSpecs r, asBackend sp == "claude-code"] `shouldSatisfy` (>= 2)
 
   it "with no tiers and the controller off, runs today's search exactly" $ do
-    let cfg = defaultSearchConfig {scBackends = ["claude-code", "gauss"], scSlots = 1, scMaxAttempts = 3, scBudget = 30}
+    let cfg = defaultSearchConfig {scBackends = ["claude-code", "fisher"], scSlots = 1, scMaxAttempts = 3, scBudget = 30}
         ok = ("ok", Nothing, 5)
     r <- search cfg Nothing fake0 three (Map.fromList [("a", [("exact BAD", Nothing, 5), ok]), ("b", [ok]), ("c", [ok])])
     map asModel (rSpecs r) `shouldBe` replicate 4 Nothing

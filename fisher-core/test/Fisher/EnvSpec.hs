@@ -11,7 +11,7 @@ import Fisher.TestUtil (withTmp)
 
 spec :: Spec
 spec = do
-  -- Ported from TestSaveEnvValueSecure in tests/gauss_cli/test_config.py.
+  -- Ported from TestSaveEnvValueSecure in upstream tests/cli/test_config.py.
   it "saves a value that loads back" $ withTmp $ \tmp -> do
     saveEnvValueAt tmp "TENOR_API_KEY" "sk-test-secret"
     env <- loadEnvAt tmp

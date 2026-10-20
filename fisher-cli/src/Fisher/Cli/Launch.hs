@@ -50,7 +50,7 @@ import Fisher.Workflow.Run (runHeadless)
 import Fisher.Workflow.Types
 
 -- | Inputs for a launch from this process: its environment, the config,
--- ~/.gauss/.env for credentials, and the project the session points at
+-- the Fisher home's .env for credentials, and the project the session points at
 -- (the override, else the one found from the cwd), as upstream's
 -- @_active_workflow_cwd@.
 liveInputs :: IO LaunchInputs

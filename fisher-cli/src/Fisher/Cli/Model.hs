@@ -1,6 +1,6 @@
--- | @gauss model@: pick a provider (the active one first), then log in or
+-- | @fisher model@: pick a provider (the active one first), then log in or
 -- enter a key as that provider needs and pick a default model. Ported from
--- @gauss_cli/main.py@ (@cmd_model@ and every @_model_flow_*@, the saved
+-- upstream @cli/main.py@ (@cmd_model@ and every @_model_flow_*@, the saved
 -- custom providers and their removal, the Anthropic OAuth flow). The
 -- pickers are upstream's numbered fallbacks (@simple_term_menu@ is not
 -- installed upstream).
@@ -24,14 +24,13 @@ import Fisher.LLM.Auth.Codex (defaultCodexOpts, getCodexAuthStatus, getCodexMode
 import Fisher.LLM.Auth.Config (promptModelSelection, saveModelChoice, updateConfigForProvider)
 import Fisher.LLM.Auth.Env (loadDotenvIntoSys, saveAnthropicApiKey, saveAnthropicOauthToken, saveEnvValue, useAnthropicClaudeCodeCredentials)
 import Fisher.LLM.Auth.Error
-import Fisher.LLM.Auth.Nous (NousOpts (..), defaultLoginArgs, fetchNousModels, loginNous, resolveNousRuntimeCredentials)
 import Fisher.LLM.Auth.Registry
-import Fisher.LLM.Auth.Resolve (resolveProvider)
-import Fisher.LLM.Auth.Store (deactivateProvider, getProviderAuthState)
+import Fisher.LLM.Auth.Resolve (detectProvider, resolveProvider)
+import Fisher.LLM.Auth.Store (deactivateProvider)
 import Fisher.LLM.Sys
 import Fisher.Py.Value
 
--- | @gauss model@.
+-- | @fisher model@.
 modelMain :: Sys -> [Text] -> IO Int
 modelMain sys args = do
   loadDotenvIntoSys sys
@@ -91,17 +90,20 @@ cmdModel ui sys = do
           Just v | truthy v -> Just (pyStrOf v)
           _ -> Nothing
         _ -> Nothing
-  envProvider <- sysGetEnv sys "GAUSS_INFERENCE_PROVIDER"
+  envProvider <- sysGetEnv sys "FISHER_INFERENCE_PROVIDER"
   let effective = fromMaybe "auto" (orNonEmpty [configProvider, envProvider])
   active0 <- try (resolveProvider sys (Just effective) Nothing Nothing) >>= \case
     Right p -> pure p
     Left (e :: AuthError) -> do
       say sys ("Warning: " <> formatAuthError e <> " Falling back to auto provider detection.")
-      resolveProvider sys (Just "auto") Nothing Nothing
+      -- The detection itself, so that an auth.json whose active provider
+      -- was removed (reported just above) does not stop the menu that
+      -- replaces it.
+      detectProvider sys
   customBase <- envValue sys "OPENAI_BASE_URL"
   let active = if active0 == "openrouter" && not (T.null customBase) then "custom" else active0
       labels =
-        [ ("openrouter", "OpenRouter"), ("nous", "Nous Portal"), ("openai-codex", "OpenAI Codex"), ("anthropic", "Anthropic")
+        [ ("openrouter", "OpenRouter"), ("openai-codex", "OpenAI Codex"), ("anthropic", "Anthropic")
         , ("zai", "Z.AI / GLM"), ("kimi-coding", "Kimi / Moonshot"), ("minimax", "MiniMax"), ("minimax-cn", "MiniMax (China)")
         , ("custom", "Custom endpoint") ]
   say sys ""
@@ -109,7 +111,7 @@ cmdModel ui sys = do
   say sys ("  Active provider:  " <> fromMaybe active (lookup active labels))
   say sys ""
   let builtIn =
-        [ ("openrouter", "OpenRouter (100+ models, pay-per-use)"), ("nous", "Nous Portal (Nous Research subscription)")
+        [ ("openrouter", "OpenRouter (100+ models, pay-per-use)")
         , ("openai-codex", "OpenAI Codex"), ("anthropic", "Anthropic (Claude models — API key or Claude Code)")
         , ("zai", "Z.AI / GLM (Zhipu AI direct API)"), ("kimi-coding", "Kimi / Moonshot (Moonshot AI direct API)")
         , ("minimax", "MiniMax (global direct API)"), ("minimax-cn", "MiniMax China (domestic direct API)") ]
@@ -139,7 +141,6 @@ cmdModel ui sys = do
     Just i -> case fst (ordered !! i) of
       "cancel" -> say sys "No change."
       "openrouter" -> flowOpenRouter ui sys currentModel
-      "nous" -> flowNous sys currentModel
       "openai-codex" -> flowCodex sys currentModel
       "custom" -> flowCustom ui sys
       "remove-custom" -> removeCustomProvider ui sys
@@ -207,52 +208,6 @@ flowOpenRouter ui sys currentModel = do
         say sys ("Default model set to: " <> sel <> " (via OpenRouter)")
       Nothing -> say sys "No change."
 
--- | @_model_flow_nous(config, current_model)@.
-flowNous :: Sys -> Text -> IO ()
-flowNous sys currentModel = do
-  state <- getProviderAuthState sys "nous"
-  let pc = fromMaybe (error "nous is in the registry") (lookupProvider "nous")
-  if maybe True (\s -> not (maybe False truthy (get "access_token" s))) state
-    then do
-      say sys "Not logged into Nous Portal. Starting login..."
-      say sys ""
-      catchPy (loginNous sys defaultLoginArgs pc) >>= \case
-        NoError -> pure ()
-        ExitRaised _ -> say sys "Login cancelled or failed."
-        Failed e -> say sys ("Login failed: " <> errorStr e)
-    else do
-      say sys "Fetching models from Nous Portal..."
-      r <- try $ do
-        creds <- resolveNousRuntimeCredentials sys (NousOpts 300 15.0 Nothing Nothing False)
-        ids <- fetchNousModels sys (getS "base_url" creds) (getS "api_key" creds) 15.0
-        pure (creds, ids)
-      case r of
-        Left (e :: SomeException)
-          | Just (SystemExit _) <- fromException e -> throwIO e
-          | Just (_ :: AsyncException) <- fromException e -> throwIO e
-          | otherwise -> do
-              let relogin = maybe False aeRelogin (fromException e)
-                  msg = formatRuntimeProviderError e
-              if relogin
-                then do
-                  say sys ("Session expired: " <> msg)
-                  say sys "Re-authenticating with Nous Portal...\n"
-                  catchPy (loginNous sys defaultLoginArgs pc) >>= \case
-                    Failed le -> say sys ("Re-login failed: " <> errorStr le)
-                    ExitRaised n -> throwIO (SystemExit n)
-                    NoError -> pure ()
-                else say sys ("Could not fetch models: " <> msg)
-        Right (creds, ids)
-          | null ids -> say sys "No models returned by the inference API."
-          | otherwise ->
-              promptModelSelection sys ids currentModel >>= \case
-                Just sel -> do
-                  saveModelChoice sys sel
-                  void (updateConfigForProvider sys "nous" (getS "base_url" creds) Nothing)
-                  clearCustomEndpoint sys
-                  say sys ("Default model set to: " <> sel <> " (via Nous Portal)")
-                Nothing -> say sys "No change."
-
 -- | @_model_flow_openai_codex(config, current_model)@.
 flowCodex :: Sys -> Text -> IO ()
 flowCodex sys currentModel = do
@@ -317,7 +272,7 @@ flowCustom ui sys = do
                     case prModels probe of
                       Just ms -> say sys ("Verified endpoint via " <> fromMaybe "None" (prProbedUrl probe) <> " (" <> showT (length ms) <> " model(s) visible)")
                       Nothing -> do
-                        say sys ("Warning: could not verify this endpoint via " <> fromMaybe "None" (prProbedUrl probe) <> ". Gauss will still save it.")
+                        say sys ("Warning: could not verify this endpoint via " <> fromMaybe "None" (prProbedUrl probe) <> ". Fisher will still save it.")
                         mapM_ (\s -> say sys ("  If this server expects /v1, try base URL: " <> s)) (prSuggestedBaseUrl probe)
                     pure (url0, baseUrl0)
               unless (T.null baseUrl) $ saveEnvValue sys "OPENAI_BASE_URL" url
@@ -635,7 +590,7 @@ runAnthropicOauthFlow ui sys = do
         then do
           useAnthropicClaudeCodeCredentials sys
           say sys "  ✓ Claude Code credentials linked."
-          say sys "    Gauss will use Claude's credential store directly instead of copying a setup-token into the active home directory."
+          say sys "    Fisher will use Claude's credential store directly instead of copying a setup-token into the active home directory."
           pure True
         else pure False
 

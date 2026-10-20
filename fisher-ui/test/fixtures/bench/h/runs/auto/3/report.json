@@ -3,7 +3,7 @@
     "attempts": [
         {
             "attempt": 1,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 413.9,
             "goal": "Step.Graft.runBody_subst",
             "outcome": "closed",
@@ -31,7 +31,7 @@
     "auto_requested": true,
     "auto_warmup_s": 51.6,
     "backends": {
-        "gauss": [
+        "fisher": [
             1,
             1
         ]
@@ -45,10 +45,10 @@
     "goals": [
         {
             "attempts": [
-                "gauss"
+                "fisher"
             ],
             "by_attempt": 1,
-            "by_backend": "gauss",
+            "by_backend": "fisher",
             "closedBy": "model",
             "closed_at_s": 413.9,
             "goal": "Step.Graft.runBody_subst",

@@ -1,9 +1,9 @@
 {"mode": "swarm", "file": "Step/Latency.lean", "elapsed_s": 700.0, "goals_total": 3, "goals_closed": 2, "auto_requested": false,
  "facts_mean": 13.3, "offered_total": 3, "used_total": 1,
  "goals": [
-  {"goal": "Step.Latency.a", "status": "closed", "attempts": ["gauss"], "by_attempt": 1, "by_backend": "gauss", "closed_at_s": 200.0, "facts": 20, "offered": ["Step.Topology.lemma1", "Step.Check.lemma2"], "used": ["Step.Topology.lemma1"]},
-  {"goal": "Step.Latency.b", "status": "closed", "attempts": ["gauss"], "by_attempt": 2, "by_backend": "gauss", "closed_at_s": 500.0, "facts": 12, "offered": ["Step.Check.lemma2"], "used": []},
+  {"goal": "Step.Latency.a", "status": "closed", "attempts": ["fisher"], "by_attempt": 1, "by_backend": "fisher", "closed_at_s": 200.0, "facts": 20, "offered": ["Step.Topology.lemma1", "Step.Check.lemma2"], "used": ["Step.Topology.lemma1"]},
+  {"goal": "Step.Latency.b", "status": "closed", "attempts": ["fisher"], "by_attempt": 2, "by_backend": "fisher", "closed_at_s": 500.0, "facts": 12, "offered": ["Step.Check.lemma2"], "used": []},
   {"goal": "Step.Latency.c", "status": "open", "attempts": [], "by_attempt": null, "by_backend": null, "closed_at_s": null, "facts": 8, "offered": [], "used": []}],
  "attempts": [
-  {"attempt": 1, "goal": "Step.Latency.a", "backend": "gauss", "stats": {"cost_usd": 0.25, "turns": 8}},
-  {"attempt": 2, "goal": "Step.Latency.b", "backend": "gauss", "stats": {"cost_usd": 0.5, "turns": 9}}]}
+  {"attempt": 1, "goal": "Step.Latency.a", "backend": "fisher", "stats": {"cost_usd": 0.25, "turns": 8}},
+  {"attempt": 2, "goal": "Step.Latency.b", "backend": "fisher", "stats": {"cost_usd": 0.5, "turns": 9}}]}

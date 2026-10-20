@@ -55,11 +55,11 @@ claudeModel = "claude-opus-4-6"
 -- same Opus as the claude-code backend. A Claude subscription login is
 -- served to Claude Code only, so the default is OpenRouter
 -- (@OPENROUTER_API_KEY@); @anthropic@ takes a Console API key or token.
--- From @GAUSS_AUTOFORMALIZE_NATIVE_PROVIDER@, else
--- @gauss.autoformalize.native_provider@.
+-- From @FISHER_AUTOFORMALIZE_NATIVE_PROVIDER@, else
+-- @fisher.autoformalize.native_provider@.
 nativeProvider :: Value -> [(String, String)] -> Either Text (Text, Text)
 nativeProvider cfg env =
-  let override = T.toLower (T.strip (T.pack (fromMaybe "" (lookup "GAUSS_AUTOFORMALIZE_NATIVE_PROVIDER" env))))
+  let override = T.toLower (T.strip (T.pack (fromMaybe "" (lookup "FISHER_AUTOFORMALIZE_NATIVE_PROVIDER" env))))
       configured = T.toLower (T.strip (pyStrOr (lookupKey "native_provider" (autoformalizeConfig cfg))))
       chosen
         | not (T.null override) = override
@@ -68,7 +68,7 @@ nativeProvider cfg env =
    in case chosen of
         "openrouter" -> Right ("openrouter", nativeOpenRouterModel)
         "anthropic" -> Right ("anthropic", claudeModel)
-        _ -> Left "`gauss.autoformalize.native_provider` must be one of: openrouter, anthropic."
+        _ -> Left "`fisher.autoformalize.native_provider` must be one of: openrouter, anthropic."
 
 nativeOpenRouterModel :: Text
 nativeOpenRouterModel = "anthropic/claude-opus-4.6"
@@ -78,7 +78,7 @@ data LaunchInputs = LaunchInputs
   , liConfig :: Value
   , liBaseEnv :: Env
   , liIncludePersisted :: Bool
-  -- ^ Whether ~/.gauss/.env may supply credentials (upstream: when no
+  -- ^ Whether the Fisher home's .env may supply credentials (upstream: when no
   -- base environment was passed in).
   , liGetPersisted :: Text -> IO (Maybe Text)
   , liActiveCwd :: Maybe FilePath
@@ -159,17 +159,17 @@ either' f = either (throwW . f) pure
 -- | @_resolve_managed_state_base@.
 managedStateBase :: LaunchInputs -> IO FilePath
 managedStateBase li = do
-  let override = T.strip (T.pack (Map.findWithDefault "" "GAUSS_AUTOFORMALIZE_MANAGED_STATE_DIR" (liBaseEnv li)))
+  let override = T.strip (T.pack (fromMaybe "" (Map.lookup "FISHER_AUTOFORMALIZE_MANAGED_STATE_DIR" (liBaseEnv li))))
       configured = pyStrOr (lookupKey "managed_state_dir" (autoformalizeConfig (liConfig li)))
       chosen = if T.null override then configured else override
   if T.null chosen
-    then resolveDir (mGaussHome (liMachine li) </> "autoformalize")
+    then resolveDir (mFisherHome (liMachine li) </> "autoformalize")
     else resolveDir (T.unpack chosen)
 
 -- | @_managed_root@, with its fallback to the pre-backend layout.
 managedRoot :: LaunchInputs -> FilePath -> Backend -> IO FilePath
 managedRoot li base backend = do
-  defaultRoot <- resolveDir (mGaussHome (liMachine li) </> "autoformalize")
+  defaultRoot <- resolveDir (mFisherHome (liMachine li) </> "autoformalize")
   let backendRoot = base </> T.unpack (backendName backend) </> "managed"
       legacy = defaultRoot </> "managed"
   legacyExists <- doesPathExist legacy
@@ -214,8 +214,8 @@ claudeAuthPlan li mode home = do
       | otherwise ->
           throwW . PreflightError $
             "Claude Code auth not found. Run `claude auth login`, save `ANTHROPIC_API_KEY`, "
-              <> "or set `gauss.autoformalize.auth_mode: login` "
-              <> "(or `GAUSS_AUTOFORMALIZE_AUTH_MODE=login`) to launch the normal Claude login flow."
+              <> "or set `fisher.autoformalize.auth_mode: login` "
+              <> "(or `FISHER_AUTOFORMALIZE_AUTH_MODE=login`) to launch the normal Claude login flow."
     AuthLogin -> pure (ClaudeAuthPlan Nothing login False True)
     AuthApiKey
       | Just _ <- staged -> pure (ClaudeAuthPlan staged False False True)
@@ -224,7 +224,7 @@ claudeAuthPlan li mode home = do
           throwW . PreflightError $
             "Claude Code API-key auth not found. Save `ANTHROPIC_API_KEY`, "
               <> "`ANTHROPIC_TOKEN`, or `CLAUDE_CODE_OAUTH_TOKEN`, or switch "
-              <> "`gauss.autoformalize.auth_mode` back to `auto` or `login`."
+              <> "`fisher.autoformalize.auth_mode` back to `auto` or `login`."
 
 data CodexAuthPlan = CodexAuthPlan { xapSource :: Maybe FilePath, xapKey :: Text }
 
@@ -248,8 +248,8 @@ codexAuthPlan li mode home = do
       | otherwise ->
           throwW . PreflightError $
             "Codex auth not found. Run `codex login`, save `OPENAI_API_KEY`, "
-              <> "or set `gauss.autoformalize.auth_mode: login` "
-              <> "(or `GAUSS_AUTOFORMALIZE_AUTH_MODE=login`) to launch the normal Codex login flow."
+              <> "or set `fisher.autoformalize.auth_mode: login` "
+              <> "(or `FISHER_AUTOFORMALIZE_AUTH_MODE=login`) to launch the normal Codex login flow."
     AuthLogin -> pure (if valid then copy else CodexAuthPlan Nothing "")
     AuthApiKey
       | not (T.null key) -> pure (CodexAuthPlan Nothing key)
@@ -257,25 +257,26 @@ codexAuthPlan li mode home = do
       | otherwise ->
           throwW . PreflightError $
             "Codex API-key auth not found. Save `OPENAI_API_KEY`, or switch "
-              <> "`gauss.autoformalize.auth_mode` back to `auto` or `login`."
+              <> "`fisher.autoformalize.auth_mode` back to `auto` or `login`."
 
 claudeExe, codexExe :: Env -> IO FilePath
 claudeExe = requireExecutable "claude" "Claude Code CLI not found. Install it with `npm install -g @anthropic-ai/claude-code`."
 codexExe = requireExecutable "codex" "Codex CLI not found. Install the OpenAI Codex CLI and try again."
 
+-- | Set variables for a child.
 setAll :: [(String, String)] -> Env -> Env
 setAll kvs e = foldl (\acc (k, v) -> Map.insert k v acc) e kvs
 
 baseChildEnv :: ManagedContext -> FilePath -> [(String, String)]
 baseChildEnv c home =
-  [ ("GAUSS_AUTOFORMALIZE", "1")
-  , ("GAUSS_AUTOFORMALIZE_BACKEND", T.unpack (mcBackend c))
-  , ("GAUSS_PROJECT_ROOT", mcProjectRoot c)
-  , ("GAUSS_PROJECT_MANIFEST", fromMaybe "" (mcManifest c))
+  [ ("FISHER_AUTOFORMALIZE", "1")
+  , ("FISHER_AUTOFORMALIZE_BACKEND", T.unpack (mcBackend c))
+  , ("FISHER_PROJECT_ROOT", mcProjectRoot c)
+  , ("FISHER_PROJECT_MANIFEST", fromMaybe "" (mcManifest c))
   , ("LEAN_PROJECT_PATH", mcLeanRoot c)
-  , ("GAUSS_MANAGED_STATE_DIR", mcManagedRoot c)
-  , ("GAUSS_REAL_HOME", home) ]
-    <> [("GAUSS_AUTOFORMALIZE_SKILLS_ROOT", s) | Just s <- [mcSkillsRoot c]]
+  , ("FISHER_MANAGED_STATE_DIR", mcManagedRoot c)
+  , ("FISHER_REAL_HOME", home) ]
+    <> [("FISHER_AUTOFORMALIZE_SKILLS_ROOT", s) | Just s <- [mcSkillsRoot c]]
 
 permissionArgs :: Machine -> [Text]
 permissionArgs m = if mIsRoot m then ["--permission-mode", "bypassPermissions"] else ["--dangerously-skip-permissions"]
@@ -338,10 +339,10 @@ claudeRuntime li mode instruction ws b = do
   let c = ManagedContext "claude-code" (bManaged b) (projectRoot project) leanRoot backendHome pluginRoot mcpPath
             (Just ctx) (bAssets b) (Just (projectManifestPath project)) (Just backendConfig) (Just skills) Nothing
       child =
-        setAll [("GAUSS_AUTOFORMALIZE_CONTEXT", ctx)]
+        setAll [("FISHER_AUTOFORMALIZE_CONTEXT", ctx)]
           . setAll [ ("HOME", backendHome), ("CLAUDE_PLUGIN_ROOT", pluginRoot), ("LEAN4_PLUGIN_ROOT", pluginRoot)
                    , ("LEAN4_SCRIPTS", pluginRoot </> "lib" </> "scripts"), ("LEAN4_REFS", skills </> "references")
-                   , ("GAUSS_YOLO_MODE", "1") ]
+                   , ("FISHER_YOLO_MODE", "1") ]
           . setAll (baseChildEnv c (bRealHome b))
           . setAll [(T.unpack k, T.unpack v) | Just (k, v) <- [capEnv auth]]
           . (if capStrip auth then stripKeys claudeAuthEnvKeys else id)
@@ -363,7 +364,7 @@ codexRuntime li mode instruction ws b = do
       codexHome = backendHome </> ".codex"
       skills = backendHome </> ".agents" </> "skills" </> "lean4"
       cfgPath = codexHome </> "config.toml"
-      instructions = codexHome </> "gauss-autoformalize-instructions.md"
+      instructions = codexHome </> "fisher-autoformalize-instructions.md"
   mapM_ (createDirectoryIfMissing True) [backendHome, codexHome, backendHome </> ".agents" </> "skills"]
   stageTree (lpSkill lp) skills (bRevision b)
   stageCodexAuth codexHome (xapSource auth) (xapKey auth)
@@ -375,10 +376,10 @@ codexRuntime li mode instruction ws b = do
   let c = ManagedContext "codex" (bManaged b) (projectRoot project) leanRoot backendHome (lpPlugin lp) cfgPath
             (Just ctx) (bAssets b) (Just (projectManifestPath project)) (Just cfgPath) (Just skills) (Just instructions)
       child =
-        setAll [("GAUSS_AUTOFORMALIZE_INSTRUCTIONS", instructions), ("GAUSS_AUTOFORMALIZE_CONTEXT", ctx)]
+        setAll [("FISHER_AUTOFORMALIZE_INSTRUCTIONS", instructions), ("FISHER_AUTOFORMALIZE_CONTEXT", ctx)]
           . setAll [ ("HOME", backendHome), ("CODEX_HOME", codexHome), ("LEAN4_PLUGIN_ROOT", lpPlugin lp)
                    , ("LEAN4_SCRIPTS", lpScripts lp), ("LEAN4_REFS", skills </> "references")
-                   , ("GAUSS_AUTOFORMALIZE_SKILLS_ROOT", skills) ]
+                   , ("FISHER_AUTOFORMALIZE_SKILLS_ROOT", skills) ]
           . setAll (baseChildEnv c (bRealHome b))
           . Map.delete "OPENAI_API_KEY"
           $ env
@@ -411,13 +412,13 @@ fisherRuntime li mode instruction ws b = do
   systemPrompt <- fisherSystemPrompt lp ws
   let promptPath = ctx <> ".system.md"
   TIO.writeFile promptPath systemPrompt
-  let home = if provider == "anthropic" then bManaged b </> "gauss-home" else bRealHome b
+  let home = if provider == "anthropic" then bManaged b </> "fisher-home" else bRealHome b
       c = ManagedContext "fisher" (bManaged b) (projectRoot project) leanRoot home (lpPlugin lp) mcpPath
             (Just ctx) (bAssets b) (Just (projectManifestPath project)) Nothing (Just (lpSkill lp)) (Just promptPath)
       child =
-        setAll [("GAUSS_AUTOFORMALIZE_CONTEXT", ctx), ("GAUSS_AUTOFORMALIZE_INSTRUCTIONS", promptPath)]
+        setAll [("FISHER_AUTOFORMALIZE_CONTEXT", ctx), ("FISHER_AUTOFORMALIZE_INSTRUCTIONS", promptPath)]
           . setAll [ ("CLAUDE_PLUGIN_ROOT", lpPlugin lp), ("LEAN4_PLUGIN_ROOT", lpPlugin lp), ("LEAN4_SCRIPTS", lpScripts lp)
-                   , ("LEAN4_REFS", lpReferences lp), ("GAUSS_YOLO_MODE", "1") ]
+                   , ("LEAN4_REFS", lpReferences lp), ("FISHER_YOLO_MODE", "1") ]
           . setAll (baseChildEnv c (bRealHome b))
           . authEnv
           $ env
@@ -431,7 +432,7 @@ fisherRuntime li mode instruction ws b = do
 
 -- | The native backend's credentials: for anthropic, Claude credentials
 -- staged under a managed HOME, as for claude-code (and, for Lean, the real
--- elan); for openrouter, the key from the environment or ~/.gauss/.env.
+-- elan); for openrouter, the key from the environment or the Fisher home's .env.
 nativeAuthEnv :: LaunchInputs -> AuthMode -> Text -> FilePath -> FilePath -> Bool -> IO (Env -> Env)
 nativeAuthEnv li mode provider managed realHome lean = do
   let m = liMachine li
@@ -439,25 +440,23 @@ nativeAuthEnv li mode provider managed realHome lean = do
   case provider of
     "anthropic" -> do
       auth <- claudeAuthPlan li mode realHome
-      -- "gauss-home" is a directory name on disk under the managed state;
-      -- it keeps its name so existing managed states stay in use
-      let backendHome = managed </> "gauss-home"
+      let backendHome = managed </> "fisher-home"
       createDirectoryIfMissing True backendHome
       stageClaudeCredentials m realHome backendHome (capEnv auth) (capCopyOauth auth) (capCopyKey auth) Nothing
       elan <-
         if not lean
           then pure []
           else let e = realHome </> ".elan" in doesDirectoryExist e >>= \ok -> pure [("ELAN_HOME", e) | ok, not (Map.member "ELAN_HOME" env)]
-      pure ( setAll [("HOME", backendHome), ("GAUSS_HOME", mGaussHome m)] . setAll elan
+      pure ( setAll [("HOME", backendHome), ("FISHER_HOME", mFisherHome m)] . setAll elan
                . setAll [(T.unpack k, T.unpack v) | Just (k, v) <- [capEnv auth]]
                . (if capStrip auth then stripKeys claudeAuthEnvKeys else id) )
     _ -> do
       inEnv <- pure (maybe False (not . null) (Map.lookup "OPENROUTER_API_KEY" env))
-      -- only checked here: the child reads ~/.gauss/.env itself
+      -- only checked here: the child reads the Fisher home's .env itself
       persisted <- liGetPersisted li "OPENROUTER_API_KEY"
       unless (inEnv || maybe False (not . T.null . T.strip) persisted) $
-        throwW (PreflightError "OpenRouter auth not found. Save `OPENROUTER_API_KEY` in ~/.gauss/.env, or set `gauss.autoformalize.native_provider: anthropic`.")
-      pure (setAll [("GAUSS_HOME", mGaussHome m)])
+        throwW (PreflightError ("OpenRouter auth not found. Save `OPENROUTER_API_KEY` in " <> T.pack (mFisherHome m </> ".env") <> ", or set `fisher.autoformalize.native_provider: anthropic`."))
+      pure (setAll [("FISHER_HOME", mFisherHome m)])
 
 -- | The native backend's system prompt: how this session maps the
 -- skill's Claude Code terms, then SKILL.md and the command doc, front
@@ -664,8 +663,8 @@ proverClaudeRuntime li mode ws pb = do
   let c = ManagedContext "claude-code" (pbManaged pb) (projectRoot project) root backendHome pluginRoot mcpPath
             (Just ctx) (pbAssets pb) (Just (projectManifestPath project)) (Just backendConfig) (Just skills) Nothing
       child =
-        setAll [("GAUSS_AUTOFORMALIZE_CONTEXT", ctx)]
-          . setAll [("HOME", backendHome), ("CLAUDE_PLUGIN_ROOT", pluginRoot), ("GAUSS_YOLO_MODE", "1")]
+        setAll [("FISHER_AUTOFORMALIZE_CONTEXT", ctx)]
+          . setAll [("HOME", backendHome), ("CLAUDE_PLUGIN_ROOT", pluginRoot), ("FISHER_YOLO_MODE", "1")]
           -- Claude Code's wait for an MCP server to start, in milliseconds
           . setAll [("MCP_TIMEOUT", show (proverConnectTimeout * 1000))]
           . setAll (proverChildEnv kind c (pbRealHome pb) (pbCoqc pb))
@@ -690,7 +689,7 @@ proverCodexRuntime li mode ws pb = do
       codexHome = backendHome </> ".codex"
       skills = backendHome </> ".agents" </> "skills" </> T.unpack name
       cfgPath = codexHome </> "config.toml"
-      instructions = codexHome </> "gauss-autoformalize-instructions.md"
+      instructions = codexHome </> "fisher-autoformalize-instructions.md"
       guide = skills </> "commands" </> (T.unpack (wsKind ws) <> ".md")
   mapM_ (createDirectoryIfMissing True) [backendHome, codexHome, backendHome </> ".agents" </> "skills"]
   stageCodexProverSkill kind skills
@@ -702,8 +701,8 @@ proverCodexRuntime li mode ws pb = do
   let c = ManagedContext "codex" (pbManaged pb) (projectRoot project) root backendHome skills cfgPath
             (Just ctx) (pbAssets pb) (Just (projectManifestPath project)) (Just cfgPath) (Just skills) (Just instructions)
       child =
-        setAll [("GAUSS_AUTOFORMALIZE_INSTRUCTIONS", instructions), ("GAUSS_AUTOFORMALIZE_CONTEXT", ctx)]
-          . setAll [("HOME", backendHome), ("CODEX_HOME", codexHome), ("GAUSS_AUTOFORMALIZE_SKILLS_ROOT", skills)]
+        setAll [("FISHER_AUTOFORMALIZE_INSTRUCTIONS", instructions), ("FISHER_AUTOFORMALIZE_CONTEXT", ctx)]
+          . setAll [("HOME", backendHome), ("CODEX_HOME", codexHome), ("FISHER_AUTOFORMALIZE_SKILLS_ROOT", skills)]
           . setAll (proverChildEnv kind c (pbRealHome pb) (pbCoqc pb))
           . Map.delete "OPENAI_API_KEY"
           $ env
@@ -741,12 +740,12 @@ proverFisherRuntime li mode ws pb = do
            (skills </> "SKILL.md") guide mcpPath (pbFisher pb)
   let promptPath = ctx <> ".system.md"
   TIO.writeFile promptPath (proverSystemPrompt kind ws pluginRoot pet)
-  let home = if provider == "anthropic" then pbManaged pb </> "gauss-home" else pbRealHome pb
+  let home = if provider == "anthropic" then pbManaged pb </> "fisher-home" else pbRealHome pb
       c = ManagedContext "fisher" (pbManaged pb) (projectRoot project) root home pluginRoot mcpPath
             (Just ctx) (pbAssets pb) (Just (projectManifestPath project)) Nothing (Just skills) (Just promptPath)
       child =
-        setAll [("GAUSS_AUTOFORMALIZE_CONTEXT", ctx), ("GAUSS_AUTOFORMALIZE_INSTRUCTIONS", promptPath)]
-          . setAll [("GAUSS_YOLO_MODE", "1")]
+        setAll [("FISHER_AUTOFORMALIZE_CONTEXT", ctx), ("FISHER_AUTOFORMALIZE_INSTRUCTIONS", promptPath)]
+          . setAll [("FISHER_YOLO_MODE", "1")]
           . setAll (proverChildEnv kind c (pbRealHome pb) (pbCoqc pb))
           . authEnv
           $ env
@@ -824,8 +823,8 @@ resolveChatRequest li instruction0 = try $ do
   base <- managedStateBase li
   home <- realHomeOf env
   let chatRoot = base </> T.unpack (backendName backend) </> "chat"
-      common = [ ("GAUSS_MANAGED_CHAT", "1"), ("GAUSS_MANAGED_CHAT_BACKEND", T.unpack (backendName backend))
-               , ("GAUSS_CHAT_CWD", active), ("GAUSS_MANAGED_STATE_DIR", chatRoot), ("GAUSS_REAL_HOME", home) ]
+      common = [ ("FISHER_MANAGED_CHAT", "1"), ("FISHER_MANAGED_CHAT_BACKEND", T.unpack (backendName backend))
+               , ("FISHER_CHAT_CWD", active), ("FISHER_MANAGED_STATE_DIR", chatRoot), ("FISHER_REAL_HOME", home) ]
       prompt = chatPrompt (backendName backend) active instruction
   (argv, child) <- case backend of
     ClaudeCode -> do
@@ -844,7 +843,7 @@ resolveChatRequest li instruction0 = try $ do
                          , ("LEAN4_REFS", p </> "skills" </> "lean4" </> "references") ]
           child =
             setAll (maybe [] pluginVars plugin)
-              . setAll (common <> [("HOME", backendHome), ("GAUSS_YOLO_MODE", "1")])
+              . setAll (common <> [("HOME", backendHome), ("FISHER_YOLO_MODE", "1")])
               . setAll [(T.unpack k, T.unpack v) | Just (k, v) <- [capEnv auth]]
               . (if capStrip auth then stripKeys claudeAuthEnvKeys else id)
               $ env
@@ -868,9 +867,9 @@ resolveChatRequest li instruction0 = try $ do
         stageTree (lpSkill lp) (codexHome </> "skills" </> "lean4") rev
       stageCodexAuth codexHome (xapSource auth) (xapKey auth)
       let child =
-            setAll (if isJust assets then [("GAUSS_AUTOFORMALIZE_SKILLS_ROOT", staged), ("LEAN4_REFS", staged </> "references")] else [])
+            setAll (if isJust assets then [("FISHER_AUTOFORMALIZE_SKILLS_ROOT", staged), ("LEAN4_REFS", staged </> "references")] else [])
               . setAll (concat [[("LEAN4_PLUGIN_ROOT", lpPlugin lp), ("LEAN4_SCRIPTS", lpScripts lp)] | Just (_, lp, _) <- [assets]])
-              . setAll (common <> [("HOME", backendHome), ("CODEX_HOME", codexHome), ("GAUSS_YOLO_MODE", "1")])
+              . setAll (common <> [("HOME", backendHome), ("CODEX_HOME", codexHome), ("FISHER_YOLO_MODE", "1")])
               . Map.delete "OPENAI_API_KEY"
               $ env
       pure ([T.pack exe, "--dangerously-bypass-approvals-and-sandbox", prompt], child)

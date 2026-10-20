@@ -230,7 +230,8 @@ stageCodexProverSkill k dest =
 proverServerCommand :: ProverKind -> [(String, String)] -> Maybe FilePath -> Either Text [Text]
 proverServerCommand k env shim =
   let sv = pvServer (prover k)
-      spec = T.strip (T.pack (fromMaybe "" (lookup (svOverride sv) env)))
+      overrideName = svOverride sv
+      spec = T.strip (T.pack (fromMaybe "" (lookup overrideName env)))
       viaShim = case (k, shim) of
         (Isabelle, Just p) -> viaIsabelleShim p
         _ -> id
@@ -239,7 +240,7 @@ proverServerCommand k env shim =
           then Right (svDefault sv)
           else
             if T.any isSpace spec
-              then Left (T.pack (svOverride sv) <> " must be a package spec, without spaces.")
+              then Left (T.pack overrideName <> " must be a package spec, without spaces.")
               else Right ["uvx", "--from", spec, last (svDefault sv)]
 
 -- | Fisher's launcher for Isabelle-MCP, a Python file run by the server's

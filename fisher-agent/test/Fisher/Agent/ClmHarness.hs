@@ -113,7 +113,7 @@ runScenarioWith :: Maybe ReplayLog -> PyVal -> IO PyVal
 runScenarioWith rec sc = withSystemTempDirectory "fisher-clm" $ \tmp0 -> do
   tmp <- canonicalizePath tmp0
   let home = tmp </> "home"
-      gauss = home </> ".gauss"
+      fisher = home </> ".fisher"
       cfgV = field "config" sc
       num k d = case get k cfgV of
         Just (PInt n) -> n
@@ -130,7 +130,7 @@ runScenarioWith rec sc = withSystemTempDirectory "fisher-clm" $ \tmp0 -> do
               _ -> 0.25
           , ccStorePrompt = get "store_prompt" cfgV /= Just (PBool False) }
       path = txt "mirror_path" sc
-  createDirectoryIfMissing True gauss
+  createDirectoryIfMissing True fisher
   offset <- newIORef (0 :: Double)
   uuidN <- newIORef (0 :: Int)
   answers <- newIORef (list "answers" sc)
@@ -148,7 +148,7 @@ runScenarioWith rec sc = withSystemTempDirectory "fisher-clm" $ \tmp0 -> do
   let clock = (1790000000 +) <$> readIORef offset
       sleep d = modifyIORef offset (+ d)
       sys =
-        (testSys home [("HOME", T.pack home), ("GAUSS_TIMEZONE", "UTC")] (\_ -> pure ()))
+        (testSys home [("HOME", T.pack home), ("FISHER_TIMEZONE", "UTC")] (\_ -> pure ()))
           { sysNow = clock, sysSleep = sleep
           , sysUuidHex = atomicModifyIORef' uuidN (\n -> (n + 1, T.justifyRight 32 '0' (T.pack (showHex n "")))) }
       sysR = maybe sys (`recordUuids` sys) rec
@@ -238,7 +238,7 @@ runScenarioWith rec sc = withSystemTempDirectory "fisher-clm" $ \tmp0 -> do
           , envPromptNow = pure (LocalTime (fromGregorian 2026 10 6) (TimeOfDay 10 15 0))
           , envCwd = pure tmp, envChoice = \_ -> pure 0, envAnimate = False, envDb = Nothing, envTools = runner
           , envAux = callLlm auxEnv, envAuxEnv = Just auxEnv
-          , envMeta = MetaEnv tr clock gauss cache (\_ -> pure ())
+          , envMeta = MetaEnv tr clock fisher cache (\_ -> pure ())
           , envSkin = defaultSkin, envConfig = PDict [], envCallbacks = noCallbacks
           , envWarn = \_ -> pure (), envPromptHook = maybe pure recordPromptHook rec, envWriteFiles = False
           , envLocalTool = maybe (\_ _ act -> act) recordLocalTool rec, envInbox = pure [] }

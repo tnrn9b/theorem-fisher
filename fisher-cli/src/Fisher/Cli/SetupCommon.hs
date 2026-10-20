@@ -1,7 +1,7 @@
--- | What @gauss setup@ and @gauss model@ share beyond the credential layer:
+-- | What @fisher setup@ and @fisher model@ share beyond the credential layer:
 -- the merged configuration as Python holds it (a dict in insertion order,
 -- ints and floats apart) and its save; the model catalogues of
--- @gauss_cli/models.py@ and its @/models@ probes; and
+-- upstream @cli/models.py@ and its @/models@ probes; and
 -- @agent.auxiliary_client.get_available_vision_backends@.
 module Fisher.Cli.SetupCommon
   ( -- * Configuration
@@ -13,6 +13,7 @@ module Fisher.Cli.SetupCommon
   , setModelProvider
   , setDefaultModel
   , envValue
+  , homeLabelOf
     -- * Catalogues
   , openrouterModels
   , modelIds
@@ -31,13 +32,10 @@ module Fisher.Cli.SetupCommon
   ) where
 
 import Control.Exception (SomeException, try)
-import qualified Data.ByteString as BS
 import Data.List (sortOn)
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
-import System.Directory (doesFileExist)
-import System.FilePath ((</>))
 
 import Fisher.LLM.Auth.Anthropic (isOauthToken, resolveAnthropicToken)
 import Fisher.LLM.Auth.Codex (readCodexTokens)
@@ -46,6 +44,7 @@ import Fisher.LLM.Auth.PyYaml (loadConfigOrdered, saveConfigOrdered)
 import Fisher.LLM.Auth.Resolve (RuntimeRequest (..), defaultRuntimeRequest, resolveRuntimeProvider)
 import Fisher.LLM.Auth.Util (rstripSlash)
 import Fisher.LLM.Sys
+import Fisher.Paths (homeLabel)
 import Fisher.Py.Value
 
 -- ------------------------------------------------------------ configuration
@@ -95,6 +94,11 @@ setDefaultModel name cfg
 envValue :: Sys -> Text -> IO Text
 envValue sys k = fromMaybe "" <$> getEnvValue sys k
 
+-- | How a message names the Fisher home this 'Sys' uses ('homeLabel'):
+-- @~/.fisher@, or its path when it is elsewhere.
+homeLabelOf :: Sys -> Text
+homeLabelOf sys = T.pack (homeLabel (sysHome sys) (sysFisherHome sys))
+
 -- | @str(v).strip()@ of an optional value; empty for None.
 pyStrStrip :: Maybe PyVal -> Text
 pyStrStrip = \case
@@ -127,7 +131,6 @@ menuLabels = [if T.null d then m else m <> " (" <> d <> ")" | (m, d) <- openrout
 -- | @models._PROVIDER_MODELS@.
 providerModels :: Text -> [Text]
 providerModels = \case
-  "nous" -> ["claude-opus-4-6", "claude-sonnet-4-6", "gpt-5.4", "gemini-3-flash", "gemini-3.0-pro-preview", "deepseek-v3.2"]
   "openai-codex" -> ["gpt-5.3-codex", "gpt-5.2-codex", "gpt-5.1-codex-mini", "gpt-5.1-codex-max"]
   "zai" -> ["glm-5", "glm-4.7", "glm-4.5", "glm-4.5-flash"]
   "kimi-coding" -> ["kimi-for-coding", "kimi-k2.5", "kimi-k2-thinking", "kimi-k2-thinking-turbo", "kimi-k2-turbo-preview", "kimi-k2-0905-preview"]
@@ -241,7 +244,7 @@ fetchAnthropicModels sys =
 
 -- ------------------------------------------------------------------- vision
 
--- | @get_available_vision_backends()@: the backends Gauss can use for
+-- | @get_available_vision_backends()@: the backends Fisher can use for
 -- vision, the configured provider first. Left where upstream raises: with
 -- an Anthropic token the Anthropic client cannot be built in upstream's
 -- environment (its SDK wants httpx2's Timeout), and the error escapes the
@@ -249,7 +252,7 @@ fetchAnthropicModels sys =
 availableVisionBackends :: Sys -> IO (Either () [Text])
 availableVisionBackends sys = do
   cfg <- loadCfg sys
-  let order = ["openrouter", "nous", "openai-codex", "anthropic", "custom"]
+  let order = ["openrouter", "openai-codex", "anthropic", "custom"]
       preferred = case get "model" cfg of
         Just m@(PDict _) ->
           let p = normalize (case get "provider" m of Just PNull -> ""; Just v -> pyStrOf v; Nothing -> "")
@@ -271,7 +274,6 @@ availableVisionBackends sys = do
     available :: Text -> IO (Either () Bool)
     available = \case
       "openrouter" -> Right . maybe False (not . T.null) <$> sysGetEnv sys "OPENROUTER_API_KEY"
-      "nous" -> Right <$> nousAvailable
       "openai-codex" -> do
         r <- try (readCodexTokens sys True) :: IO (Either SomeException PyVal)
         pure . Right $ case r of
@@ -293,18 +295,3 @@ availableVisionBackends sys = do
                 not ("openrouter.ai" `T.isInfixOf` T.toLower (rstripSlash (T.strip b)))
           _ -> False
       _ -> pure (Right False)
-    nousAvailable = do
-      let path = sysGaussHome sys </> "auth.json"
-      exists <- doesFileExist path
-      if not exists
-        then pure False
-        else do
-          r <- try (BS.readFile path) :: IO (Either SomeException BS.ByteString)
-          pure $ case r of
-            Right bytes
-              | Right d@(PDict _) <- loads bytes
-              , get "active_provider" d == Just (str "nous")
-              , Just ps@(PDict _) <- Just (fromMaybe (PDict []) (get "providers" d))
-              , Just n@(PDict _) <- Just (fromMaybe (PDict []) (get "nous" ps)) ->
-                  maybe False truthy (get "agent_key" n) || maybe False truthy (get "access_token" n)
-            _ -> False

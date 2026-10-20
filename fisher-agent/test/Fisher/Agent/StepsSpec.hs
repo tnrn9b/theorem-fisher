@@ -13,10 +13,10 @@ import Fisher.Py.Value
 spec :: Spec
 spec = describe "Fisher.Agent.Steps" $ do
   it "appends steps and reads them back in order" $ withSystemTempDirectory "fisher-steps" $ \tmp -> do
-    let path = stepsPath (tmp </> "gauss") "s1"
+    let path = stepsPath (tmp </> "fisher") "s1"
         a = Step 1 "call_1" "/w/A.lean" (fileHash "a") "a" "write_file" 1.5
         b = Step 2 "call_2" "/w/B.lean" (fileHash "b\n") "b\n" "patch" 2.25
-    path `shouldBe` tmp </> "gauss" </> "fisher" </> "steps" </> "s1.jsonl"
+    path `shouldBe` tmp </> "fisher" </> "fisher" </> "steps" </> "s1.jsonl"
     readSteps path `shouldReturn` []
     appendStep path a
     appendStep path b

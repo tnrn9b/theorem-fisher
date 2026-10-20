@@ -1,7 +1,7 @@
--- | @gauss setup tools@ and the tools step of the full wizard: upstream's
+-- | @fisher setup tools@ and the tools step of the full wizard: upstream's
 -- @tools_config.tools_command@ (pick a platform, toggle toolsets, then
 -- choose a provider and enter keys for the ones that need them). Ported
--- from @gauss_cli/tools_config.py@.
+-- from upstream @cli/tools_config.py@.
 module Fisher.Cli.SetupTools
   ( toolsCommand
   , ToolsEnv (..)
@@ -20,6 +20,7 @@ import System.FilePath ((</>))
 import Fisher.Cli.Prompt
 import Fisher.Cli.SetupCommon
 import Fisher.LLM.Auth.Env (saveEnvValue)
+import Fisher.LLM.Auth.Error (cliName)
 import Fisher.LLM.Sys
 import Fisher.Py.Value
 import Fisher.Term
@@ -46,24 +47,28 @@ labelOf ts = case [l | (k, l, _) <- configurableToolsets, k == ts] of
   (l : _) -> l
   [] -> ts
 
--- | @PLATFORMS@: label and default toolset.
+-- | @PLATFORMS@: label and default toolset (upstream's platform toolsets
+-- under Fisher's @fisher-*@ names).
 platforms :: [(Text, (Text, Text))]
 platforms =
-  [ ("cli", ("🖥\xFE0F  CLI", "gauss-cli")), ("telegram", ("📱 Telegram", "gauss-telegram"))
-  , ("discord", ("💬 Discord", "gauss-discord")), ("slack", ("💼 Slack", "gauss-slack"))
-  , ("whatsapp", ("📱 WhatsApp", "gauss-whatsapp")), ("signal", ("📡 Signal", "gauss-signal"))
-  , ("email", ("📧 Email", "gauss-email")) ]
+  [ ("cli", ("🖥\xFE0F  CLI", "fisher-cli")), ("telegram", ("📱 Telegram", "fisher-telegram"))
+  , ("discord", ("💬 Discord", "fisher-discord")), ("slack", ("💼 Slack", "fisher-slack"))
+  , ("whatsapp", ("📱 WhatsApp", "fisher-whatsapp")), ("signal", ("📡 Signal", "fisher-signal"))
+  , ("email", ("📧 Email", "fisher-email")) ]
 
 platformLabel :: Text -> Text
 platformLabel p = maybe p fst (lookup p platforms)
 
--- | @toolsets.resolve_toolset(name)@ at the pinned upstream.
+-- | @toolsets.resolve_toolset(name)@ at the pinned upstream, its
+-- platform toolsets under Fisher's names.
 resolveToolset :: Text -> Set.Set Text
 resolveToolset name
   | name == "file" = fileTools
   | name `elem` ["web", "search"] = Set.fromList ["web_search"]
   | name == "browser" = browserTools
-  | name `elem` ["all", "*", "autoformalize", "gauss-acp", "gauss-cli", "gauss-telegram", "gauss-discord", "gauss-whatsapp", "gauss-slack", "gauss-signal", "gauss-homeassistant", "gauss-email", "gauss-gateway"] =
+  | name `elem` ["all", "*", "autoformalize"] = fileTools <> browserTools
+  | Just p <- T.stripPrefix "fisher-" name
+  , p `elem` ["acp", "cli", "telegram", "discord", "whatsapp", "slack", "signal", "homeassistant", "email", "gateway"] =
       fileTools <> browserTools
   | otherwise = Set.empty
   where
@@ -196,9 +201,9 @@ runPostSetup te key = when (key == "browserbase") $ do
       r <- sysRun sys ["npm", "install", "--silent"]
       case r of
         Right rr | rrCode rr == 0 -> sayLn ui (paint ui [green] "✓     Node.js dependencies installed")
-        _ -> sayLn ui (paint ui [yellow] "⚠     npm install failed - run manually: cd ~/.gauss/gauss-agent && npm install")
+        _ -> sayLn ui (paint ui [yellow] ("⚠     npm install failed - run manually: cd " <> T.pack (teInstallDir te) <> " && npm install"))
     else unless installed $
-      sayLn ui (paint ui [yellow] "⚠     Node.js not found - browser tools require: npm install (in gauss-agent directory)")
+      sayLn ui (paint ui [yellow] ("⚠     Node.js not found - browser tools require: npm install (in " <> T.pack (teInstallDir te) <> ")"))
 
 -- | @_configure_provider(provider, config)@.
 configureProvider :: ToolsEnv -> ToolProvider -> IO ()
@@ -318,7 +323,7 @@ toolsCommand te firstInstall cref = do
       total = length configurableToolsets
   enabled <- enabledPlatforms sys
   sayLn ui ""
-  sayLn ui (paint ui [cyan, bold] "⚕ Gauss Tool Configuration")
+  sayLn ui (paint ui [cyan, bold] "⚕ Fisher Tool Configuration")
   sayLn ui (paint ui [dim] "  Enable or disable tools per platform.")
   sayLn ui (paint ui [dim] "  Tools that need API keys will be configured when enabled.")
   sayLn ui ""
@@ -408,6 +413,6 @@ toolsCommand te firstInstall cref = do
                     loop
       loop
       sayLn ui ""
-      sayLn ui (paint ui [dim] "  Tool configuration saved to ~/.gauss/config.yaml")
-      sayLn ui (paint ui [dim] "  Changes take effect on next 'gauss' or gateway restart.")
+      sayLn ui (paint ui [dim] ("  Tool configuration saved to " <> homeLabelOf sys <> "/config.yaml"))
+      sayLn ui (paint ui [dim] ("  Changes take effect on next '" <> cliName <> "' or gateway restart."))
       sayLn ui ""

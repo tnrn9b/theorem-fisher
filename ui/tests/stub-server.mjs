@@ -263,14 +263,14 @@ function newSearch(project, file, graph, auto, retrieval = true, library = true)
   const r = { run, project, file, graph, auto, retrieval, library, lines: [], running: true, status: "running", report: null, timers: [] };
   const line = (o) => r.lines.push(JSON.stringify(o));
   r.timers.push(setTimeout(() => line({ event: "auto missed", goal: "Demo.a", seconds: 1, t: 1 }), 500));
-  r.timers.push(setTimeout(() => line({ attempt: 1, backend: "gauss", event: "launched", goal: "Demo.a", t: 1 }), 1000));
-  r.timers.push(setTimeout(() => line({ attempt: 1, backend: "gauss", event: "finished", goal: "Demo.a", outcome: "closed", t: 3 }), 3000));
+  r.timers.push(setTimeout(() => line({ attempt: 1, backend: "fisher", event: "launched", goal: "Demo.a", t: 1 }), 1000));
+  r.timers.push(setTimeout(() => line({ attempt: 1, backend: "fisher", event: "finished", goal: "Demo.a", outcome: "closed", t: 3 }), 3000));
   r.timers.push(setTimeout(() => line({ attempt: 1, event: "closed", goal: "Demo.a", t: 3 }), 3000));
   r.timers.push(
     setTimeout(() => {
       r.report = {
         mode: "swarm", file, project, elapsed_s: 3, goals_total: 1, goals_closed: 1, auto_requested: true, attempts: [],
-        goals: [{ goal: "Demo.a", status: "closed", closedBy: "model", attempts: ["gauss"], by_attempt: 1, by_backend: "gauss", closed_at_s: 3 }],
+        goals: [{ goal: "Demo.a", status: "closed", closedBy: "model", attempts: ["fisher"], by_attempt: 1, by_backend: "fisher", closed_at_s: 3 }],
       };
       r.running = false;
       r.status = "done";

@@ -70,7 +70,7 @@ dangerousPatterns =
   , ("\\b(python[23]?|perl|ruby|node)\\s+-[ec]\\s+", "script execution via -e/-c flag")
   , ("\\b(curl|wget)\\b.*\\|\\s*(ba)?sh\\b", "pipe remote content to shell")
   , ("\\b(bash|sh|zsh|ksh)\\s+<\\s*<?\\s*\\(\\s*(curl|wget)\\b", "execute remote script via process substitution")
-  , ("\\btee\\b.*(/etc/|/dev/sd|\\.ssh/|\\.gauss/\\.env)", "overwrite system file via tee")
+  , ("\\btee\\b.*(/etc/|/dev/sd|\\.ssh/|\\.fisher/\\.env)", "overwrite system file via tee")
   , ("\\bxargs\\s+.*\\brm\\b", "xargs with rm")
   , ("\\bfind\\b.*-exec\\s+(/\\S*/)?rm\\b", "find -exec rm")
   , ("\\bfind\\b.*-delete\\b", "find -delete")
@@ -159,13 +159,13 @@ checkAllCommandGuards env command envType
   | envType `elem` ["docker", "singularity", "modal", "daytona"] = pure approved
   | otherwise = do
       mode <- aeMode env
-      yolo <- envSet env "GAUSS_YOLO_MODE"
+      yolo <- envSet env "FISHER_YOLO_MODE"
       if yolo || mode == "off"
         then pure approved
         else do
-          cli <- envSet env "GAUSS_INTERACTIVE"
-          gateway <- envSet env "GAUSS_GATEWAY_SESSION"
-          ask <- envSet env "GAUSS_EXEC_ASK"
+          cli <- envSet env "FISHER_INTERACTIVE"
+          gateway <- envSet env "FISHER_GATEWAY_SESSION"
+          ask <- envSet env "FISHER_EXEC_ASK"
           if not cli && not gateway && not ask
             then pure approved
             else do
@@ -174,7 +174,7 @@ checkAllCommandGuards env command envType
               if action == "block"
                 then pure (PDict [("approved", PBool False), ("message", PStr ("BLOCKED: Command blocked by security scan (" <> (if T.null summary then "security issue detected" else summary) <> "). Do NOT retry."))])
                 else do
-                  sk <- maybe "default" id <$> aeGetEnv env "GAUSS_SESSION_KEY"
+                  sk <- maybe "default" id <$> aeGetEnv env "FISHER_SESSION_KEY"
                   tw <-
                     if action == "warn"
                       then do
@@ -286,7 +286,7 @@ data TirithEnv = TirithEnv
   , tiWhich :: Text -> IO (Maybe Text)
   , tiIsExecutable :: FilePath -> IO Bool
   , tiExpandUser :: Text -> IO Text
-  , tiGaussHome :: FilePath
+  , tiFisherHome :: FilePath
   , tiRun :: [Text] -> Int -> IO RunOutcome
   }
 
@@ -331,7 +331,7 @@ tirithCheck env command = do
     tshow = T.pack . show
     envBool k d = maybe d (\v -> T.toLower v `elem` ["1", "true", "yes"]) <$> tiGetEnv env k
     envInt k d = maybe d (\v -> fromMaybe d (readMaybe (T.unpack (T.strip v)))) <$> tiGetEnv env k
-    -- the configured path when it was given; else PATH, then $GAUSS_HOME/bin
+    -- the configured path when it was given; else PATH, then the Fisher home's bin
     resolvePath p
       | p /= "tirith" = do
           expanded <- tiExpandUser env p
@@ -344,7 +344,7 @@ tirithCheck env command = do
           case found of
             Just f -> pure f
             Nothing -> do
-              let local = tiGaussHome env <> "/bin/tirith"
+              let local = tiFisherHome env <> "/bin/tirith"
               ok <- tiIsExecutable env local
               pure (if ok then T.pack local else p)
 

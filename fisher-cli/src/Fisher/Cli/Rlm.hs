@@ -4,7 +4,7 @@
 -- writes code against it, and the code's model calls are served here.
 --
 -- Model calls go through Fisher's LLM client and are all written to a
--- replay log under @$GAUSS_HOME/fisher/replays/@. @--replay LOG@ answers
+-- replay log under @$FISHER_HOME/fisher/replays/@. @--replay LOG@ answers
 -- every call from such a log instead of the network, and @--script FILE@
 -- answers them from a list of replies (for tests and the cross-check).
 module Fisher.Cli.Rlm
@@ -211,7 +211,7 @@ rlmMainWith deps sys argv = case parseOpts argv >>= \o -> if oHelp o then Right 
     | oHelp o -> sysOut sys helpText >> pure 0
     | otherwise -> do
         -- loadConfigPy would print the warnings to stdout, ahead of --json
-        (raw, warnings) <- loadConfigAt (sysGaussHome sys)
+        (raw, warnings) <- loadConfigAt (sysFisherHome sys)
         mapM_ (rdErr deps) warnings
         let config = fromAeson raw
         case withFlags o <$> rlmConfigFromPy (get "fisher" config >>= get "rlm") of
@@ -267,8 +267,8 @@ startup deps sys argv o cfg = do
                 Left e -> failWith deps e
                 Right base -> do
                   let mode = sMode base
-                      path = replayPath (sysGaussHome sys) ("rlm_" <> runId)
-                  opened <- try (openReplayLog (sysGaussHome sys) ("rlm_" <> runId))
+                      path = replayPath (sysFisherHome sys) ("rlm_" <> runId)
+                  opened <- try (openReplayLog (sysFisherHome sys) ("rlm_" <> runId))
                   case opened of
                     Left (e :: IOException) -> failWith deps ("cannot open the replay log " <> T.pack path <> ": " <> T.pack (displayException e))
                     Right lg ->

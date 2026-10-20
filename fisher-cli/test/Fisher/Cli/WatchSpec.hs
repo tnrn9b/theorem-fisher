@@ -93,7 +93,7 @@ spec = do
             , "{\"type\":\"item.completed\",\"item\":{\"type\":\"reasoning\",\"text\":\"hm\"}}" ]
       streamSignals "codex" ls `shouldBe` [Turn, Turn]
     it "native: each model call (a cost row) is a turn" $
-      streamSignals "gauss" (linesOf ["{\"type\":\"assistant\",\"message\":{}}", "{\"type\":\"assistant\",\"message\":{}}", "{\"type\":\"result\"}"])
+      streamSignals "fisher" (linesOf ["{\"type\":\"assistant\",\"message\":{}}", "{\"type\":\"assistant\",\"message\":{}}", "{\"type\":\"result\"}"])
         `shouldBe` [Turn, Turn]
 
   describe "watchChild on the ledger" $ do

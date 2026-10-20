@@ -3,7 +3,7 @@
     "attempts": [
         {
             "attempt": 1,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 129.5,
             "goal": "Step.Concrete.fireRecv_wt",
             "outcome": "closed",
@@ -25,7 +25,7 @@
         }
     ],
     "backends": [
-        "gauss"
+        "fisher"
     ],
     "budget_s": 3600,
     "cap_usd": 6,

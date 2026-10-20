@@ -2,7 +2,6 @@
 -- http-client-tls, subprocesses, the browser, and the terminal.
 module Fisher.LLM.SysIO
   ( newSysIO
-  , fisherHints
   ) where
 
 import Control.Concurrent (threadDelay)
@@ -37,10 +36,10 @@ import Fisher.LLM.Http (userAgent)
 import Fisher.LLM.Sys
 import Fisher.Py.Value (dumpsUnicode)
 
--- | A Sys over this process. @home@ and @gaussHome@ are resolved by the
--- caller (HOME and GAUSS_HOME, as upstream reads them).
+-- | A Sys over this process. @home@ and @fisherHome@ are resolved by the
+-- caller (HOME, and the Fisher home as 'Fisher.Paths.getFisherHome' finds it).
 newSysIO :: FilePath -> FilePath -> IO Sys
-newSysIO home gaussHome = do
+newSysIO home fisherHome = do
   envRef <- newIORef . Map.fromList . map (\(k, v) -> (T.pack k, T.pack v)) =<< getEnvironment
   mgr <- HT.newTlsManager
   pid <- fromIntegral <$> getProcessID
@@ -78,8 +77,8 @@ newSysIO home gaussHome = do
       , sysUuidHex = T.concat <$> mapM (const hexDigit) [1 .. 32 :: Int]
       , sysTimeZoneAt = getTimeZone . posixSecondsToUTCTime . realToFrac
       , sysHome = home
-      , sysGaussHome = gaussHome
-      , sysOut = \t -> TIO.putStr (fisherHints t) >> hFlush stdout
+      , sysFisherHome = fisherHome
+      , sysOut = \t -> TIO.putStr t >> hFlush stdout
       , sysInput = \p -> do
           TIO.putStr p
           hFlush stdout
@@ -105,24 +104,6 @@ newSysIO home gaussHome = do
     hexDigit = do
       n <- randomRIO (0, 15 :: Int)
       pure (T.pack (showHex n ""))
-
--- | Command hints name @fisher@: upstream's \"gauss <subcommand>\" (in
--- quotes, backticks, usage lines or indented examples) becomes
--- \"fisher <subcommand>\". The recordings keep upstream's spelling, so the
--- port prints "gauss" and only the real terminal sees this rewrite.
-fisherHints :: Text -> Text
-fisherHints t = case T.breakOn "gauss " t of
-  (a, b)
-    | T.null b -> a
-    | otherwise ->
-        let rest = T.drop 6 b
-            word = T.takeWhile (\c -> c /= ' ' && c /= '`' && c /= '\'' && c /= '\n' && c /= ']' && c /= ':') rest
-            boundary = T.null a || T.last a `elem` (" `'\"(\n" :: String)
-         in if boundary && word `elem` subcommands
-              then a <> "fisher " <> fisherHints rest
-              else a <> "gauss " <> fisherHints rest
-  where
-    subcommands = ["setup", "model", "config", "doctor", "status", "login", "logout", "sessions", "cron", "update", "tools", "gateway", "chat", "version"]
 
 httpCall :: H.Manager -> AuthReq -> IO (Either HttpFail AuthResp)
 httpCall mgr ar = do

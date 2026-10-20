@@ -1,5 +1,5 @@
 -- | @fisher config path|env-path|check|migrate@, from @config_command@ in
--- @gauss_cli/config.py@.
+-- upstream @cli/config.py@.
 module Fisher.Cli.ConfigCmd
   ( configCheck
   , configMigrate
@@ -20,7 +20,7 @@ present home v = maybe False (not . T.null) <$> getEnvValueAt home (evName v)
 toolsSuffix :: Text -> EnvVar -> Text
 toolsSuffix sep v = if null (evTools v) then "" else sep <> T.intercalate ", " (take 2 (evTools v))
 
--- | @gauss config check@.
+-- | @fisher config check@.
 configCheck :: Style -> FilePath -> IO [Text]
 configCheck st home = do
   (current, latest) <- checkConfigVersionAt home
@@ -44,7 +44,7 @@ configCheck st home = do
              , "    Run 'fisher config migrate' to add them" ])
     <> [""]
 
--- | @gauss config migrate@: report, then migrate interactively.
+-- | @fisher config migrate@: report, then migrate interactively.
 configMigrate :: Style -> FilePath -> Prompter -> (Text -> IO ()) -> IO ()
 configMigrate st home prompter say = do
   say ""

@@ -65,7 +65,7 @@ data BrowserEnv = BrowserEnv
   , beAux :: AuxLLM
   , beInterrupted :: IO Bool
   , beUuidHex :: IO Text
-  , beGaussHome :: FilePath
+  , beFisherHome :: FilePath
   , beSocketRoot :: FilePath
   -- ^ @_socket_safe_tmpdir()@: @/tmp@ on macOS
   , beIsDir :: FilePath -> IO Bool
@@ -270,7 +270,7 @@ browserbaseSession env task = do
             let features =
                   [ ("basic_stealth", True), ("proxies", proxies && not pxFallback), ("advanced_stealth", stealth)
                   , ("keep_alive", keepAlive && not kaFallback), ("custom_timeout", isJust customTimeout && maybe False (> 0) timeoutVal) ]
-            pure (Right (Session ("gauss_" <> task <> "_" <> T.take 8 h) (Just i) (Just u) features True))
+            pure (Right (Session ("fisher_" <> task <> "_" <> T.take 8 h) (Just i) (Just u) features True))
           _ -> pure (Left ("KeyError", "'id'"))
 
 -- | @_run_browser_command@: the parsed JSON answer (a dict).
@@ -332,13 +332,13 @@ runCommand env task command args timeout = do
   where
     failure e = PDict [("success", PBool False), ("error", PStr e)]
 
--- | The PATH agent-browser runs with: Gauss's own node, then the usual
+-- | The PATH agent-browser runs with: Fisher's own node, then the usual
 -- system directories, put in front when they exist and are missing.
 browserPath :: BrowserEnv -> IO Text
 browserPath env = do
   existing <- fromMaybe "" <$> beGetEnv env "PATH"
   let parts0 = filter (not . T.null) (T.splitOn ":" existing)
-      cands = T.pack (beGaussHome env </> "node" </> "bin") : T.splitOn ":" "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      cands = T.pack (beFisherHome env </> "node" </> "bin") : T.splitOn ":" "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
       step parts c = do
         d <- beIsDir env (T.unpack c)
         pure (if d && c `notElem` parts then c : parts else parts)
@@ -569,7 +569,7 @@ images env task = do
 vision :: BrowserEnv -> Text -> Text -> Bool -> IO Text
 vision env task question annotate = do
   h <- beUuidHex env
-  let dir = beGaussHome env </> "browser_screenshots"
+  let dir = beFisherHome env </> "browser_screenshots"
       planned = dir </> ("browser_screenshot_" <> T.unpack h <> ".png")
   shotRef <- newIORef planned
   res <- try $ do
@@ -646,7 +646,7 @@ maybeStartRecording env task = do
   active <- S.member task <$> readIORef (beRecording env)
   enabled <- beRecordSessions env
   when (not active && enabled) $ do
-    let dir = beGaussHome env </> "browser_recordings"
+    let dir = beFisherHome env </> "browser_recordings"
     createDirectoryIfMissing True dir
     now <- beNow env
     removeOlder dir now (72 * 3600) (\f -> "session_" `T.isPrefixOf` T.pack f && ".webm" `isSuffixOf` f)

@@ -110,7 +110,7 @@ data Env = Env
   , eApp :: Application
   }
 
--- | GAUSS_HOME with sessions R (model example/model-a) and its compression
+-- | FISHER_HOME with sessions R (model example/model-a) and its compression
 -- child K, a Lean project (lakefile) and a Rocq project (_CoqProject), a
 -- fake lake that records where it ran and fails on BAD, and a fake fisher:
 -- @check@ fails a file with Admitted (for the hole) or BAD, @chat@ writes
@@ -119,7 +119,7 @@ data Env = Env
 withSteps :: (Env -> IO a) -> IO a
 withSteps k = withSystemTempDirectory "fisher-ui-steps" $ \tmp0 -> do
   tmp <- canonicalizePath tmp0
-  let home = tmp </> "gauss"
+  let home = tmp </> "fisher"
       lean = tmp </> "lean"
       rocq = tmp </> "rocq"
       count = tmp </> "lake-runs.txt"
@@ -144,12 +144,12 @@ withSteps k = withSystemTempDirectory "fisher-ui-steps" $ \tmp0 -> do
       , "  if grep -q Admitted \"$2\"; then echo \"FAIL $2:r: uses Admitted\"; exit 1; fi"
       , "  echo \"ok $2:r\"; exit 0 ;;"
       , "chat)"
-      , "  printf '%s\\n' \"$@\" > \"$GAUSS_HOME/chat-args.txt\""
-      , "  pwd > \"$GAUSS_HOME/chat-cwd.txt\"; echo \"$FISHER_UI_LEDGER\" > \"$GAUSS_HOME/chat-ledger.txt\""
-      , "  echo \"$LEAN_PROJECT_PATH\" > \"$GAUSS_HOME/chat-env.txt\""
+      , "  printf '%s\\n' \"$@\" > \"$FISHER_HOME/chat-args.txt\""
+      , "  pwd > \"$FISHER_HOME/chat-cwd.txt\"; echo \"$FISHER_UI_LEDGER\" > \"$FISHER_HOME/chat-ledger.txt\""
+      , "  echo \"$LEAN_PROJECT_PATH\" > \"$FISHER_HOME/chat-env.txt\""
       , "  sleep 0.3; exit 0 ;;"
       , "*)"
-      , "  sqlite3 \"$GAUSS_HOME/state.db\" \".timeout 5000\" \"INSERT INTO ui_runs VALUES ('$FISHER_UI_TAG', 'R', $$, 0);\" > /dev/null"
+      , "  sqlite3 \"$FISHER_HOME/state.db\" \".timeout 5000\" \"INSERT INTO ui_runs VALUES ('$FISHER_UI_TAG', 'R', $$, 0);\" > /dev/null"
       , "  sleep 30 ;;"
       , "esac" ]
   mapM_ (`setFileMode` 0o755) [lake, fake]
@@ -178,7 +178,7 @@ withSteps k = withSystemTempDirectory "fisher-ui-steps" $ \tmp0 -> do
   appendStep (stepsPath home "S") (step' 1 (lean </> "S.lean") "theorem s : True := by\n  SLOW\n")
   c2 <- open (home </> "state.db")
   -- Z's chat ran in the Lean project
-  execute c2 "INSERT INTO ui_events VALUES ('Z', 1, 0, 'chat', ?)" (Only (TE.decodeUtf8 (BL.toStrict (A.encode (A.object ["env" A..= A.object ["GAUSS_PROJECT_ROOT" A..= lean]])))))
+  execute c2 "INSERT INTO ui_events VALUES ('Z', 1, 0, 'chat', ?)" (Only (TE.decodeUtf8 (BL.toStrict (A.encode (A.object ["env" A..= A.object ["FISHER_PROJECT_ROOT" A..= lean]])))))
   close c2
   ui <- newUiEnv home (tmp </> "bench") (tmp </> "repo")
   le0 <- newLiveEnv ui fake

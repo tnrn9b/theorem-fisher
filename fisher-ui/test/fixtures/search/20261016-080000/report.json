@@ -3,7 +3,7 @@
     "attempts": [
         {
             "attempt": 1,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 50.5,
             "goal": "Demo.b",
             "outcome": "closed",
@@ -22,7 +22,7 @@
         },
         {
             "attempt": 2,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 70,
             "goal": "Demo.d",
             "outcome": "exit 0",
@@ -45,7 +45,7 @@
     "auto_ran": true,
     "auto_requested": true,
     "backends": {
-        "gauss": [
+        "fisher": [
             2,
             1
         ]
@@ -68,10 +68,10 @@
         },
         {
             "attempts": [
-                "gauss"
+                "fisher"
             ],
             "by_attempt": 1,
-            "by_backend": "gauss",
+            "by_backend": "fisher",
             "closedBy": "model+repair",
             "closed_at_s": 50.5,
             "goal": "Demo.b",
@@ -92,7 +92,7 @@
         },
         {
             "attempts": [
-                "gauss"
+                "fisher"
             ],
             "by_attempt": null,
             "by_backend": null,

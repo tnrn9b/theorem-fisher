@@ -9,7 +9,7 @@
 --   * @POST /api/sessions/:id/steps/:seq/verdict@: the step's verdict
 --     @{errors, holes, ok, prover, hash}@, computed once and then served
 --     from @steps/<session>.verdicts.json@ beside the log. It is computed
---     in a copy of the project (in @$GAUSS_HOME/fisher/ui-check@, removed
+--     in a copy of the project (in @$FISHER_HOME/fisher/ui-check@, removed
 --     after), never in the project: Lean by fisher-search's 'probe' in a
 --     'makeWorkspace' copy (the project's build cloned, its packages
 --     shared), Rocq and Isabelle by @fisher check FILE@ in a plain copy.
@@ -295,7 +295,7 @@ copyProject from to = do
 runCheck :: LiveEnv -> FilePath -> FilePath -> IO (ExitCode, Text)
 runCheck env dir rel = do
   let logp = dir <> ".log"
-  (ch, exited) <- spawnChild (Just logp) dir [leFisher env, "check", rel] [("GAUSS_HOME", home env)]
+  (ch, exited) <- spawnChild (Just logp) dir [leFisher env, "check", rel] [("FISHER_HOME", home env)]
   r <- timeout (leCheckSecs env * 1000000) (readMVar exited)
   code <- case r of
     Just c -> pure c
@@ -323,7 +323,7 @@ chatEvent env root = do
   pure (listToMaybe (reverse [o | (_, "chat", A.Object o) <- evs]))
 
 -- | The session's project root: the project of this server's run for it,
--- else the one its chat recorded (GAUSS_PROJECT_ROOT, else the prover's
+-- else the one its chat recorded (FISHER_PROJECT_ROOT, else the prover's
 -- project variable), else the prover root at or above the file's
 -- directory (walking up the path as written, links not followed);
 -- canonical.
@@ -333,7 +333,7 @@ projectRootFor env root path = do
   chat <- chatEvent env root
   let recorded = case chat >>= KM.lookup "env" of
         Just (A.Object o) ->
-          listToMaybe [T.unpack t | k <- ["GAUSS_PROJECT_ROOT", "LEAN_PROJECT_PATH", "ROCQ_PROJECT_PATH", "ISABELLE_PROJECT_PATH"], Just (A.String t) <- [KM.lookup k o], not (T.null t)]
+          listToMaybe [T.unpack t | k <- ["FISHER_PROJECT_ROOT", "LEAN_PROJECT_PATH", "ROCQ_PROJECT_PATH", "ISABELLE_PROJECT_PATH"], Just (A.String t) <- [KM.lookup k o], not (T.null t)]
         _ -> Nothing
   found <- case (rnProject <$> run, recorded) of
     (Just p, _) -> pure (Just p)

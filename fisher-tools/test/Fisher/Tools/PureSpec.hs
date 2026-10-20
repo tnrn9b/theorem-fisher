@@ -17,7 +17,7 @@ spec = do
   red <- runIO (cases <$> loadDoc "test/golden/b2/redact.json")
   describe "redact_sensitive_text" $
     forM_ (zip [1 :: Int ..] red) $ \(i, c) -> it (show i <> " " <> show (T.take 40 (txt "text" c))) $ do
-      let enabled = redactEnabled (case field "env" c of PNull -> Nothing; e -> Just (txt "GAUSS_REDACT_SECRETS" e))
+      let enabled = redactEnabled (case field "env" c of PNull -> Nothing; e -> Just (txt "FISHER_REDACT_SECRETS" e))
       (if enabled then redactSensitiveText (txt "text" c) else txt "text" c) `shouldBe` txt "redacted" c
   san <- runIO (cases <$> loadDoc "test/golden/b2/sanitize.json")
   describe "_sanitize_error" $

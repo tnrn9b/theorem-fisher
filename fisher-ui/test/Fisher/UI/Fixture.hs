@@ -1,6 +1,6 @@
--- | A scripted GAUSS_HOME for the read routes: state.db with three
+-- | A scripted FISHER_HOME for the read routes: state.db with three
 -- sessions, their replay logs and a CLM ctx dir, plus two projects (Lean
--- by its lakefile, Rocq by its Gauss manifest).
+-- by its lakefile, Rocq by its Fisher manifest).
 --
 --   * s1, Lean, CLM: three priced responses (0.01, 0.02 and an SSE one at
 --     0.005), a tool call, the ctx files and three @clm_*@ events.
@@ -88,17 +88,17 @@ httpLineWith prefix sse cost =
 
 withFixture :: (Fixture -> IO a) -> IO a
 withFixture k = withSystemTempDirectory "fisher-ui" $ \tmp -> do
-  let home = tmp </> "gauss"
+  let home = tmp </> "fisher"
       lean = tmp </> "projects" </> "lean"
       rocq = tmp </> "projects" </> "rocq"
-  mapM_ (createDirectoryIfMissing True) [home </> "fisher" </> "replays", lean, rocq </> ".gauss", home </> "fisher" </> "ctx" </> T.unpack s1]
+  mapM_ (createDirectoryIfMissing True) [home </> "fisher" </> "replays", lean, rocq </> ".fisher", home </> "fisher" </> "ctx" </> T.unpack s1]
   B.writeFile (lean </> "lakefile.lean") "import Lake\n"
   B.writeFile (lean </> "Main.lean") (TE.encodeUtf8 (last leanSteps))
   sequence_
     [ appendStep (stepsPath home s1) (Step n ("call_s" <> T.pack (show n)) (lean </> "Main.lean") (fileHash (TE.encodeUtf8 t)) t tool (1790000001 + fromIntegral n))
     | (n, t, tool) <- zip3 [1 ..] leanSteps ["write_file", "patch", "patch"] ]
   B.writeFile (rocq </> "_CoqProject") "-R . Demo\n"
-  B.writeFile (rocq </> ".gauss" </> "project.yaml") $
+  B.writeFile (rocq </> ".fisher" </> "project.yaml") $
     TE.encodeUtf8 ("schema_version: " <> T.pack (show schemaVersion) <> "\nname: demo\nkind: rocq\nroot: .\n")
   -- state.db
   withStore (home </> "state.db") $ \st -> do

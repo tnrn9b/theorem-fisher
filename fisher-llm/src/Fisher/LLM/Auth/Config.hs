@@ -3,7 +3,7 @@
 -- rewrite of @config.yaml@ (@_update_config_for_provider@,
 -- @_reset_config_provider@), @_save_model_choice@ (the full @save_config@)
 -- and the numbered @_prompt_model_selection@ picker. Ported from
--- @gauss_cli/auth.py@.
+-- upstream @cli/auth.py@.
 module Fisher.LLM.Auth.Config
   ( loadConfigSys
   , loadConfigPy
@@ -38,7 +38,7 @@ import Fisher.Py.Value
 -- defaults; a warning printed when the file cannot be read.
 loadConfigSys :: Sys -> IO A.Value
 loadConfigSys sys = do
-  (cfg, warnings) <- loadConfigAt (sysGaussHome sys)
+  (cfg, warnings) <- loadConfigAt (sysFisherHome sys)
   forM_ warnings (outLn sys)
   pure cfg
 
@@ -93,7 +93,7 @@ updateConfigForProvider sys pid baseUrl defaultModel = do
   withAuthLock sys $ do
     store <- loadAuthStore sys
     void (saveAuthStore sys (set "active_provider" (str pid) store))
-  let path = configPathIn (sysGaussHome sys)
+  let path = configPathIn (sysFisherHome sys)
   createDirectoryIfMissing True (takeDirectory path)
   loaded <- readRawConfig path
   let cfg = case loaded of
@@ -123,7 +123,7 @@ updateConfigForProvider sys pid baseUrl defaultModel = do
 -- @auto@ and an existing @model.base_url@ pointed at OpenRouter.
 resetConfigProvider :: Sys -> IO FilePath
 resetConfigProvider sys = do
-  let path = configPathIn (sysGaussHome sys)
+  let path = configPathIn (sysFisherHome sys)
   loaded <- readRawConfig path
   case loaded of
     Just cfg@(PDict _) -> do

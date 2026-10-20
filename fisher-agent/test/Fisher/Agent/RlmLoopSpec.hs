@@ -139,8 +139,8 @@ runRlmWith :: Opts -> [Reply] -> IO Out
 runRlmWith op script = withSystemTempDirectory "fisher-rlm-loop" $ \tmp0 -> do
   tmp <- canonicalizePath tmp0
   let home = tmp </> "home"
-      gauss = home </> ".gauss"
-  createDirectoryIfMissing True gauss
+      fisher = home </> ".fisher"
+  createDirectoryIfMissing True fisher
   offset <- newIORef (0 :: Double)
   uuidN <- newIORef (0 :: Int)
   queue <- newIORef script
@@ -167,7 +167,7 @@ runRlmWith op script = withSystemTempDirectory "fisher-rlm-loop" $ \tmp0 -> do
   let clock = (1790000000 +) <$> readIORef offset
       sleep d = atomicModifyIORef' offset (\o -> (o + d, ()))
       sys =
-        (testSys home ([("HOME", T.pack home), ("GAUSS_TIMEZONE", "UTC"), ("CONTEXT_COMPRESSION_THRESHOLD", "0.5")] <> opEnv op) (\_ -> pure ()))
+        (testSys home ([("HOME", T.pack home), ("FISHER_TIMEZONE", "UTC"), ("CONTEXT_COMPRESSION_THRESHOLD", "0.5")] <> opEnv op) (\_ -> pure ()))
           { sysNow = clock, sysSleep = sleep
           , sysUuidHex = atomicModifyIORef' uuidN (\n -> (n + 1, T.justifyRight 32 '0' (T.pack (showHex n "")))) }
       rt = Runtime clock sleep (pure 0)
@@ -229,7 +229,7 @@ runRlmWith op script = withSystemTempDirectory "fisher-rlm-loop" $ \tmp0 -> do
           , envCwd = pure tmp, envChoice = \_ -> pure 0, envAnimate = False, envDb = if opDb op then Just db else Nothing, envTools = runner
           , envAux = \_ -> atomicModifyIORef' auxN (\n -> (n + 1, ())) >> pure (Left (AuxNoProvider ""))
           , envAuxEnv = Nothing
-          , envMeta = MetaEnv tr clock gauss cache (\_ -> pure ())
+          , envMeta = MetaEnv tr clock fisher cache (\_ -> pure ())
           , envSkin = defaultSkin, envConfig = PDict [], envCallbacks = noCallbacks
           , envWarn = \_ -> pure (), envPromptHook = pure, envWriteFiles = False
           , envLocalTool = \_ _ act -> act, envInbox = pure [] }

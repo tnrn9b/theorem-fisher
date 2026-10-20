@@ -22,27 +22,27 @@
         "checkout": "none"
       },
       "result": {
-        "lean4_checkout_root": "<TMP>/gauss-home/autoformalize/assets/lean4-skills",
+        "lean4_checkout_root": "<TMP>/fisher-home/autoformalize/assets/lean4-skills",
         "skill_revision": "def456",
         "lean_lsp_mcp_spec": "lean-lsp-mcp",
         "claude_plugin_root": "<TMP>/fake-plugin"
       },
       "files": {
-        "gauss-home/autoformalize/assets/lean4-skills/.claude-plugin/marketplace.json": {
+        "fisher-home/autoformalize/assets/lean4-skills/.claude-plugin/marketplace.json": {
           "json": {
             "name": "lean4-skills"
           }
         },
-        "gauss-home/autoformalize/assets/lean4-skills/.gauss-managed-revision": {
+        "fisher-home/autoformalize/assets/lean4-skills/.fisher-managed-revision": {
           "text": "def456\n"
         },
-        "gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/.claude-plugin/plugin.json": {
+        "fisher-home/autoformalize/assets/lean4-skills/plugins/lean4/.claude-plugin/plugin.json": {
           "json": {
             "name": "lean4",
             "version": "2.0.0"
           }
         },
-        "gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/skills/lean4/SKILL.md": {
+        "fisher-home/autoformalize/assets/lean4-skills/plugins/lean4/skills/lean4/SKILL.md": {
           "text": "# lean4 skill\n"
         },
         "home/.claude/plugins/installed_plugins.json": {
@@ -89,8 +89,8 @@
         }
       },
       "calls": [
-        "git [clone] [--depth] [1] [--filter=blob:none] [https://github.com/cameronfreer/lean4-skills.git] [<TMP>/gauss-home/autoformalize/assets/lean4-skills]",
-        "git [-C] [<TMP>/gauss-home/autoformalize/assets/lean4-skills] [rev-parse] [HEAD]",
+        "git [clone] [--depth] [1] [--filter=blob:none] [https://github.com/cameronfreer/lean4-skills.git] [<TMP>/fisher-home/autoformalize/assets/lean4-skills]",
+        "git [-C] [<TMP>/fisher-home/autoformalize/assets/lean4-skills] [rev-parse] [HEAD]",
         "uvx [--from] [lean-lsp-mcp] [lean-lsp-mcp] [--help]",
         "claude [plugin] [marketplace] [add] [cameronfreer/lean4-skills]",
         "claude [plugin] [install] [lean4]"
@@ -114,27 +114,27 @@
         "checkout": "none"
       },
       "result": {
-        "lean4_checkout_root": "<TMP>/gauss-home/autoformalize/assets/lean4-skills",
+        "lean4_checkout_root": "<TMP>/fisher-home/autoformalize/assets/lean4-skills",
         "skill_revision": "def456",
         "lean_lsp_mcp_spec": "lean-lsp-mcp",
         "claude_plugin_root": "<TMP>/home/.claude/plugins/cache/lean4-skills/lean4/1.2.3"
       },
       "files": {
-        "gauss-home/autoformalize/assets/lean4-skills/.claude-plugin/marketplace.json": {
+        "fisher-home/autoformalize/assets/lean4-skills/.claude-plugin/marketplace.json": {
           "json": {
             "name": "lean4-skills"
           }
         },
-        "gauss-home/autoformalize/assets/lean4-skills/.gauss-managed-revision": {
+        "fisher-home/autoformalize/assets/lean4-skills/.fisher-managed-revision": {
           "text": "def456\n"
         },
-        "gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/.claude-plugin/plugin.json": {
+        "fisher-home/autoformalize/assets/lean4-skills/plugins/lean4/.claude-plugin/plugin.json": {
           "json": {
             "name": "lean4",
             "version": "2.0.0"
           }
         },
-        "gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/skills/lean4/SKILL.md": {
+        "fisher-home/autoformalize/assets/lean4-skills/plugins/lean4/skills/lean4/SKILL.md": {
           "text": "# lean4 skill\n"
         },
         "home/.claude/plugins/known_marketplaces.json": {
@@ -170,8 +170,8 @@
         }
       },
       "calls": [
-        "git [clone] [--depth] [1] [--filter=blob:none] [https://github.com/cameronfreer/lean4-skills.git] [<TMP>/gauss-home/autoformalize/assets/lean4-skills]",
-        "git [-C] [<TMP>/gauss-home/autoformalize/assets/lean4-skills] [rev-parse] [HEAD]",
+        "git [clone] [--depth] [1] [--filter=blob:none] [https://github.com/cameronfreer/lean4-skills.git] [<TMP>/fisher-home/autoformalize/assets/lean4-skills]",
+        "git [-C] [<TMP>/fisher-home/autoformalize/assets/lean4-skills] [rev-parse] [HEAD]",
         "uvx [--from] [lean-lsp-mcp] [lean-lsp-mcp] [--help]"
       ]
     },
@@ -186,33 +186,33 @@
         "checkout": "none"
       },
       "result": {
-        "lean4_checkout_root": "<TMP>/gauss-home/autoformalize/assets/lean4-skills",
+        "lean4_checkout_root": "<TMP>/fisher-home/autoformalize/assets/lean4-skills",
         "skill_revision": "def456",
         "lean_lsp_mcp_spec": "lean-lsp-mcp",
         "claude_plugin_root": ""
       },
       "files": {
-        "gauss-home/autoformalize/assets/lean4-skills/.claude-plugin/marketplace.json": {
+        "fisher-home/autoformalize/assets/lean4-skills/.claude-plugin/marketplace.json": {
           "json": {
             "name": "lean4-skills"
           }
         },
-        "gauss-home/autoformalize/assets/lean4-skills/.gauss-managed-revision": {
+        "fisher-home/autoformalize/assets/lean4-skills/.fisher-managed-revision": {
           "text": "def456\n"
         },
-        "gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/.claude-plugin/plugin.json": {
+        "fisher-home/autoformalize/assets/lean4-skills/plugins/lean4/.claude-plugin/plugin.json": {
           "json": {
             "name": "lean4",
             "version": "2.0.0"
           }
         },
-        "gauss-home/autoformalize/assets/lean4-skills/plugins/lean4/skills/lean4/SKILL.md": {
+        "fisher-home/autoformalize/assets/lean4-skills/plugins/lean4/skills/lean4/SKILL.md": {
           "text": "# lean4 skill\n"
         }
       },
       "calls": [
-        "git [clone] [--depth] [1] [--filter=blob:none] [https://github.com/cameronfreer/lean4-skills.git] [<TMP>/gauss-home/autoformalize/assets/lean4-skills]",
-        "git [-C] [<TMP>/gauss-home/autoformalize/assets/lean4-skills] [rev-parse] [HEAD]",
+        "git [clone] [--depth] [1] [--filter=blob:none] [https://github.com/cameronfreer/lean4-skills.git] [<TMP>/fisher-home/autoformalize/assets/lean4-skills]",
+        "git [-C] [<TMP>/fisher-home/autoformalize/assets/lean4-skills] [rev-parse] [HEAD]",
         "uvx [--from] [lean-lsp-mcp] [lean-lsp-mcp] [--help]"
       ]
     },
@@ -230,7 +230,7 @@
       },
       "files": {},
       "calls": [
-        "git [clone] [--depth] [1] [--filter=blob:none] [https://github.com/cameronfreer/lean4-skills.git] [<TMP>/gauss-home/autoformalize/assets/lean4-skills]"
+        "git [clone] [--depth] [1] [--filter=blob:none] [https://github.com/cameronfreer/lean4-skills.git] [<TMP>/fisher-home/autoformalize/assets/lean4-skills]"
       ]
     }
   ]

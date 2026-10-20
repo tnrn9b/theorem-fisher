@@ -99,7 +99,7 @@ spec = do
     it "takes a query value that is not UTF-8 as matching nothing, not as an error" $ withFixture $ \fx -> do
       (code, v) <- getJson (fxEnv fx) "/api/sessions?model=%FF%FE"
       (code, v) `shouldBe` (200, A.Array mempty)
-    it "an empty GAUSS_HOME gives an empty list" $ withSystemTempDirectory "fisher-ui" $ \tmp -> do
+    it "an empty FISHER_HOME gives an empty list" $ withSystemTempDirectory "fisher-ui" $ \tmp -> do
       env <- newUiEnv tmp tmp tmp
       snd <$> getJson env "/api/sessions" `shouldReturn` A.Array mempty
 

@@ -1,5 +1,5 @@
 -- | Upstream's cron/jobs.py: schedules, the next run, and the jobs kept in
--- @~/.gauss/cron/jobs.json@ (with each run's output under
+-- @cron/jobs.json@ in the Fisher home (with each run's output under
 -- @cron/output/JOB/TIMESTAMP.md@). Jobs stay Python dicts ('PyVal'), in
 -- upstream's key order, since the file is shared with it.
 module Fisher.Cron.Jobs
@@ -48,9 +48,9 @@ import Fisher.Py.Value
 -- | What the cron code takes from outside.
 data CronEnv = CronEnv
   { ceHome :: FilePath
-  -- ^ GAUSS_HOME
+  -- ^ the Fisher home ('Fisher.Paths.getFisherHome')
   , ceNow :: IO Dt
-  -- ^ @gauss_time.now()@
+  -- ^ upstream's @now()@ (its time module)
   , ceLocalOffset :: IO Int
   -- ^ the offset of @datetime.now().astimezone()@ (system local time)
   , ceNewHex :: IO Text
@@ -63,7 +63,7 @@ cronDir env = ceHome env </> "cron"
 nowIso :: CronEnv -> IO Text
 nowIso env = isoformat <$> ceNow env
 
--- | The zone @gauss_time.now()@ answers in.
+-- | The zone upstream's @now()@ answers in.
 zoneFor :: Dt -> Maybe Tz
 zoneFor = dtTz
 
@@ -128,7 +128,7 @@ parseSchedule env schedule0 = do
                     <> "  - Cron: '0 9 * * *' (cron expression)\n"
                     <> "  - Timestamp: '2026-02-03T14:00:00' (one-shot at time)"
 
--- | @_ensure_aware(dt)@: in the zone of @gauss_time.now()@.
+-- | @_ensure_aware(dt)@: in the zone of upstream's @now()@.
 ensureAware :: CronEnv -> Dt -> IO Dt
 ensureAware env dt = do
   now <- ceNow env

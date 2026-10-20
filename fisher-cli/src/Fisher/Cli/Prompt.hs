@@ -1,7 +1,7 @@
--- | The prompt primitives of the setup wizard (@gauss_cli/setup.py@:
+-- | The prompt primitives of the setup wizard (upstream @cli/setup.py@:
 -- @print_header@ and friends, @prompt@, @prompt_choice@,
 -- @prompt_yes_no@, @prompt_checklist@), the checklist of
--- @gauss_cli/curses_ui.py@ and the gentler copies @tools_config.py@ keeps
+-- upstream @cli/curses_ui.py@ and the gentler copies @tools_config.py@ keeps
 -- for itself, all over 'Sys'.
 --
 -- Upstream tries a curses menu first and falls back to a numbered list

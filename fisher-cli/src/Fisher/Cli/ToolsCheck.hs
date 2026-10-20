@@ -50,7 +50,7 @@ toolsCheckMain :: Sys -> [Text] -> IO Int
 toolsCheckMain sys args = do
   loadDotenvIntoSys sys
   cfg <- loadConfigOrdered sys
-  at <- newAgentTools (sysGaussHome sys)
+  at <- newAgentTools (sysFisherHome sys)
   http <- tlsHttpClient
   environ <- sysEnviron
   let env =
@@ -60,7 +60,7 @@ toolsCheckMain sys args = do
           , meSampling = mainProviderSampling sys cfg
           , meEnviron = pure environ
           , meHome = T.pack (sysHome sys)
-          , meGaussHome = sysGaussHome sys
+          , meFisherHome = sysFisherHome sys
           , meHttp = Just http
           }
   mc <- newMcpClient env

@@ -176,7 +176,8 @@ coreTools =
   , "browser_press", "browser_close", "browser_get_images", "browser_vision"
   ]
 
--- | @TOOLSETS@ at the pinned commit, in its order.
+-- | @TOOLSETS@ at the pinned commit, in its order, with upstream's
+-- platform toolsets under Fisher's @fisher-*@ names.
 builtinToolsets :: [(Text, Toolset)]
 builtinToolsets =
   [ ("web", Toolset "Web research tools" ["web_search"] [])
@@ -190,21 +191,21 @@ builtinToolsets =
         []
     )
   , ("file", Toolset "File manipulation tools: read, write, patch (with fuzzy matching), and search (content + files)" ["read_file", "write_file", "patch", "search_files"] [])
-  , ("autoformalize", Toolset "Minimal Gauss workflow for papers, source files, and browser-driven research" [] ["web", "file", "browser"])
-  , ("gauss-acp", Toolset "Editor integration (VS Code, Zed, JetBrains) \8212 minimal file, web, and browser tools for Gauss work" coreTools [])
-  , ("gauss-cli", Toolset "Minimal interactive Gauss toolset for autoformalization workflows" coreTools [])
-  , ("gauss-telegram", Toolset "Telegram bot toolset - minimal Gauss file, web, and browser access" coreTools [])
-  , ("gauss-discord", Toolset "Discord bot toolset - minimal Gauss file, web, and browser access" coreTools [])
-  , ("gauss-whatsapp", Toolset "WhatsApp bot toolset - minimal Gauss file, web, and browser access" coreTools [])
-  , ("gauss-slack", Toolset "Slack bot toolset - minimal Gauss file, web, and browser access" coreTools [])
-  , ("gauss-signal", Toolset "Signal bot toolset - minimal Gauss file, web, and browser access" coreTools [])
-  , ("gauss-homeassistant", Toolset "Home Assistant bot toolset - minimal Gauss file, web, and browser access" coreTools [])
-  , ("gauss-email", Toolset "Email bot toolset - minimal Gauss file, web, and browser access" coreTools [])
-  , ( "gauss-gateway"
+  , ("autoformalize", Toolset "Minimal Fisher workflow for papers, source files, and browser-driven research" [] ["web", "file", "browser"])
+  , ("fisher-acp", Toolset "Editor integration (VS Code, Zed, JetBrains) \8212 minimal file, web, and browser tools for Fisher work" coreTools [])
+  , ("fisher-cli", Toolset "Minimal interactive Fisher toolset for autoformalization workflows" coreTools [])
+  , ("fisher-telegram", Toolset "Telegram bot toolset - minimal Fisher file, web, and browser access" coreTools [])
+  , ("fisher-discord", Toolset "Discord bot toolset - minimal Fisher file, web, and browser access" coreTools [])
+  , ("fisher-whatsapp", Toolset "WhatsApp bot toolset - minimal Fisher file, web, and browser access" coreTools [])
+  , ("fisher-slack", Toolset "Slack bot toolset - minimal Fisher file, web, and browser access" coreTools [])
+  , ("fisher-signal", Toolset "Signal bot toolset - minimal Fisher file, web, and browser access" coreTools [])
+  , ("fisher-homeassistant", Toolset "Home Assistant bot toolset - minimal Fisher file, web, and browser access" coreTools [])
+  , ("fisher-email", Toolset "Email bot toolset - minimal Fisher file, web, and browser access" coreTools [])
+  , ( "fisher-gateway"
     , Toolset
         "Gateway toolset - union of the minimal messaging-platform tool surfaces"
         []
-        ["gauss-telegram", "gauss-discord", "gauss-whatsapp", "gauss-slack", "gauss-signal", "gauss-homeassistant", "gauss-email"]
+        ["fisher-telegram", "fisher-discord", "fisher-whatsapp", "fisher-slack", "fisher-signal", "fisher-homeassistant", "fisher-email"]
     )
   ]
 
@@ -228,7 +229,7 @@ createCustomToolset r name ts = modifyIORef' (rToolsets r) $ \tss ->
   if any ((== name) . fst) tss then [(n, if n == name then ts else t) | (n, t) <- tss] else tss <> [(name, ts)]
 
 -- | Append tool names to every toolset whose name starts with a prefix
--- (MCP adds its tools to each @gauss-*@ toolset).
+-- (MCP adds its tools to each @fisher-*@ toolset).
 appendToToolsets :: Registry -> Text -> [Text] -> IO ()
 appendToToolsets r prefix names = modifyIORef' (rToolsets r) . map $ \(n, ts) ->
   if prefix `T.isPrefixOf` n then (n, ts {tsTools = foldl (\acc x -> if x `elem` acc then acc else acc <> [x]) (tsTools ts) names}) else (n, ts)
@@ -274,7 +275,8 @@ toolsetInfo r name = do
 -- the definitions and the lines upstream prints when not quiet.
 getToolDefinitions :: Registry -> Maybe [Text] -> Maybe [Text] -> IO ([PyVal], [Text])
 getToolDefinitions r enabled disabled = do
-  allNames <- map fst <$> readIORef (rToolsets r)
+  tss0 <- readIORef (rToolsets r)
+  let allNames = map fst tss0
   let listing xs = if null xs then "no tools" else T.intercalate ", " xs
   (include, msgs) <- case (enabled, disabled) of
     (Just en@(_ : _), _) -> do

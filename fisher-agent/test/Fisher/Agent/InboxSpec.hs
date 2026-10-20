@@ -13,8 +13,8 @@ import Fisher.Agent.Inbox
 spec :: Spec
 spec = describe "Fisher.Agent.Inbox" $ do
   it "takes what is new, each line once" $ withSystemTempDirectory "fisher-inbox" $ \tmp -> do
-    let path = inboxPath (tmp </> "gauss") "s1"
-    path `shouldBe` tmp </> "gauss" </> "fisher" </> "inbox" </> "s1.jsonl"
+    let path = inboxPath (tmp </> "fisher") "s1"
+    path `shouldBe` tmp </> "fisher" </> "fisher" </> "inbox" </> "s1.jsonl"
     takeInbox path `shouldReturn` []
     appendInbox path "Also check B."
     appendInbox path "and \"quote\" ü"

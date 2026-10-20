@@ -31,7 +31,7 @@ withHolder p k =
 spec :: Spec
 spec = describe "Fisher.Agent.RunLock" $ do
   it "holds the session's lock for the process's life and writes its pid" $ withSystemTempDirectory "fisher-runlock" $ \tmp -> do
-    let home = tmp </> "gauss"
+    let home = tmp </> "fisher"
     runLockPath home "R" `shouldBe` home </> "fisher" </> "steps" </> "R.lock"
     holdRunLock home "R" `shouldReturn` True
     -- a second take in the same process keeps it
@@ -44,7 +44,7 @@ spec = describe "Fisher.Agent.RunLock" $ do
     otherCanLock (runLockPath home "T") `shouldReturn` True
 
   it "does not take a lock another process holds, and names that process" $ withSystemTempDirectory "fisher-runlock" $ \tmp -> do
-    let home = tmp </> "gauss"
+    let home = tmp </> "fisher"
     holdRunLock home "X" `shouldReturn` True
     let p = runLockPath home "Q"
     writeFile p ""
@@ -56,7 +56,7 @@ spec = describe "Fisher.Agent.RunLock" $ do
     runLockHolder home "nothing-here" `shouldReturn` Nothing
 
   it "waits a moment for a lock held briefly (a prune), then takes it" $ withSystemTempDirectory "fisher-runlock" $ \tmp -> do
-    let home = tmp </> "gauss"
+    let home = tmp </> "fisher"
         p = runLockPath home "W"
     holdRunLock home "X0" `shouldReturn` True
     writeFile p ""
@@ -67,13 +67,13 @@ spec = describe "Fisher.Agent.RunLock" $ do
     otherCanLock p `shouldReturn` False
 
   it "opens the lock's descriptor close-on-exec (a tool's subprocess does not keep it)" $ withSystemTempDirectory "fisher-runlock" $ \tmp -> do
-    let home = tmp </> "gauss"
+    let home = tmp </> "fisher"
     holdRunLock home "E" `shouldReturn` True
     fd <- maybe (fail "no descriptor held") pure =<< heldRunLockFd home "E"
     queryFdOption fd CloseOnExec `shouldReturn` True
 
   it "takes a lock for a while when it is free (tryRunLock), and not when another process holds it" $ withSystemTempDirectory "fisher-runlock" $ \tmp -> do
-    let home = tmp </> "gauss"
+    let home = tmp </> "fisher"
     got <- tryRunLock home "P"
     case got of
       Nothing -> expectationFailure "a free lock was not taken"

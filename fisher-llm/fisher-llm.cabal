@@ -23,7 +23,6 @@ library
       Fisher.LLM.Auth.Env
       Fisher.LLM.Auth.Error
       Fisher.LLM.Auth.Logout
-      Fisher.LLM.Auth.Nous
       Fisher.LLM.Auth.PyYaml
       Fisher.LLM.Auth.Registry
       Fisher.LLM.Auth.Resolve
@@ -91,6 +90,7 @@ test-suite fisher-llm-test
       Fisher.LLM.AuthResolveSpec
       Fisher.LLM.GoldenSpec
       Fisher.LLM.LiveSpec
+      Fisher.LLM.PyYamlNamesSpec
       Paths_fisher_llm
   autogen-modules:
       Paths_fisher_llm

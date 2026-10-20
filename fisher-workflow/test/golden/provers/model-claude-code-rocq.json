@@ -5,7 +5,7 @@
     "from-flag",
     "--permission-mode",
     "bypassPermissions",
-    "You are in a Fisher-managed Rocq workflow session. Read the startup context at <TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md first. Then run this command inside the active project as your first workflow action: /rocq:prove Main"
+    "You are in a Fisher-managed Rocq workflow session. Read the startup context at <TMP>/fisher-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md first. Then run this command inside the active project as your first workflow action: /rocq:prove Main"
   ],
   "backend_command": "/rocq:prove Main",
   "print_argv": [
@@ -15,6 +15,6 @@
     "--permission-mode",
     "bypassPermissions",
     "-p",
-    "You are in a Fisher-managed Rocq workflow session. Read the startup context at <TMP>/gauss-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md first. Then run this command inside the active project as your first workflow action: /rocq:prove Main"
+    "You are in a Fisher-managed Rocq workflow session. Read the startup context at <TMP>/fisher-home/autoformalize/claude-code/managed/startup/<STAMP>-prove.md first. Then run this command inside the active project as your first workflow action: /rocq:prove Main"
   ]
 }

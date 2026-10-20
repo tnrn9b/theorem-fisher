@@ -3,7 +3,7 @@
     "attempts": [
         {
             "attempt": 1,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 157.2,
             "goal": "Step.Diamond.runBody_pop",
             "outcome": "closed",
@@ -25,7 +25,7 @@
         }
     ],
     "backends": [
-        "gauss"
+        "fisher"
     ],
     "budget_s": 3600,
     "cap_usd": 6,

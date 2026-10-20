@@ -1,5 +1,5 @@
 -- | The interactive fisher shell: @fisher@ with no command. Upstream's
--- @GaussCLI.run@ over prompt_toolkit becomes a haskeline loop; the
+-- CLI class's @run@ over prompt_toolkit becomes a haskeline loop; the
 -- commands themselves are "Fisher.Shell.Commands", wired here to the
 -- project model, the workflow plans and the swarm.
 module Fisher.Shell
@@ -162,7 +162,7 @@ runShell opts = do
           , dAnsi = styleAnsi st
           , dUnicode = styleUnicode st
           , dRenderTerminal = renderText st
-          , dGaussHome = home
+          , dFisherHome = home
           , dConfigPath = configPath
           , dProject = do
               ps <- projectState session
@@ -243,7 +243,7 @@ runShell opts = do
   showBanner deps state
   plainPrint deps ""
   welcome deps state
-  let settings = (defaultSettings :: Settings IO) {historyFile = Just (home </> ".gauss_history")}
+  let settings = (defaultSettings :: Settings IO) {historyFile = Just (home </> ".fisher_history")}
   runInputT settings $ do
     ext <- getExternalPrint
     liftIO (writeIORef external (\t -> ext (T.unpack t <> "\n")))

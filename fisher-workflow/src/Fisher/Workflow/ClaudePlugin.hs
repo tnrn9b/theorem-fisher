@@ -1,7 +1,7 @@
 -- | The lean4 plugin in a Claude Code profile: its marketplace and
 -- installed-plugin records, syncing a prewarmed install into a managed
 -- home, and installing it through the @claude@ CLI. Ported from the
--- @_claude_*@ helpers in @gauss_cli/autoformalize.py@.
+-- @_claude_*@ helpers in upstream @cli/autoformalize.py@.
 module Fisher.Workflow.ClaudePlugin
   ( marketplaceName
   , pluginId

@@ -1,4 +1,4 @@
--- | @fisher cron@ against @gauss cron@ (@test/golden/e2/cli.json@ and
+-- | @fisher cron@ against upstream's @cron@ command (@test/golden/e2/cli.json@ and
 -- @tick.json@, from tools/corpus/e2.py).
 --
 -- The CLI: each case's commands in order, the clock moved between them;
@@ -65,10 +65,10 @@ canon = \case
 fisherText :: Text -> Text
 fisherText =
   T.replace
-    "  ⚠  Gateway is not running — jobs won't fire automatically.\n     Start it with: gauss gateway install\n                    sudo gauss gateway install --system  # Linux servers\n"
+    "  ⚠  Gateway is not running — jobs won't fire automatically.\n     Start it with: fisher gateway install\n                    sudo fisher gateway install --system  # Linux servers\n"
     "  ⚠  The cron ticker is not running — jobs won't fire automatically.\n     Start it with: fisher cron serve\n"
     . T.replace
-      "✗ Gateway is not running — cron jobs will NOT fire\n\n  To enable automatic execution:\n    gauss gateway install    # Install as a user service\n    sudo gauss gateway install --system  # Linux servers: boot-time system service\n    gauss gateway            # Or run in foreground\n"
+      "✗ Gateway is not running — cron jobs will NOT fire\n\n  To enable automatic execution:\n    fisher gateway install    # Install as a user service\n    sudo fisher gateway install --system  # Linux servers: boot-time system service\n    fisher gateway            # Or run in foreground\n"
       "✗ The cron ticker is not running — cron jobs will NOT fire\n\n  To enable automatic execution:\n    fisher cron serve        # Run the ticker (keep it running, e.g. under launchd or systemd)\n"
 
 clockStart :: Dt
@@ -77,9 +77,9 @@ clockStart = case fromIsoformat "2026-10-02T04:50:07.123456+00:00" of
   Left e -> error (T.unpack e)
 
 cronEnvFor :: FilePath -> IORef Integer -> IORef Integer -> CronEnv
-cronEnvFor gauss clock ids =
+cronEnvFor fisher clock ids =
   CronEnv
-    { ceHome = gauss
+    { ceHome = fisher
     , ceNow = do
         us <- readIORef clock
         pure (dtFromInstant (TzZone utcZone Nothing) us)
@@ -89,14 +89,14 @@ cronEnvFor gauss clock ids =
         pure (T.justifyRight 32 '0' (T.pack (showHex (((0xC0FFEE000000 + n) * 2 ^ (80 :: Int)) + 0xABCDEF) ""))) }
 
 readJobs :: FilePath -> IO PyVal
-readJobs gauss = do
-  let f = gauss </> "cron" </> "jobs.json"
+readJobs fisher = do
+  let f = fisher </> "cron" </> "jobs.json"
   ex <- doesFileExist f
   if ex then either fail pure . loads =<< BS.readFile f else pure PNull
 
 outputs :: FilePath -> IO PyVal
-outputs gauss = do
-  let d = gauss </> "cron" </> "output"
+outputs fisher = do
+  let d = fisher </> "cron" </> "output"
   ex <- doesDirectoryExist d
   if not ex
     then pure (PDict [])
@@ -126,7 +126,7 @@ newSys home env offset uuidN outBuf =
         , sysOpenBrowser = \_ -> pure False, sysRun = \_ -> pure (Left "no"), sysRunInteractive = \_ -> pure (Left "no")
         , sysWhich = \_ -> pure Nothing, sysPlatform = "linux"
         , sysUuidHex = atomicModifyIORef' uuidN (\n -> (n + 1, T.justifyRight 32 '0' (T.pack (showHex (toInteger (n + 1) * 0x1F2E3D * 2 ^ (104 :: Int)) ""))))
-        , sysTimeZoneAt = \_ -> pure utc, sysHome = home, sysGaussHome = home </> ".gauss"
+        , sysTimeZoneAt = \_ -> pure utc, sysHome = home, sysFisherHome = home </> ".fisher"
         , sysOut = \t -> modifyIORef outBuf (<> [t]), sysInput = \_ -> pure Nothing, sysGetPass = \_ -> pure Nothing
         , sysStdinTty = pure False, sysStdoutTty = pure False, sysPid = 4242 }
 
@@ -153,12 +153,12 @@ normalizeOut = T.intercalate "\n" . map (last . T.splitOn "\r") . T.splitOn "\n"
 spec :: Spec
 spec = do
   cli <- runIO (either fail pure . loads =<< BS.readFile "test/golden/e2/cli.json")
-  describe "gauss cron" $
+  describe "fisher cron" $
     forM_ (lst "cases" cli) $ \c -> it (T.unpack (txt "name" c)) $ withSystemTempDirectory "fisher-cron" $ \tmp0 -> do
       home <- canonicalizePath tmp0
-      let gauss = home </> ".gauss"
-      createDirectoryIfMissing True gauss
-      env <- newIORef (M.fromList [("HOME", T.pack home), ("NO_COLOR", "1"), ("GAUSS_TIMEZONE", "UTC")])
+      let fisher = home </> ".fisher"
+      createDirectoryIfMissing True fisher
+      env <- newIORef (M.fromList [("HOME", T.pack home), ("NO_COLOR", "1"), ("FISHER_TIMEZONE", "UTC")])
       offset <- newIORef 0
       uuidN <- newIORef 0
       outBuf <- newIORef []
@@ -167,7 +167,7 @@ spec = do
       let sys = newSys home env offset uuidN outBuf
           deps =
             (defaultCronDeps)
-              { crEnv = \_ -> pure (cronEnvFor gauss clock ids)
+              { crEnv = \_ -> pure (cronEnvFor fisher clock ids)
               , crTicker = \_ -> pure Nothing
               , crErr = \t -> modifyIORef outBuf (<> [t <> "\n"])
               , crReplay = False }
@@ -180,27 +180,27 @@ spec = do
           PInt (fromIntegral code) `shouldBe` fld "exit" st
           let want = txt "output" st
           when (not (T.null want) || fld "exit" st == PInt 0) $ out `shouldBe` fisherText want
-          j <- readJobs gauss
+          j <- readJobs fisher
           j `shouldBe` fld "jobs" st
   tickDoc <- runIO (either fail pure . loads =<< BS.readFile "test/golden/e2/tick.json")
   describe "cron.scheduler.tick" $
     forM_ (lst "cases" tickDoc) $ \c -> it (T.unpack (txt "name" c)) $ withSystemTempDirectory "fisher-tick" $ \tmp0 -> do
       home <- canonicalizePath tmp0
-      let gauss = home </> ".gauss"
+      let fisher = home </> ".fisher"
           setup = fld "setup" c
           work = home </> "work"
-      createDirectoryIfMissing True (gauss </> "memories")
+      createDirectoryIfMissing True (fisher </> "memories")
       createDirectoryIfMissing True work
       BS.writeFile (work </> "README.md") "# Demo\n\nA small project.\n"
-      env <- newIORef (M.fromList ([("HOME", T.pack home), ("NO_COLOR", "1"), ("GAUSS_TIMEZONE", "UTC")]
+      env <- newIORef (M.fromList ([("HOME", T.pack home), ("NO_COLOR", "1"), ("FISHER_TIMEZONE", "UTC")]
         <> [("OPENROUTER_API_KEY", "sk-or-test-1234567890") | fld "no_key" setup /= PBool True]))
-      when (fld "no_key" setup /= PBool True) $ BS.writeFile (gauss </> ".env") "OPENROUTER_API_KEY=sk-or-test-1234567890\n"
+      when (fld "no_key" setup /= PBool True) $ BS.writeFile (fisher </> ".env") "OPENROUTER_API_KEY=sk-or-test-1234567890\n"
       case get "config" setup of
-        Just (PStr y) -> BS.writeFile (gauss </> "config.yaml") (TE.encodeUtf8 y)
+        Just (PStr y) -> BS.writeFile (fisher </> "config.yaml") (TE.encodeUtf8 y)
         _ -> pure ()
       case get "skills" setup of
         Just (PDict kvs) -> forM_ kvs $ \(rel, v) -> do
-          let p = gauss </> "skills" </> T.unpack rel
+          let p = fisher </> "skills" </> T.unpack rel
           createDirectoryIfMissing True (takeDirectory p)
           BS.writeFile p (TE.encodeUtf8 (pyStrOf v))
         _ -> pure ()
@@ -213,7 +213,7 @@ spec = do
       queue <- newIORef []
       toolQ <- newIORef []
       let sys = newSys home env offset uuidN outBuf
-          cenv = cronEnvFor gauss clock ids
+          cenv = cronEnvFor fisher clock ids
       -- the jobs, as the recorder made them
       forM_ (lst "jobs" setup) $ \case
         PList [PStr sched, PStr prompt, opts] -> do
@@ -232,9 +232,9 @@ spec = do
             Left e -> expectationFailure (T.unpack e)
         _ -> pure ()
       case lst "steps" c of
-        first : _ -> readJobs gauss >>= (`shouldBe` fld "jobs" first)
+        first : _ -> readJobs fisher >>= (`shouldBe` fld "jobs" first)
         [] -> pure ()
-      at <- newAgentTools gauss
+      at <- newAgentTools fisher
       (defs, _) <- getToolDefinitions (atRegistry at) Nothing (Just ["cronjob"])
       let respond hr = do
             modifyIORef reqs (<> [hr])
@@ -280,24 +280,24 @@ spec = do
           held <-
             if txt "name" c == "locked"
               then do
-                createDirectoryIfMissing True (gauss </> "cron")
-                Just <$> lockFile (gauss </> "cron" </> ".tick.lock") Exclusive
+                createDirectoryIfMissing True (fisher </> "cron")
+                Just <$> lockFile (fisher </> "cron" </> ".tick.lock") Exclusive
               else pure Nothing
           n <- tick deps sys
           mapM_ unlockFile held
           PInt (fromIntegral n) `shouldBe` fld "tick" st
           rs <- readIORef reqs
           map reqVal rs `shouldBe` map goldenReq (lst "requests" st)
-          o <- outputs gauss
+          o <- outputs fisher
           beforeTraceback o `shouldBe` beforeTraceback (fld "outputs" st)
-          j <- readJobs gauss
+          j <- readJobs fisher
           j `shouldBe` fld "jobs" st
           out <- T.concat <$> readIORef outBuf
-          normalizeOut (T.replace (T.pack gauss) "<GAUSS_HOME>" out) `shouldBe` normalizeOut (txt "stdout" st)
+          normalizeOut (T.replace (T.pack fisher) "<FISHER_HOME>" out) `shouldBe` normalizeOut (txt "stdout" st)
           case fld "db" st of
             PNull -> pure ()
             db -> do
-              stDb <- openStore (gauss </> "state.db")
+              stDb <- openStore (fisher </> "state.db")
               (ss, ms) <- snapshotRows stDb
               closeStore stDb
               let pick ks row = PDict [(k, fromMaybe PNull (lookup k row)) | k <- ks]

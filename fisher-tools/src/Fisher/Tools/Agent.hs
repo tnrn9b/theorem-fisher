@@ -32,18 +32,18 @@ data AgentTools = AgentTools
 getenvT :: Text -> IO (Maybe Text)
 getenvT k = fmap T.pack <$> lookupEnv (T.unpack k)
 
--- | @gaussHome@ is where docker workspaces go (@<home>/sandboxes@ unless
+-- | @fisherHome@ is where docker workspaces go (@<home>/sandboxes@ unless
 -- @TERMINAL_SANDBOX_DIR@ says otherwise).
 newAgentTools :: FilePath -> IO AgentTools
 newAgentTools = newAgentToolsWith id
 
 -- | With the sandbox environment adjusted (the CLI's sudo prompt).
 newAgentToolsWith :: (SandboxEnv -> SandboxEnv) -> FilePath -> IO AgentTools
-newAgentToolsWith adjust gaussHome = do
+newAgentToolsWith adjust fisherHome = do
   se <- adjust <$> defaultSandboxEnv
   home <- T.pack <$> getHomeDirectory
   scope <- homeWriteScope home
-  sandboxDir <- maybe (gaussHome <> "/sandboxes") id <$> lookupEnv "TERMINAL_SANDBOX_DIR"
+  sandboxDir <- maybe (fisherHome <> "/sandboxes") id <$> lookupEnv "TERMINAL_SANDBOX_DIR"
   let platform = if os == "darwin" then "darwin" else T.pack os
       host = systemDockerHost platform sandboxDir
       create tid = do
@@ -68,7 +68,7 @@ newAgentToolsWith adjust gaussHome = do
       check = do
         cwd <- T.pack <$> getCurrentDirectory
         checkTerminalRequirements getenvT cwd
-  ft <- newFileTools opsFor (getenvT "GAUSS_REDACT_SECRETS") check
+  ft <- newFileTools opsFor (fmap T.pack <$> lookupEnv "FISHER_REDACT_SECRETS") check
   reg <- newRegistry
   registerFileTools reg ft
   pure (AgentTools reg ft mgr se)

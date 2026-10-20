@@ -1,7 +1,9 @@
--- | The argparse surface of @gauss login@, @logout@, @status@, @setup@ and
+-- | The argparse surface of @fisher login@, @logout@, @status@, @setup@ and
 -- @model@ (main.py): the options each takes, their help (as argparse lays
 -- it out at 100 columns) and argparse's error text. Unique prefixes of
--- long options are accepted, as argparse accepts them.
+-- long options are accepted, as argparse accepts them. A @--provider@ that
+-- names a provider Fisher removed gets the removal message, not argparse's
+-- invalid choice.
 module Fisher.Cli.AuthArgs
   ( ArgParser (..)
   , OptSpec (..)
@@ -22,6 +24,7 @@ import Data.Maybe (isJust)
 import Data.Text (Text)
 import qualified Data.Text as T
 
+import Fisher.LLM.Auth.Registry (isRemovedProvider, removedProviderMessage)
 import Fisher.LLM.Auth.Util (pyFloatText)
 
 data OptKind
@@ -109,6 +112,8 @@ parseArgs p args0 = do
                 (v : r) | not ("-" `T.isPrefixOf` v) || v == "-" -> Right (v, r)
                 _ -> err ("argument " <> osName o <> ": expected one argument")
             case choices of
+              Just cs | v `notElem` cs, osName o == "--provider", isRemovedProvider v ->
+                err ("argument --provider: " <> removedProviderMessage)
               Just cs | v `notElem` cs ->
                 err ("argument " <> osName o <> ": invalid choice: '" <> v <> "' (choose from " <> choiceList cs <> ")")
               _ | isFloat, Nothing <- pyFloatText v -> err ("argument " <> osName o <> ": invalid float value: '" <> v <> "'")
@@ -116,26 +121,19 @@ parseArgs p args0 = do
     upsert k v acc = filter ((/= k) . fst) acc <> [(k, v)]
 
 providerChoices :: [Text]
-providerChoices = ["nous", "openai-codex"]
+providerChoices = ["openai-codex"]
 
 loginParser :: ArgParser
 loginParser =
   ArgParser
-    { apProg = "gauss login"
+    { apProg = "fisher login"
     , apUsage = loginUsage
     , apHelp =
         loginUsage
-          <> "\nRun OAuth device authorization flow for the Gauss CLI\n\noptions:\n\
+          <> "\nRun OAuth device authorization flow for the Fisher CLI\n\noptions:\n\
              \  -h, --help            show this help message and exit\n\
-             \  --provider {nous,openai-codex}\n\
-             \                        Provider to authenticate with (default: nous)\n\
-             \  --portal-url PORTAL_URL\n\
-             \                        Portal base URL (default: production portal)\n\
-             \  --inference-url INFERENCE_URL\n\
-             \                        Inference API base URL (default: production inference API)\n\
-             \  --client-id CLIENT_ID\n\
-             \                        OAuth client id to use (default: gauss-cli)\n\
-             \  --scope SCOPE         OAuth scope to request\n\
+             \  --provider {openai-codex}\n\
+             \                        Provider to authenticate with\n\
              \  --no-browser          Do not attempt to open the browser automatically\n\
              \  --timeout TIMEOUT     HTTP request timeout in seconds (default: 15)\n\
              \  --ca-bundle CA_BUNDLE\n\
@@ -143,10 +141,6 @@ loginParser =
              \  --insecure            Disable TLS verification (testing only)\n"
     , apOpts =
         [ OptSpec "--provider" "PROVIDER" (Value (Just providerChoices) False)
-        , OptSpec "--portal-url" "PORTAL_URL" (Value Nothing False)
-        , OptSpec "--inference-url" "INFERENCE_URL" (Value Nothing False)
-        , OptSpec "--client-id" "CLIENT_ID" (Value Nothing False)
-        , OptSpec "--scope" "SCOPE" (Value Nothing False)
         , OptSpec "--no-browser" "" Flag
         , OptSpec "--timeout" "TIMEOUT" (Value Nothing True)
         , OptSpec "--ca-bundle" "CA_BUNDLE" (Value Nothing False)
@@ -155,35 +149,34 @@ loginParser =
     }
   where
     loginUsage =
-      "usage: gauss login [-h] [--provider {nous,openai-codex}] [--portal-url PORTAL_URL]\n\
-      \                   [--inference-url INFERENCE_URL] [--client-id CLIENT_ID] [--scope SCOPE]\n\
-      \                   [--no-browser] [--timeout TIMEOUT] [--ca-bundle CA_BUNDLE] [--insecure]\n"
+      "usage: fisher login [-h] [--provider {openai-codex}] [--no-browser] [--timeout TIMEOUT]\n\
+      \                    [--ca-bundle CA_BUNDLE] [--insecure]\n"
 
 logoutParser :: ArgParser
 logoutParser =
   ArgParser
-    { apProg = "gauss logout"
+    { apProg = "fisher logout"
     , apUsage = usage
     , apHelp =
         usage
           <> "\nRemove stored credentials and reset provider config\n\noptions:\n\
              \  -h, --help            show this help message and exit\n\
-             \  --provider {nous,openai-codex}\n\
+             \  --provider {openai-codex}\n\
              \                        Provider to log out from (default: active provider)\n"
     , apOpts = [OptSpec "--provider" "PROVIDER" (Value (Just providerChoices) False)]
     , apPositional = Nothing
     }
   where
-    usage = "usage: gauss logout [-h] [--provider {nous,openai-codex}]\n"
+    usage = "usage: fisher logout [-h] [--provider {openai-codex}]\n"
 
 statusParser :: ArgParser
 statusParser =
   ArgParser
-    { apProg = "gauss status"
+    { apProg = "fisher status"
     , apUsage = usage
     , apHelp =
         usage
-          <> "\nDisplay status of Gauss components\n\noptions:\n\
+          <> "\nDisplay status of Fisher components\n\noptions:\n\
              \  -h, --help  show this help message and exit\n\
              \  --all       Show all details (redacted for sharing)\n\
              \  --deep      Run deep checks (may take longer)\n"
@@ -191,16 +184,16 @@ statusParser =
     , apPositional = Nothing
     }
   where
-    usage = "usage: gauss status [-h] [--all] [--deep]\n"
+    usage = "usage: fisher status [-h] [--all] [--deep]\n"
 
 setupParser :: ArgParser
 setupParser =
   ArgParser
-    { apProg = "gauss setup"
+    { apProg = "fisher setup"
     , apUsage = usage
     , apHelp =
         usage
-          <> "\nConfigure Gauss with an interactive wizard. Run a specific section: gauss setup\n\
+          <> "\nConfigure Fisher with an interactive wizard. Run a specific section: fisher setup\n\
              \model|terminal|gateway|tools|agent\n\n\
              \positional arguments:\n\
              \  {model,terminal,gateway,tools,agent}\n\
@@ -213,12 +206,12 @@ setupParser =
     , apPositional = Just ("section", ["model", "terminal", "gateway", "tools", "agent"])
     }
   where
-    usage = "usage: gauss setup [-h] [--non-interactive] [--reset] [{model,terminal,gateway,tools,agent}]\n"
+    usage = "usage: fisher setup [-h] [--non-interactive] [--reset] [{model,terminal,gateway,tools,agent}]\n"
 
 modelParser :: ArgParser
 modelParser =
   ArgParser
-    { apProg = "gauss model"
+    { apProg = "fisher model"
     , apUsage = usage
     , apHelp =
         usage
@@ -228,4 +221,4 @@ modelParser =
     , apPositional = Nothing
     }
   where
-    usage = "usage: gauss model [-h]\n"
+    usage = "usage: fisher model [-h]\n"

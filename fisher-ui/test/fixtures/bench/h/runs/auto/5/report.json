@@ -3,7 +3,7 @@
     "attempts": [
         {
             "attempt": 1,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 452.4,
             "goal": "Step.Diamond.twoFire_joint",
             "outcome": "closed",
@@ -33,7 +33,7 @@
     "auto_requested": true,
     "auto_warmup_s": 53.8,
     "backends": {
-        "gauss": [
+        "fisher": [
             1,
             1
         ]
@@ -47,10 +47,10 @@
     "goals": [
         {
             "attempts": [
-                "gauss"
+                "fisher"
             ],
             "by_attempt": 1,
-            "by_backend": "gauss",
+            "by_backend": "fisher",
             "closedBy": "model",
             "closed_at_s": 452.4,
             "goal": "Step.Diamond.twoFire_joint",

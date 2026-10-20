@@ -309,7 +309,7 @@
   {
    "text": "sk-abcdefghijklmnop",
    "env": {
-    "GAUSS_REDACT_SECRETS": "off"
+    "FISHER_REDACT_SECRETS": "off"
    },
    "redacted": "sk-abcdefghijklmnop"
   }

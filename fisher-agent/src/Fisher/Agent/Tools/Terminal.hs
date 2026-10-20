@@ -21,6 +21,7 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 
 import Fisher.Agent.Tools.Approval
+import Fisher.Paths (fisherHomeLabelWith)
 import Fisher.Agent.Tools.Process
 import Fisher.Agent.Tools.Web (toolSchemas)
 import Fisher.Py.Re (compileOrDie, search)
@@ -117,11 +118,13 @@ runForeground env sandbox command workdir effTimeout = go (0 :: Int)
           | retry < 3 -> teSleep env (2 ^ (retry + 1)) >> go (retry + 1)
           | otherwise -> out [("output", PStr ""), ("exit_code", PInt (-1)), ("error", PStr ("Command execution failed: Exception: " <> T.pack (displayException e)))]
         Right res -> do
-          gateway <- maybe False (not . T.null) <$> teGetEnv env "GAUSS_GATEWAY_SESSION"
-          redact <- redactEnabled <$> teGetEnv env "GAUSS_REDACT_SECRETS"
+          gateway <- maybe False (not . T.null) <$> teGetEnv env "FISHER_GATEWAY_SESSION"
+          redact <- redactEnabled <$> teGetEnv env "FISHER_REDACT_SECRETS"
           let o0 = exOutput res
-              o1 = if gateway && any (`T.isInfixOf` o0) ["sudo: a password is required", "sudo: no tty present", "sudo: a terminal is required"]
-                then o0 <> "\n\n\128161 Tip: To enable sudo over messaging, add SUDO_PASSWORD to ~/.gauss/.env on the agent machine."
+              sudoBlocked = gateway && any (`T.isInfixOf` o0) ["sudo: a password is required", "sudo: no tty present", "sudo: a terminal is required"]
+          home <- if sudoBlocked then T.pack <$> fisherHomeLabelWith (fmap (fmap T.unpack) . teGetEnv env . T.pack) else pure ""
+          let o1 = if sudoBlocked
+                then o0 <> "\n\n\128161 Tip: To enable sudo over messaging, add SUDO_PASSWORD to " <> home <> "/.env on the agent machine."
                 else o0
               o2 = truncateOutput o1
               o3 = if T.null o2 then "" else (if redact then redactSensitiveText else id) (T.strip o2)
@@ -139,7 +142,7 @@ truncateOutput o
 
 runBackground :: TerminalEnv -> EnvConfig -> Sandbox -> Text -> Text -> Maybe Text -> Integer -> IO Text
 runBackground env cfg sandbox task command workdir _effTimeout = do
-  key <- fromMaybe "" <$> teGetEnv env "GAUSS_SESSION_KEY"
+  key <- fromMaybe "" <$> teGetEnv env "FISHER_SESSION_KEY"
   let cwd = Just (fromMaybe (ecCwd cfg) workdir)
       pr = teProcesses env
   started <-
@@ -163,10 +166,10 @@ handler env ctx args = do
   -- the watcher note and registration for a background start
   case (maybe False truthy (get "background" args), get "check_interval" args, loads' r) of
     (True, Just (PInt ci), Just d@(PDict kvs)) | ci /= 0, Just (PStr sid) <- get "session_id" d -> do
-      key <- fromMaybe "" <$> teGetEnv env "GAUSS_SESSION_KEY"
-      platform <- fromMaybe "" <$> teGetEnv env "GAUSS_SESSION_PLATFORM"
-      chat <- fromMaybe "" <$> teGetEnv env "GAUSS_SESSION_CHAT_ID"
-      thread <- fromMaybe "" <$> teGetEnv env "GAUSS_SESSION_THREAD_ID"
+      key <- fromMaybe "" <$> teGetEnv env "FISHER_SESSION_KEY"
+      platform <- fromMaybe "" <$> teGetEnv env "FISHER_SESSION_PLATFORM"
+      chat <- fromMaybe "" <$> teGetEnv env "FISHER_SESSION_CHAT_ID"
+      thread <- fromMaybe "" <$> teGetEnv env "FISHER_SESSION_THREAD_ID"
       addWatcher (teProcesses env) (PDict [("session_id", PStr sid), ("check_interval", PInt (max 30 ci)), ("session_key", PStr key), ("platform", PStr platform), ("chat_id", PStr chat), ("thread_id", PStr thread)])
       pure (dumpsUnicode (PDict (kvs <> [("check_interval_note", PStr ("Requested " <> T.pack (show ci) <> "s raised to minimum 30s")) | ci < 30])))
     _ -> pure r
@@ -199,7 +202,7 @@ sudoPasswordFor sp command
       if not (T.null known)
         then pure known
         else do
-          interactive <- maybe False (not . T.null) <$> spGetEnv sp "GAUSS_INTERACTIVE"
+          interactive <- maybe False (not . T.null) <$> spGetEnv sp "FISHER_INTERACTIVE"
           if not interactive
             then pure ""
             else do

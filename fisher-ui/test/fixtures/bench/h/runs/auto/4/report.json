@@ -3,7 +3,7 @@
     "attempts": [
         {
             "attempt": 1,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 426.2,
             "goal": "Step.Graft.runS_graft",
             "outcome": "closed (helpers: commEffect_bufLen_ge, runBody_bufLen_ge, flush_run_le, flush_run_comm, GraftCtx.reads_ok, runS_graft_core)",
@@ -32,7 +32,7 @@
     "auto_requested": true,
     "auto_warmup_s": 50.8,
     "backends": {
-        "gauss": [
+        "fisher": [
             1,
             1
         ]
@@ -46,10 +46,10 @@
     "goals": [
         {
             "attempts": [
-                "gauss"
+                "fisher"
             ],
             "by_attempt": 1,
-            "by_backend": "gauss",
+            "by_backend": "fisher",
             "closedBy": "model",
             "closed_at_s": 426.2,
             "goal": "Step.Graft.runS_graft",

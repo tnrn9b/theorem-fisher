@@ -63,7 +63,7 @@ homeWriteScope home = do
   let h = T.unpack home
       exact =
         [ h <> "/.ssh/authorized_keys", h <> "/.ssh/id_rsa", h <> "/.ssh/id_ed25519", h <> "/.ssh/config"
-        , h <> "/.gauss/.env", h <> "/.bashrc", h <> "/.zshrc", h <> "/.profile", h <> "/.bash_profile"
+        , h <> "/.fisher/.env", h <> "/.bashrc", h <> "/.zshrc", h <> "/.profile", h <> "/.bash_profile"
         , h <> "/.zprofile", h <> "/.netrc", h <> "/.pgpass", h <> "/.npmrc", h <> "/.pypirc"
         , "/etc/sudoers", "/etc/passwd", "/etc/shadow"
         ]

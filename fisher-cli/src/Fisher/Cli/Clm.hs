@@ -1,6 +1,6 @@
 -- | Choosing the context strategy for a CLI session: @fisher.context@ in
 -- config.yaml or @--context@. For CLM (docs/clm.md sections 3, 9 and 11)
--- the context file and its backup under @$GAUSS_HOME/fisher/ctx/<session>/@,
+-- the context file and its backup under @$FISHER_HOME/fisher/ctx/<session>/@,
 -- @state.json@ beside them, and the replay log's record of every write and
 -- read-back; with CLM's store (docs/superpowers/specs/2026-10-14-clm-store-design.md
 -- section 4) @store.json@ beside them, recall's setup, and the replay log's
@@ -87,7 +87,7 @@ contextChoice flag cfg = case flag of
       _ -> ChooseCompress
 
 ctxDir :: FilePath -> Text -> FilePath
-ctxDir gaussHome sid = gaussHome </> "fisher" </> "ctx" </> T.unpack sid
+ctxDir fisherHome sid = fisherHome </> "fisher" </> "ctx" </> T.unpack sid
 
 -- | Phase 1's interpreter check on the session's PATH: python3's path, or
 -- why not ('Nothing': there is no python3 at all).
@@ -114,8 +114,8 @@ clmSetupFor sys warn cfg sid model lg = do
     Right rcfg -> do
       -- the canonical spelling (macOS's /var is /private/var), so the path
       -- in the prompt is the one the model sees in tool output
-      createDirectoryIfMissing True (ctxDir (sysGaussHome sys) sid)
-      dir <- canonicalizePath (ctxDir (sysGaussHome sys) sid)
+      createDirectoryIfMissing True (ctxDir (sysFisherHome sys) sid)
+      dir <- canonicalizePath (ctxDir (sysFisherHome sys) sid)
       let path = dir </> "context.txt"
           prev = T.unpack (prevPath (T.pack path))
           stateFile = dir </> "state.json"
@@ -219,7 +219,7 @@ rlmSetupFor sys warn cfg sid model lg = case agentRlmConfig model cfg of
     case checked of
       Left e -> pure (Left e)
       Right py -> do
-        let dir = ctxDir (sysGaussHome sys) sid
+        let dir = ctxDir (sysFisherHome sys) sid
             file = dir </> "rlm.json"
         ex <- doesFileExist file
         loaded <-

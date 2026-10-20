@@ -1,5 +1,5 @@
--- | @gauss config set KEY VALUE@ (@set_config_value@ in
--- @gauss_cli/config.py@). Credentials go to @.env@; anything else goes to
+-- | @fisher config set KEY VALUE@ (@set_config_value@ in
+-- upstream @cli/config.py@). Credentials go to @.env@; anything else goes to
 -- @config.yaml@, written from the user's own file rather than the merged
 -- defaults.
 module Fisher.Config.Set
@@ -25,7 +25,7 @@ import System.Posix.Files (fileMode, getFileStatus, setFileMode)
 
 import Fisher.Atomic (atomicWriteFile, secureFile)
 import Fisher.Env (saveEnvValueAt)
-import Fisher.Paths (configPathIn, ensureGaussHomeAt, envPathIn)
+import Fisher.Paths (configPathIn, ensureFisherHomeAt, envPathIn)
 import Fisher.Py (pyTruthy)
 import Fisher.Yaml.Ordered (encodeOrdered, keyOrderOfFile)
 
@@ -126,7 +126,7 @@ setConfigValueAt home key value = case setTarget key of
       Right o -> do
         let c = coerceValue value
             v = toValue c
-        ensureGaussHomeAt home
+        ensureFisherHomeAt home
         order <- keyOrderOfFile cfgPath
         -- Fisher only: a temporary file renamed over it, never a
         -- half-written config.yaml. As upstream's plain write: through a
@@ -137,4 +137,4 @@ setConfigValueAt home key value = case setTarget key of
         atomicWriteFile ".config_.tmp" target (encodeOrdered [order] (Object (setPath path v o)))
         maybe (secureFile target) (setFileMode target) mode
         forM_ (lookup key configToEnv) $ \envName -> saveEnvValueAt home envName (render c)
-        pure (Right ("✓ Set " <> key <> " = " <> render c <> " in " <> T.pack cfgPath))
+        pure (Right ("✓ Set " <> T.intercalate "." path <> " = " <> render c <> " in " <> T.pack cfgPath))

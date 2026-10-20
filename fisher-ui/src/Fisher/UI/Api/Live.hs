@@ -4,8 +4,8 @@
 --   * @POST /api/sessions@ @{project, command}@: runs
 --     @fisher launch --print <command>@ (the command one argument) in the project with
 --     @FISHER_UI_LEDGER=1 FISHER_UI_TAG=<tag>@ (and the server's
---     GAUSS_HOME), stdin from /dev/null, in its own process group, output
---     to @$GAUSS_HOME/fisher/ui-runs/<tag>.log@; answers @{tag}@.
+--     FISHER_HOME), stdin from /dev/null, in its own process group, output
+--     to @$FISHER_HOME/fisher/ui-runs/<tag>.log@; answers @{tag}@.
 --   * @GET /api/tags/:tag@: @{tag, session, status, running, exit}@; the
 --     session is null until the agent records the tag in @ui_runs@.
 --     @POST /api/tags/:tag/stop@ stops a run that has no session yet.
@@ -35,7 +35,7 @@
 --     process (then @elsewhere@ is its pid).
 --
 -- A session runs in another process when its run lock
--- (@$GAUSS_HOME/fisher/steps/<root>.lock@, 'Fisher.Agent.RunLock') is held
+-- (@$FISHER_HOME/fisher/steps/<root>.lock@, 'Fisher.Agent.RunLock') is held
 -- and no live run of this server drives it: whoever started that chat (a
 -- terminal, another server), the server sends to it only through the
 -- inbox and never resumes it. @live@ gives that process as @elsewhere@.
@@ -226,7 +226,7 @@ launch env project cmd =
 
 -- | Start @fisher ARGS@ in the project as a run of this server, with the
 -- ledger on (@FISHER_UI_LEDGER=1@, a new @FISHER_UI_TAG@, the server's
--- GAUSS_HOME), output to @$GAUSS_HOME/fisher/ui-runs/<tag>.log@: its tag.
+-- FISHER_HOME), output to @$FISHER_HOME/fisher/ui-runs/<tag>.log@: its tag.
 -- The label is what the page shows as its command; the base is the
 -- session's last ledger number at the start, and the session, when known
 -- already (a resume), is recorded at once.
@@ -244,7 +244,7 @@ spawnRunWith env project0 args extra label base sess = do
       tag <- newTag
       let home = ueHome (leUi env)
           logp = home </> "fisher" </> "ui-runs" </> T.unpack (tag <> ".log")
-          vars = [("FISHER_UI_LEDGER", "1"), ("FISHER_UI_TAG", T.unpack tag), ("GAUSS_HOME", home)]
+          vars = [("FISHER_UI_LEDGER", "1"), ("FISHER_UI_TAG", T.unpack tag), ("FISHER_HOME", home)]
           ours = map fst vars
       r <- try (spawnChild (Just logp) project (leFisher env : args) (vars <> [kv | kv@(k, _) <- extra, k `notElem` ours]))
       case r of

@@ -1,3 +1,3 @@
-{"attempt":1,"backend":"gauss","event":"launched","goal":"Step.Relay.Setup.graftCtx","t":0}
-{"attempt":1,"backend":"gauss","event":"finished","goal":"Step.Relay.Setup.graftCtx","outcome":"closed","stats":{"cost_usd":0.5102622,"exit":0,"input_tokens":1136210,"output_tokens":13241,"tools":{"mcp_lean_lsp_lean_diagnostic_messages":3,"patch":2,"read_file":15,"search_files":4,"terminal":4},"turns":15,"wall_s":160.2},"t":183.2}
+{"attempt":1,"backend":"fisher","event":"launched","goal":"Step.Relay.Setup.graftCtx","t":0}
+{"attempt":1,"backend":"fisher","event":"finished","goal":"Step.Relay.Setup.graftCtx","outcome":"closed","stats":{"cost_usd":0.5102622,"exit":0,"input_tokens":1136210,"output_tokens":13241,"tools":{"mcp_lean_lsp_lean_diagnostic_messages":3,"patch":2,"read_file":15,"search_files":4,"terminal":4},"turns":15,"wall_s":160.2},"t":183.2}
 {"attempt":1,"event":"closed","goal":"Step.Relay.Setup.graftCtx","t":183.2}

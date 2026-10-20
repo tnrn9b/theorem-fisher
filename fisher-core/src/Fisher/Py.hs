@@ -1,4 +1,4 @@
--- | The handful of Python coercions OpenGauss applies to YAML values, so the
+-- | The handful of Python coercions upstream applies to YAML values, so the
 -- ports below can say @str(x or "").strip()@ once instead of re-deriving it
 -- at every field.
 module Fisher.Py
@@ -31,7 +31,7 @@ pyTruthy = \case
   Object o -> not (KM.null o)
 
 -- | @str(x)@. Containers fall back to their JSON text, which is close to,
--- but not the same as, Python's repr; no manifest field OpenGauss reads is a
+-- but not the same as, Python's repr; no manifest field upstream reads is a
 -- container.
 pyStr :: Value -> Text
 pyStr = \case
@@ -44,7 +44,7 @@ pyStr = \case
     Left d -> T.pack (show d)
   v -> TL.toStrict (encodeToLazyText v)
 
--- | @repr(x)@ as it appears in OpenGauss error messages. 'Nothing' is a key
+-- | @repr(x)@ as it appears in upstream's error messages. 'Nothing' is a key
 -- that was absent, which Python's @dict.get@ reports as @None@.
 pyRepr :: Maybe Value -> Text
 pyRepr = \case

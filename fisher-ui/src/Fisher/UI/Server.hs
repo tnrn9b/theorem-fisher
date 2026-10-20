@@ -59,7 +59,7 @@ import Fisher.UI.Static (staticFiles)
 data UiConfig = UiConfig
   { ucPort :: Int      -- ^ 0: any free port
   , ucOpen :: Bool     -- ^ open the page in the browser
-  , ucHome :: FilePath -- ^ GAUSS_HOME
+  , ucHome :: FilePath -- ^ the Fisher home
   }
   deriving (Eq, Show)
 

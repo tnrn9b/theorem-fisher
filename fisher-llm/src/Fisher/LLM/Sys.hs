@@ -95,7 +95,8 @@ data Sys = Sys
   , sysUuidHex :: IO Text
   , sysTimeZoneAt :: Double -> IO TimeZone
   , sysHome :: FilePath
-  , sysGaussHome :: FilePath
+  , sysFisherHome :: FilePath
+  -- ^ the Fisher home ('Fisher.Paths.getFisherHome')
   , sysOut :: Text -> IO ()
   -- ^ stdout, as written (no newline added)
   , sysInput :: Text -> IO (Maybe Text)

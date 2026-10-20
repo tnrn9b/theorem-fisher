@@ -3,7 +3,7 @@
     "attempts": [
         {
             "attempt": 1,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 251.9,
             "goal": "Step.Relay.fireCand_third",
             "outcome": "closed",
@@ -27,7 +27,7 @@
         }
     ],
     "backends": {
-        "gauss": [
+        "fisher": [
             1,
             1
         ]
@@ -40,10 +40,10 @@
     "goals": [
         {
             "attempts": [
-                "gauss"
+                "fisher"
             ],
             "by_attempt": 1,
-            "by_backend": "gauss",
+            "by_backend": "fisher",
             "closed_at_s": 251.9,
             "goal": "Step.Relay.fireCand_third",
             "status": "closed"

@@ -79,7 +79,7 @@ arxivPath :: FilePath
 arxivPath = "/fisher-test/arxiv/search_arxiv.py"
 
 machineFor :: Value -> FilePath -> Machine
-machineFor golden gaussHome =
+machineFor golden fisherHome =
   let mach = field "machine" golden :: Value
    in Machine
         { mIsRoot = field "is_root" mach
@@ -87,7 +87,7 @@ machineFor golden gaussHome =
         , mKeychain = pure Nothing
         , mNow = pure (UTCTime (fromGregorian 2026 10 1) 0)
         , mStamp = pure "20261001-120000"
-        , mGaussHome = gaussHome
+        , mFisherHome = fisherHome
         , mArxivScript = Just arxivPath
         , mNote = \_ -> pure ()
         }
@@ -119,7 +119,7 @@ makeCheckout assets complete = do
   writeFile (plugin </> "commands" </> "autoformalize.md") "# autoformalize\n"
   writeJson (plugin </> ".claude-plugin" </> "plugin.json") (object ["name" .= ("lean4" :: Text), "version" .= ("1.2.3" :: Text)])
   writeJson (co </> ".claude-plugin" </> "marketplace.json") (object ["name" .= ("lean4-skills" :: Text)])
-  writeFile (co </> ".gauss-managed-revision") "abc123\n"
+  writeFile (co </> ".fisher-managed-revision") "abc123\n"
 
 makePrewarmed :: FilePath -> IO ()
 makePrewarmed home = do
@@ -162,7 +162,7 @@ setupCase :: FilePath -> Extras -> IO Env
 setupCase root extras = do
   let bins = maybe ["git", "uvx", "rg", "claude"] (\v -> field "bins" (object ["bins" .= v])) (opt "bins" extras)
       home = root </> "home"
-      gh = root </> "gauss-home"
+      gh = root </> "fisher-home"
   binDir <- makeBins root bins
   createDirectoryIfMissing True home
   writeHomeFiles home (fromMaybe (Object KM.empty) (opt "home" extras))
@@ -184,9 +184,9 @@ setupCase root extras = do
   forM_ (opt "project_settings" extras) $ \s -> case s of
     Null -> pure ()
     v -> writeJson (proj </> ".claude" </> "settings.local.json") v
-  createDirectoryIfMissing True (root </> "broken" </> ".gauss")
+  createDirectoryIfMissing True (root </> "broken" </> ".fisher")
   writeFile (root </> "broken" </> "lakefile.lean") ""
-  writeFile (root </> "broken" </> ".gauss" </> "project.yaml") "name: x\n"
+  writeFile (root </> "broken" </> ".fisher" </> "project.yaml") "name: x\n"
   createDirectoryIfMissing True (root </> "outside")
   createDirectoryIfMissing True (root </> "fake-plugin" </> "skills" </> "lean4")
   process <- Map.fromList <$> getEnvironment
@@ -195,7 +195,7 @@ setupCase root extras = do
         _ -> []
       base = foldl (\m (k, v) -> Map.insert k v m) process $
         [ ("PATH", binDir), ("HOME", home), ("FAKE_LOG", root </> "fake.log")
-        , ("FAKE_PLUGIN_DIR", root </> "fake-plugin"), ("GAUSS_HOME", gh)
+        , ("FAKE_PLUGIN_DIR", root </> "fake-plugin"), ("FISHER_HOME", gh)
           -- the recordings are upstream's, whose MCP server is uvx lean-lsp-mcp
         , ("FISHER_LEAN_MCP", "uvx") ] <> extraEnv
   pure base
@@ -205,7 +205,7 @@ setupCase root extras = do
 withProcessEnv :: Env -> IO a -> IO a
 withProcessEnv base act = bracket set restore (const act)
   where
-    keys = ["FAKE_LOG", "FAKE_PLUGIN_DIR", "FAKE_GIT_FAIL", "FAKE_CLAUDE_ALREADY", "GAUSS_HOME", "FISHER_LEAN_MCP"]
+    keys = ["FAKE_LOG", "FAKE_PLUGIN_DIR", "FAKE_GIT_FAIL", "FAKE_CLAUDE_ALREADY", "FISHER_HOME", "FISHER_LEAN_MCP"]
     set = forM keys $ \k -> do
       old <- lookupEnv k
       maybe (unsetEnv k) (setEnv k) (Map.lookup k base)

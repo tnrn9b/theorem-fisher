@@ -1,11 +1,12 @@
 -- | OpenAI chat completions, as @run_agent.py@ sends them to OpenRouter,
--- Nous, the API-key providers and custom endpoints.
+-- the API-key providers and custom endpoints.
 module Fisher.LLM.Chat
   ( chatRequest
   , chatHeaders
   , buildBody
   , supportsReasoningExtraBody
   , openRouterHeaders
+  , fisherReferer
   ) where
 
 import Data.Text (Text)
@@ -14,11 +15,17 @@ import qualified Data.Text as T
 import Fisher.LLM.Types
 import Fisher.Py.Value
 
+-- | The app attribution OpenRouter reads. Upstream sent its own site as
+-- the referer; Fisher sends a neutral value of its own (a reserved
+-- domain, until Fisher has a site), and the title.
+fisherReferer :: Text
+fisherReferer = "https://fisher.invalid"
+
 openRouterHeaders :: [(Text, Text)]
 openRouterHeaders =
-  [ ("http-referer", "https://gauss-agent.nousresearch.com")
+  [ ("http-referer", fisherReferer)
   , ("x-openrouter-categories", "productivity,cli-agent")
-  , ("x-openrouter-title", "Gauss Agent") ]
+  , ("x-openrouter-title", "Fisher Agent") ]
 
 -- | The OpenAI SDK's headers plus the client's @default_headers@
 -- (@run_agent.py:515-526@).
@@ -36,7 +43,6 @@ chatHeaders baseUrl key =
 -- | @_supports_reasoning_extra_body@.
 supportsReasoningExtraBody :: Text -> Text -> Bool
 supportsReasoningExtraBody baseUrl model
-  | "nousresearch" `T.isInfixOf` low = True
   | not ("openrouter" `T.isInfixOf` low) = False
   | "api.mistral.ai" `T.isInfixOf` low = False
   | otherwise = any (`T.isPrefixOf` T.toLower model) ["deepseek/", "anthropic/", "openai/", "x-ai/", "google/gemini-2", "qwen/qwen3"]
@@ -59,7 +65,6 @@ buildBody s msgs =
           <> [("require_parameters", PBool True) | rRequireParameters r]
           <> [("data_collection", str x) | Just x <- [rDataCollection r], not (T.null x)]
       isOpenRouter = "openrouter" `T.isInfixOf` low
-      isNous = "nousresearch" `T.isInfixOf` low
       maxTok = case sMaxTokens s of
         Just n
           | "api.openai.com" `T.isInfixOf` low && not ("openrouter" `T.isInfixOf` low) -> [("max_completion_tokens", PInt n)]
@@ -67,13 +72,12 @@ buildBody s msgs =
         Nothing -> []
       reasoning
         | supportsReasoningExtraBody (sBaseUrl s) (sModel s) = case sReasoning s of
-            Just rc -> if isNous && get "enabled" rc == Just (PBool False) then [] else [("reasoning", rc)]
+            Just rc -> [("reasoning", rc)]
             Nothing -> [("reasoning", obj [("enabled", PBool True), ("effort", str "medium")])]
         | otherwise = []
       extra =
         [("provider", obj prefs) | not (null prefs), isOpenRouter]
           <> reasoning
-          <> [("tags", PList [str "product=gauss-agent"]) | isNous]
       tools = case sTools s of
         Just ts@(_ : _) -> PList ts
         _ -> PNull

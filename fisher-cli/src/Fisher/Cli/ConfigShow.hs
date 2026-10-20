@@ -1,4 +1,4 @@
--- | @fisher config show@ and @fisher config edit@ (@gauss_cli/config.py@'s
+-- | @fisher config show@ and @fisher config edit@ (upstream @cli/config.py@'s
 -- @show_config@ and @edit_config@).
 module Fisher.Cli.ConfigShow
   ( ShowEnv (..)
@@ -158,7 +158,7 @@ showConfigLines e = do
   pure $
     [ ""
     , c "┌─────────────────────────────────────────────────────────┐"
-    , c "│              ⚕ Gauss Configuration                    │"
+    , c "│              ⚕ Fisher Configuration                   │"
     , c "└─────────────────────────────────────────────────────────┘"
     , "", h "◆ Paths"
     , "  Config:       " <> T.pack (shConfigPath e)

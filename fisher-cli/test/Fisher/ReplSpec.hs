@@ -39,13 +39,13 @@ import Fisher.Workflow.Plan (LaunchInputs (..), resolveChatRequest, resolveWorkf
 import Fisher.Workflow.Settings (backendName, normalizeBackendName, supportedBackends)
 import Fisher.Workflow.Types (Machine (..), errorMessage)
 
--- | Lines that name the swarm table: upstream's title says Gauss, and
--- centring a longer name moves it.
+-- | Lines that name the swarm table: the recording centres upstream's
+-- shorter title, so they are compared without the padding.
 titleFix :: Text -> Text
 titleFix = T.unlines . map fix . T.lines
   where
     fix l
-      | "Workflow Swarm" `T.isInfixOf` l = T.replace "Gauss" "Fisher" (T.strip l)
+      | "Workflow Swarm" `T.isInfixOf` l = T.strip l
       | otherwise = l
 
 machine :: FilePath -> Machine
@@ -61,7 +61,7 @@ spec = do
   describe "the fisher shell, against upstream's REPL" $
     forM_ cases $ \c -> it (T.unpack (str "name" c)) $ withTempDirectory "/tmp" "fa3r-" $ \tmp -> withTempDirectory "/var/tmp" "fa3g-" $ \tmpg -> do
       w <- makeWorld tmp tmpg
-      let gh = wGaussHome w
+      let gh = wFisherHome w
           cwd = wRoot w </> T.unpack (str "cwd" c)
           envExtra = case obj "env" c of
             Object o -> [(K.toString k, T.unpack v) | (k, String v) <- KM.toList o]
@@ -106,7 +106,7 @@ spec = do
             deps =
               ShellDeps
                 { dOut = Out put, dWidth = pure 80, dAnsi = False, dUnicode = True
-                , dRenderTerminal = renderText (Style False True), dGaussHome = gh, dConfigPath = configPath
+                , dRenderTerminal = renderText (Style False True), dFisherHome = gh, dConfigPath = configPath
                 , dProject = do
                     ps <- projectState session
                     case stateProject ps of
@@ -167,7 +167,8 @@ spec = do
                   (label, actual) `shouldBe` (label, expected)
                 Nothing -> pure ()
               case mstr "env_backend" step of
-                Just b -> (fmap T.pack <$> lookupEnv "GAUSS_AUTOFORMALIZE_BACKEND") `shouldReturn` Just b
+                Just b -> do
+                  (fmap T.pack <$> lookupEnv "FISHER_AUTOFORMALIZE_BACKEND") `shouldReturn` Just b
                 Nothing -> pure ()
               if continue then go rest else pure ()
         go steps

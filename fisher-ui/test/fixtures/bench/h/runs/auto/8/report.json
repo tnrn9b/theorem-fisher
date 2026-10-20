@@ -3,7 +3,7 @@
     "attempts": [
         {
             "attempt": 1,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 212.1,
             "goal": "Step.Frame.runBody_split",
             "outcome": "closed (helpers: Touches.of_single)",
@@ -31,7 +31,7 @@
     "auto_requested": true,
     "auto_warmup_s": 90.1,
     "backends": {
-        "gauss": [
+        "fisher": [
             1,
             1
         ]
@@ -45,10 +45,10 @@
     "goals": [
         {
             "attempts": [
-                "gauss"
+                "fisher"
             ],
             "by_attempt": 1,
-            "by_backend": "gauss",
+            "by_backend": "fisher",
             "closedBy": "model",
             "closed_at_s": 212.1,
             "goal": "Step.Frame.runBody_split",

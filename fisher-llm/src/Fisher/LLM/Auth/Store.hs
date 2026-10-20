@@ -1,8 +1,9 @@
--- | @~/.gauss/auth.json@ and its lock: loading (with the legacy
--- @systems@ shape migrated), saving (indent 2, version and @updated_at@
+-- | @auth.json@ in the Fisher home and its lock: loading (upstream's
+-- older @systems@ shape held only a removed provider, so it loads as an
+-- empty store), saving (indent 2, version and @updated_at@
 -- set, written beside the file and renamed over it, owner-only), the
 -- per-provider state, and the active provider. Ported from
--- @gauss_cli/auth.py@.
+-- upstream @cli/auth.py@.
 module Fisher.LLM.Auth.Store
   ( authFilePath
   , authLockPath
@@ -42,11 +43,11 @@ import Fisher.LLM.Sys
 import Fisher.Py.Value
 
 authFilePath :: Sys -> FilePath
-authFilePath sys = sysGaussHome sys </> "auth.json"
+authFilePath sys = sysFisherHome sys </> "auth.json"
 
 -- | @auth.json@ with its suffix swapped: @auth.lock@.
 authLockPath :: Sys -> FilePath
-authLockPath sys = sysGaussHome sys </> "auth.lock"
+authLockPath sys = sysFisherHome sys </> "auth.lock"
 
 -- | Lock depth held by this process: the lock is reentrant, as upstream's
 -- thread-local counter makes it (the credential code runs on one thread).
@@ -100,11 +101,6 @@ loadAuthStore sys = do
         Left _ -> emptyStore
         Right bytes -> case loads bytes of
           Right raw@(PDict _) | Just (PDict _) <- get "providers" raw -> raw
-          Right raw@(PDict _) | Just systems@(PDict _) <- get "systems" raw ->
-            let providers = maybe [] (\s -> [("nous", s)]) (get "nous_portal" systems)
-             in obj
-                  [ ("version", PInt 1), ("providers", PDict providers)
-                  , ("active_provider", if null providers then PNull else str "nous") ]
           _ -> emptyStore
 
 -- | @_save_auth_store@: returns the store as written (version and

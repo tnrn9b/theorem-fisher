@@ -1,7 +1,7 @@
 -- | Write a file so that a reader sees either the old contents or the new
 -- ones, never a partial write: a temporary file beside the target, flushed
 -- and synced, then renamed over it. A failure removes the temporary file and
--- re-raises. This is OpenGauss's @atomic_yaml_write@ without the YAML.
+-- re-raises. This is upstream's @atomic_yaml_write@ without the YAML.
 module Fisher.Atomic
   ( atomicWriteFile
   , atomicWriteWith
@@ -21,7 +21,7 @@ import System.Posix.Unistd (fileSynchronise)
 
 -- | @atomicWriteFile template path bytes@. The template names the temporary
 -- file (@".config_.tmp"@ gives @.config_12345.tmp@), matching the prefixes
--- and suffixes OpenGauss uses so its cleanup globs still apply.
+-- and suffixes upstream uses so its cleanup globs still apply.
 atomicWriteFile :: String -> FilePath -> BS.ByteString -> IO ()
 atomicWriteFile template path bytes = atomicWriteWith template path (`BS.hPut` bytes)
 

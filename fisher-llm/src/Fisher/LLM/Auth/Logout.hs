@@ -1,5 +1,5 @@
--- | @gauss logout@ and the removed @gauss login@. Ported from
--- @logout_command@ and @login_command@ in @gauss_cli/auth.py@.
+-- | @fisher logout@ and the removed @fisher login@. Ported from
+-- @logout_command@ and @login_command@ in upstream @cli/auth.py@.
 module Fisher.LLM.Auth.Logout
   ( logoutCommand
   , loginCommand
@@ -46,7 +46,7 @@ logoutCommand sys mprovider = case mprovider of
             outLn sys $
               if T.null orKey
                 then "Run `" <> cliName <> " model` or configure an API key to continue."
-                else "Gauss will use OpenRouter for inference."
+                else "Fisher will use OpenRouter for inference."
           else outLn sys ("No auth state found for " <> name <> ".")
         pure 0
 

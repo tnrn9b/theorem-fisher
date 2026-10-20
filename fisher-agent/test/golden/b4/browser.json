@@ -3120,7 +3120,7 @@
    },
    "extra": {},
    "results": [
-    "{\"success\": true, \"analysis\": \"A page with a heading.\", \"screenshot_path\": \"<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png\"}"
+    "{\"success\": true, \"analysis\": \"A page with a heading.\", \"screenshot_path\": \"<FISHER_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png\"}"
    ],
    "runs": [
     {
@@ -3131,7 +3131,7 @@
       "--json",
       "screenshot",
       "--full",
-      "<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
+      "<FISHER_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
      ],
      "timeout": 30,
      "socket_dir": "<SOCK>/agent-browser-h_3e5c7a0000",
@@ -3210,7 +3210,7 @@
    },
    "extra": {},
    "results": [
-    "{\"success\": true, \"analysis\": \"Button [1].\", \"screenshot_path\": \"<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png\", \"annotations\": [{\"n\": 1, \"ref\": \"e1\"}]}"
+    "{\"success\": true, \"analysis\": \"Button [1].\", \"screenshot_path\": \"<FISHER_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png\", \"annotations\": [{\"n\": 1, \"ref\": \"e1\"}]}"
    ],
    "runs": [
     {
@@ -3222,7 +3222,7 @@
       "screenshot",
       "--annotate",
       "--full",
-      "<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
+      "<FISHER_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
      ],
      "timeout": 30,
      "socket_dir": "<SOCK>/agent-browser-h_3e5c7a0000",
@@ -3306,7 +3306,7 @@
       "--json",
       "screenshot",
       "--full",
-      "<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
+      "<FISHER_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
      ],
      "timeout": 30,
      "socket_dir": "<SOCK>/agent-browser-h_3e5c7a0000",
@@ -3370,7 +3370,7 @@
    },
    "extra": {},
    "results": [
-    "{\"success\": false, \"error\": \"Screenshot file was not created at <GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png (local mode). This may indicate a socket path issue (macOS /var/folders/), a missing Chromium install ('agent-browser install'), or a stale daemon process.\"}"
+    "{\"success\": false, \"error\": \"Screenshot file was not created at <FISHER_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png (local mode). This may indicate a socket path issue (macOS /var/folders/), a missing Chromium install ('agent-browser install'), or a stale daemon process.\"}"
    ],
    "runs": [
     {
@@ -3381,7 +3381,7 @@
       "--json",
       "screenshot",
       "--full",
-      "<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
+      "<FISHER_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
      ],
      "timeout": 30,
      "socket_dir": "<SOCK>/agent-browser-h_3e5c7a0000",
@@ -3435,7 +3435,7 @@
       "--json",
       "screenshot",
       "--full",
-      "<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
+      "<FISHER_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
      ],
      "timeout": 30,
      "socket_dir": "<SOCK>/agent-browser-h_3e5c7a0000",
@@ -3483,7 +3483,7 @@
    },
    "extra": {},
    "results": [
-    "{\"success\": false, \"error\": \"Error during vision analysis: vision model down\", \"screenshot_path\": \"<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png\", \"note\": \"Screenshot was captured but vision analysis failed. You can still share it via MEDIA:<path>.\"}"
+    "{\"success\": false, \"error\": \"Error during vision analysis: vision model down\", \"screenshot_path\": \"<FISHER_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png\", \"note\": \"Screenshot was captured but vision analysis failed. You can still share it via MEDIA:<path>.\"}"
    ],
    "runs": [
     {
@@ -3494,7 +3494,7 @@
       "--json",
       "screenshot",
       "--full",
-      "<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
+      "<FISHER_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
      ],
      "timeout": 30,
      "socket_dir": "<SOCK>/agent-browser-h_3e5c7a0000",
@@ -3573,7 +3573,7 @@
       "--json",
       "screenshot",
       "--full",
-      "<GAUSS_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
+      "<FISHER_HOME>/browser_screenshots/browser_screenshot_1f2e3d00000000000000000000000000.png"
      ],
      "timeout": 30,
      "socket_dir": "<SOCK>/agent-browser-h_3e5c7a0000",
@@ -3878,7 +3878,7 @@
       "https://example.com"
      ],
      "timeout": 60,
-     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "socket_dir": "<SOCK>/agent-browser-fisher_default_1f2e3d00",
      "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
     },
     {
@@ -3890,7 +3890,7 @@
       "close"
      ],
      "timeout": 10,
-     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "socket_dir": "<SOCK>/agent-browser-fisher_default_1f2e3d00",
      "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
     }
    ],
@@ -3976,7 +3976,7 @@
       "https://example.com"
      ],
      "timeout": 60,
-     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "socket_dir": "<SOCK>/agent-browser-fisher_default_1f2e3d00",
      "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
     }
    ],
@@ -3995,7 +3995,7 @@
    "kills": [],
    "available": true,
    "socket_dirs_left": [
-    "agent-browser-gauss_default_1f2e3d00"
+    "agent-browser-fisher_default_1f2e3d00"
    ],
    "screenshots": []
   },
@@ -4052,7 +4052,7 @@
       "https://example.com"
      ],
      "timeout": 60,
-     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "socket_dir": "<SOCK>/agent-browser-fisher_default_1f2e3d00",
      "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
     }
    ],
@@ -4071,7 +4071,7 @@
    "kills": [],
    "available": true,
    "socket_dirs_left": [
-    "agent-browser-gauss_default_1f2e3d00"
+    "agent-browser-fisher_default_1f2e3d00"
    ],
    "screenshots": []
   },
@@ -4135,7 +4135,7 @@
       "https://example.com"
      ],
      "timeout": 60,
-     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "socket_dir": "<SOCK>/agent-browser-fisher_default_1f2e3d00",
      "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
     }
    ],
@@ -4172,7 +4172,7 @@
    "kills": [],
    "available": true,
    "socket_dirs_left": [
-    "agent-browser-gauss_default_1f2e3d00"
+    "agent-browser-fisher_default_1f2e3d00"
    ],
    "screenshots": []
   },
@@ -4232,7 +4232,7 @@
       "https://example.com"
      ],
      "timeout": 60,
-     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "socket_dir": "<SOCK>/agent-browser-fisher_default_1f2e3d00",
      "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
     }
    ],
@@ -4260,7 +4260,7 @@
    "kills": [],
    "available": true,
    "socket_dirs_left": [
-    "agent-browser-gauss_default_1f2e3d00"
+    "agent-browser-fisher_default_1f2e3d00"
    ],
    "screenshots": []
   },
@@ -4380,7 +4380,7 @@
       "https://example.com"
      ],
      "timeout": 60,
-     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "socket_dir": "<SOCK>/agent-browser-fisher_default_1f2e3d00",
      "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
     },
     {
@@ -4392,7 +4392,7 @@
       "close"
      ],
      "timeout": 10,
-     "socket_dir": "<SOCK>/agent-browser-gauss_default_1f2e3d00",
+     "socket_dir": "<SOCK>/agent-browser-fisher_default_1f2e3d00",
      "path": "/usr/local/bin:/usr/sbin:/bin:/opt/homebrew/bin:/usr/bin"
     }
    ],
@@ -4494,7 +4494,7 @@
       "--json",
       "record",
       "start",
-      "<GAUSS_HOME>/browser_recordings/session_20261002_045007_task-with-a-long.webm"
+      "<FISHER_HOME>/browser_recordings/session_20261002_045007_task-with-a-long.webm"
      ],
      "timeout": 30,
      "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",
@@ -4594,7 +4594,7 @@
       "--json",
       "record",
       "start",
-      "<GAUSS_HOME>/browser_recordings/session_20261002_045007_default.webm"
+      "<FISHER_HOME>/browser_recordings/session_20261002_045007_default.webm"
      ],
      "timeout": 30,
      "socket_dir": "<SOCK>/agent-browser-h_1f2e3d0000",

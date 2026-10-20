@@ -1,5 +1,5 @@
--- | Upstream's skins (@gauss_cli/skin_engine.py@): the built-in ones, and
--- YAML files in @$GAUSS_HOME/skins/@, each filled in from the default.
+-- | Upstream's skins (@cli/skin_engine.py@): the built-in ones, and
+-- YAML files in @$FISHER_HOME/skins/@, each filled in from the default.
 module Fisher.Skin
   ( Skin (..)
   , buildSkin
@@ -91,8 +91,8 @@ loadYaml p = do
 -- | @load_skin@: the user's file by that name, else the built-in, else the
 -- default.
 loadSkin :: FilePath -> Text -> IO Skin
-loadSkin gaussHome name = do
-  let f = gaussHome </> "skins" </> T.unpack name <> ".yaml"
+loadSkin fisherHome name = do
+  let f = fisherHome </> "skins" </> T.unpack name <> ".yaml"
   isFile <- doesFileExist f
   user <- if isFile then loadYaml f else pure Nothing
   pure $ case user of
@@ -105,8 +105,8 @@ data SkinEntry = SkinEntry {seName :: Text, seDescription :: Text, seUser :: Boo
 -- | @list_skins@: built-ins, then user skins (sorted by file) that do not
 -- shadow one already listed.
 listSkins :: FilePath -> IO [SkinEntry]
-listSkins gaussHome = do
-  let dir = gaussHome </> "skins"
+listSkins fisherHome = do
+  let dir = fisherHome </> "skins"
       base = [SkinEntry n (fromMaybe "" (txt "description" o)) False | (n, o) <- builtins]
   isDir <- doesDirectoryExist dir
   files <- if isDir then sort . filter ((== ".yaml") . takeExtension) <$> listDirectory dir else pure []

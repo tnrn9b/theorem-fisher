@@ -33,9 +33,9 @@ spec = do
     forM_ cases $ \c0 -> it (T.unpack (txt "name" c0)) $
       withSystemTempDirectory "fisher-browser" $ \root -> do
         let name = T.unpack (txt "name" c0)
-            gh = root </> name </> "gauss"
+            gh = root </> name </> "fisher"
             sock = root </> "sock"
-            unmask t = T.replace "<GAUSS_HOME>" (T.pack gh) (T.replace "<ROOT>" (T.pack root) (T.replace "<SOCK>" (T.pack sock) (T.replace "<NODE_BIN>" (T.pack (gh </> "node" </> "bin")) t)))
+            unmask t = T.replace "<FISHER_HOME>" (T.pack gh) (T.replace "<ROOT>" (T.pack root) (T.replace "<SOCK>" (T.pack sock) (T.replace "<NODE_BIN>" (T.pack (gh </> "node" </> "bin")) t)))
             deep = \case
               PStr s -> PStr (unmask s)
               PList xs -> PList (map deep xs)
@@ -70,7 +70,7 @@ spec = do
                             _ -> maybe "" dumpsAscii (get "json" ans)
                       pure (Ran (fromIntegral (int "rc" ans)) stdout (txt "stderr" ans))
             whichT = field "which" c
-            envT = PDict ([(k, v) | (k, v) <- case field "env" c of PDict kvs -> kvs; _ -> []] <> [("PATH", PStr "/opt/homebrew/bin:/usr/bin"), ("GAUSS_HOME", PStr (T.pack gh))])
+            envT = PDict ([(k, v) | (k, v) <- case field "env" c of PDict kvs -> kvs; _ -> []] <> [("PATH", PStr "/opt/homebrew/bin:/usr/bin"), ("FISHER_HOME", PStr (T.pack gh))])
             tr =
               Transport
                 { tRequest = \hr _ -> do

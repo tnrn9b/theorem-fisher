@@ -54,7 +54,7 @@ data ProcessEnv = ProcessEnv
   , peCwd :: IO FilePath
   , peInterrupted :: IO Bool
   , peCheckpoint :: FilePath
-  -- ^ @$GAUSS_HOME/processes.json@
+  -- ^ @processes.json@ in the Fisher home
   , pePollRemote :: Bool
   -- ^ run the 2-second poller for sandboxed processes
   }
@@ -165,8 +165,8 @@ spawnLocal pr command cwd0 task key = do
   s0 <- newSessionRecord pr command task key (Just cwd)
   bash <- peBash env
   environ <- peEnviron env
-  let forcePrefix = "_GAUSS_FORCE_"
-      sanitized = [(k, v) | (k, v) <- environ, not (forcePrefix `T.isPrefixOf` k), not (k `S.member` providerEnvBlocklist)]
+  let forced k = "_FISHER_FORCE_" `T.isPrefixOf` k
+      sanitized = [(k, v) | (k, v) <- environ, not (forced k), not (k `S.member` providerEnvBlocklist)]
       bgEnv = [(k, v) | (k, v) <- sanitized, k /= "PYTHONUNBUFFERED"] <> [("PYTHONUNBUFFERED", "1")]
   r <- try $ do
     (readEnd, writeEnd) <- createPipe
@@ -240,8 +240,8 @@ shellQuote t
 spawnViaSandbox :: ProcessRegistry -> Sandbox -> Text -> Maybe Text -> Text -> Text -> IO (Text, Maybe Int)
 spawnViaSandbox pr sb command cwd task key = do
   s0 <- newSessionRecord pr command task key cwd
-  let logPath = "/tmp/gauss_bg_" <> sId s0 <> ".log"
-      pidPath = "/tmp/gauss_bg_" <> sId s0 <> ".pid"
+  let logPath = "/tmp/fisher_bg_" <> sId s0 <> ".log"
+      pidPath = "/tmp/fisher_bg_" <> sId s0 <> ".pid"
       bg = "nohup bash -c " <> shellQuote command <> " > " <> logPath <> " 2>&1 & echo $! > " <> pidPath <> " && cat " <> pidPath
   r <- try (sbExecute sb (ExecRequest bg "" (Just 10) Nothing))
   s <- case r of

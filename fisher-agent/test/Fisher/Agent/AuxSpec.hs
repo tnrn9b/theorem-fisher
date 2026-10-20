@@ -44,7 +44,7 @@ testSys home env write =
     , sysUuidHex = pure "00000000000000000000000000000001"
     , sysTimeZoneAt = \_ -> pure utc
     , sysHome = home
-    , sysGaussHome = home </> ".gauss"
+    , sysFisherHome = home </> ".fisher"
     , sysOut = write
     , sysInput = \_ -> pure Nothing
     , sysGetPass = \_ -> pure Nothing
@@ -77,9 +77,9 @@ spec = do
               PDict kvs -> [(k, pyStrOf v) | (k, v) <- kvs]
               _ -> []
             sys = testSys home (("HOME", T.pack home) : env) (\_ -> pure ())
-        createDirectoryIfMissing True (sysGaussHome sys)
+        createDirectoryIfMissing True (sysFisherHome sys)
         case field "config" c of
-          PStr y -> BS.writeFile (sysGaussHome sys </> "config.yaml") (TE.encodeUtf8 y)
+          PStr y -> BS.writeFile (sysFisherHome sys </> "config.yaml") (TE.encodeUtf8 y)
           _ -> pure ()
         reqs <- newIORef []
         let ok = PDict [("id", PStr "x"), ("object", PStr "chat.completion"), ("created", PInt 0), ("model", PStr "m"), ("choices", PList [PDict [("index", PInt 0), ("message", PDict [("role", PStr "assistant"), ("content", PStr " sum ")]), ("finish_reason", PStr "stop")]]), ("usage", PDict [("prompt_tokens", PInt 1), ("completion_tokens", PInt 1), ("total_tokens", PInt 2)])]

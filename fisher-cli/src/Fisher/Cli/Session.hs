@@ -1,7 +1,7 @@
 -- | The project session for the one-shot @fisher@ CLI. Upstream keeps the
 -- @/project@ override in the REPL's memory; a command that exits after one
 -- line has nowhere to keep it, so Fisher keeps it in
--- @$GAUSS_HOME/fisher/project-override@ until @fisher project clear@.
+-- @$FISHER_HOME/fisher/project-override@ until @fisher project clear@.
 module Fisher.Cli.Session
   ( cliSession
   , saveOverride
@@ -17,7 +17,7 @@ import System.Environment (getEnvironment, lookupEnv)
 import System.FilePath ((</>))
 
 import Fisher.Config (loadConfigAt)
-import Fisher.Paths (ensureGaussHome)
+import Fisher.Paths (ensureFisherHome)
 import Fisher.ProjectCommand (ProjectSession (..))
 
 overrideFile :: FilePath -> FilePath
@@ -31,7 +31,7 @@ activeCwd = lookupEnv "TERMINAL_CWD" >>= \case
 
 cliSession :: IO (FilePath, ProjectSession)
 cliSession = do
-  home <- ensureGaussHome
+  home <- ensureFisherHome
   (cfg, _) <- loadConfigAt home
   env <- getEnvironment
   cwd <- activeCwd

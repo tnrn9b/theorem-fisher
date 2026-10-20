@@ -1,5 +1,5 @@
 -- | The launch's model: @--model M@ in the command (which @fisher launch
--- --model M@ puts there), else @gauss.autoformalize.model@, else the
+-- --model M@ puts there), else @fisher.autoformalize.model@, else the
 -- backend's own default. Each backend's child takes it in its own flag:
 -- claude-code @--model@, codex @-m@, the native @fisher chat -m@.
 module Fisher.LaunchModelSpec (spec) where
@@ -25,7 +25,7 @@ import Fisher.Workflow.Settings (resolveLaunchModel)
 import Fisher.Workflow.Types
 
 -- | Plan a command for a Lean project from a recorded case, with the
--- backend and more @gauss.autoformalize@ keys.
+-- backend and more @fisher.autoformalize@ keys.
 planLean :: Text -> Text -> [(Key, Value)] -> [(String, String)] -> Text -> (Either WorkflowError WorkflowPlan -> IO ()) -> IO ()
 planLean caseName backend auto extraEnv command k = do
   let path = "test/golden/a2/workflow-plans.json"
@@ -36,8 +36,8 @@ planLean caseName backend auto extraEnv command k = do
     root <- canonicalizePath d
     base0 <- setupCase root (field "extras" c)
     let base = foldr (uncurry Map.insert) (Map.delete "OPENROUTER_API_KEY" base0) extraEnv
-        cfg = object ["gauss" .= object ["autoformalize" .= object (["backend" .= backend, "auth_mode" .= textField "auth_mode" c] <> auto)]]
-        li = LaunchInputs (machineFor file (root </> "gauss-home")) cfg base False (const (pure Nothing)) (Just (root </> "project"))
+        cfg = object ["fisher" .= object ["autoformalize" .= object (["backend" .= backend, "auth_mode" .= textField "auth_mode" c] <> auto)]]
+        li = LaunchInputs (machineFor file (root </> "fisher-home")) cfg base False (const (pure Nothing)) (Just (root </> "project"))
     r <- withProcessEnv base (resolveWorkflowRequest li command)
     k r
 
@@ -61,13 +61,13 @@ configured = [("model", String "from-config")]
 spec :: Spec
 spec = do
   describe "resolveLaunchModel" $ do
-    let cfg = object ["gauss" .= object ["autoformalize" .= object configured]]
+    let cfg = object ["fisher" .= object ["autoformalize" .= object configured]]
     it "takes the flag, then the config, then nothing" $ do
       resolveLaunchModel (Just "from-flag") cfg `shouldBe` Just "from-flag"
       resolveLaunchModel Nothing cfg `shouldBe` Just "from-config"
       resolveLaunchModel Nothing (object []) `shouldBe` Nothing
     it "reads an empty value as unset" $
-      resolveLaunchModel (Just " ") (object ["gauss" .= object ["autoformalize" .= object ["model" .= ("" :: Text)]]]) `shouldBe` Nothing
+      resolveLaunchModel (Just " ") (object ["fisher" .= object ["autoformalize" .= object ["model" .= ("" :: Text)]]]) `shouldBe` Nothing
 
   describe "stripModelFlag" $ do
     it "takes --model M and --model=M out of the arguments and the backend command" $ do

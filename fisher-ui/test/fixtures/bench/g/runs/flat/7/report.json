@@ -3,7 +3,7 @@
     "attempts": [
         {
             "attempt": 1,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 1363.8,
             "goal": "Channels.ObfsSummary.good_eq",
             "outcome": "rejected: does not compile: Channels/_fisher_search_ObfsSummary.lean:299:62: error: (deterministic) timeout at `whnf`, maximum number of heartbeats (1000000) has been reached",
@@ -27,7 +27,7 @@
         },
         {
             "attempt": 2,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 1565,
             "goal": "Channels.ObfsSummary.good_eq",
             "outcome": "closed",
@@ -51,7 +51,7 @@
         }
     ],
     "backends": {
-        "gauss": [
+        "fisher": [
             2,
             1
         ]
@@ -64,11 +64,11 @@
     "goals": [
         {
             "attempts": [
-                "gauss",
-                "gauss"
+                "fisher",
+                "fisher"
             ],
             "by_attempt": 2,
-            "by_backend": "gauss",
+            "by_backend": "fisher",
             "closed_at_s": 1565,
             "goal": "Channels.ObfsSummary.good_eq",
             "status": "closed"

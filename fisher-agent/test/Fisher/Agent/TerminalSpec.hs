@@ -53,9 +53,9 @@ spec = do
         PDict [("toolset", PStr (tdToolset td)), ("schema", tdSchema td), ("requires_env", PList (map PStr (tdRequiresEnv td))), ("emoji", PStr (tdEmoji td))]
           `shouldBe` PDict [(k, field k e) | k <- ["toolset", "schema", "requires_env", "emoji"]]
   describe "tools/terminal_tool.py" $
-    forM_ (list "cases" doc) $ \c -> it (T.unpack (txt "name" c)) $
+    forM_ (list "cases" doc) $ \c -> it (T.unpack (txt "name" c)) $ withIsolatedHome $
       withSystemTempDirectory "fisher-terminal" $ \root -> do
-        let gh = root </> "gauss"
+        let gh = root </> "fisher"
             opts = field "opts" c
             optsList k = list k opts
         createDirectoryIfMissing True gh
@@ -65,7 +65,7 @@ spec = do
         let envT =
               [(k, v) | (k, PStr v) <- case field "env" opts of PDict kvs -> kvs; _ -> []]
                 <> [("TERMINAL_CWD", "/work/project")]
-                <> [("GAUSS_INTERACTIVE", "1") | get "interactive" opts == Just (PBool True)]
+                <> [("FISHER_INTERACTIVE", "1") | get "interactive" opts == Just (PBool True)]
             getEnv k = pure (lookup k envT)
         execQ <- newIORef (list "exec_answers" c)
         inputs <- newIORef (optsList "inputs")
@@ -117,7 +117,7 @@ spec = do
               TirithEnv
                 { tiGetEnv = getEnv, tiSecurity = configSecurity gh
                 , tiWhich = \n -> pure (case get n (field "which" opts) of Just (PStr p) -> Just p; _ -> Nothing)
-                , tiIsExecutable = \_ -> pure False, tiExpandUser = pure, tiGaussHome = gh
+                , tiIsExecutable = \_ -> pure False, tiExpandUser = pure, tiFisherHome = gh
                 , tiRun = \argv t -> do
                     modifyIORef tiriths (<> [PDict [("argv", PList (map PStr argv)), ("timeout", PInt (fromIntegral t))]])
                     a <- next tirithQ

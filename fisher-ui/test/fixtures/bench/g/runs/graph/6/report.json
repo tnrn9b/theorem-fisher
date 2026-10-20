@@ -3,7 +3,7 @@
     "attempts": [
         {
             "attempt": 1,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 221.9,
             "goal": "Step.Summary.indist_dropDead",
             "outcome": "closed (helpers: ifaceOff_replace)",
@@ -26,7 +26,7 @@
         }
     ],
     "backends": [
-        "gauss"
+        "fisher"
     ],
     "budget_s": 3600,
     "cap_usd": 6,

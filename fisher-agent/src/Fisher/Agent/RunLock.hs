@@ -1,5 +1,5 @@
 -- | The run lock (Fisher UI): a chat process holds an exclusive fcntl lock
--- on @$GAUSS_HOME/fisher/steps/<root>.lock@ for as long as it lives, and
+-- on @<Fisher home>/fisher/steps/<root>.lock@ for as long as it lives, and
 -- writes its process id to @<root>.pid@ beside it, so the UI server knows a
 -- session is running whoever started it (a terminal, launch, another
 -- server). The UI then sends to such a session through its inbox and never
@@ -37,10 +37,10 @@ import System.Posix.Types (Fd, ProcessID)
 import Fisher.Agent.Steps (stepsDir)
 
 runLockPath :: FilePath -> Text -> FilePath
-runLockPath gaussHome root = stepsDir gaussHome </> T.unpack (root <> ".lock")
+runLockPath fisherHome root = stepsDir fisherHome </> T.unpack (root <> ".lock")
 
 runPidPath :: FilePath -> Text -> FilePath
-runPidPath gaussHome root = stepsDir gaussHome </> T.unpack (root <> ".pid")
+runPidPath fisherHome root = stepsDir fisherHome </> T.unpack (root <> ".pid")
 
 -- | The descriptors this process holds its run locks with, by lock file.
 held :: MVar (M.Map FilePath Fd)
@@ -52,13 +52,13 @@ held = unsafePerformIO (newMVar M.empty)
 -- it for more than 2 s, or the file could not be opened; the run goes on
 -- either way).
 holdRunLock :: FilePath -> Text -> IO Bool
-holdRunLock gaussHome root = modifyMVar held $ \m -> do
-  let p = runLockPath gaussHome root
+holdRunLock fisherHome root = modifyMVar held $ \m -> do
+  let p = runLockPath fisherHome root
   case M.lookup p m of
     Just _ -> pure (m, True)
     Nothing -> do
       r <- try @SomeException $ do
-        createDirectoryIfMissing True (stepsDir gaussHome)
+        createDirectoryIfMissing True (stepsDir fisherHome)
         fd <- openLockFile p
         -- a prune holds it for a moment: wait up to 2 s for that
         let attempt :: Int -> IO (Either SomeException ())
@@ -71,7 +71,7 @@ holdRunLock gaussHome root = modifyMVar held $ \m -> do
         case got of
           Right () -> do
             pid <- getProcessID
-            writeFile (runPidPath gaussHome root) (show pid <> "\n")
+            writeFile (runPidPath fisherHome root) (show pid <> "\n")
             pure (Just fd)
           Left _ -> closeFd fd >> pure Nothing
       pure $ case r of
@@ -85,7 +85,7 @@ openLockFile p = openFd p ReadWrite defaultFileFlags {creat = Just 0o644, cloexe
 
 -- | The descriptor 'holdRunLock' holds the session's lock with, if it does.
 heldRunLockFd :: FilePath -> Text -> IO (Maybe Fd)
-heldRunLockFd gaussHome root = M.lookup (runLockPath gaussHome root) <$> readMVar held
+heldRunLockFd fisherHome root = M.lookup (runLockPath fisherHome root) <$> readMVar held
 
 -- | Take the session's run lock now if no process holds it (the lock file
 -- made when missing): its descriptor, to give back with
@@ -93,10 +93,10 @@ heldRunLockFd gaussHome root = M.lookup (runLockPath gaussHome root) <$> readMVa
 -- that acts on a session only while it is not running (prune): a chat
 -- that starts meanwhile finds the lock taken. The file is never removed.
 tryRunLock :: FilePath -> Text -> IO (Maybe Fd)
-tryRunLock gaussHome root = do
+tryRunLock fisherHome root = do
   r <- try @SomeException $ do
-    createDirectoryIfMissing True (stepsDir gaussHome)
-    fd <- openLockFile (runLockPath gaussHome root)
+    createDirectoryIfMissing True (stepsDir fisherHome)
+    fd <- openLockFile (runLockPath fisherHome root)
     got <- try @SomeException (setLock fd (WriteLock, AbsoluteSeek, 0, 0))
     case got of
       Right () -> pure (Just fd)
@@ -110,8 +110,8 @@ releaseRunLock fd = () <$ try @SomeException (closeFd fd)
 -- | The process that holds the session's run lock, if any (for a process
 -- other than the holder; see the module's note).
 runLockHolder :: FilePath -> Text -> IO (Maybe ProcessID)
-runLockHolder gaussHome root = do
-  let p = runLockPath gaussHome root
+runLockHolder fisherHome root = do
+  let p = runLockPath fisherHome root
   here <- doesFileExist p
   if not here
     then pure Nothing

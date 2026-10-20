@@ -2,7 +2,7 @@
 -- over 'PyVal': mappings keep document order, and ints, floats, bools and
 -- nulls resolve by YAML 1.1's implicit rules (so @3.0@ stays a float and is
 -- written back as @3.0@). On top of it, @load_config@ and @save_config@ of
--- @gauss_cli/config.py@ with the dict exactly as Python holds it: the
+-- upstream @cli/config.py@ with the dict exactly as Python holds it: the
 -- defaults' keys first, the user's own appended, later changes in place.
 module Fisher.LLM.Auth.PyYaml
   ( parsePyYaml
@@ -32,7 +32,7 @@ import Fisher.Atomic (atomicWriteFile, secureFile)
 import Fisher.Config (defaultConfigYaml, loadConfigAt, normalizeMaxTurns, renderConfigWith)
 import qualified Fisher.Config as Config
 import Fisher.LLM.Sys (Sys (..), outLn)
-import Fisher.Paths (configPathIn, ensureGaussHomeAt)
+import Fisher.Paths (configPathIn, ensureFisherHomeAt)
 import Fisher.Py.Json (pyFloatRepr)
 import Fisher.Py.Value
 import Fisher.Yaml.Ordered (encodeOrdered)
@@ -168,9 +168,9 @@ normalizeMaxTurnsPy cfg =
 -- the defaults, as upstream.
 loadConfigOrdered :: Sys -> IO PyVal
 loadConfigOrdered sys = do
-  let home = sysGaussHome sys
+  let home = sysFisherHome sys
       path = configPathIn home
-  ensureGaussHomeAt home
+  ensureFisherHomeAt home
   defaults <- either (const (PDict [])) id <$> parsePyYaml defaultConfigYaml
   exists <- doesFileExist path
   if not exists
@@ -213,11 +213,12 @@ loadConfigOrdered sys = do
 -- not configured, written atomically at 0600.
 saveConfigOrdered :: Sys -> PyVal -> IO ()
 saveConfigOrdered sys cfg = do
-  let home = sysGaussHome sys
+  let home = sysFisherHome sys
       path = configPathIn home
-      normalized = normalizeMaxTurnsPy cfg
+  let normalized = normalizeMaxTurnsPy cfg
+      -- The comments depend on security and fallback_model only.
       av = normalizeMaxTurns (toAeson normalized)
       comments = BS.drop (BS.length (encodeOrdered [] av)) (renderConfigWith [] av)
-  ensureGaussHomeAt home
+  ensureFisherHomeAt home
   atomicWriteFile ".config_.tmp" path (dumpPyYaml normalized <> comments)
   secureFile path

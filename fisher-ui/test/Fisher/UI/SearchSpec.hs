@@ -136,7 +136,7 @@ withSearch body k = withSystemTempDirectory "fisher-ui-search" $ \tmp0 -> do
   tmp <- canonicalizePath tmp0
   let root = tmp </> "search"
       proj = tmp </> "proj"
-      home = tmp </> "gauss"
+      home = tmp </> "fisher"
       fake = tmp </> "fake-fisher"
   mapM_ (createDirectoryIfMissing True) [root, home, proj </> "Demo"]
   forM_ projectFiles $ \(f, t) -> TIO.writeFile (proj </> f) t >> setModificationTime (proj </> f) old
@@ -145,7 +145,7 @@ withSearch body k = withSystemTempDirectory "fisher-ui-search" $ \tmp0 -> do
     let p = root </> d </> "report.json"
     t <- TIO.readFile p
     TIO.writeFile p (T.replace "\"/fixture/lean\"" (T.pack (show proj)) t)
-  TIO.writeFile fake ("#!/bin/sh\nprintf '%s\\n' \"$@\" > \"$GAUSS_HOME/search-args.txt\"\npwd > \"$GAUSS_HOME/search-cwd.txt\"\n" <> body)
+  TIO.writeFile fake ("#!/bin/sh\nprintf '%s\\n' \"$@\" > \"$FISHER_HOME/search-args.txt\"\npwd > \"$FISHER_HOME/search-cwd.txt\"\n" <> body)
   setFileMode fake 0o755
   ui <- newUiEnv home (fixturesDir </> "bench") (tmp </> "repo")
   le0 <- newLiveEnv ui fake
@@ -246,7 +246,7 @@ spec = describe "Fisher.UI.Api.Search" $ do
         `shouldBe` [ (A.Number 1, A.String "whiteboard-1-Demo_main_thm.md", A.String wb1)
                    , (A.Number 2, A.String "whiteboard-2-Demo_side_thm.md", A.String "# Plan for Demo.side_thm\n- Demo.side_thm (proved)") ]
       (key "mode" v, key "status" v, key "auto" v) `shouldBe` (A.String "graph", A.String "done", A.Bool True)
-      key "attempts" v `shouldBe` A.toJSON ["1-Demo_main_thm-gauss", "2-Demo_side_thm-gauss" :: Text]
+      key "attempts" v `shouldBe` A.toJSON ["1-Demo_main_thm-fisher", "2-Demo_side_thm-fisher" :: Text]
       key "goals_closed" (key "report" v) `shouldBe` A.Number 1
     it "gives the bench g graph run's graph and whiteboard" $ withSearch "exit 0" $ \_ _ _ app -> do
       (_, v) <- getJ app "/api/search/g.graph.5"
@@ -295,7 +295,7 @@ spec = describe "Fisher.UI.Api.Search" $ do
     it "does not send a partial last line until its newline is written" $ withSearch "exit 0" $ \tmp _ _ app -> do
       let dir = tmp </> "search" </> "20261016-100000"
           l1 = "{\"event\":\"auto missed\",\"goal\":\"Demo.a\",\"seconds\":1,\"t\":1}"
-          l2 = "{\"attempt\":1,\"backend\":\"gauss\",\"event\":\"launched\",\"goal\":\"Demo.a\",\"t\":1}"
+          l2 = "{\"attempt\":1,\"backend\":\"fisher\",\"event\":\"launched\",\"goal\":\"Demo.a\",\"t\":1}"
           l3a = "{\"attempt\":1,\"event\":\"clo"
           l3b = "sed\",\"goal\":\"Demo.a\",\"t\":9}"
       createDirectoryIfMissing True dir
@@ -428,9 +428,9 @@ spec = describe "Fisher.UI.Api.Search" $ do
         rid `shouldSatisfy` ("s." `T.isPrefixOf`)
         let out = seRoot se </> T.unpack (T.drop 2 rid)
         doesDirectoryExist out `shouldReturn` True
-        waitFile (tmp </> "gauss" </> "search-args.txt")
-        lines <$> readFile (tmp </> "gauss" </> "search-args.txt") `shouldReturn` ["search", "Demo/Graph.lean", "--graph", "--no-auto", "--out", out]
-        readFile (tmp </> "gauss" </> "search-cwd.txt") `shouldReturn` (proj <> "\n")
+        waitFile (tmp </> "fisher" </> "search-args.txt")
+        lines <$> readFile (tmp </> "fisher" </> "search-args.txt") `shouldReturn` ["search", "Demo/Graph.lean", "--graph", "--no-auto", "--out", out]
+        readFile (tmp </> "fisher" </> "search-cwd.txt") `shouldReturn` (proj <> "\n")
         (_, l) <- getJ app "/api/search"
         fmap (key "status") (runOf rid l) `shouldBe` Just (A.String "running")
         (_, s) <- stream app ("/api/search/" <> TE.encodeUtf8 rid <> "/events") []
@@ -441,11 +441,11 @@ spec = describe "Fisher.UI.Api.Search" $ do
     it "passes no --graph and no --no-auto for a flat run with the automation, and a retry (the same file again) is a new run" $
       withSearch "exit 0" $ \tmp proj _ app -> do
         (_, v1) <- postJ app "/api/search" (A.object ["project" A..= proj, "file" A..= (proj </> "Demo" </> "Flat.lean"), "graph" A..= False, "auto" A..= True])
-        waitFile (tmp </> "gauss" </> "search-args.txt")
+        waitFile (tmp </> "fisher" </> "search-args.txt")
         (_, v2) <- postJ app "/api/search" (A.object ["project" A..= proj, "file" A..= ("Demo/Flat.lean" :: Text), "graph" A..= False, "auto" A..= True])
         key "run" v1 `shouldNotBe` key "run" v2
         threadDelay 300000
-        args <- lines <$> readFile (tmp </> "gauss" </> "search-args.txt")
+        args <- lines <$> readFile (tmp </> "fisher" </> "search-args.txt")
         take 3 args `shouldBe` ["search", "Demo/Flat.lean", "--out"]
         length args `shouldBe` 4
         -- the fake exits 0 with no report: crashed
@@ -454,8 +454,8 @@ spec = describe "Fisher.UI.Api.Search" $ do
       withSearch "sleep 1" $ \tmp proj _ app -> do
         (code, v) <- postJ app "/api/search" (A.object ["project" A..= proj, "file" A..= ("Demo/Flat.lean" :: Text), "graph" A..= False, "auto" A..= True, "retrieval" A..= False, "library" A..= False])
         code `shouldBe` 200
-        waitFile (tmp </> "gauss" </> "search-args.txt")
-        args <- lines <$> readFile (tmp </> "gauss" </> "search-args.txt")
+        waitFile (tmp </> "fisher" </> "search-args.txt")
+        args <- lines <$> readFile (tmp </> "fisher" </> "search-args.txt")
         take 4 args `shouldBe` ["search", "Demo/Flat.lean", "--no-retrieval", "--no-library"]
         (_, d) <- getJ app ("/api/search/" <> TE.encodeUtf8 (txt (key "run" v)))
         (key "retrieval" d, key "library" d) `shouldBe` (A.Bool False, A.Bool False)
@@ -473,7 +473,7 @@ spec = describe "Fisher.UI.Api.Search" $ do
     it "stops a run (its process tree) and says stopped" $ withSearch "trap '' TERM; sleep 300 & wait" $ \tmp proj _ app -> do
       (_, v) <- postJ app "/api/search" (A.object ["project" A..= proj, "file" A..= ("Demo/Flat.lean" :: Text), "graph" A..= False, "auto" A..= True])
       let rid = txt (key "run" v)
-      waitFile (tmp </> "gauss" </> "search-args.txt")
+      waitFile (tmp </> "fisher" </> "search-args.txt")
       (code, _) <- postJ app ("/api/search/" <> TE.encodeUtf8 rid <> "/stop") (A.object [])
       code `shouldBe` 202
       _ <- statusBecomes app rid "stopped"
@@ -487,7 +487,7 @@ spec = describe "Fisher.UI.Api.Search" $ do
       (code, v) <- postJ app "/api/search" (A.object ["project" A..= (tmp </> "bare"), "file" A..= ("Demo/X.lean" :: Text), "graph" A..= False, "auto" A..= True])
       code `shouldBe` 400
       txt (key "error" v) `shouldSatisfy` ("lakefile" `T.isInfixOf`)
-      doesFileExist (tmp </> "gauss" </> "search-args.txt") `shouldReturn` False
+      doesFileExist (tmp </> "fisher" </> "search-args.txt") `shouldReturn` False
     it "refuses a relative project, a file outside the project or missing, and a file that is not Lean" $ withSearch "exit 0" $ \tmp proj _ app -> do
       writeFile (tmp </> "Out.lean") "theorem x : True := trivial\n"
       writeFile (proj </> "notes.txt") "x\n"
@@ -497,7 +497,7 @@ spec = describe "Fisher.UI.Api.Search" $ do
       try1 (T.pack proj) ("../Out.lean" :: Text) `shouldReturn` 400
       try1 (T.pack proj) ("Demo/None.lean" :: Text) `shouldReturn` 400
       try1 (T.pack proj) ("notes.txt" :: Text) `shouldReturn` 400
-      doesFileExist (tmp </> "gauss" </> "search-args.txt") `shouldReturn` False
+      doesFileExist (tmp </> "fisher" </> "search-args.txt") `shouldReturn` False
   where
     waitFile p = do
       ok <- timeout 10000000 (let go = doesFileExist p >>= \y -> if y then threadDelay 100000 else threadDelay 50000 >> go in go)

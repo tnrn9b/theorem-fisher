@@ -123,9 +123,9 @@ recordWith :: [Reply] -> FilePath -> IO FilePath
 recordWith scr dir0 = do
   dir <- canonicalizePath dir0
   let home = dir </> "home"
-      gauss = home </> ".gauss"
+      fisher = home </> ".fisher"
       sid = "20261013_101500_ab12cd"
-  createDirectoryIfMissing True gauss
+  createDirectoryIfMissing True fisher
   lg <- openReplayLog dir sid
   offset <- newIORef (0 :: Double)
   uuidN <- newIORef (0 :: Int)
@@ -133,7 +133,7 @@ recordWith scr dir0 = do
   let clock = (1790000000 +) <$> readIORef offset
       sleep d = atomicModifyIORef' offset (\o -> (o + d, ()))
       sys0 =
-        (testSys home [("HOME", T.pack home), ("GAUSS_TIMEZONE", "UTC"), ("CONTEXT_COMPRESSION_THRESHOLD", "0.5")] (\_ -> pure ()))
+        (testSys home [("HOME", T.pack home), ("FISHER_TIMEZONE", "UTC"), ("CONTEXT_COMPRESSION_THRESHOLD", "0.5")] (\_ -> pure ()))
           { sysNow = clock, sysSleep = sleep
           , sysUuidHex = atomicModifyIORef' uuidN (\n -> (n + 1, T.justifyRight 32 '0' (T.pack (showHex n "")))) }
       sys = recordUuids lg sys0
@@ -194,7 +194,7 @@ recordWith scr dir0 = do
           , envCwd = pure dir, envChoice = \_ -> pure 0, envAnimate = False, envDb = Nothing, envTools = runner
           , envAux = \_ -> pure (Left (AuxNoProvider ""))
           , envAuxEnv = Nothing
-          , envMeta = MetaEnv tr clock gauss cache (\_ -> pure ())
+          , envMeta = MetaEnv tr clock fisher cache (\_ -> pure ())
           , envSkin = defaultSkin, envConfig = PDict [], envCallbacks = noCallbacks
           , envWarn = \_ -> pure (), envPromptHook = recordPromptHook lg, envWriteFiles = False
           , envLocalTool = recordLocalTool lg, envInbox = pure [] }

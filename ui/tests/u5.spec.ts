@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 // Settings against the stub's in-memory settings or the fixture server's
-// scratch GAUSS_HOME (config.yaml: model example/model-a, provider
+// scratch FISHER_HOME (config.yaml: model example/model-a, provider
 // openrouter, context clm, autoformalize model example/model-b; .env:
 // OPENROUTER_API_KEY ending in 1234).
 const token = "0123456789abcdef0123456789abcdef";

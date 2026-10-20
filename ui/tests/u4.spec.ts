@@ -110,3 +110,35 @@ test("run again starts a new run on the file and its board follows the growing e
   await expect(page.getByTestId("run-status")).toHaveText("done", { timeout: 10000 });
   await expect(page.getByTestId("events").locator("li")).toHaveCount(4);
 });
+
+// A run recorded before the rename names the previous backend in its report,
+// its attempt directories and its events. The board shows it as any other
+// run: backend names are data. The previous name is built here, so that the
+// repository does not spell it.
+const oldBackend = "ga" + "uss";
+
+test("a run whose report and events name the previous backend is still shown", async ({ page }) => {
+  let swapped = 0;
+  await page.route(new RegExp(`/api/search/${flatRun.replace(".", "\\.")}(/events)?(\\?.*)?$`), async (route) => {
+    const res = await route.fetch();
+    const body = (await res.text()).replace(/"fisher"/g, `"${oldBackend}"`).replace(/-fisher"/g, `-${oldBackend}"`);
+    if (body.includes(oldBackend)) swapped += 1;
+    await route.fulfill({ response: res, body });
+  });
+  await signIn(page);
+  await page.goto(`/search/${flatRun}`);
+  await expect(page.getByTestId("run-status")).toHaveText("done");
+  const rows = page.getByTestId("goal-row");
+  await expect(rows).toHaveCount(4);
+  expect(await rows.evaluateAll((es) => es.map((e) => [e.getAttribute("data-goal"), e.getAttribute("data-status")]))).toEqual([
+    ["Demo.a", "closed"],
+    ["Demo.b", "closed"],
+    ["Demo.c", "disproved"],
+    ["Demo.d", "gave up"],
+  ]);
+  const row = (g: string) => page.locator(`[data-testid=goal-row][data-goal="${g}"]`);
+  await expect(row("Demo.b").getByTestId("closed-by")).toHaveText("model+repair");
+  await expect(row("Demo.b").locator("[data-kind='repaired']")).toBeVisible();
+  // both the report and the events stream carried the previous name
+  expect(swapped).toBeGreaterThanOrEqual(2);
+});

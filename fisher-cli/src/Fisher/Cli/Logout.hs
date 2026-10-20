@@ -1,4 +1,4 @@
--- | @gauss logout [--provider nous|openai-codex]@: argparse, then
+-- | @fisher logout [--provider openai-codex]@: argparse, then
 -- 'logoutCommand'.
 module Fisher.Cli.Logout
   ( logoutMain

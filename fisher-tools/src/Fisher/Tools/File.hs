@@ -41,7 +41,7 @@ data FileTools = FileTools
   { ftOps :: Text -> IO (Either Text FileOps)
   -- ^ the task's file operations (its sandbox created on first use)
   , ftRedactSetting :: IO (Maybe Text)
-  -- ^ @GAUSS_REDACT_SECRETS@
+  -- ^ @FISHER_REDACT_SECRETS@
   , ftCheck :: IO Bool
   -- ^ @check_file_requirements@
   , ftTracker :: IORef (M.Map Text Tracker)

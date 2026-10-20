@@ -6,7 +6,7 @@
       "input": null,
       "key": "model",
       "value": "anthropic/claude-sonnet-4",
-      "stdout": "✓ Set model = anthropic/claude-sonnet-4 in <TMP>/gauss-home/config.yaml\n",
+      "stdout": "✓ Set model = anthropic/claude-sonnet-4 in <TMP>/fisher-home/config.yaml\n",
       "saved": {
         "model": "anthropic/claude-sonnet-4"
       },
@@ -17,7 +17,7 @@
       "input": null,
       "key": "tts.provider",
       "value": "edge",
-      "stdout": "✓ Set tts.provider = edge in <TMP>/gauss-home/config.yaml\n",
+      "stdout": "✓ Set tts.provider = edge in <TMP>/fisher-home/config.yaml\n",
       "saved": {
         "tts": {
           "provider": "edge"
@@ -30,7 +30,7 @@
       "input": "model: a\nterminal:\n  timeout: 5\n",
       "key": "terminal.backend",
       "value": "docker",
-      "stdout": "✓ Set terminal.backend = docker in <TMP>/gauss-home/config.yaml\n",
+      "stdout": "✓ Set terminal.backend = docker in <TMP>/fisher-home/config.yaml\n",
       "saved": {
         "model": "a",
         "terminal": {
@@ -45,7 +45,7 @@
       "input": "tts: 3\n",
       "key": "tts.provider",
       "value": "x",
-      "stdout": "✓ Set tts.provider = x in <TMP>/gauss-home/config.yaml\n",
+      "stdout": "✓ Set tts.provider = x in <TMP>/fisher-home/config.yaml\n",
       "saved": {
         "tts": {
           "provider": "x"
@@ -58,7 +58,7 @@
       "input": null,
       "key": "display.compact",
       "value": "Yes",
-      "stdout": "✓ Set display.compact = True in <TMP>/gauss-home/config.yaml\n",
+      "stdout": "✓ Set display.compact = True in <TMP>/fisher-home/config.yaml\n",
       "saved": {
         "display": {
           "compact": true
@@ -71,7 +71,7 @@
       "input": null,
       "key": "display.compact",
       "value": "off",
-      "stdout": "✓ Set display.compact = False in <TMP>/gauss-home/config.yaml\n",
+      "stdout": "✓ Set display.compact = False in <TMP>/fisher-home/config.yaml\n",
       "saved": {
         "display": {
           "compact": false
@@ -84,7 +84,7 @@
       "input": null,
       "key": "agent.max_turns",
       "value": "42",
-      "stdout": "✓ Set agent.max_turns = 42 in <TMP>/gauss-home/config.yaml\n",
+      "stdout": "✓ Set agent.max_turns = 42 in <TMP>/fisher-home/config.yaml\n",
       "saved": {
         "agent": {
           "max_turns": 42
@@ -97,7 +97,7 @@
       "input": null,
       "key": "x.ratio",
       "value": "1.5",
-      "stdout": "✓ Set x.ratio = 1.5 in <TMP>/gauss-home/config.yaml\n",
+      "stdout": "✓ Set x.ratio = 1.5 in <TMP>/fisher-home/config.yaml\n",
       "saved": {
         "x": {
           "ratio": 1.5
@@ -110,7 +110,7 @@
       "input": null,
       "key": "x.ratio",
       "value": "1.",
-      "stdout": "✓ Set x.ratio = 1.0 in <TMP>/gauss-home/config.yaml\n",
+      "stdout": "✓ Set x.ratio = 1.0 in <TMP>/fisher-home/config.yaml\n",
       "saved": {
         "x": {
           "ratio": 1.0
@@ -123,7 +123,7 @@
       "input": null,
       "key": "x.n",
       "value": "-1",
-      "stdout": "✓ Set x.n = -1 in <TMP>/gauss-home/config.yaml\n",
+      "stdout": "✓ Set x.n = -1 in <TMP>/fisher-home/config.yaml\n",
       "saved": {
         "x": {
           "n": "-1"
@@ -136,7 +136,7 @@
       "input": null,
       "key": "deepseek_api_key",
       "value": "sk-1",
-      "stdout": "✓ Set deepseek_api_key in <TMP>/gauss-home/.env\n",
+      "stdout": "✓ Set deepseek_api_key in <TMP>/fisher-home/.env\n",
       "saved": null,
       "env": "DEEPSEEK_API_KEY=sk-1\n"
     },
@@ -145,7 +145,7 @@
       "input": null,
       "key": "MY_TOKEN",
       "value": "t",
-      "stdout": "✓ Set MY_TOKEN in <TMP>/gauss-home/.env\n",
+      "stdout": "✓ Set MY_TOKEN in <TMP>/fisher-home/.env\n",
       "saved": null,
       "env": "MY_TOKEN=t\n"
     },
@@ -154,7 +154,7 @@
       "input": null,
       "key": "fal_key",
       "value": "f",
-      "stdout": "✓ Set fal_key in <TMP>/gauss-home/.env\n",
+      "stdout": "✓ Set fal_key in <TMP>/fisher-home/.env\n",
       "saved": null,
       "env": "FAL_KEY=f\n"
     },
@@ -163,7 +163,7 @@
       "input": null,
       "key": "terminal_ssh_port",
       "value": "22",
-      "stdout": "✓ Set terminal_ssh_port in <TMP>/gauss-home/.env\n",
+      "stdout": "✓ Set terminal_ssh_port in <TMP>/fisher-home/.env\n",
       "saved": null,
       "env": "TERMINAL_SSH_PORT=22\n"
     },
@@ -172,7 +172,7 @@
       "input": null,
       "key": "terminal.docker_mount_cwd_to_workspace",
       "value": "true",
-      "stdout": "✓ Set terminal.docker_mount_cwd_to_workspace = True in <TMP>/gauss-home/config.yaml\n",
+      "stdout": "✓ Set terminal.docker_mount_cwd_to_workspace = True in <TMP>/fisher-home/config.yaml\n",
       "saved": {
         "terminal": {
           "docker_mount_cwd_to_workspace": true
@@ -185,7 +185,7 @@
       "input": null,
       "key": "terminal.timeout",
       "value": "300",
-      "stdout": "✓ Set terminal.timeout = 300 in <TMP>/gauss-home/config.yaml\n",
+      "stdout": "✓ Set terminal.timeout = 300 in <TMP>/fisher-home/config.yaml\n",
       "saved": {
         "terminal": {
           "timeout": 300

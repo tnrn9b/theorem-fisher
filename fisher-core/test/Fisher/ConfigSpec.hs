@@ -7,7 +7,7 @@ import qualified Data.Aeson.KeyMap as KM
 import qualified Data.ByteString.Char8 as BC
 import Data.List (isPrefixOf, isSuffixOf)
 import qualified Data.Yaml as Y
-import System.Directory (doesDirectoryExist, doesFileExist, getHomeDirectory, listDirectory)
+import System.Directory (doesDirectoryExist, doesFileExist, listDirectory)
 import System.Environment (setEnv, unsetEnv)
 import System.FilePath ((</>))
 import System.Posix.Files (fileMode, getFileStatus, intersectFileModes)
@@ -29,25 +29,23 @@ setPath _ new _ = new
 
 spec :: Spec
 spec = do
-  -- Ported from tests/gauss_cli/test_config.py.
+  -- Ported from upstream tests/cli/test_config.py.
   describe "home" $ do
-    it "defaults to ~/.gauss and follows GAUSS_HOME" $ do
-      unsetEnv "GAUSS_HOME"
-      home <- getHomeDirectory
-      getGaussHome `shouldReturn` home </> ".gauss"
-      setEnv "GAUSS_HOME" "/custom/path"
-      getGaussHome `shouldReturn` "/custom/path"
-      unsetEnv "GAUSS_HOME"
+    -- That no other name is read is in NamesSpec.
+    it "follows FISHER_HOME" $ do
+      setEnv "FISHER_HOME" "/custom/path"
+      getFisherHome `shouldReturn` "/custom/path"
+      unsetEnv "FISHER_HOME"
 
     it "creates the subdirectories and a SOUL.md" $ withTmp $ \tmp -> do
-      ensureGaussHomeAt tmp
+      ensureFisherHomeAt tmp
       mapM_ (\d -> doesDirectoryExist (tmp </> d) `shouldReturn` True) ["cron", "sessions", "logs", "memories"]
       soul <- readFile (tmp </> "SOUL.md")
       soul `shouldNotBe` ""
 
     it "leaves an existing SOUL.md alone" $ withTmp $ \tmp -> do
       writeFile (tmp </> "SOUL.md") "custom soul"
-      ensureGaussHomeAt tmp
+      ensureFisherHomeAt tmp
       readFile (tmp </> "SOUL.md") `shouldReturn` "custom soul"
 
   describe "load" $ do

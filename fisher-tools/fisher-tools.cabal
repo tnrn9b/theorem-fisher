@@ -63,6 +63,7 @@ test-suite fisher-tools-test
       Fisher.Tools.FileOpsSpec
       Fisher.Tools.LiveSpec
       Fisher.Tools.LocalSandboxSpec
+      Fisher.Tools.NamesSpec
       Fisher.Tools.PureSpec
       Fisher.Tools.RegistrySpec
       Fisher.Tools.SandboxSpec

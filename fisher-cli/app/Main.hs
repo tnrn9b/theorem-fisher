@@ -27,7 +27,7 @@ import Fisher.Doctor
 import Fisher.Lean.Mcp (serveMcp)
 import Fisher.Lean.Session (defaultLeanEnv)
 import Fisher.EnvVars (getEnvValueAt)
-import Fisher.Paths (configPathIn, envPathIn, ensureGaussHome)
+import Fisher.Paths (configPathIn, envPathIn, ensureFisherHome)
 import Fisher.ProjectCommand
 import Fisher.Term (detectStyle)
 import Fisher.Workflow.LocalAuth (readKeychainClaudeCredentials)
@@ -46,7 +46,7 @@ import Fisher.Cli.Status (StatusInfo (..), statusMain)
 import Fisher.LLM.Auth.Error (SystemExit (..))
 import Fisher.LLM.SysIO (newSysIO)
 import Fisher.UI.Server (uiMain)
-import Fisher.Paths (getGaussHome)
+import Fisher.Paths (getFisherHome)
 import System.Directory (findExecutable, getHomeDirectory)
 import System.Environment (getArgs, getExecutablePath)
 import System.FilePath (takeDirectory)
@@ -172,20 +172,20 @@ run = \case
     mapM_ TIO.putStrLn out
     readIORef (sessionOverride session) >>= saveOverride home
   Doctor fix allProvers -> do
-    home <- ensureGaussHome
+    home <- ensureFisherHome
     (cfg, _) <- loadConfigAt home
     env <- getEnvironment
     st <- detectStyle
     let de = DoctorEnv st cfg env Nothing (getEnvValueAt home) readKeychainClaudeCredentials "fisher"
     runDoctor fix allProvers de home >>= mapM_ TIO.putStrLn
-  ConfigPath -> ensureGaussHome >>= putStrLn . configPathIn
-  ConfigEnvPath -> ensureGaussHome >>= putStrLn . envPathIn
+  ConfigPath -> ensureFisherHome >>= putStrLn . configPathIn
+  ConfigEnvPath -> ensureFisherHome >>= putStrLn . envPathIn
   ConfigCheck -> do
-    home <- ensureGaussHome
+    home <- ensureFisherHome
     st <- detectStyle
     configCheck st home >>= mapM_ TIO.putStrLn
   ConfigSet key val -> do
-    home <- ensureGaussHome
+    home <- ensureFisherHome
     setConfigValueAt home (T.pack key) (T.pack val) >>= \case
       Right line -> TIO.putStrLn line
       Left e -> TIO.hPutStrLn stderr e >> exitWith (ExitFailure 1)
@@ -203,7 +203,7 @@ run = \case
   Version -> versionCli
   ViaSys c args -> do
     home <- getHomeDirectory
-    gh <- getGaussHome
+    gh <- getFisherHome
     sys <- newSysIO home gh
     exe <- getExecutablePath
     py <- maybe "python3" id <$> findExecutable "python3"
@@ -226,7 +226,7 @@ run = \case
       `catch` \(SystemExit n) -> pure n
     if code == 0 then pure () else exitWith (ExitFailure code)
   ConfigMigrate -> do
-    home <- ensureGaussHome
+    home <- ensureFisherHome
     st <- detectStyle
     configMigrate st home prompter TIO.putStrLn
 
@@ -237,7 +237,7 @@ main = do
   args <- getArgs
   case args of
     (name : rest) | Just c <- lookup name sysCommands -> run (ViaSys c rest)
-    -- `fisher chat -q QUERY` / `-Q`: upstream's `gauss chat`, the native agent
+    -- `fisher chat -q QUERY` / `-Q`: upstream's `chat` command, the native agent
     ("chat" : rest) | any (`elem` ["-q", "--query", "-Q", "--quiet", "-p", "--print"]) rest -> run (ViaSys SysChat rest)
     -- check, plan and launch take their flags anywhere ('ownArgsCommand')
     _ | Just own <- ownArgsCommand args -> run $ case own of

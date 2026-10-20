@@ -66,6 +66,7 @@ import qualified Fisher.Search.Controller as Ctl
 import Fisher.Search.Disprove (Disproof (..), disprove)
 import Fisher.Search.Graph
 import Fisher.Search.GraphJobs
+import Fisher.Search.Headless (nativeBackend)
 import Fisher.Search.Lean
 import qualified Fisher.Search.Repair as R
 import Fisher.Search.Retrieval
@@ -183,7 +184,7 @@ data GraphReport = GraphReport
 
 -- | The native backend the workers run on.
 workerBackend :: Text
-workerBackend = "gauss"
+workerBackend = nativeBackend
 
 data Kind
   = KWorker AttemptSpec Double

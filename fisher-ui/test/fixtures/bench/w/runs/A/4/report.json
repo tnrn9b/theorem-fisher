@@ -1,8 +1,8 @@
 {"mode": "swarm", "file": "Step/Latency.lean", "elapsed_s": 900.0, "goals_total": 3, "goals_closed": 1, "auto_requested": false,
  "goals": [
-  {"goal": "Step.Latency.a", "status": "closed", "attempts": ["gauss"], "by_attempt": 1, "by_backend": "gauss", "closed_at_s": 300.0},
-  {"goal": "Step.Latency.b", "status": "gave up", "attempts": ["gauss"], "by_attempt": null, "by_backend": null, "closed_at_s": null},
+  {"goal": "Step.Latency.a", "status": "closed", "attempts": ["fisher"], "by_attempt": 1, "by_backend": "fisher", "closed_at_s": 300.0},
+  {"goal": "Step.Latency.b", "status": "gave up", "attempts": ["fisher"], "by_attempt": null, "by_backend": null, "closed_at_s": null},
   {"goal": "Step.Latency.c", "status": "open", "attempts": [], "by_attempt": null, "by_backend": null, "closed_at_s": null}],
  "attempts": [
-  {"attempt": 1, "goal": "Step.Latency.a", "backend": "gauss", "stats": {"cost_usd": 0.5, "turns": 10}},
-  {"attempt": 2, "goal": "Step.Latency.b", "backend": "gauss", "stats": {"cost_usd": 0.75, "turns": 12}}]}
+  {"attempt": 1, "goal": "Step.Latency.a", "backend": "fisher", "stats": {"cost_usd": 0.5, "turns": 10}},
+  {"attempt": 2, "goal": "Step.Latency.b", "backend": "fisher", "stats": {"cost_usd": 0.75, "turns": 12}}]}

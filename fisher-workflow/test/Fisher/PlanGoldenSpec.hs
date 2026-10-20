@@ -1,4 +1,4 @@
--- | Launch plans against what the pinned OpenGauss produced from the same
+-- | Launch plans against what the pinned upstream produced from the same
 -- setups (@tools/corpus/a2.py@).
 module Fisher.PlanGoldenSpec (spec) where
 
@@ -41,7 +41,7 @@ configFor c root =
         [("backend", String (textField "backend" c)), ("auth_mode", String (textField "auth_mode" c))]
           <> [("managed_state_dir", String (T.pack (root </> T.unpack d))) | Just (String d) <- [get "state_dir"]]
           <> [("handoff_mode", m) | Just m <- [get "handoff_mode"]]
-   in object ["gauss" .= object ["autoformalize" .= Object auto]]
+   in object ["fisher" .= object ["autoformalize" .= Object auto]]
 
 cwdFor :: Value -> FilePath -> FilePath
 cwdFor c root = case field "extras" c :: Value of
@@ -75,7 +75,7 @@ subObject k = \case
 runCase :: Value -> Value -> (LaunchInputs -> IO (Either WorkflowError (FilePath -> Env -> Value))) -> IO ()
 runCase file c resolve = withRoot $ \root -> do
   base <- setupCase root (field "extras" c)
-  let li = LaunchInputs (machineFor file (root </> "gauss-home")) (configFor c root) base False
+  let li = LaunchInputs (machineFor file (root </> "fisher-home")) (configFor c root) base False
              (const (pure Nothing)) (Just (cwdFor c root))
   snapBefore <- snapshot root
   result <- withProcessEnv base (resolve li)
@@ -141,7 +141,7 @@ spec = do
     (file, cases) <- runIO (loadFile (golden "prewarm.json"))
     forM_ cases $ \c -> it (T.unpack (textField "name" c)) $ withRoot $ \root -> do
       base <- setupCase root (field "extras" c)
-      let li = LaunchInputs (machineFor file (root </> "gauss-home")) (object []) base False (const (pure Nothing)) Nothing
+      let li = LaunchInputs (machineFor file (root </> "fisher-home")) (object []) base False (const (pure Nothing)) Nothing
       snapBefore <- snapshot root
       result <- withProcessEnv base (prepareManagedRuntimeAssets li)
       snapAfter <- snapshot root

@@ -1,7 +1,7 @@
 -- | The providers upstream knows by name: @PROVIDER_REGISTRY@ (in its
 -- order, which auto-detection follows), the aliases, the labels
--- @gauss_cli/models.py@ shows, the Kimi base-URL rule and the Z.AI
--- endpoint probe. Ported from @gauss_cli/auth.py@ and @gauss_cli/models.py@.
+-- upstream @cli/models.py@ shows, the Kimi base-URL rule and the Z.AI
+-- endpoint probe. Ported from upstream @cli/auth.py@ and upstream @cli/models.py@.
 module Fisher.LLM.Auth.Registry
   ( AuthType (..)
   , ProviderConfig (..)
@@ -14,14 +14,10 @@ module Fisher.LLM.Auth.Registry
   , normalizeProvider
   , providerLabels
   , providerLabel
+    -- * Removed providers
+  , isRemovedProvider
+  , removedProviderMessage
     -- * Constants
-  , defaultNousPortalUrl
-  , defaultNousInferenceUrl
-  , defaultNousClientId
-  , defaultNousScope
-  , defaultAgentKeyMinTtlSeconds
-  , accessTokenRefreshSkewSeconds
-  , deviceAuthPollIntervalCapSeconds
   , defaultCodexBaseUrl
   , codexOAuthClientId
   , codexOAuthTokenUrl
@@ -48,32 +44,29 @@ import Fisher.LLM.Auth.Util (httpxClient, send)
 import Fisher.LLM.Sys
 import Fisher.Py.Value
 
-data AuthType = OAuthDeviceCode | OAuthExternal | ApiKey
+data AuthType = OAuthExternal | ApiKey
   deriving (Eq, Show)
 
 data ProviderConfig = ProviderConfig
   { pcId :: Text
   , pcName :: Text
   , pcAuthType :: AuthType
-  , pcPortalBaseUrl :: Text
   , pcInferenceBaseUrl :: Text
-  , pcClientId :: Text
-  , pcScope :: Text
   , pcApiKeyEnvVars :: [Text]
   , pcBaseUrlEnvVar :: Text
   }
   deriving (Eq, Show)
 
-defaultNousPortalUrl, defaultNousInferenceUrl, defaultNousClientId, defaultNousScope :: Text
-defaultNousPortalUrl = "https://portal.nousresearch.com"
-defaultNousInferenceUrl = "https://inference-api.nousresearch.com/v1"
-defaultNousClientId = "gauss-cli"
-defaultNousScope = "inference:mint_agent_key"
+-- | Providers upstream has that Fisher removed. A config, an environment
+-- variable or an auth store that still names one gets
+-- 'removedProviderMessage' instead of being treated as unknown.
+isRemovedProvider :: Text -> Bool
+isRemovedProvider p = T.toLower (T.strip p) == "nous"
 
-defaultAgentKeyMinTtlSeconds, accessTokenRefreshSkewSeconds, deviceAuthPollIntervalCapSeconds, codexAccessTokenRefreshSkewSeconds :: Int
-defaultAgentKeyMinTtlSeconds = 30 * 60
-accessTokenRefreshSkewSeconds = 120
-deviceAuthPollIntervalCapSeconds = 1
+removedProviderMessage :: Text
+removedProviderMessage = "the Nous Portal provider was removed; choose another provider with fisher setup model"
+
+codexAccessTokenRefreshSkewSeconds :: Int
 codexAccessTokenRefreshSkewSeconds = 120
 
 authLockTimeoutSeconds :: Double
@@ -84,19 +77,18 @@ defaultCodexBaseUrl = "https://chatgpt.com/backend-api/codex"
 codexOAuthClientId = "app_EMoamEEZ73f0CkXaXp7hrann"
 codexOAuthTokenUrl = "https://auth.openai.com/oauth/token"
 
--- | @gauss_constants.py@.
+-- | Upstream's constants module.
 openrouterBaseUrl, openrouterModelsUrl :: Text
 openrouterBaseUrl = "https://openrouter.ai/api/v1"
 openrouterModelsUrl = openrouterBaseUrl <> "/models"
 
 apiKey :: Text -> Text -> Text -> [Text] -> Text -> ProviderConfig
-apiKey i n url vars envUrl = ProviderConfig i n ApiKey "" url "" "" vars envUrl
+apiKey i n url vars envUrl = ProviderConfig i n ApiKey url vars envUrl
 
--- | @PROVIDER_REGISTRY@, in its order.
+-- | @PROVIDER_REGISTRY@, in its order, without the removed providers.
 providerRegistry :: [ProviderConfig]
 providerRegistry =
-  [ ProviderConfig "nous" "Nous Portal" OAuthDeviceCode defaultNousPortalUrl defaultNousInferenceUrl defaultNousClientId defaultNousScope [] ""
-  , ProviderConfig "openai-codex" "OpenAI Codex" OAuthExternal "" defaultCodexBaseUrl "" "" [] ""
+  [ ProviderConfig "openai-codex" "OpenAI Codex" OAuthExternal defaultCodexBaseUrl [] ""
   , apiKey "zai" "Z.AI / GLM" "https://api.z.ai/api/paas/v4" ["GLM_API_KEY", "ZAI_API_KEY", "Z_AI_API_KEY"] "GLM_BASE_URL"
   , apiKey "kimi-coding" "Kimi / Moonshot" "https://api.moonshot.ai/v1" ["KIMI_API_KEY"] "KIMI_BASE_URL"
   , apiKey "minimax" "MiniMax" "https://api.minimax.io/v1" ["MINIMAX_API_KEY"] "MINIMAX_BASE_URL"
@@ -137,7 +129,7 @@ nonEmpty = \case
 -- | @models._PROVIDER_LABELS@.
 providerLabels :: [(Text, Text)]
 providerLabels =
-  [ ("openrouter", "OpenRouter"), ("openai-codex", "OpenAI Codex"), ("nous", "Nous Portal")
+  [ ("openrouter", "OpenRouter"), ("openai-codex", "OpenAI Codex")
   , ("zai", "Z.AI / GLM"), ("kimi-coding", "Kimi / Moonshot"), ("minimax", "MiniMax")
   , ("minimax-cn", "MiniMax (China)"), ("anthropic", "Anthropic"), ("deepseek", "DeepSeek")
   , ("custom", "Custom endpoint") ]

@@ -1,5 +1,5 @@
--- | The session store upstream keeps in @$GAUSS_HOME/state.db@
--- (@gauss_state.py@'s @SessionDB@): the same SQLite schema, migrations,
+-- | The session store upstream keeps in its home's @state.db@
+-- (its state module's @SessionDB@): the same SQLite schema, migrations,
 -- FTS5 index and queries, so either program reads what the other wrote.
 module Fisher.Store
   ( Store

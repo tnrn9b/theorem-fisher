@@ -1,4 +1,4 @@
 {"event":"auto missed","goal":"Step.Diamond.twoFire_joint","seconds":16.4,"t":16.4}
-{"attempt":1,"backend":"gauss","event":"launched","goal":"Step.Diamond.twoFire_joint","t":16.4}
-{"attempt":1,"backend":"gauss","event":"finished","goal":"Step.Diamond.twoFire_joint","outcome":"closed","stats":{"cost_usd":1.0260106,"exit":0,"input_tokens":2529436,"output_tokens":35981,"tools":{"mcp_lean_lsp_lean_diagnostic_messages":6,"mcp_lean_lsp_lean_goal":2,"mcp_lean_lsp_lean_verify":1,"patch":6,"read_file":14,"search_files":4,"terminal":1},"turns":22,"wall_s":402},"t":452.4}
+{"attempt":1,"backend":"fisher","event":"launched","goal":"Step.Diamond.twoFire_joint","t":16.4}
+{"attempt":1,"backend":"fisher","event":"finished","goal":"Step.Diamond.twoFire_joint","outcome":"closed","stats":{"cost_usd":1.0260106,"exit":0,"input_tokens":2529436,"output_tokens":35981,"tools":{"mcp_lean_lsp_lean_diagnostic_messages":6,"mcp_lean_lsp_lean_goal":2,"mcp_lean_lsp_lean_verify":1,"patch":6,"read_file":14,"search_files":4,"terminal":1},"turns":22,"wall_s":402},"t":452.4}
 {"attempt":1,"event":"closed","goal":"Step.Diamond.twoFire_joint","t":452.4}

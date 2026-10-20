@@ -3,7 +3,7 @@
     "attempts": [
         {
             "attempt": 1,
-            "backend": "gauss",
+            "backend": "fisher",
             "ended_s": 246.8,
             "goal": "Step.Relay.fireCand_third",
             "outcome": "closed",
@@ -28,7 +28,7 @@
         }
     ],
     "backends": [
-        "gauss"
+        "fisher"
     ],
     "budget_s": 3600,
     "cap_usd": 6,

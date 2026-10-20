@@ -2,13 +2,18 @@
 -- would hand to a terminal, turned into one that runs to the end on its
 -- own, prints its events as JSON lines, and stops at a turn budget.
 module Fisher.Search.Headless
-  ( attemptPrompt
+  ( nativeBackend
+  , attemptPrompt
   , headlessArgv
   , workflowCommand
   ) where
 
 import Data.Text (Text)
 import qualified Data.Text as T
+
+-- | The native backend's name: Fisher's own agent (@fisher chat@).
+nativeBackend :: Text
+nativeBackend = "fisher"
 
 -- | The workflow each attempt runs, on the whole file (the prompt narrows
 -- it to one theorem): no planning, review, checkpoints, commits or golf.
@@ -28,9 +33,9 @@ attemptPrompt goal file = T.unwords
   , "Stop when it is proved or when you cannot make progress." ]
 
 -- | The headless form of a planned child's argv, whose last element is
--- its prompt. claude-code: @-p@ with stream-json and @--max-turns@; fisher,
--- also accepted as gauss (@fisher chat ... -q PROMPT@): the same flags; codex: @codex exec
--- --json@ (no turn limit; the attempt's time limit bounds it).
+-- its prompt. claude-code: @-p@ with stream-json and @--max-turns@; fisher
+-- (the native backend, @fisher chat ... -q PROMPT@): the same flags; codex: @codex exec --json@ (no turn
+-- limit; the attempt's time limit bounds it).
 headlessArgv :: Text -> [Text] -> Text -> Int -> Either Text [Text]
 headlessArgv backend argv extra maxTurns = case unsnoc argv of
   Nothing -> Left "empty launch argv"
@@ -39,7 +44,7 @@ headlessArgv backend argv extra maxTurns = case unsnoc argv of
         turns = T.pack (show maxTurns)
      in case backend of
           "claude-code" -> Right (front <> ["-p", prompt, "--output-format", "stream-json", "--verbose", "--max-turns", turns])
-          b | b `elem` ["gauss", "fisher"] -> Right (dropQ front <> ["-p", prompt, "--output-format", "stream-json", "--max-turns", turns])
+          b | b == nativeBackend -> Right (dropQ front <> ["-p", prompt, "--output-format", "stream-json", "--max-turns", turns])
           "codex" -> case front of
             exe : rest -> Right ([exe, "exec", "--json"] <> rest <> [prompt])
             [] -> Left "empty launch argv"

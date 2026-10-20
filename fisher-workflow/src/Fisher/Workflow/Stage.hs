@@ -1,5 +1,5 @@
 -- | The files a managed session is staged with. Each function is the
--- matching @_stage_*@ or @_write_*@ helper in @gauss_cli/autoformalize.py@,
+-- matching @_stage_*@ or @_write_*@ helper in upstream @cli/autoformalize.py@,
 -- writing the same text.
 module Fisher.Workflow.Stage
   ( stageTree
@@ -66,7 +66,7 @@ copyTreeKeepingLinks src dst = do
 -- | Copy a tree and mark it with its revision; an up-to-date copy is kept.
 stageTree :: FilePath -> FilePath -> Text -> IO ()
 stageTree src dst revision = do
-  let marker = dst </> ".gauss-managed-revision"
+  let marker = dst </> ".fisher-managed-revision"
   exists <- doesFileExist marker
   current <- if exists then T.strip <$> TIO.readFile marker else pure ""
   unless (exists && current == revision) $ do

@@ -2,17 +2,6 @@
  "required": [],
  "optional": [
   [
-   "NOUS_BASE_URL",
-   {
-    "description": "Nous Portal base URL override",
-    "prompt": "Nous Portal base URL (leave empty for default)",
-    "url": null,
-    "password": false,
-    "category": "provider",
-    "advanced": true
-   }
-  ],
-  [
    "OPENROUTER_API_KEY",
    {
     "description": "OpenRouter API key (for vision, web scraping helpers, and MoA)",
@@ -377,7 +366,7 @@
    }
   ],
   [
-   "GAUSS_MAX_ITERATIONS",
+   "FISHER_MAX_ITERATIONS",
    {
     "description": "Maximum tool-calling iterations per conversation (default: 90)",
     "prompt": "Max iterations",
@@ -387,7 +376,7 @@
    }
   ],
   [
-   "GAUSS_TOOL_PROGRESS",
+   "FISHER_TOOL_PROGRESS",
    {
     "description": "(deprecated) Use display.tool_progress in config.yaml instead",
     "prompt": "Tool progress (deprecated \u2014 use config.yaml)",
@@ -397,7 +386,7 @@
    }
   ],
   [
-   "GAUSS_TOOL_PROGRESS_MODE",
+   "FISHER_TOOL_PROGRESS_MODE",
    {
     "description": "(deprecated) Use display.tool_progress in config.yaml instead",
     "prompt": "Progress mode (deprecated \u2014 use config.yaml)",
@@ -407,7 +396,7 @@
    }
   ],
   [
-   "GAUSS_PREFILL_MESSAGES_FILE",
+   "FISHER_PREFILL_MESSAGES_FILE",
    {
     "description": "Path to JSON file with ephemeral prefill messages for few-shot priming",
     "prompt": "Prefill messages file path",
@@ -417,7 +406,7 @@
    }
   ],
   [
-   "GAUSS_EPHEMERAL_SYSTEM_PROMPT",
+   "FISHER_EPHEMERAL_SYSTEM_PROMPT",
    {
     "description": "Ephemeral system prompt injected at API-call time (never persisted to sessions)",
     "prompt": "Ephemeral system prompt",

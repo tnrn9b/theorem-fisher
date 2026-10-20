@@ -31,6 +31,7 @@ import Fisher.LLM.Auth.Anthropic (resolveAnthropicToken)
 import Fisher.LLM.Auth.Registry
 import Fisher.LLM.Auth.Resolve (RuntimeRequest (..), resolveRuntimeProvider)
 import Fisher.LLM.Auth.Store (loadAuthStore, loadProviderState)
+import Fisher.LLM.Chat (fisherReferer)
 import Fisher.LLM.Client (readEvents)
 import qualified Fisher.LLM.Codex as Cx
 import Fisher.LLM.Errors (errorText)
@@ -53,14 +54,13 @@ data Client = Client
   deriving (Eq, Show)
 
 -- | The process-wide state upstream keeps in module globals: the client
--- cache and the "Nous was resolved once" flag.
-data AuxState = AuxState
+-- cache.
+newtype AuxState = AuxState
   { asCache :: IORef [((Text, Text, Text), (Client, Maybe Text))]
-  , asNous :: IORef Bool
   }
 
 newAuxState :: IO AuxState
-newAuxState = AuxState <$> newIORef [] <*> newIORef False
+newAuxState = AuxState <$> newIORef []
 
 data AuxEnv = AuxEnv
   { axSys :: Sys
@@ -78,12 +78,11 @@ auxProviderAuxModels =
 
 orHeaders :: [(Text, Text)]
 orHeaders =
-  [ ("http-referer", "https://gauss-agent.nousresearch.com"), ("x-openrouter-title", "Gauss Agent")
+  [ ("http-referer", fisherReferer), ("x-openrouter-title", "Fisher Agent")
   , ("x-openrouter-categories", "productivity,cli-agent") ]
 
-openRouterModel, nousModel, codexAuxModel, codexAuxBaseUrl :: Text
+openRouterModel, codexAuxModel, codexAuxBaseUrl :: Text
 openRouterModel = "google/gemini-3-flash-preview"
-nousModel = "gemini-3-flash"
 codexAuxModel = "gpt-5.2-codex"
 codexAuxBaseUrl = "https://chatgpt.com/backend-api/codex"
 
@@ -171,22 +170,6 @@ tryOpenRouter env = do
     Just key | not (T.null key) -> Just (openai openrouterBaseUrl key orHeaders, openRouterModel)
     _ -> Nothing
 
-tryNous :: AuxEnv -> IO (Maybe (Client, Text))
-tryNous env = do
-  r <- try @SomeException (loadAuthStore (axSys env))
-  case r of
-    Right store
-      | get "active_provider" store == Just (PStr "nous")
-      , Just p <- loadProviderState store "nous"
-      , truthy (fromMaybe PNull (get "agent_key" p)) || truthy (fromMaybe PNull (get "access_token" p)) -> do
-          writeIORef (asNous (axState env)) True
-          base <- sysGetEnv (axSys env) "NOUS_INFERENCE_BASE_URL"
-          let key = case get "agent_key" p of
-                Just v | truthy v -> pyStrOf v
-                _ -> maybe "" pyStrOf (get "access_token" p)
-          pure (Just (openai (fromMaybe defaultNousInferenceUrl base) key [], nousModel))
-    _ -> pure Nothing
-
 -- | @_resolve_custom_runtime()@
 customRuntime :: AuxEnv -> IO (Maybe (Text, Text))
 customRuntime env = do
@@ -213,7 +196,7 @@ readMainModel env = do
       go (k : ks) = do
         v <- envStrip env k
         if T.null v then go ks else pure v
-  go ["OPENAI_MODEL", "GAUSS_MODEL", "LLM_MODEL"]
+  go ["OPENAI_MODEL", "FISHER_MODEL", "LLM_MODEL"]
 
 tryCustom :: AuxEnv -> IO (Maybe (Client, Text))
 tryCustom env =
@@ -291,7 +274,7 @@ resolveProviderClient env provider0 model explicitBase explicitKey = do
       warnNone msg = axWarn env msg >> pure (Nothing, Nothing)
   case provider of
     "auto" ->
-      firstOf [tryOpenRouter env, tryNous env, tryCustom env, tryCodex env, apiKeyProvider env] >>= \case
+      firstOf [tryOpenRouter env, tryCustom env, tryCodex env, apiKeyProvider env] >>= \case
         Nothing -> pure (Nothing, Nothing)
         Just (c, resolved) ->
           let m = case model of
@@ -299,8 +282,7 @@ resolveProviderClient env provider0 model explicitBase explicitKey = do
                 x -> x >>= nonEmptyT
            in pure (Just c, Just (fromMaybe resolved m))
     "openrouter" -> tryOpenRouter env >>= maybe (warnNone "resolve_provider_client: openrouter requested but OPENROUTER_API_KEY not set") (done . Just)
-    "nous" -> tryNous env >>= maybe (warnNone "resolve_provider_client: nous requested but Nous Portal not configured (run: gauss login)") (done . Just)
-    "openai-codex" -> tryCodex env >>= maybe (warnNone "resolve_provider_client: openai-codex requested but no Codex OAuth token found (run: gauss model)") (done . Just)
+    "openai-codex" -> tryCodex env >>= maybe (warnNone "resolve_provider_client: openai-codex requested but no Codex OAuth token found (run: fisher model)") (done . Just)
     "custom" -> case explicitBase of
       Just b | not (T.null b) -> do
         envKey <- envStrip env "OPENAI_API_KEY"
@@ -317,6 +299,7 @@ resolveProviderClient env provider0 model explicitBase explicitKey = do
         firstOf [tryCustom env, tryCodex env, apiKeyProvider env]
           >>= maybe (warnNone "resolve_provider_client: custom/main requested but no endpoint credentials found") (done . Just)
     other -> case lookupProvider other of
+      Nothing | isRemovedProvider other -> warnNone ("resolve_provider_client: " <> removedProviderMessage)
       Nothing -> warnNone ("resolve_provider_client: unknown provider '" <> other <> "'")
       Just pc
         | pcAuthType pc == ApiKey ->
@@ -364,7 +347,7 @@ callLlm env call = do
       cachedClient env "openrouter" (Just (fromMaybe openRouterModel rm)) Nothing Nothing
     _ -> pure (c0, m0)
   case client of
-    Nothing -> pure (Left (AuxNoProvider ("No LLM provider configured for task=" <> fromMaybe "None" (axTask call) <> " provider=" <> rp <> ". Run: gauss setup")))
+    Nothing -> pure (Left (AuxNoProvider ("No LLM provider configured for task=" <> fromMaybe "None" (axTask call) <> " provider=" <> rp <> ". Run: fisher setup")))
     Just cl -> do
       useCompletion <- case (rp, axMaxTokens call) of
         ("custom", Just _) -> do
@@ -373,12 +356,8 @@ callLlm env call = do
             Nothing -> maybe "" fst <$> customRuntime env
           pure ("api.openai.com" `T.isInfixOf` T.toLower base)
         _ -> pure False
-      isNous <- readIORef (asNous (axState env))
       let model = fromMaybe PNull (PStr <$> finalModel)
-          extra =
-            if rp == "nous" || isNous
-              then mergeTags (axExtraBody call)
-              else axExtraBody call
+          extra = axExtraBody call
           tokensKey = if useCompletion then "max_completion_tokens" else "max_tokens"
           body tk =
             [("messages", PList (axMessages call)), ("model", model)]
@@ -410,9 +389,6 @@ callLlm env call = do
       pure $ case r of
         Left e -> Left (errorText e)
         Right resp -> either (Left . T.pack) Right (loads (rBody resp))
-    mergeTags kvs = case lookup "tags" kvs of
-      Just (PList ts) -> [(k, if k == "tags" then PList (ts <> [PStr "product=gauss-agent"]) else v) | (k, v) <- kvs]
-      _ -> kvs <> [("tags", PList [PStr "product=gauss-agent"])]
     insertAfterModel kv kvs = case break ((== "model") . fst) kvs of
       (a, m : b) -> a <> [m, kv] <> b
       _ -> kvs <> [kv]

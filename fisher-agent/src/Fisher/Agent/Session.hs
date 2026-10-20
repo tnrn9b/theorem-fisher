@@ -1,5 +1,5 @@
 -- | Where a conversation is kept: the session database the agent writes
--- through (upstream's @SessionDB@ in @gauss_state.py@, as an interface:
+-- through (upstream's @SessionDB@ in its state module, as an interface:
 -- the sqlite store in the CLI, an in-memory copy in the specs), and the
 -- session log file (@sessions/session_<id>.json@).
 module Fisher.Agent.Session

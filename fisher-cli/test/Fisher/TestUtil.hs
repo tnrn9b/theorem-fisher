@@ -1,4 +1,4 @@
-module Fisher.TestUtil (withTmp, writeLeanRoot) where
+module Fisher.TestUtil (withTmp, writeLeanRoot, oldName) where
 
 import System.Directory (canonicalizePath, createDirectoryIfMissing)
 import System.FilePath ((</>))
@@ -8,6 +8,11 @@ import System.IO.Temp (withSystemTempDirectory)
 -- symlink on macOS.
 withTmp :: (FilePath -> IO a) -> IO a
 withTmp k = withSystemTempDirectory "fisher" (\d -> canonicalizePath d >>= k)
+
+-- | The product's previous name in lower case, built so that no file spells
+-- it. The specs make its other spellings from it.
+oldName :: String
+oldName = ['g', 'a', 'u', 's', 's']
 
 writeLeanRoot :: FilePath -> IO ()
 writeLeanRoot p = do

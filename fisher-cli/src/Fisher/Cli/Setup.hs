@@ -1,12 +1,12 @@
--- | @gauss setup [section]@: upstream's wizard (@gauss_cli/setup.py@,
+-- | @fisher setup [section]@: upstream's wizard (@cli/setup.py@,
 -- @run_setup_wizard@ and every section it runs: model and provider,
 -- terminal backend, tools, agent settings), its non-interactive guidance,
 -- the returning user's menu, quick setup and the closing summary. The
--- logins go through the credential layer (@Fisher.LLM.Auth@), as upstream
--- reuses @_login_nous@ and @_login_openai_codex@.
+-- login goes through the credential layer (@Fisher.LLM.Auth@), as upstream
+-- reuses @_login_openai_codex@. Upstream's first provider (a portal login)
+-- was removed, so the provider menu starts at its second.
 --
--- Upstream's quirks are kept: the Nous path asks for the model twice (once
--- in the login, once here), and choosing "Keep current" in the Codex model
+-- Upstream's quirk is kept: choosing "Keep current" in the Codex model
 -- menu asks for a model name.
 module Fisher.Cli.Setup
   ( SetupInfo (..)
@@ -36,7 +36,6 @@ import Fisher.LLM.Auth.Codex (defaultCodexOpts, getCodexModelIds, loginOpenAICod
 import Fisher.LLM.Auth.Config (readRawConfig, updateConfigForProvider, writeRawConfig)
 import Fisher.LLM.Auth.Env (loadDotenvIntoSys, saveAnthropicApiKey, saveAnthropicOauthToken, saveEnvValue)
 import Fisher.LLM.Auth.Error
-import Fisher.LLM.Auth.Nous (NousOpts (..), defaultLoginArgs, fetchNousModels, loginNous, resolveNousRuntimeCredentials)
 import Fisher.LLM.Auth.Registry
 import Fisher.LLM.Auth.Resolve (detectExternalCredentials)
 import Fisher.LLM.Auth.Store (deactivateProvider, getActiveProvider)
@@ -61,7 +60,7 @@ data Env = Env
   , eInfo :: SetupInfo
   }
 
--- | @gauss setup ...@.
+-- | @fisher setup ...@.
 setupMain :: Sys -> [Text] -> IO Int
 setupMain sys args = do
   exe <- getExecutablePath
@@ -91,7 +90,7 @@ runTop sys act =
           let line = case fromException e of
                 Just (PyError ty _ msg) -> ty <> ": " <> msg
                 _ -> case fromException e of
-                  Just (a :: AuthError) -> "gauss_cli.auth.AuthError: " <> aeMessage a
+                  Just (a :: AuthError) -> "fisher_cli.auth.AuthError: " <> aeMessage a
                   Nothing -> "Exception: " <> T.pack (show e)
           outLn sys ("Traceback (most recent call last):\n" <> line)
           pure 1
@@ -133,7 +132,7 @@ runSetupWizard :: Env -> Parsed -> IO ()
 runSetupWizard e opts = do
   let ui = eUI e
       sys = eSys e
-      home = sysGaussHome sys
+      home = sysFisherHome sys
   cref <- newIORef =<< loadCfg sys
   tty <- sysStdinTty sys
   if flagSet "non-interactive" opts || not tty
@@ -143,7 +142,7 @@ runSetupWizard e opts = do
         Just label -> do
           sayLn ui ""
           sayLn ui (paint ui [magenta] "┌─────────────────────────────────────────────────────────┐")
-          sayLn ui (paint ui [magenta] ("│     ⚕ Gauss Setup — " <> T.justifyLeft 34 ' ' label <> " │"))
+          sayLn ui (paint ui [magenta] ("│     ⚕ Fisher Setup — " <> T.justifyLeft 33 ' ' label <> " │"))
           sayLn ui (paint ui [magenta] "└─────────────────────────────────────────────────────────┘")
           runSection e cref False section
           readIORef cref >>= saveCfg sys
@@ -154,16 +153,16 @@ runSetupWizard e opts = do
           printInfo ui ("Available sections: " <> T.intercalate ", " (map fst sections))
       Nothing -> do
         active <- getActiveProvider sys
-        force <- maybe False ((`elem` ["1", "true", "yes", "on"]) . T.toLower . T.strip) <$> sysGetEnv sys "GAUSS_FORCE_FIRST_TIME_SETUP"
+        force <- maybe False ((`elem` ["1", "true", "yes", "on"]) . T.toLower . T.strip) <$> sysGetEnv sys "FISHER_FORCE_FIRST_TIME_SETUP"
         orKey <- envValue sys "OPENROUTER_API_KEY"
         baseUrl <- envValue sys "OPENAI_BASE_URL"
         let isExisting = not force && (not (T.null orKey) || not (T.null baseUrl) || active /= PNull)
         sayLn ui ""
         mapM_ (sayLn ui . paint ui [magenta])
           [ "┌─────────────────────────────────────────────────────────┐"
-          , "│             ⚕ Gauss Agent Setup Wizard                │"
+          , "│             ⚕ Fisher Agent Setup Wizard               │"
           , "├─────────────────────────────────────────────────────────┤"
-          , "│  Let's configure your Gauss Agent installation.       │"
+          , "│  Let's configure your Fisher Agent installation.      │"
           , "│  Press Ctrl+C at any time to exit.                     │"
           , "└─────────────────────────────────────────────────────────┘" ]
         proceed <-
@@ -171,7 +170,7 @@ runSetupWizard e opts = do
             then do
               sayLn ui ""
               printHeader ui "Welcome Back!"
-              printSuccess ui "You already have Gauss configured."
+              printSuccess ui "You already have Fisher configured."
               sayLn ui ""
               choice <- promptChoice ui "What would you like to do?"
                 [ "Quick Setup - configure missing items only", "Full Setup - reconfigure everything", "---"
@@ -207,7 +206,7 @@ runSetupWizard e opts = do
           printInfo ui ("Data folder:  " <> T.pack home)
           printInfo ui ("Install dir:  " <> siInstallDir (eInfo e))
           sayLn ui ""
-          printInfo ui "You can edit these files directly or use 'gauss config edit'"
+          printInfo ui ("You can edit these files directly or use '" <> cliName <> " config edit'")
           setupModelProvider e cref
           setupTerminalBackend e cref
           runSection e cref (not isExisting) "tools"
@@ -218,15 +217,15 @@ runSetupWizard e opts = do
 noninteractiveGuidance :: UI -> IO ()
 noninteractiveGuidance ui = do
   sayLn ui ""
-  sayLn ui (paint ui [cyan, bold] "⚕ Gauss Setup — Non-interactive mode")
+  sayLn ui (paint ui [cyan, bold] "⚕ Fisher Setup — Non-interactive mode")
   sayLn ui ""
   printInfo ui "Running in a non-interactive environment (no TTY detected)."
   printInfo ui "The interactive wizard cannot be used here."
   sayLn ui ""
-  printInfo ui "Configure Gauss using environment variables or config commands:"
-  printInfo ui "  gauss config set model.provider custom"
-  printInfo ui "  gauss config set model.base_url http://localhost:8080/v1"
-  printInfo ui "  gauss config set model.default your-model-name"
+  printInfo ui "Configure Fisher using environment variables or config commands:"
+  printInfo ui ("  " <> cliName <> " config set model.provider custom")
+  printInfo ui ("  " <> cliName <> " config set model.base_url http://localhost:8080/v1")
+  printInfo ui ("  " <> cliName <> " config set model.default your-model-name")
   sayLn ui ""
   printInfo ui "Or set OPENROUTER_API_KEY / OPENAI_API_KEY in your environment."
   printInfo ui ("Run '" <> cliName <> " setup' in an interactive terminal to use the full wizard.")
@@ -234,7 +233,7 @@ noninteractiveGuidance ui = do
 
 -- ------------------------------------------------------------- quick setup
 
--- | @_run_quick_setup(config, gauss_home)@.
+-- | @_run_quick_setup(config, home)@.
 runQuickSetup :: Env -> IORef PyVal -> IO ()
 runQuickSetup e cref = do
   let ui = eUI e
@@ -318,16 +317,16 @@ promptApiKey ui sys v = do
   value <- prompt ui ("  " <> evPrompt v) Nothing (evPassword v)
   if not (T.null value)
     then saveEnvValue sys (evName v) value >> printSuccess ui "  ✓ Saved"
-    else printWarning ui "  Skipped (configure later with 'gauss setup')"
+    else printWarning ui ("  Skipped (configure later with '" <> cliName <> " setup')")
 
 -- ----------------------------------------------------------------- summary
 
--- | @_print_setup_summary(config, gauss_home)@.
+-- | @_print_setup_summary(config, home)@.
 printSetupSummary :: Env -> IORef PyVal -> IO ()
 printSetupSummary e cref = do
   let ui = eUI e
       sys = eSys e
-      home = sysGaussHome sys
+      home = sysFisherHome sys
       has' k = not . T.null <$> envValue sys k
   config <- readIORef cref
   sayLn ui ""
@@ -349,7 +348,7 @@ printSetupSummary e cref = do
         Just v -> pyStrOf v
         Nothing -> "edge"
       status =
-        [ if not (null vision) then ("Vision (image analysis)", True, "") else ("Vision (image analysis)", False, "run 'gauss setup' to configure")
+        [ if not (null vision) then ("Vision (image analysis)", True, "") else ("Vision (image analysis)", False, "run '" <> cliName <> " setup' to configure")
         , if orKey then ("Mixture of Agents", True, "") else ("Mixture of Agents", False, "OPENROUTER_API_KEY")
         , if fire then ("Web Search & Extract", True, "") else ("Web Search & Extract", False, "FIRECRAWL_API_KEY")
         , if bb
@@ -375,7 +374,7 @@ printSetupSummary e cref = do
   sayLn ui ""
   when (available < length status) $ do
     printWarning ui ("Some tools are disabled. Run '" <> cliName <> " setup tools' to configure them,")
-    printWarning ui "or edit ~/.gauss/.env directly to add the missing API keys."
+    printWarning ui ("or edit " <> homeLabelOf sys <> "/.env directly to add the missing API keys.")
     sayLn ui ""
   sayLn ui ""
   sayLn ui (paint ui [green] "┌─────────────────────────────────────────────────────────┐")
@@ -385,7 +384,7 @@ printSetupSummary e cref = do
   let cfgPath = T.pack (configPathIn home)
       envPath = T.pack (envPathIn home)
       g = paint ui [green]
-  sayLn ui (paint ui [cyan, bold] "📁 All your files are in ~/.gauss/:")
+  sayLn ui (paint ui [cyan, bold] ("📁 All your files are in " <> homeLabelOf sys <> "/:"))
   sayLn ui ""
   sayLn ui ("   " <> paint ui [yellow] "Settings:" <> "  " <> cfgPath)
   sayLn ui ("   " <> paint ui [yellow] "API Keys:" <> "  " <> envPath)
@@ -395,15 +394,15 @@ printSetupSummary e cref = do
   sayLn ui ""
   sayLn ui (paint ui [cyan, bold] "📝 To edit your configuration:")
   sayLn ui ""
-  sayLn ui ("   " <> g "gauss setup" <> "          Re-run the full wizard")
-  sayLn ui ("   " <> g "gauss setup model" <> "    Change model/provider")
-  sayLn ui ("   " <> g "gauss setup terminal" <> " Change terminal backend")
-  sayLn ui ("   " <> g "gauss setup tools" <> "    Configure tool providers")
+  sayLn ui ("   " <> g "fisher setup" <> "          Re-run the full wizard")
+  sayLn ui ("   " <> g "fisher setup model" <> "    Change model/provider")
+  sayLn ui ("   " <> g "fisher setup terminal" <> " Change terminal backend")
+  sayLn ui ("   " <> g "fisher setup tools" <> "    Configure tool providers")
   sayLn ui ""
-  sayLn ui ("   " <> g "gauss config" <> "         View current settings")
-  sayLn ui ("   " <> g "gauss config edit" <> "    Open config in your editor")
-  sayLn ui ("   " <> g "gauss config set <key> <value>")
-  sayLn ui "                          Set a specific value"
+  sayLn ui ("   " <> g "fisher config" <> "         View current settings")
+  sayLn ui ("   " <> g "fisher config edit" <> "    Open config in your editor")
+  sayLn ui ("   " <> g "fisher config set <key> <value>")
+  sayLn ui "                           Set a specific value"
   sayLn ui ""
   sayLn ui "   Or edit the files directly:"
   sayLn ui ("   " <> paint ui [dim] ("nano " <> cfgPath))
@@ -413,8 +412,8 @@ printSetupSummary e cref = do
   sayLn ui ""
   sayLn ui (paint ui [cyan, bold] "🚀 Ready to go!")
   sayLn ui ""
-  sayLn ui ("   " <> g "gauss" <> "              Start chatting")
-  sayLn ui ("   " <> g "gauss doctor" <> "       Check for issues")
+  sayLn ui ("   " <> g "fisher" <> "              Start chatting")
+  sayLn ui ("   " <> g "fisher doctor" <> "       Check for issues")
   sayLn ui ""
 
 -- ------------------------------------------------------- model & provider
@@ -431,11 +430,14 @@ currentModelOf dflt cfg = case get "model" cfg of
 
 -- | The raw @config.yaml@ rewrite of setup's OpenRouter and custom
 -- branches (@yaml.safe_dump@, no comment blocks, the mode left alone), at
--- @$GAUSS_HOME@ as given. False where upstream's attempt raises.
+-- @$FISHER_HOME@ as given, else the Fisher home.
+-- False where upstream's attempt raises.
 rawModelRewrite :: Sys -> (PyVal -> PyVal) -> IO Bool
 rawModelRewrite sys f = do
-  gh <- sysGetEnv sys "GAUSS_HOME"
-  let path = maybe (sysHome sys </> ".gauss") T.unpack gh </> "config.yaml"
+  given <- sysGetEnv sys "FISHER_HOME"
+  let path = case given of
+        Just h | not (T.null h) -> T.unpack h </> "config.yaml"
+        _ -> sysFisherHome sys </> "config.yaml"
   exists <- doesFileExist path
   loaded <- if exists then readRawConfig path else pure (Just (PDict []))
   case loaded of
@@ -503,17 +505,16 @@ setupModelProvider e cref = do
           | not (T.null existingOr) -> Just "Keep current (OpenRouter)"
           | otherwise -> Nothing
       choices =
-        [ "Login with Nous Portal (Nous Research subscription — OAuth)", "Login with OpenAI Codex"
+        [ "Login with OpenAI Codex"
         , "OpenRouter API key (100+ models, pay-per-use)", "Custom OpenAI-compatible endpoint (self-hosted / VLLM / etc.)"
         , "Z.AI / GLM (Zhipu AI models)", "Kimi / Moonshot (Kimi coding models)", "MiniMax (global endpoint)"
         , "MiniMax China (mainland China endpoint)", "Anthropic (Claude models — API key or Claude Code subscription)" ]
           <> maybe [] pure keepLabel
-      dflt = if hasAny then length choices - 1 else 2
+      dflt = if hasAny then length choices - 1 else 1
   unless hasAny $ do
-    printWarning ui "An inference provider is required for Gauss to work."
+    printWarning ui "An inference provider is required for Fisher to work."
     sayLn ui ""
   idx <- promptChoice ui "Select your inference provider:" choices dflt
-  nousModelsRef <- newIORef ([] :: [Text])
   let loginFailed what = do
         printWarning ui (what <> " login was cancelled or failed.")
         printInfo ui ("You can try again later with: " <> cliName <> " model")
@@ -524,26 +525,6 @@ setupModelProvider e cref = do
         pure (Nothing, Nothing)
   (selected0, selectedBase) <- case idx of
     0 -> do
-      sayLn ui ""
-      printHeader ui "Nous Portal Login"
-      printInfo ui "This will open your browser to authenticate with Nous Portal."
-      printInfo ui "You'll need a Nous Research account with an active subscription."
-      sayLn ui ""
-      r <- tryPy $ do
-        forM_ (lookupProvider "nous") (loginNous sys defaultLoginArgs)
-        syncModelFromDisk sys cref
-        m <- tryPy $ do
-          creds <- resolveNousRuntimeCredentials sys (NousOpts 300 15.0 Nothing Nothing False)
-          fetchNousModels sys (getS "base_url" creds) (getS "api_key" creds) 15.0
-        case m of
-          Ok ms -> writeIORef nousModelsRef ms
-          Exited -> throwIO (SystemExit 1)
-          Raised _ -> pure ()
-      case r of
-        Ok () -> pure (Just "nous", Nothing)
-        Exited -> loginFailed "Nous Portal"
-        Raised ex -> loginRaised ex
-    1 -> do
       sayLn ui ""
       printHeader ui "OpenAI Codex Login"
       sayLn ui ""
@@ -556,7 +537,7 @@ setupModelProvider e cref = do
         Ok () -> pure (Just "openai-codex", Nothing)
         Exited -> loginFailed "OpenAI Codex"
         Raised ex -> loginRaised ex
-    2 -> do
+    1 -> do
       sayLn ui ""
       printHeader ui "OpenRouter API Key"
       printInfo ui "OpenRouter provides access to 100+ models from multiple providers."
@@ -580,7 +561,7 @@ setupModelProvider e cref = do
       ok <- rawModelRewrite sys (delete "base_url" . set "provider" (str "openrouter"))
       when ok $ modify' (setModelProvider "openrouter" "")
       pure (Just "openrouter", Nothing)
-    3 -> do
+    2 -> do
       sayLn ui ""
       printHeader ui "Custom OpenAI-Compatible Endpoint"
       printInfo ui "Works with any API that follows OpenAI's chat completions spec"
@@ -610,7 +591,7 @@ setupModelProvider e cref = do
                   case prModels probe of
                     Just ms -> printSuccess ui ("Verified endpoint via " <> fromMaybe "None" (prProbedUrl probe) <> " (" <> showT (length ms) <> " model(s) visible)")
                     Nothing -> do
-                      printWarning ui ("Could not verify this endpoint via " <> fromMaybe "None" (prProbedUrl probe) <> ". Gauss will still save it.")
+                      printWarning ui ("Could not verify this endpoint via " <> fromMaybe "None" (prProbedUrl probe) <> ". Fisher will still save it.")
                       forM_ (prSuggestedBaseUrl probe) $ \s -> printInfo ui ("  If this server expects /v1, try base URL: " <> s)
                   pure baseUrl0
             saveEnvValue sys "OPENAI_BASE_URL" b
@@ -625,7 +606,7 @@ setupModelProvider e cref = do
         modify' (setModelProvider "custom" baseUrl)
       printSuccess ui "Custom endpoint configured"
       pure (Just "custom", Nothing)
-    4 -> do
+    3 -> do
       sayLn ui ""
       printHeader ui "Z.AI / GLM API Key"
       let zaiDefault = "https://api.z.ai/api/paas/v4"
@@ -674,10 +655,10 @@ setupModelProvider e cref = do
       clearCustom existingCustom
       modify' (setModelProvider "zai" base)
       pure (Just "zai", Just base)
-    5 -> apiKeyBranch "kimi-coding" "Kimi / Moonshot API Key" "https://platform.moonshot.cn/" "KIMI_API_KEY" "Kimi" existingCustom
-    6 -> apiKeyBranch "minimax" "MiniMax API Key" "https://platform.minimaxi.com/" "MINIMAX_API_KEY" "MiniMax" existingCustom
-    7 -> apiKeyBranch "minimax-cn" "MiniMax China API Key" "https://platform.minimaxi.com/" "MINIMAX_CN_API_KEY" "MiniMax CN" existingCustom
-    8 -> do
+    4 -> apiKeyBranch "kimi-coding" "Kimi / Moonshot API Key" "https://platform.moonshot.cn/" "KIMI_API_KEY" "Kimi" existingCustom
+    5 -> apiKeyBranch "minimax" "MiniMax API Key" "https://platform.minimaxi.com/" "MINIMAX_API_KEY" "MiniMax" existingCustom
+    6 -> apiKeyBranch "minimax-cn" "MiniMax China API Key" "https://platform.minimaxi.com/" "MINIMAX_CN_API_KEY" "MiniMax CN" existingCustom
+    7 -> do
       sayLn ui ""
       printHeader ui "Anthropic Authentication"
       cc <- readClaudeCodeCredentials sys
@@ -755,12 +736,12 @@ setupModelProvider e cref = do
   let needsVision = null backends && not (maybe False (`elem` backends) selected)
   when needsVision $ do
     let display = case selected of
-          Just p -> fromMaybe p (lookup p [("nous-api", "Nous Portal API key"), ("zai", "Z.AI / GLM"), ("kimi-coding", "Kimi / Moonshot"), ("minimax", "MiniMax"), ("minimax-cn", "MiniMax CN"), ("anthropic", "Anthropic"), ("custom", "your custom endpoint")])
+          Just p -> fromMaybe p (lookup p [("zai", "Z.AI / GLM"), ("kimi-coding", "Kimi / Moonshot"), ("minimax", "MiniMax"), ("minimax-cn", "MiniMax CN"), ("anthropic", "Anthropic"), ("custom", "your custom endpoint")])
           Nothing -> "your provider"
     sayLn ui ""
     printHeader ui "Vision & Image Analysis (optional)"
     printInfo ui ("Vision uses a separate multimodal backend. " <> display)
-    printInfo ui "doesn't currently provide one Gauss can auto-use for vision,"
+    printInfo ui "doesn't currently provide one Fisher can auto-use for vision,"
     printInfo ui "so choose a backend now or skip and configure later."
     sayLn ui ""
     v <- promptChoice ui "Configure vision:"
@@ -791,7 +772,7 @@ setupModelProvider e cref = do
             saveEnvValue sys "AUXILIARY_VISION_MODEL" vm
             printSuccess ui ("Vision configured with " <> b <> (if T.null vm then "" else " (" <> vm <> ")"))
           else printInfo ui "Skipped — vision won't be available"
-      _ -> printInfo ui "Skipped — add later with 'gauss setup' or configure AUXILIARY_VISION_* settings"
+      _ -> printInfo ui ("Skipped — add later with '" <> cliName <> " setup' or configure AUXILIARY_VISION_* settings")
   -- Default model.
   when (selected /= Just "custom") $ do
     printHeader ui "Default Model"
@@ -799,25 +780,7 @@ setupModelProvider e cref = do
     let currentModel = currentModelOf defaultModelName cfg
         keep = "Keep current (" <> currentModel <> ")"
     printInfo ui ("Current: " <> currentModel)
-    nousModels <- readIORef nousModelsRef
     case selected of
-      Just "nous" | not (null nousModels) -> do
-        let mc = nousModels <> ["Custom model", keep]
-        when (not (T.null currentModel) && currentModel `notElem` nousModels) $ do
-          printWarning ui ("Your current model (" <> currentModel <> ") may not be available via Nous Portal.")
-          printInfo ui "Select a model from the list, or keep current to use it anyway."
-          sayLn ui ""
-        i <- promptChoice ui "Select default model:" mc (length mc - 1)
-        if i < length nousModels
-          then modify' (setDefaultModel (nousModels !! i))
-          else when (i == length mc - 2) $ do
-            n <- prompt ui "  Model name" Nothing False
-            unless (T.null n) $ modify' (setDefaultModel n)
-      Just "nous" -> do
-        printWarning ui "Could not fetch available models from Nous Portal."
-        printInfo ui "Enter a Nous model name manually (e.g., claude-opus-4-6)."
-        n <- prompt ui ("  Model name (Enter to keep '" <> currentModel <> "')") Nothing False
-        unless (T.null n) $ modify' (setDefaultModel n)
       Just "openai-codex" -> do
         tok <- tryPy (resolveCodexRuntimeCredentials sys defaultCodexOpts) >>= \case
           Ok c -> pure (case get "api_key" c of Just (PStr k) -> Just k; _ -> Nothing)
@@ -900,16 +863,6 @@ setupModelProvider e cref = do
         saveEnvValue sys "OPENAI_API_KEY" ""
       modifyIORef (cref) (setModelProvider pid url)
       pure (Just pid, Just url)
-
--- | @_sync_model_from_disk(config)@.
-syncModelFromDisk :: Sys -> IORef PyVal -> IO ()
-syncModelFromDisk sys cref = do
-  disk <- loadCfg sys
-  case get "model" disk of
-    Just (PDict kvs) -> modifyIORef cref $ \cfg ->
-      set "model" (foldl (\m (k, v) -> set k v m) (modelConfigDict cfg) kvs) cfg
-    Just (PStr s) | not (T.null (T.strip s)) -> modifyIORef cref (setDefaultModel (T.strip s))
-    _ -> pure ()
 
 -- | @_DEFAULT_PROVIDER_MODELS@.
 defaultProviderModels :: Text -> [Text]
@@ -994,7 +947,7 @@ setupTerminalBackend e cref = do
           Right r -> pure r
           Left msg -> throwIO (pyError "FileNotFoundError" (msg <> ": '" <> head argv <> "'"))
   printHeader ui "Terminal Backend"
-  printInfo ui "Choose where Gauss runs shell commands and code."
+  printInfo ui "Choose where Fisher runs shell commands and code."
   printInfo ui "This affects tool execution, file access, and isolation."
   sayLn ui ""
   cfg <- readIORef cref
@@ -1156,7 +1109,7 @@ setupAgentSettings e cref = do
       sub k c = getD k c
   printHeader ui "Agent Settings"
   cfg0 <- readIORef cref
-  envMax <- envValue sys "GAUSS_MAX_ITERATIONS"
+  envMax <- envValue sys "FISHER_MAX_ITERATIONS"
   let currentMax = if T.null envMax then maybe "90" pyStrOf (get "max_turns" (sub "agent" cfg0)) else envMax
   printInfo ui "Maximum tool-calling iterations per conversation."
   printInfo ui "Higher = more complex tasks, but costs more tokens."
@@ -1165,7 +1118,7 @@ setupAgentSettings e cref = do
   case pyIntOf maxStr of
     Nothing -> printWarning ui "Invalid number, keeping current value"
     Just n -> when (n > 0) $ do
-      saveEnvValue sys "GAUSS_MAX_ITERATIONS" (showT n)
+      saveEnvValue sys "FISHER_MAX_ITERATIONS" (showT n)
       modifyIORef cref (\c -> delete "max_turns" (set "agent" (set "max_turns" (PInt n) (sub "agent" c)) c))
       printSuccess ui ("Max iterations set to " <> showT n)
   printInfo ui ""

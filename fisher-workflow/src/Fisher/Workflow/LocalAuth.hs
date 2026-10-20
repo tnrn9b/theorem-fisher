@@ -1,7 +1,7 @@
 -- | What a machine already has for Claude Code and Codex authentication,
--- and what Gauss would stage for them. Ported from the @_has_local_*@,
+-- and what Fisher would stage for them. Ported from the @_has_local_*@,
 -- @_resolve_*_auth*@ and @_codex_auth_payload_*@ helpers in
--- @gauss_cli/autoformalize.py@.
+-- upstream @cli/autoformalize.py@.
 module Fisher.Workflow.LocalAuth
   ( claudeAuthEnvKeys
   , hasLocalClaudeLogin

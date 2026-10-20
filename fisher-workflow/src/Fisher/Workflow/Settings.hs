@@ -1,7 +1,7 @@
 -- | Which backend and auth mode the managed workflows use, from the
--- environment and @gauss.autoformalize@ (@_resolve_backend_name@,
+-- environment and @fisher.autoformalize@ (@_resolve_backend_name@,
 -- @_resolve_auth_mode@ and @_resolve_uv_runner@ in
--- @gauss_cli/autoformalize.py@).
+-- upstream @cli/autoformalize.py@).
 module Fisher.Workflow.Settings
   ( Backend (..)
   , backendName
@@ -50,7 +50,7 @@ aliases :: [(Text, Backend)]
 aliases =
   [ ("claude", ClaudeCode), ("claude-code", ClaudeCode)
   , ("codex", Codex), ("codex-cli", Codex), ("openai-codex", Codex)
-  , ("gauss", Fisher), ("native", Fisher), ("fisher", Fisher) ]
+  , ("native", Fisher), ("fisher", Fisher) ]
 
 -- | Lower-case, @_@ and @/@ to @-@, then the aliases.
 normalizeBackendName :: Text -> Either Text Backend
@@ -59,19 +59,17 @@ normalizeBackendName raw =
    in case lookup n aliases of
         Just b -> Right b
         Nothing ->
-          Left ("`gauss.autoformalize.backend` must be one of: "
+          Left ("`fisher.autoformalize.backend` must be one of: "
                   <> T.intercalate ", " (map backendName supportedBackends) <> ".")
 
--- | @gauss.autoformalize@ when both levels are mappings, else empty.
+-- | @fisher.autoformalize@ when it is a mapping, else empty.
 autoformalizeConfig :: Value -> Value
-autoformalizeConfig cfg =
-  let m v = case v of
-        Just o@(Object _) -> o
-        _ -> Object KM.empty
-   in m (lookupKey "autoformalize" (m (lookupKey "gauss" cfg)))
+autoformalizeConfig cfg = case lookupKey "fisher" cfg >>= lookupKey "autoformalize" of
+  Just o@(Object _) -> o
+  _ -> Object KM.empty
 
 -- | Fisher only: the model a managed workflow's child runs, from the
--- command's @--model@, else @gauss.autoformalize.model@; Nothing leaves
+-- command's @--model@, else @fisher.autoformalize.model@; Nothing leaves
 -- each backend its own default. Not @model.default@: that is the native
 -- agent's own model, always set, and named as OpenRouter names it.
 resolveLaunchModel :: Maybe Text -> Value -> Maybe Text
@@ -83,11 +81,11 @@ resolveLaunchModel flag cfg =
 envText :: [(String, String)] -> String -> Text
 envText env k = T.toLower (T.strip (T.pack (fromMaybe "" (lookup k env))))
 
--- | @GAUSS_AUTOFORMALIZE_BACKEND@, else the config's @backend@, else
+-- | @FISHER_AUTOFORMALIZE_BACKEND@, else the config's @backend@, else
 -- claude-code.
 resolveBackend :: Value -> [(String, String)] -> Either Text Backend
 resolveBackend cfg env =
-  let override = envText env "GAUSS_AUTOFORMALIZE_BACKEND"
+  let override = envText env "FISHER_AUTOFORMALIZE_BACKEND"
       configured = T.toLower (pyStrOr (lookupKey "backend" (autoformalizeConfig cfg)))
       value
         | not (T.null override) = override
@@ -106,7 +104,7 @@ authModeName = \case
 
 resolveAuthMode :: Value -> [(String, String)] -> Either Text AuthMode
 resolveAuthMode cfg env =
-  let override = envText env "GAUSS_AUTOFORMALIZE_AUTH_MODE"
+  let override = envText env "FISHER_AUTOFORMALIZE_AUTH_MODE"
       configured = T.toLower (pyStrOr (lookupKey "auth_mode" (autoformalizeConfig cfg)))
       value = T.replace "_" "-" $
         if not (T.null override) then override else if T.null configured then "auto" else configured
@@ -114,12 +112,12 @@ resolveAuthMode cfg env =
         "auto" -> Right AuthAuto
         "login" -> Right AuthLogin
         "api-key" -> Right AuthApiKey
-        _ -> Left "`gauss.autoformalize.auth_mode` must be one of: auto, login, api-key."
+        _ -> Left "`fisher.autoformalize.auth_mode` must be one of: auto, login, api-key."
 
--- | @GAUSS_AUTOFORMALIZE_LEAN_LSP_MCP_SPEC@, else @lean-lsp-mcp@.
+-- | @FISHER_AUTOFORMALIZE_LEAN_LSP_MCP_SPEC@, else @lean-lsp-mcp@.
 leanLspMcpSpec :: [(String, String)] -> Text
 leanLspMcpSpec env =
-  let v = T.strip (T.pack (fromMaybe "" (lookup "GAUSS_AUTOFORMALIZE_LEAN_LSP_MCP_SPEC" env)))
+  let v = T.strip (T.pack (fromMaybe "" (lookup "FISHER_AUTOFORMALIZE_LEAN_LSP_MCP_SPEC" env)))
    in if T.null v then "lean-lsp-mcp" else v
 
 -- | The command that runs the Lean MCP server: Fisher's own,

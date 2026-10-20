@@ -4,7 +4,7 @@
     "-m",
     "from-flag",
     "--dangerously-bypass-approvals-and-sandbox",
-    "You are in a Fisher-managed Rocq workflow session. Read the startup context at <TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-prove.md first. Then explicitly invoke the `$rocq` skill and follow the requested Rocq workflow in the active project. Important: `/rocq:*` entries in the startup context are skill workflow names, not shell commands, so do not try to execute them in bash. The staged skill entrypoint is <TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/rocq/SKILL.md. The matching workflow guide is <TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/rocq/commands/prove.md."
+    "You are in a Fisher-managed Rocq workflow session. Read the startup context at <TMP>/fisher-home/autoformalize/codex/managed/startup/<STAMP>-prove.md first. Then explicitly invoke the `$rocq` skill and follow the requested Rocq workflow in the active project. Important: `/rocq:*` entries in the startup context are skill workflow names, not shell commands, so do not try to execute them in bash. The staged skill entrypoint is <TMP>/fisher-home/autoformalize/codex/managed/codex-home/.agents/skills/rocq/SKILL.md. The matching workflow guide is <TMP>/fisher-home/autoformalize/codex/managed/codex-home/.agents/skills/rocq/commands/prove.md."
   ],
   "backend_command": "/rocq:prove Main",
   "print_argv": [
@@ -13,6 +13,6 @@
     "-m",
     "from-flag",
     "--dangerously-bypass-approvals-and-sandbox",
-    "You are in a Fisher-managed Rocq workflow session. Read the startup context at <TMP>/gauss-home/autoformalize/codex/managed/startup/<STAMP>-prove.md first. Then explicitly invoke the `$rocq` skill and follow the requested Rocq workflow in the active project. Important: `/rocq:*` entries in the startup context are skill workflow names, not shell commands, so do not try to execute them in bash. The staged skill entrypoint is <TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/rocq/SKILL.md. The matching workflow guide is <TMP>/gauss-home/autoformalize/codex/managed/codex-home/.agents/skills/rocq/commands/prove.md."
+    "You are in a Fisher-managed Rocq workflow session. Read the startup context at <TMP>/fisher-home/autoformalize/codex/managed/startup/<STAMP>-prove.md first. Then explicitly invoke the `$rocq` skill and follow the requested Rocq workflow in the active project. Important: `/rocq:*` entries in the startup context are skill workflow names, not shell commands, so do not try to execute them in bash. The staged skill entrypoint is <TMP>/fisher-home/autoformalize/codex/managed/codex-home/.agents/skills/rocq/SKILL.md. The matching workflow guide is <TMP>/fisher-home/autoformalize/codex/managed/codex-home/.agents/skills/rocq/commands/prove.md."
   ]
 }

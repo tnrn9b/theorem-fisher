@@ -1,4 +1,4 @@
--- | A port of the part of croniter 6.0.0 that OpenGauss uses: expanding a
+-- | A port of the part of croniter 6.0.0 that upstream uses: expanding a
 -- numeric cron expression (5 fields, or 6 with seconds, or 7 with years)
 -- with croniter's own error texts, and @get_next@ from an aware datetime,
 -- with its daylight-saving adjustment as it is (including its quirks).
@@ -49,7 +49,7 @@ badE = Left . CronError "CroniterBadCronError"
 isInt :: Text -> Bool
 isInt t = not (T.null t) && T.all isDigit t
 
--- | @croniter.expand(expr_format)@ for the syntax OpenGauss lets through.
+-- | @croniter.expand(expr_format)@ for the syntax upstream lets through.
 expand :: Text -> Either CronError CronExpr
 expand exprFormat = do
   let efl = T.toLower exprFormat

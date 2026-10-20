@@ -1,4 +1,4 @@
--- | @gauss model@ against upstream's recorded pty runs
+-- | @fisher model@ against upstream's recorded pty runs
 -- (@tools/corpus/b1_auth.py@, @model.json@), compared as
 -- "Fisher.SetupSpec" compares setup's.
 module Fisher.ModelSpec (spec) where
