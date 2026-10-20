@@ -1,0 +1,21 @@
+name: lean-mathlib
+prover: lean4
+description: A Lean 4 package with Mathlib, its cache fetched
+variables:
+  - name: mathlib
+    default: latest
+    pattern: 'latest|v4\.[0-9]+\.[0-9]+(-rc[0-9]+)?'
+    description: The Mathlib release (a tag such as v4.24.0, or latest); the Lean toolchain follows it
+files:
+  - lakefile.toml
+  - lean-toolchain
+  - '{{project}}.lean'
+  - '{{project}}/Sample.lean'
+steps:
+  - name: cache
+    run: [lake, exe, cache, get]
+    timeout_minutes: 30
+  - name: build
+    run: [lake, build]
+    timeout_minutes: 30
+sample: '{{project}}/Sample.lean'

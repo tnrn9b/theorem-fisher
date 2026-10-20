@@ -340,11 +340,13 @@ data InitOptions = InitOptions
 defaultInitOptions :: InitOptions
 defaultInitOptions = InitOptions Nothing Nothing "init" "" Nothing Nothing
 
--- | Key order of the manifest as upstream writes it.
+-- | Key order of the manifest as upstream writes it, with Fisher's own
+-- @template@ (what a project was made from) after @source@.
 manifestKeyOrder :: [Text]
 manifestKeyOrder =
-  [ "schema_version", "name", "kind", "lean_root", "root", "created_at", "source", "blueprint", "paths"
-  , "mode", "template_source", "markers", "runtime", "cache", "workflows" ]
+  [ "schema_version", "name", "kind", "lean_root", "root", "created_at", "source", "template", "blueprint", "paths"
+  , "mode", "template_source", "markers", "runtime", "cache", "workflows"
+  , "revision", "origin", "variables", "steps", "sample", "done", "run", "timeout_minutes" ]
 
 -- | The manifest as upstream writes it: keys in its order, and the
 -- timestamp single-quoted. Unquoted, PyYAML reads @created_at@ back as a

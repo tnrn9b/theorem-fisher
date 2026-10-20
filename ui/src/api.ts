@@ -110,6 +110,71 @@ export interface SessionFilters {
   strategy?: string;
 }
 
+/** A template the New project view offers (GET /api/templates). */
+export interface TemplateVariable {
+  name: string;
+  default: string;
+  /** a regular expression the whole value must match ("" for any) */
+  pattern: string;
+  description: string;
+}
+
+export interface TemplateStep {
+  name: string;
+  run: string[];
+  timeout_minutes: number;
+}
+
+export interface TemplateView {
+  name: string;
+  prover: string;
+  description: string;
+  variables: TemplateVariable[];
+  origin: "builtin" | "configured" | "source";
+  source: string | null;
+  steps: TemplateStep[];
+  sample: string;
+  trusted: boolean;
+}
+
+export interface TemplateList {
+  templates: TemplateView[];
+  /** configured templates that could not be loaded */
+  notes: string[];
+}
+
+export interface CreateRequest {
+  template: string;
+  path?: string;
+  scratch?: boolean;
+  statement?: string;
+  vars: Record<string, string>;
+  /** the revision a 409 answered with: the steps shown were confirmed */
+  confirm?: string;
+}
+
+/** A create run (GET /api/create/:id); root and file once known. */
+export interface CreateView {
+  id: string;
+  template: string;
+  mode: "project" | "scratch";
+  root: string | null;
+  file: string | null;
+  status: string;
+  running: boolean;
+  reason: string | null;
+  log: string;
+  events: string | null;
+}
+
+/** A line of a project's .fisher/create.jsonl. */
+export type CreateEvent =
+  | { event: "step start"; step: string }
+  | { event: "step end"; step: string; exit: number; tail: string[] }
+  | { event: "check"; ok: boolean; problems: string[] }
+  | { event: "ready" }
+  | { event: "failed"; reason: string };
+
 /** A failed request: 401 means the page has no cookie (open the printed URL). */
 export class ApiError extends Error {
   constructor(public status: number, message: string, public body: Record<string, unknown> | null = null) {
@@ -322,6 +387,7 @@ export interface SettingsWrite {
 
 const sid = (id: string) => `/api/sessions/${encodeURIComponent(id)}`;
 const rid = (id: string) => `/api/search/${encodeURIComponent(id)}`;
+const cid = (id: string) => `/api/create/${encodeURIComponent(id)}`;
 
 export const api = {
   sessions: (f: SessionFilters = {}) => getJson<SessionSummary[]>(`/api/sessions${filterQuery(f)}`),
@@ -352,6 +418,12 @@ export const api = {
   settings: () => getJson<Settings>("/api/settings"),
   saveSettings: (w: SettingsWrite) => postJson<Settings>("/api/settings", w),
   searchEventsUrl: (id: string, from = 0) => `${rid(id)}/events${from ? `?from=${from}` : ""}`,
+  templates: () => getJson<TemplateList>("/api/templates"),
+  create: (req: CreateRequest) => postJson<{ id: string }>("/api/create", req),
+  createRun: (id: string) => getJson<CreateView>(cid(id)),
+  stopCreate: (id: string) => postJson<{ status: string }>(`${cid(id)}/stop`, {}),
+  retryCreate: (id: string) => postJson<{ id: string; from: number }>(`${cid(id)}/retry`, {}),
+  createEventsUrl: (id: string, from = 0) => `${cid(id)}/events${from ? `?from=${from}` : ""}`,
 };
 
 /** The statuses of a run that has ended. */

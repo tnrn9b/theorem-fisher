@@ -16,6 +16,7 @@ import System.Directory (createDirectoryIfMissing, doesFileExist, getCurrentDire
 import System.Environment (getEnvironment, lookupEnv)
 import System.FilePath ((</>))
 
+import Fisher.Cli.Create (templateOps)
 import Fisher.Config (loadConfigAt)
 import Fisher.Paths (ensureFisherHome)
 import Fisher.ProjectCommand (ProjectSession (..))
@@ -41,7 +42,7 @@ cliSession = do
   ref <- newIORef (case override of
     Just p | not (null p) -> Just p
     _ -> Nothing)
-  pure (home, ProjectSession cwd cfg env ref)
+  pure (home, ProjectSession cwd cfg env ref (Just (templateOps cfg env)))
 
 saveOverride :: FilePath -> Maybe FilePath -> IO ()
 saveOverride home = \case

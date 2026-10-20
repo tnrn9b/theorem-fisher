@@ -1,0 +1,18 @@
+name: lean
+prover: lean4
+description: A plain Lean 4 package with its toolchain pinned
+variables:
+  - name: lean
+    default: latest
+    pattern: 'latest|v4\.[0-9]+\.[0-9]+(-rc[0-9]+)?'
+    description: The Lean release to pin (a tag such as v4.24.0, or latest)
+files:
+  - lakefile.toml
+  - lean-toolchain
+  - '{{project}}.lean'
+  - '{{project}}/Sample.lean'
+steps:
+  - name: build
+    run: [lake, build]
+    timeout_minutes: 30
+sample: '{{project}}/Sample.lean'

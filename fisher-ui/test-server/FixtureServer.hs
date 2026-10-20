@@ -39,6 +39,7 @@ import Fisher.UI.Api.Live (LiveEnv (..), newLiveEnv, stopRuns)
 import Fisher.UI.Api.Runs (stopGates)
 import Fisher.UI.Db (UiEnv (..))
 import Fisher.UI.Api.Search (newSearchEnv, stopSearches)
+import Fisher.UI.Api.Templates (newCreateEnv, stopCreates)
 import Fisher.UI.FakeFisher (fakeScript, pageRun, searchRun)
 import Fisher.UI.Fixture (Fixture (..), gate, withFixture)
 import Fisher.UI.Server (allApis, bindUi, onTerminate, serve, uiUrl)
@@ -93,8 +94,9 @@ serveOn want =
     bracket (bindUi want) (close . snd) $ \(port, sock) ->
       bracket (pure env) stopGates $ \e ->
         bracket ((\l -> l {leLake = lake}) <$> newLiveEnv e fake) stopRuns $ \live ->
-         bracket (newSearchEnv live root) stopSearches $ \search -> do
+         bracket (newSearchEnv live root) stopSearches $ \search ->
+          bracket (newCreateEnv live) stopCreates $ \creates -> do
           putStrLn ("Fisher UI fixture: " <> T.unpack (uiUrl port (gToken gate)))
           putStrLn ("Search project: " <> proj)
           hFlush stdout
-          runSettingsSocket (setHost "127.0.0.1" (setPort port defaultSettings)) sock (serve gate {gPort = port} (allApis live search))
+          runSettingsSocket (setHost "127.0.0.1" (setPort port defaultSettings)) sock (serve gate {gPort = port} (allApis live search creates))

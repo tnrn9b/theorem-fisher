@@ -50,6 +50,7 @@ import Fisher.UI.Api.Runs (runsApi, stopGates)
 import Fisher.UI.Api.Search (SearchEnv, newSearchEnv, searchApi, stopSearches)
 import Fisher.UI.Api.Settings (settingsApi)
 import Fisher.UI.Api.Steps (stepsApi)
+import Fisher.UI.Api.Templates (CreateEnv, newCreateEnv, stopCreates, templatesApi)
 import Fisher.UI.Api.Sessions (sessionsApi)
 import Fisher.UI.Db (UiEnv (..), newUiEnv)
 import Fisher.UI.Prune (pruneLine, pruneUi)
@@ -140,14 +141,16 @@ runUi c = bracket (bindUi (ucPort c)) (close . snd) $ \(port, sock) -> do
    -- and the runs the page started
    bracket (newLiveEnv env fisher) stopRuns $ \live ->
     -- and the search runs
-    bracket (newSearchEnv live (takeDirectory bench </> "search")) stopSearches $ \search -> do
+    bracket (newSearchEnv live (takeDirectory bench </> "search")) stopSearches $ \search ->
+    -- and the creates of the New project view
+    bracket (newCreateEnv live) stopCreates $ \creates -> do
     tok <- newToken
     let url = uiUrl port tok
     putStrLn ("Fisher UI: " <> T.unpack url)
     hFlush stdout
     when (ucOpen c) (openBrowser (T.unpack url))
     let settings = setHost "127.0.0.1" (setPort port defaultSettings)
-    runSettingsSocket settings sock (serve (Gate tok port) (allApis live search))
+    runSettingsSocket settings sock (serve (Gate tok port) (allApis live search creates))
 
 -- | The Fisher repository whose @tools/bench/<b>/report.py@ computes the
 -- gates: the config key @fisher.repo@ when it names a directory, else the
@@ -183,9 +186,10 @@ uiApis env = [sessionsApi env, contextApi env, runsApi env]
 liveApis :: LiveEnv -> [Api]
 liveApis live = liveApi live : stepsApi live : uiApis (leUi live)
 
--- | Every route: the goal board's, the settings, then 'liveApis'.
-allApis :: LiveEnv -> SearchEnv -> [Api]
-allApis live search = searchApi search : settingsApi (ueHome (leUi live)) : liveApis live
+-- | Every route: the goal board's, the New project view's, the settings,
+-- then 'liveApis'.
+allApis :: LiveEnv -> SearchEnv -> CreateEnv -> [Api]
+allApis live search creates = searchApi search : templatesApi creates : settingsApi (ueHome (leUi live)) : liveApis live
 
 -- | A listening socket on 127.0.0.1 only (port 0: any free one), with the
 -- port it got.

@@ -47,7 +47,7 @@
       "env": {},
       "persisted_env": "",
       "cwd": "outside",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✗ uv / uvx (Neither `uvx` nor `uv` is available. Install uv so Fisher can run the managed Lean MCP server.)\n  ✗ Lean toolchain (lake) (required for managed Lean workflows)\n  ✓ Active working directory (<TMP>/outside)\n  ⚠ Active Fisher project (none under <TMP>/outside)\n  ✗ Codex CLI (install the OpenAI Codex CLI)\n  ✗ Codex API-key auth (not found)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✗ uv / uvx (Neither `uvx` nor `uv` is available. Install uv so Fisher can run the managed Lean MCP server.)\n  ✗ Lean toolchain (lake) (required for managed Lean workflows)\n  ✓ Active working directory (<TMP>/outside)\n  ⚠ Active Fisher project (none under <TMP>/outside)\n  ✗ Codex CLI (install the OpenAI Codex CLI)\n  ✗ Codex API-key auth (not found)\n",
       "issues": [
         "Install uv so Fisher can launch the managed Lean MCP server",
         "Install elan / Lean so `lake` is available on PATH",
@@ -108,7 +108,7 @@
       "env": {},
       "persisted_env": "",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uv)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude auth (local Claude API key)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uv)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude auth (local Claude API key)\n",
       "issues": []
     },
     {
@@ -132,7 +132,7 @@
       },
       "persisted_env": "",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✗ Lean toolchain (lake) (required for managed Lean workflows)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude auth (staged via CLAUDE_CODE_OAUTH_TOKEN)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✗ Lean toolchain (lake) (required for managed Lean workflows)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude auth (staged via CLAUDE_CODE_OAUTH_TOKEN)\n",
       "issues": [
         "Install elan / Lean so `lake` is available on PATH"
       ]
@@ -156,7 +156,7 @@
       "env": {},
       "persisted_env": "ANTHROPIC_API_KEY=sk\n",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude auth (staged via ANTHROPIC_API_KEY)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude auth (staged via ANTHROPIC_API_KEY)\n",
       "issues": []
     },
     {
@@ -177,7 +177,7 @@
       "env": {},
       "persisted_env": "",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✗ Claude Code CLI (install with `npm install -g @anthropic-ai/claude-code`)\n  ✗ Claude auth (not found)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✗ Claude Code CLI (install with `npm install -g @anthropic-ai/claude-code`)\n  ✗ Claude auth (not found)\n",
       "issues": [
         "Install the Claude Code CLI for managed Lean workflows",
         "Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `fisher.autoformalize.auth_mode: login`"
@@ -202,7 +202,7 @@
       "env": {},
       "persisted_env": "",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (login)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ⚠ Claude auth (login mode will prompt on first launch)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (login)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ⚠ Claude auth (login mode will prompt on first launch)\n",
       "issues": []
     },
     {
@@ -230,7 +230,7 @@
       "env": {},
       "persisted_env": "",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (login)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude auth (local Claude login)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (login)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude auth (local Claude login)\n",
       "issues": []
     },
     {
@@ -254,7 +254,7 @@
       },
       "persisted_env": "",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude API-key auth (staged via ANTHROPIC_TOKEN)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude API-key auth (staged via ANTHROPIC_TOKEN)\n",
       "issues": []
     },
     {
@@ -280,7 +280,7 @@
       "env": {},
       "persisted_env": "",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude API-key auth (local Claude API key)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✓ Claude API-key auth (local Claude API key)\n",
       "issues": []
     },
     {
@@ -302,7 +302,7 @@
       "env": {},
       "persisted_env": "",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✗ Claude API-key auth (not found)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✗ Claude API-key auth (not found)\n",
       "issues": [
         "Save `ANTHROPIC_API_KEY` / `ANTHROPIC_TOKEN` / `CLAUDE_CODE_OAUTH_TOKEN`, or switch `fisher.autoformalize.auth_mode` back to `auto` or `login`"
       ]
@@ -331,7 +331,7 @@
       "env": {},
       "persisted_env": "",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✗ Claude auth (not found)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✗ Claude auth (not found)\n",
       "issues": [
         "Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `fisher.autoformalize.auth_mode: login`"
       ]
@@ -363,7 +363,7 @@
       "env": {},
       "persisted_env": "",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✓ Codex auth (local Codex auth)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✓ Codex auth (local Codex auth)\n",
       "issues": []
     },
     {
@@ -392,7 +392,7 @@
       "env": {},
       "persisted_env": "",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✗ Codex auth (not found)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✗ Codex auth (not found)\n",
       "issues": [
         "Run `codex login`, save `OPENAI_API_KEY`, or set `fisher.autoformalize.auth_mode: login`"
       ]
@@ -418,7 +418,7 @@
       },
       "persisted_env": "",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✓ Codex auth (staged OPENAI_API_KEY)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✓ Codex auth (staged OPENAI_API_KEY)\n",
       "issues": []
     },
     {
@@ -440,7 +440,7 @@
       "env": {},
       "persisted_env": "",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (login)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ⚠ Codex auth (login mode will prompt on first launch)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (login)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ⚠ Codex auth (login mode will prompt on first launch)\n",
       "issues": []
     },
     {
@@ -467,7 +467,7 @@
       "env": {},
       "persisted_env": "",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✓ Codex API-key auth (local Codex API key)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✓ Codex API-key auth (local Codex API key)\n",
       "issues": []
     },
     {
@@ -496,7 +496,7 @@
       },
       "persisted_env": "",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✓ Codex auth (local Codex auth)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✓ Codex auth (local Codex auth)\n",
       "issues": []
     },
     {
@@ -562,7 +562,7 @@
       },
       "persisted_env": "",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✓ Codex API-key auth (staged OPENAI_API_KEY)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (codex)\n  ✓ Managed auth mode (api-key)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Codex CLI (<TMP>/bin/codex)\n  ✓ Codex API-key auth (staged OPENAI_API_KEY)\n",
       "issues": []
     },
     {
@@ -584,7 +584,7 @@
       "env": {},
       "persisted_env": "",
       "cwd": "project",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✗ Claude auth (not found)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/project)\n  ✓ Active Fisher project (Demo Project)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✗ Claude auth (not found)\n",
       "issues": [
         "Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `fisher.autoformalize.auth_mode: login`"
       ]
@@ -608,7 +608,7 @@
       "env": {},
       "persisted_env": "",
       "cwd": "nowhere",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✗ Active working directory (<TMP>/nowhere does not exist)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✗ Claude auth (not found)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✗ Active working directory (<TMP>/nowhere does not exist)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✗ Claude auth (not found)\n",
       "issues": [
         "Fix the managed workflow working directory: <TMP>/nowhere",
         "Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `fisher.autoformalize.auth_mode: login`"
@@ -633,7 +633,7 @@
       "env": {},
       "persisted_env": "",
       "cwd": "broken",
-      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` needs `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/broken)\n  ✗ Fisher project manifest (<TMP>/broken/.fisher/project.yaml has schema_version=None; expected 1.)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✗ Claude auth (not found)\n",
+      "stdout": "\n◆ Managed Lean Workflows\n  ✓ Managed backend (claude-code)\n  ✓ Managed auth mode (auto)\n  ⚠ Project template source (`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)\n  ✓ uv / uvx (uvx)\n  ✓ Lean toolchain (lake) (<TMP>/bin/lake)\n  ✓ Active working directory (<TMP>/broken)\n  ✗ Fisher project manifest (<TMP>/broken/.fisher/project.yaml has schema_version=None; expected 1.)\n  ✓ Claude Code CLI (<TMP>/bin/claude)\n  ✗ Claude auth (not found)\n",
       "issues": [
         "Repair the active Fisher project manifest: <TMP>/broken/.fisher/project.yaml has schema_version=None; expected 1.",
         "Run `claude auth login`, save `ANTHROPIC_API_KEY`, or set `fisher.autoformalize.auth_mode: login`"

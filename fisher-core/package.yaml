@@ -6,6 +6,7 @@ author:      Tom Reynolds
 
 extra-source-files:
 - data/*
+- data/templates/**/*
 
 language: GHC2021
 
@@ -30,6 +31,7 @@ dependencies:
 - text
 - time
 - typed-process
+- process
 - unicode-transforms
 - unix
 - vector

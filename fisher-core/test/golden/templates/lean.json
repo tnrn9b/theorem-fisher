@@ -1,0 +1,26 @@
+{
+  "template": "lean",
+  "variables": {
+    "project": "Demo",
+    "lean": "v4.24.0",
+    "mathlib": "v4.24.0"
+  },
+  "files": [
+    {
+      "path": "lakefile.toml",
+      "contents": "name = \"Demo\"\nversion = \"0.1.0\"\ndefaultTargets = [\"Demo\"]\n\n[[lean_lib]]\nname = \"Demo\"\n"
+    },
+    {
+      "path": "lean-toolchain",
+      "contents": "leanprover/lean4:v4.24.0\n"
+    },
+    {
+      "path": "Demo.lean",
+      "contents": "import Demo.Sample\n"
+    },
+    {
+      "path": "Demo/Sample.lean",
+      "contents": "-- A sample theorem: the project is ready when this builds without `sorry`.\ntheorem fisher_sample (n : Nat) : n + 0 = n := by simp\n"
+    }
+  ]
+}

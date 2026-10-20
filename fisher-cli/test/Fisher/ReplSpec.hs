@@ -80,7 +80,7 @@ spec = do
         (cliCfg, _) <- loadCliConfig configPath
         env <- getEnvironment
         override <- newIORef Nothing
-        let session = ProjectSession cwd cfg1 env override
+        let session = ProjectSession cwd cfg1 env override Nothing
         out <- newIORef []
         tasks <- newIORef []
         allow <- newIORef True

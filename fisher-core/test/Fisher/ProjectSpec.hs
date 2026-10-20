@@ -1,14 +1,17 @@
+{-# LANGUAGE MultiWayIf #-}
 module Fisher.ProjectSpec (spec) where
 
+import Control.Exception (bracket)
 import Data.Aeson (Value (..), object, (.=))
-import Data.IORef (newIORef)
+import Data.IORef (IORef, modifyIORef', newIORef, readIORef)
 import qualified Data.Text as T
 import System.Directory (createDirectoryIfMissing, doesDirectoryExist)
-import System.FilePath ((</>))
+import System.Environment (lookupEnv, setEnv, unsetEnv)
+import System.FilePath (takeFileName, (</>))
 import Test.Hspec
 
 import Fisher.Project
-import Fisher.ProjectCommand (ProjectSession (..), handleProjectTokens)
+import Fisher.ProjectCommand (CreateRequest (..), ProjectSession (..), TemplateOps (..), handleProjectTokens, handleProjectTokensStatus, interruptedLead, projectUsage)
 import Fisher.Prover (ProverKind (..))
 import Fisher.Py (lookupKey)
 import Fisher.TestUtil
@@ -43,7 +46,34 @@ withoutCreatedAt :: String -> [String]
 withoutCreatedAt = filter (\l -> take 11 l /= "created_at:") . lines
 
 session :: FilePath -> IO ProjectSession
-session cwd = ProjectSession cwd (object []) [] <$> newIORef Nothing
+session cwd = (\r -> ProjectSession cwd (object []) [] r Nothing) <$> newIORef Nothing
+
+-- | A session whose template functions record what they were asked; a
+-- create writes a manifest at the target, as a real one would.
+fakeSession :: FilePath -> IO (ProjectSession, IORef [Either CreateRequest (Bool, FilePath)])
+fakeSession cwd = do
+  calls <- newIORef []
+  s <- session cwd
+  let ops = TemplateOps
+        { toCreate = \r -> do
+            modifyIORef' calls (<> [Left r])
+            createDirectoryIfMissing True (crTarget r </> ".fisher")
+            writeFile (crTarget r </> ".fisher" </> "project.yaml") "name: x\n"
+            pure $ if
+              | crTarget r == cwd </> "Fails" -> ["(>_<) it failed"]
+              | crTarget r == cwd </> "Stopped" -> ["(>_<) " <> interruptedLead <> T.pack (crTarget r)]
+              | otherwise -> ["created"]
+        , toBuild = \yes p -> modifyIORef' calls (<> [Right (yes, p)]) >> pure (if takeFileName p == "Stopped" then ["(>_<) " <> interruptedLead <> T.pack p] else ["built"])
+        , toList = pure ["listed"] }
+  pure (s {sessionTemplates = Just ops}, calls)
+
+-- | HOME and FISHER_HOME in a scratch directory, for the built-ins.
+withHomes :: (FilePath -> IO a) -> IO a
+withHomes k = withTmp $ \d -> bracket save restore (const (mapM_ (uncurry setEnv) (kvs d) >> k d))
+  where
+    kvs d = [("HOME", d), ("FISHER_HOME", d </> "fh")]
+    save = mapM (\n -> (,) n <$> lookupEnv n) ["HOME", "FISHER_HOME"]
+    restore = mapM_ (\(n, v) -> maybe (unsetEnv n) (setEnv n) v)
 
 replaceLine :: String -> String -> [String] -> [String]
 replaceLine prefix new = map (\l -> if take (length prefix) l == prefix then new else l)
@@ -384,3 +414,96 @@ spec = do
       conv <- handleProjectTokens s ["convert", T.pack root]
       take 1 conv `shouldBe` ["(^_^)b Registered existing repository as a Fisher project: Tied"]
       loadProject root `shouldReturn` p
+
+  describe "templates" $ do
+    let request target = CreateRequest target Nothing Nothing [] True False Nothing Nothing
+    it "parses create with --template, --var, --no-build and --yes" $ withTmp $ \tmp -> do
+      (s, calls) <- fakeSession tmp
+      out <- handleProjectTokens s ["create", "P", "--template", "lean", "--var", "project=X", "--no-build", "--yes"]
+      out `shouldBe` ["created"]
+      readIORef calls `shouldReturn`
+        [Left (request (tmp </> "P")) {crTemplate = Just "lean", crVars = [("project", "X")], crBuild = False, crYes = True}]
+
+    it "parses create with --trust-revision" $ withTmp $ \tmp -> do
+      (s, calls) <- fakeSession tmp
+      _ <- handleProjectTokens s ["create", "P", "--template", "fake", "--trust-revision", "abc123"]
+      readIORef calls `shouldReturn` [Left (request (tmp </> "P")) {crTemplate = Just "fake", crTrustRevision = Just "abc123"}]
+
+    it "keeps two --var in order, and the flags in any place" $ withTmp $ \tmp -> do
+      (s, calls) <- fakeSession tmp
+      _ <- handleProjectTokens s ["create", "--yes", "P", "--var", "project=X", "--var", "lean=v4.24.0=a"]
+      readIORef calls `shouldReturn`
+        [Left (request (tmp </> "P")) {crVars = [("project", "X"), ("lean", "v4.24.0=a")], crYes = True}]
+
+    it "refuses --var without =" $ withTmp $ \tmp -> do
+      (s, calls) <- fakeSession tmp
+      out <- handleProjectTokens s ["create", "P", "--var", "project"]
+      take 1 out `shouldBe` ["(>_<) `--var` takes NAME=VALUE; got `project`."]
+      out2 <- handleProjectTokens s ["create", "P", "--var", "=x"]
+      take 1 out2 `shouldBe` ["(>_<) `--var` takes NAME=VALUE; got `=x`."]
+      readIORef calls `shouldReturn` []
+
+    it "passes a source, given or configured, and refuses both --template and --template-source" $ withTmp $ \tmp -> do
+      (s, calls) <- fakeSession tmp
+      _ <- handleProjectTokens s ["create", "A", "--template-source", "/src", "--name", "N"]
+      let cfg = object ["fisher" .= object ["project" .= object ["template_source" .= ("/cfg" :: String)]]]
+      _ <- handleProjectTokens s {sessionConfig = cfg} ["create", "B"]
+      _ <- handleProjectTokens s {sessionConfig = cfg} ["create", "C", "--template", "lean"]
+      both <- handleProjectTokens s ["create", "D", "--template", "lean", "--template-source", "/src"]
+      take 1 both `shouldBe` ["(>_<) Pass `--template` or `--template-source`, not both."]
+      readIORef calls `shouldReturn`
+        [ Left (request (tmp </> "A")) {crSource = Just "/src", crName = Just "N"}
+        , Left (request (tmp </> "B")) {crSource = Just "/cfg"}
+        , Left (request (tmp </> "C")) {crTemplate = Just "lean"} ]
+      _ <- handleProjectTokens s {sessionEnv = [("FISHER_BLUEPRINT_TEMPLATE_SOURCE", "/env")]} ["create", "E"]
+      drop 3 <$> readIORef calls `shouldReturn` [Left (request (tmp </> "E")) {crSource = Just "/env"}]
+
+    it "gives the command line's exit status: 0, 1 for a failure, 2 for a misuse, 130 for an interrupt" $ withTmp $ \tmp -> do
+      (s, _) <- fakeSession tmp
+      st <- mapM (fmap fst . handleProjectTokensStatus s)
+        [["create", "P"], ["create", "Fails"], ["create"], ["create", "P", "--var", "x"], ["frobnicate"], ["build", "P"]]
+      st `shouldBe` [0, 1, 2, 2, 2, 0]
+      stopped <- mapM (fmap fst . handleProjectTokensStatus s) [["create", "Stopped"], ["build", "Stopped"]]
+      stopped `shouldBe` [130, 130]
+      plain <- session tmp
+      fst <$> handleProjectTokensStatus plain ["create", "Q"] `shouldReturn` 1
+
+    it "sets the override to a project the create made, not to one that was there" $ withTmp $ \tmp -> do
+      (s, _) <- fakeSession tmp
+      _ <- handleProjectTokens s ["create", "P"]
+      readIORef (sessionOverride s) `shouldReturn` Just (tmp </> "P")
+      s2 <- (\r -> s {sessionOverride = r}) <$> newIORef Nothing
+      _ <- handleProjectTokens s2 ["create", "P"]
+      readIORef (sessionOverride s2) `shouldReturn` Nothing
+
+    it "builds a path, the session directory by default" $ withTmp $ \tmp -> do
+      (s, calls) <- fakeSession tmp
+      handleProjectTokens s ["build", "P"] `shouldReturn` ["built"]
+      _ <- handleProjectTokens s ["build", "--yes"]
+      readIORef calls `shouldReturn` [Right (False, tmp </> "P"), Right (True, tmp)]
+
+    it "answers that --template and build need the command line without the template functions" $ withTmp $ \tmp -> do
+      s <- session tmp
+      out <- handleProjectTokens s ["create", "P", "--template", "lean"]
+      take 1 out `shouldBe` ["(>_<) Creating from a template needs the fisher command line."]
+      b <- handleProjectTokens s ["build", "P"]
+      take 1 b `shouldBe` ["(>_<) Building a template project needs the fisher command line."]
+      doesDirectoryExist (tmp </> "P") `shouldReturn` False
+
+    it "lists the built-ins with prover and description, here or through the functions" $ withHomes $ \tmp -> do
+      s <- session tmp
+      out <- handleProjectTokens s ["templates"]
+      out `shouldBe`
+        [ "  Templates:"
+        , "    lean          lean4  A plain Lean 4 package with its toolchain pinned"
+        , "    lean-mathlib  lean4  A Lean 4 package with Mathlib, its cache fetched (the default)" ]
+      (fs, _) <- fakeSession tmp
+      handleProjectTokens fs ["templates"] `shouldReturn` ["listed"]
+
+    it "names the new forms in the usage" $
+      drop 6 projectUsage `shouldBe`
+        [ "    /project create <path> [--template <name>] [--var <k=v>]... [--no-build] [--yes] [--trust-revision <rev>] [--name <name>]"
+        , "    /project create <path> --template-source <source> [--name <name>]"
+        , "      (with neither, a configured template source, else --template lean-mathlib)"
+        , "    /project build [path] [--yes]"
+        , "    /project templates" ]

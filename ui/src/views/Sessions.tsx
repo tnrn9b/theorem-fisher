@@ -62,7 +62,17 @@ export default function Sessions() {
   return (
     <main>
       <h1>Sessions</h1>
-      <StartRun projects={all.state === "ok" ? optionsOf(all.data, "project") : []} />
+      <p className={css.links}>
+        <Link to="/new" data-testid="new-project">
+          New project
+        </Link>
+        <span className="muted">a Lean project or a scratch environment from a template</span>
+      </p>
+      <StartRun
+        projects={all.state === "ok" ? optionsOf(all.data, "project") : []}
+        initialProject={params.get("start") ?? ""}
+        initialFile={params.get("file") ?? ""}
+      />
       <div className={css.filters} aria-label="Filters">
         {filters.map((f) => (
           <label key={f.key}>

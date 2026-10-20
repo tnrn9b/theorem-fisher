@@ -83,7 +83,7 @@
       "steps": [
         {
           "command": "/project init",
-          "stdout": "(>_<) Lean project root not found. `/project init` works inside an existing Lean 4 repository.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template-source <source>] [--name <name>]\n",
+          "stdout": "(>_<) Lean project root not found. `/project init` works inside an existing Lean 4 repository.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template <name>] [--var <k=v>]... [--no-build] [--yes] [--trust-revision <rev>] [--name <name>]\n    /project create <path> --template-source <source> [--name <name>]\n      (with neither, a configured template source, else --template lean-mathlib)\n    /project build [path] [--yes]\n    /project templates\n",
           "override": null
         }
       ]
@@ -132,7 +132,7 @@
       "steps": [
         {
           "command": "/project convert",
-          "stdout": "(>_<) Lean project root not found. `/project convert` expects a Lean 4 blueprint repository.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template-source <source>] [--name <name>]\n",
+          "stdout": "(>_<) Lean project root not found. `/project convert` expects a Lean 4 blueprint repository.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template <name>] [--var <k=v>]... [--no-build] [--yes] [--trust-revision <rev>] [--name <name>]\n    /project create <path> --template-source <source> [--name <name>]\n      (with neither, a configured template source, else --template lean-mathlib)\n    /project build [path] [--yes]\n    /project templates\n",
           "override": null
         }
       ]
@@ -180,7 +180,7 @@
         },
         {
           "command": "/project use",
-          "stdout": "(>_<) No active Fisher project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template-source <source>] [--name <name>]\n",
+          "stdout": "(>_<) No active Fisher project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template <name>] [--var <k=v>]... [--no-build] [--yes] [--trust-revision <rev>] [--name <name>]\n    /project create <path> --template-source <source> [--name <name>]\n      (with neither, a configured template source, else --template lean-mathlib)\n    /project build [path] [--yes]\n    /project templates\n",
           "override": "<TMP>/B"
         }
       ]
@@ -250,7 +250,7 @@
       "steps": [
         {
           "command": "/project create ../X",
-          "stdout": "(>_<) Blueprint project creation is blocked until a template source is configured. Set `fisher.project.template_source` or `FISHER_BLUEPRINT_TEMPLATE_SOURCE`, then retry.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template-source <source>] [--name <name>]\n",
+          "stdout": "(>_<) Blueprint project creation is blocked until a template source is configured. Set `fisher.project.template_source` or `FISHER_BLUEPRINT_TEMPLATE_SOURCE`, then retry.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template <name>] [--var <k=v>]... [--no-build] [--yes] [--trust-revision <rev>] [--name <name>]\n    /project create <path> --template-source <source> [--name <name>]\n      (with neither, a configured template source, else --template lean-mathlib)\n    /project build [path] [--yes]\n    /project templates\n",
           "override": null
         }
       ]
@@ -263,7 +263,7 @@
       "steps": [
         {
           "command": "/project create",
-          "stdout": "(>_<) `/project create` requires a target directory path.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template-source <source>] [--name <name>]\n",
+          "stdout": "(>_<) `/project create` requires a target directory path.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template <name>] [--var <k=v>]... [--no-build] [--yes] [--trust-revision <rev>] [--name <name>]\n    /project create <path> --template-source <source> [--name <name>]\n      (with neither, a configured template source, else --template lean-mathlib)\n    /project build [path] [--yes]\n    /project templates\n",
           "override": null
         }
       ]
@@ -276,7 +276,7 @@
       "steps": [
         {
           "command": "/project create ../A --template-source <TMP>/Template",
-          "stdout": "(>_<) Target path already exists: <TMP>/A\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template-source <source>] [--name <name>]\n",
+          "stdout": "(>_<) Target path already exists: <TMP>/A\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template <name>] [--var <k=v>]... [--no-build] [--yes] [--trust-revision <rev>] [--name <name>]\n    /project create <path> --template-source <source> [--name <name>]\n      (with neither, a configured template source, else --template lean-mathlib)\n    /project build [path] [--yes]\n    /project templates\n",
           "override": null
         }
       ]
@@ -289,12 +289,12 @@
       "steps": [
         {
           "command": "/project frobnicate",
-          "stdout": "(>_<) Unknown `/project` subcommand: frobnicate\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template-source <source>] [--name <name>]\n",
+          "stdout": "(>_<) Unknown `/project` subcommand: frobnicate\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template <name>] [--var <k=v>]... [--no-build] [--yes] [--trust-revision <rev>] [--name <name>]\n    /project create <path> --template-source <source> [--name <name>]\n      (with neither, a configured template source, else --template lean-mathlib)\n    /project build [path] [--yes]\n    /project templates\n",
           "override": null
         },
         {
           "command": "/project init --name",
-          "stdout": "(>_<) Missing value for option `--name`.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template-source <source>] [--name <name>]\n",
+          "stdout": "(>_<) Missing value for option `--name`.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template <name>] [--var <k=v>]... [--no-build] [--yes] [--trust-revision <rev>] [--name <name>]\n    /project create <path> --template-source <source> [--name <name>]\n      (with neither, a configured template source, else --template lean-mathlib)\n    /project build [path] [--yes]\n    /project templates\n",
           "override": null
         },
         {
@@ -304,7 +304,7 @@
         },
         {
           "command": "/project use ../plain",
-          "stdout": "(>_<) No active Fisher project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template-source <source>] [--name <name>]\n",
+          "stdout": "(>_<) No active Fisher project found. Use `/project init`, `/project convert`, or `/project use <path>` first.\n  Usage:\n    /project status\n    /project init [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project convert [path] [--name <name>] [--prover lean4|rocq|isabelle]\n    /project use [path]\n    /project clear\n    /project create <path> [--template <name>] [--var <k=v>]... [--no-build] [--yes] [--trust-revision <rev>] [--name <name>]\n    /project create <path> --template-source <source> [--name <name>]\n      (with neither, a configured template source, else --template lean-mathlib)\n    /project build [path] [--yes]\n    /project templates\n",
           "override": null
         }
       ]

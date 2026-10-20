@@ -16,6 +16,7 @@ import System.Directory (canonicalizePath, createDirectoryIfMissing, setPermissi
 import System.FilePath (takeDirectory, (</>))
 import Test.Hspec
 
+import Fisher.Cli.Create (templateOps)
 import Fisher.Doctor
 import Fisher.Env (loadEnvAt)
 import Fisher.Golden
@@ -58,15 +59,16 @@ envPairs = \case
   Object o -> [(K.toString k, T.unpack v) | (k, String v) <- KM.toList o]
   _ -> []
 
-spec :: Spec
-spec = do
-  describe "project-commands.json" $ do
-    cases <- runIO (goldenCases (golden "project-commands.json"))
+projectCases :: (Value -> Bool) -> (Value -> [(String, String)] -> Maybe TemplateOps) -> Spec
+projectCases keep ops = do
+    cases <- runIO (filter keep <$> goldenCases (golden "project-commands.json"))
     forM_ cases $ \c -> it (T.unpack (textField "name" c)) $ withTmp $ \tmp -> do
       setupLayout tmp
       cwd <- canonicalizePath (tmp </> T.unpack (textField "cwd" c))
       ref <- newIORef Nothing
-      let session = ProjectSession cwd (fill tmp (field "config" c)) (envPairs (fill tmp (field "env" c))) ref
+      let cfg = fill tmp (field "config" c)
+          env = envPairs (fill tmp (field "env" c))
+          session = ProjectSession cwd cfg env ref (ops cfg env)
       forM_ (zip [0 :: Int ..] (field "steps" c :: [Value])) $ \(i, step) -> do
         when (textField "name" c == "override-broken" && i == 1) $
           writeFile (tmp </> "A" </> ".fisher" </> "project.yaml") "schema_version: 7\nname: A\n"
@@ -75,6 +77,17 @@ spec = do
         printed `shouldBe` textField "stdout" step
         override <- readIORef ref
         (T.replace (T.pack tmp) "<TMP>" . T.pack <$> override) `shouldBe` (field "override" step :: Maybe Text)
+
+spec :: Spec
+spec = do
+  describe "project-commands.json" $ projectCases (const True) (\_ _ -> Nothing)
+
+  -- A plain template source through the command line's template functions
+  -- prints what it did before (with no source at all they choose
+  -- lean-mathlib instead).
+  describe "project-commands.json through the template functions" $
+    projectCases (\c -> "create" `T.isPrefixOf` textField "name" c && textField "name" c /= "create-no-template")
+      (\cfg env -> Just (templateOps cfg env))
 
   describe "doctor-managed.json" $ do
     cases <- runIO (goldenCases (golden "doctor-managed.json"))

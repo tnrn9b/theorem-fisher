@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api, ApiError, dollars, when, type SearchDetail, type SearchRow } from "../api";
 import { foldFlat, foldGraph, foldRetrieval, foldTiers, type SearchEvent } from "../board";
 import GoalRow from "../components/GoalRow";
@@ -19,8 +19,10 @@ export default function GoalBoard() {
 
 function StartSearch({ projects }: { projects: string[] }) {
   const nav = useNavigate();
-  const [project, setProject] = useState("");
-  const [file, setFile] = useState("");
+  // the New project view links here with its project and sample
+  const [params] = useSearchParams();
+  const [project, setProject] = useState(params.get("start") ?? "");
+  const [file, setFile] = useState(params.get("file") ?? "");
   const [graph, setGraph] = useState(false);
   const [auto, setAuto] = useState(true);
   const [retrieval, setRetrieval] = useState(true);

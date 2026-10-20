@@ -1,0 +1,16 @@
+name = "{{project}}"
+version = "0.1.0"
+defaultTargets = ["{{project}}"]
+
+[leanOptions]
+pp.unicode.fun = true
+autoImplicit = false
+relaxedAutoImplicit = false
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "{{mathlib}}"
+
+[[lean_lib]]
+name = "{{project}}"

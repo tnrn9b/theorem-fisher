@@ -14,6 +14,7 @@ import System.IO.Error (isEOFError)
 
 import Fisher.Cli.ConfigCmd
 import Fisher.Cli.Check (checkMain)
+import Fisher.Cli.Scratch (scratchMain)
 import Fisher.Cli.Search (searchMain)
 import Fisher.Cli.Sessions (SessionsCmd (..), sessionsParser)
 import Fisher.Cli.Subcommands
@@ -53,6 +54,7 @@ import System.FilePath (takeDirectory)
 
 data Command
   = Project [String]
+  | Scratch [String]
   | Doctor Bool Bool
   | ConfigPath
   | ConfigEnvPath
@@ -110,7 +112,11 @@ subcommands = hsubparser $
   <> sysCommand "cron" SysCron "Manage scheduled jobs (fisher cron serve runs them)"
   <> command "project"
     (info (Project <$> many (strArgument (metavar "ARGS...")))
-          (progDesc "status | init [PATH] [--name N] | convert [PATH] | use [PATH] | clear | create PATH [--template-source S] [--name N]"
+          (progDesc "status | init [PATH] [--name N] | convert [PATH] | use [PATH] | clear | templates | create PATH [--template NAME] [--var K=V]... [--no-build] [--yes] | create PATH --template-source S [--name N] | build [PATH]"
+             <> forwardOptions <> noIntersperse))
+  <> command "scratch"
+    (info (Scratch <$> many (strArgument (metavar "ARGS...")))
+          (progDesc "A throwaway Lean environment cloned from a built base: [--template NAME] [--var K=V]... [--yes] [--trust-revision REV] [FILE | --statement TEXT] | --list | --prune DAYS [--bases]"
              <> forwardOptions <> noIntersperse))
   <> command "plan"
     (info (Plan <$> some (strArgument (metavar "COMMAND... [--model M] [--prover P] [--print] [-- TEXT]")))
@@ -168,9 +174,11 @@ run :: Command -> IO ()
 run = \case
   Project args -> do
     (home, session) <- cliSession
-    out <- handleProjectTokens session (map T.pack args)
+    (code, out) <- handleProjectTokensStatus session (map T.pack args)
     mapM_ TIO.putStrLn out
     readIORef (sessionOverride session) >>= saveOverride home
+    if code == 0 then pure () else exitWith (ExitFailure code)
+  Scratch args -> scratchMain args >>= \code -> if code == 0 then pure () else exitWith (ExitFailure code)
   Doctor fix allProvers -> do
     home <- ensureFisherHome
     (cfg, _) <- loadConfigAt home

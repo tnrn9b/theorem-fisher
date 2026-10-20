@@ -1,0 +1,11 @@
+{
+ "name": "long_output",
+ "context": "x",
+ "query": "Print a lot.",
+ "max_iterations": 4,
+ "replies": [
+  "```repl\nprint('0123456789' * 5000)\n```",
+  "```repl\nprint('é世' * 30000)\nanswer['content'] = 'done'\nanswer['ready'] = True\n```"
+ ],
+ "sub": "SUB:"
+}

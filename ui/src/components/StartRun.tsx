@@ -7,11 +7,21 @@ import css from "./components.module.css";
  * Start a run: a Fisher command (such as /prove theories/Lists.v) in a
  * project directory. The server runs it headless with the event ledger on;
  * the page waits for the session it becomes, then opens its live view.
+ * The New project view links here with the project (and its sample)
+ * filled in.
  */
-export default function StartRun({ projects }: { projects: string[] }) {
+export default function StartRun({
+  projects,
+  initialProject = "",
+  initialFile = "",
+}: {
+  projects: string[];
+  initialProject?: string;
+  initialFile?: string;
+}) {
   const navigate = useNavigate();
-  const [project, setProject] = useState("");
-  const [command, setCommand] = useState("/prove ");
+  const [project, setProject] = useState(initialProject);
+  const [command, setCommand] = useState(`/prove ${initialFile}`);
   const [tag, setTag] = useState<string | null>(null);
   const [run, setRun] = useState<RunView | null>(null);
   const [error, setError] = useState<string | null>(null);

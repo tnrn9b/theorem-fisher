@@ -18,6 +18,16 @@ extra-source-files:
     data/env-vars.json
     data/fallback-comment.txt
     data/security-comment.txt
+    data/templates/lean-mathlib/__project__.lean
+    data/templates/lean-mathlib/__project__/Sample.lean
+    data/templates/lean-mathlib/fisher-template.yaml
+    data/templates/lean-mathlib/lakefile.toml
+    data/templates/lean-mathlib/lean-toolchain
+    data/templates/lean/__project__.lean
+    data/templates/lean/__project__/Sample.lean
+    data/templates/lean/fisher-template.yaml
+    data/templates/lean/lakefile.toml
+    data/templates/lean/lean-toolchain
 
 library
   exposed-modules:
@@ -50,8 +60,11 @@ library
       Fisher.Rich.Render
       Fisher.Rich.Style
       Fisher.Rich.Text
+      Fisher.Sha256
       Fisher.Shlex
       Fisher.Store
+      Fisher.Template
+      Fisher.Template.Run
       Fisher.Term
       Fisher.Which
       Fisher.Yaml.Ordered
@@ -76,6 +89,7 @@ library
     , file-embed
     , filepath
     , libyaml
+    , process
     , resourcet
     , scientific
     , sqlite-simple
@@ -110,6 +124,8 @@ test-suite fisher-core-test
       Fisher.PyValueSpec
       Fisher.RichSpec
       Fisher.ShlexTermSpec
+      Fisher.Template.RunSpec
+      Fisher.TemplateSpec
       Fisher.TestUtil
       Paths_fisher_core
   autogen-modules:
@@ -136,6 +152,7 @@ test-suite fisher-core-test
     , fisher-core
     , hspec
     , libyaml
+    , process
     , resourcet
     , scientific
     , sqlite-simple

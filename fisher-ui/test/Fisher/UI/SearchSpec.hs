@@ -37,6 +37,7 @@ import Test.Hspec
 import Fisher.UI.Access (Gate (..))
 import Fisher.UI.Api.Live (LiveEnv (..), newLiveEnv, stopRuns)
 import Fisher.UI.Api.Search
+import Fisher.UI.Api.Templates (newCreateEnv)
 import Fisher.UI.Db (newUiEnv)
 import Fisher.UI.Server (allApis, serve)
 import Fisher.UI.TestDirs (fixturesDir)
@@ -151,7 +152,8 @@ withSearch body k = withSystemTempDirectory "fisher-ui-search" $ \tmp0 -> do
   le0 <- newLiveEnv ui fake
   let le = le0 {leGrace = 1000000, leIdle = 1500000}
   se <- newSearchEnv le root
-  r <- k tmp proj se (serve gate (allApis le se))
+  ce <- newCreateEnv le
+  r <- k tmp proj se (serve gate (allApis le se ce))
   stopSearches se
   stopRuns le
   pure r

@@ -3,6 +3,7 @@ import { Link, NavLink, Navigate, Route, Routes } from "react-router-dom";
 import Context from "./views/Context";
 import GoalBoard from "./views/GoalBoard";
 import LiveSession from "./views/LiveSession";
+import NewProject from "./views/NewProject";
 import Runs from "./views/Runs";
 import Session from "./views/Session";
 import Sessions from "./views/Sessions";
@@ -59,6 +60,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/sessions" replace />} />
         <Route path="/sessions" element={<Sessions />} />
+        <Route path="/new" element={<NewProject />} />
+        <Route path="/new/:id" element={<NewProject />} />
         <Route path="/session/:id" element={<Session />} />
         <Route path="/live/:id" element={<LiveSession />} />
         <Route path="/context/:id" element={<Context />} />

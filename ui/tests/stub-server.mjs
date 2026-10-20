@@ -32,6 +32,22 @@
 // a file changed since the run started, unless forced); stop stops the
 // scripted run.
 //
+// The New project view's routes (GET /api/templates, POST /api/create and
+// a create's detail, events, stop and retry) are scripted in memory: the
+// templates are lean and lean-mathlib (built-in, trusted) and custom (a
+// configured one at revision rev-custom-1, not trusted until a create
+// confirms that revision: confirm is the revision a 409 gave). The
+// variables are checked against their patterns as the real route does. A
+// create writes, as lines of its events file, two steps (fetch, build)
+// 0.3 s apart, the check and ready; a folder whose path has "fail" in it
+// fails its build on the first try, and a retry (fisher project build)
+// then appends the build again, the check and ready. A folder whose path
+// has "changed" in it stops at once the first time, as the command line
+// does when the template changed since it was confirmed (nothing written),
+// and its retry answers 409 with the steps, a new revision and the request
+// to send again. A scratch's root is /tmp/stub-scratch/20991231-000000-abcd
+// and its file Scratch.lean.
+//
 // The settings (GET and POST /api/settings) are kept in memory, starting
 // as the fixture server's home has them (model example/model-a, provider
 // openrouter, context clm, autoformalize model example/model-b, an
@@ -375,6 +391,166 @@ function searchRoutes(req, res, u) {
   return false;
 }
 
+// ---------------------------------------------------------- new project
+const projectVar = { name: "project", default: "", pattern: "[A-Za-z][A-Za-z0-9_]*", description: "The project name (default: the target directory's name)" };
+const templates = [
+  {
+    name: "lean", prover: "lean4", description: "A plain Lean 4 package with its toolchain pinned", origin: "builtin", source: null,
+    variables: [projectVar, { name: "lean", default: "latest", pattern: "latest|v4\\.[0-9]+\\.[0-9]+(-rc[0-9]+)?", description: "The Lean release to pin (a tag such as v4.24.0, or latest)" }],
+    steps: [{ name: "build", run: ["lake", "build"], timeout_minutes: 30 }], sample: "{{project}}/Sample.lean", trusted: true,
+  },
+  {
+    name: "lean-mathlib", prover: "lean4", description: "A Lean 4 package that depends on Mathlib, its cache fetched", origin: "builtin", source: null,
+    variables: [projectVar, { name: "mathlib", default: "latest", pattern: "latest|v4\\.[0-9]+\\.[0-9]+(-rc[0-9]+)?", description: "The Mathlib release (a tag such as v4.24.0, or latest)" }],
+    steps: [{ name: "cache", run: ["lake", "exe", "cache", "get"], timeout_minutes: 30 }, { name: "build", run: ["lake", "build"], timeout_minutes: 30 }],
+    sample: "{{project}}/Sample.lean", trusted: true,
+  },
+  {
+    name: "custom", prover: "lean4", description: "A team template with its own setup", origin: "configured", source: "/tmp/stub-templates/custom",
+    variables: [projectVar], steps: [{ name: "setup", run: ["./setup.sh", "{{project}}"], timeout_minutes: 10 }], sample: "Main.lean", trusted: false,
+    revision: "rev-custom-1",
+  },
+];
+const creates = new Map(); // id -> scripted create
+let createCount = 0;
+const changedOnce = new Set(); // folders that stopped once as changed since confirmed
+
+const render = (t, vals) => t.replace(/\{\{([A-Za-z0-9_]+)\}\}/g, (_, k) => vals[k] ?? "");
+const baseOf = (p) => p.split("/").filter(Boolean).at(-1) ?? "";
+
+function createAttempt(c, failing) {
+  const line = (o) => c.lines.push(JSON.stringify(o));
+  const at = (ms, f) => c.timers.push(setTimeout(f, ms));
+  c.running = true;
+  c.status = "running";
+  c.reason = null;
+  const finish = (ok, reason) => {
+    c.running = false;
+    c.status = ok ? "ready" : "failed";
+    c.reason = reason ?? null;
+  };
+  if (c.attempts > 0 && c.mode === "project") {
+    // fisher project build: the steps not done yet
+    at(200, () => line({ event: "step start", step: "build" }));
+    at(500, () => line({ event: "step end", step: "build", exit: 0, tail: [] }));
+    at(600, () => line({ event: "check", ok: true, problems: [] }));
+    at(700, () => (line({ event: "ready" }), finish(true)));
+  } else {
+    at(300, () => line({ event: "step start", step: "fetch" }));
+    at(600, () => line({ event: "step end", step: "fetch", exit: 0, tail: [] }));
+    at(900, () => line({ event: "step start", step: "build" }));
+    if (failing) {
+      at(1200, () => line({ event: "step end", step: "build", exit: 1, tail: ["error: unknown package 'Mathlib'"] }));
+      at(1300, () => (line({ event: "failed", reason: "Step build failed (exit 1)" }), finish(false, "Step build failed (exit 1); see .fisher/create.log\nRerun with fisher project build " + c.root)));
+    } else {
+      at(1200, () => line({ event: "step end", step: "build", exit: 0, tail: [] }));
+      at(1300, () => line({ event: "check", ok: true, problems: [] }));
+      at(1400, () => (line({ event: "ready" }), finish(true)));
+    }
+  }
+  c.attempts += 1;
+}
+
+function createDetail(c) {
+  const shown = c.mode === "project" || c.status === "ready";
+  return {
+    id: c.id, template: c.template, mode: c.mode, root: shown ? c.root : null, file: shown ? c.file : null, status: c.status,
+    running: c.running, reason: c.reason, log: `/tmp/stub-fisher/ui-runs/create-${c.id.slice(2)}.log`,
+    events: c.mode === "project" ? `${c.root}/.fisher/create.jsonl` : "/tmp/stub-scratch/bases/0123456789abcdef/.fisher/create.jsonl",
+  };
+}
+
+/** The New project view's routes; true when this request was one of them. */
+function createRoutes(req, res, u) {
+  const parts = u.pathname.split("/").filter(Boolean).map(decodeURIComponent);
+  if (u.pathname === "/api/templates" && req.method === "GET") return json(res, 200, { templates, notes: [] }), true;
+  if (parts[1] !== "create") return false;
+  if (parts.length === 2 && req.method === "POST") {
+    readBody(req).then((b) => {
+      if (!b || typeof b.template !== "string") return json(res, 400, { error: "send {template, path | scratch: true, vars, confirm} as JSON" });
+      const t = templates.find((x) => x.name === b.template);
+      if (!t) return json(res, 400, { error: `Unknown template \`${b.template}\` (known: ${templates.map((x) => x.name).join(", ")})` });
+      const scratch = b.scratch === true;
+      const path = typeof b.path === "string" ? b.path.trim() : "";
+      if (scratch && path) return json(res, 400, { error: "give a folder or scratch, not both" });
+      if (!scratch && !path) return json(res, 400, { error: "give the project's folder (an absolute path) or scratch: true" });
+      if (!scratch && !path.startsWith("/")) return json(res, 400, { error: `the folder must be an absolute path (got \`${path}\`)` });
+      const given = b.vars && typeof b.vars === "object" ? b.vars : {};
+      for (const k of Object.keys(given))
+        if (!t.variables.some((v) => v.name === k))
+          return json(res, 400, { error: `Unknown variable \`${k}\` for template \`${t.name}\` (known: ${t.variables.map((v) => v.name).join(", ")})` });
+      const vals = {};
+      for (const v of t.variables) {
+        const x = String(given[v.name] ?? "").trim() || (v.name === "project" && !v.default ? (scratch ? "Scratch" : baseOf(path)) : v.default);
+        if (v.pattern && !new RegExp(`^(?:${v.pattern})$`).test(x))
+          return json(res, 400, { error: `Variable \`${v.name}\` is \`${x}\`, which does not match \`${v.pattern}\`` });
+        vals[v.name] = x;
+      }
+      const revision = t.revision ?? `rev-${t.name}`;
+      if (!t.trusted && b.confirm !== revision)
+        return json(res, 409, {
+          error: typeof b.confirm === "string"
+            ? `Template \`${t.name}\` changed since its steps were shown; confirm them again`
+            : `Template \`${t.name}\` (${t.source}) runs these steps in the new project; confirm them to go on`,
+          template: t.name, revision,
+          steps: t.steps.map((s) => ({ ...s, run: s.run.map((a) => render(a, vals)) })),
+        });
+      if (!t.trusted) t.trusted = true;
+      createCount += 1;
+      const id = `c.20991231-00000${createCount}`;
+      const c = {
+        id, template: t.name, mode: scratch ? "scratch" : "project", lines: [], timers: [], attempts: 0, running: true, status: "running", reason: null,
+        root: scratch ? "/tmp/stub-scratch/20991231-000000-abcd" : path.replace(/\/+$/, ""),
+        file: scratch ? "Scratch.lean" : render(t.sample, vals),
+      };
+      creates.set(id, c);
+      if (!scratch && path.includes("changed") && !changedOnce.has(c.root)) {
+        changedOnce.add(c.root);
+        c.changed = { template: t.name, path: c.root, vars: given, steps: t.steps.map((s) => ({ ...s, run: s.run.map((a) => render(a, vals)) })) };
+        c.attempts = 1;
+        c.timers.push(setTimeout(() => {
+          c.running = false;
+          c.status = "failed";
+          c.reason = `Template \`${t.name}\`: the template changed since it was confirmed (now at rev-${t.name}-2); nothing was written. Confirm its steps again.`;
+        }, 300));
+      } else createAttempt(c, !scratch && path.includes("fail"));
+      json(res, 200, { id });
+    });
+    return true;
+  }
+  const c = creates.get(parts[2]);
+  if (!c) return json(res, 404, { error: "no such create run" }), true;
+  if (parts.length === 3 && req.method === "GET") return json(res, 200, createDetail(c)), true;
+  if (parts[3] === "events" && req.method === "GET") {
+    const d = () => createDetail(c);
+    sse(req, res, u, () => offsets(c.lines), () => (c.running ? null : JSON.stringify({ status: c.status, reason: c.reason, root: d().root, file: d().file })));
+    return true;
+  }
+  if (parts[3] === "stop" && req.method === "POST") {
+    if (!c.running) return json(res, 409, { error: "the create has ended" }), true;
+    c.timers.forEach(clearTimeout);
+    c.running = false;
+    c.status = "stopped";
+    c.reason = "interrupted";
+    return json(res, 202, { status: "stopping" }), true;
+  }
+  if (parts[3] === "retry" && req.method === "POST") {
+    if (c.running) return json(res, 409, { error: "the create is still going" }), true;
+    if (c.status === "ready") return json(res, 409, { error: "it is ready; there is nothing to retry" }), true;
+    if (c.changed)
+      return json(res, 409, {
+        error: `Template \`${c.changed.template}\` changed since it was confirmed; confirm its steps again`,
+        template: c.changed.template, revision: `rev-${c.changed.template}-2`, steps: c.changed.steps,
+        request: { template: c.changed.template, path: c.changed.path, vars: c.changed.vars },
+      }), true;
+    if (c.mode === "scratch") c.lines = [];
+    const from = offsets(c.lines).at(-1)?.id ?? 0;
+    createAttempt(c, false);
+    return json(res, 200, { id: c.id, from }), true;
+  }
+  return false;
+}
+
 // ---------------------------------------------------------- step log
 const leanId = "20261001_100000_aaaaaa";
 const leanProject = fixture.routes[`/api/sessions/${leanId}`][0].body.session.project;
@@ -511,6 +687,7 @@ createServer((req, res) => {
     if (settingsRoutes(req, res, u)) return;
     if (stepRoutes(req, res, u)) return;
     if (searchRoutes(req, res, u)) return;
+    if (createRoutes(req, res, u)) return;
     if (live(req, res, u)) return;
     const path = canonical(req.url);
     let a = fromScenario(req, path);

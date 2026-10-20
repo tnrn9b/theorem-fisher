@@ -24,6 +24,7 @@ library
       Fisher.Cli.Clm
       Fisher.Cli.ConfigCmd
       Fisher.Cli.ConfigShow
+      Fisher.Cli.Create
       Fisher.Cli.Cron
       Fisher.Cli.Launch
       Fisher.Cli.LlmCheck
@@ -35,6 +36,7 @@ library
       Fisher.Cli.Prompt
       Fisher.Cli.ProverChat
       Fisher.Cli.Rlm
+      Fisher.Cli.Scratch
       Fisher.Cli.Search
       Fisher.Cli.SearchLsp
       Fisher.Cli.Session
@@ -158,8 +160,10 @@ test-suite fisher-cli-test
       Fisher.BannerSpec
       Fisher.ChatStreamSpec
       Fisher.Cli.CheckLiveSpec
+      Fisher.Cli.CreateSpec
       Fisher.Cli.LaunchSpec
       Fisher.Cli.ProverChatSpec
+      Fisher.Cli.ScratchSpec
       Fisher.Cli.SearchSpec
       Fisher.Cli.WatchSpec
       Fisher.ClmCliSpec

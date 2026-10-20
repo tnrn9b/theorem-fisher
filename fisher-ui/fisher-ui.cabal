@@ -22,6 +22,7 @@ library
       Fisher.UI.Api.Sessions
       Fisher.UI.Api.Settings
       Fisher.UI.Api.Steps
+      Fisher.UI.Api.Templates
       Fisher.UI.Children
       Fisher.UI.Db
       Fisher.UI.Diff
@@ -135,6 +136,7 @@ test-suite fisher-ui-test
       Fisher.UI.SessionsSpec
       Fisher.UI.SettingsSpec
       Fisher.UI.StepsSpec
+      Fisher.UI.TemplatesSpec
       Fisher.UI.TestDirs
       Paths_fisher_ui
   autogen-modules:

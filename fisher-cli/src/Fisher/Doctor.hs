@@ -90,7 +90,7 @@ checkManagedWorkflows de line issue = do
       ok st o "Managed auth mode" (paren (authModeName auth))
       let template = resolveTemplateSource cfg env
       if T.null template
-        then warn st o "Project template source" "(`/project create` needs `--template-source` or `fisher.project.template_source`)"
+        then warn st o "Project template source" "(`/project create` takes `--template NAME` (built-ins lean, lean-mathlib) or `--template-source` or `fisher.project.template_source`)"
         else ok st o "Project template source" (paren template)
       resolveUvRunner env >>= \case
         Right [_, "lean-mcp"] -> ok st o "Lean MCP server" "(fisher lean-mcp)"

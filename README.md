@@ -89,7 +89,12 @@ stack exec fisher -- tools-check [list] [--toolsets A,B] [--disable A,B]    # th
 stack exec fisher -- tools-check call NAME '{"path": "x"}' [--task ID]     # call one tool (file tools, MCP tools)
 stack exec fisher -- tools-check status                                     # MCP server status
 stack exec fisher -- project status | init [PATH] [--name N] | convert [PATH] | use [PATH] | clear
-stack exec fisher -- project create PATH [--template-source S] [--name N]
+stack exec fisher -- project templates                # the built-in and configured templates
+stack exec fisher -- project create PATH [--template NAME] [--var K=V]... [--no-build] [--yes] [--trust-revision REV]   # build and check a Lean project
+stack exec fisher -- project create PATH --template-source S [--name N]
+stack exec fisher -- project build [PATH] [--yes]      # a template project's remaining steps, then the check
+stack exec fisher -- scratch [--template NAME] [--var K=V]... [--yes] [--trust-revision REV] [FILE | --statement TEXT]   # a throwaway clone of a built base
+stack exec fisher -- scratch --list | --prune DAYS [--bases]
 stack exec fisher -- doctor [--fix] [--all]           # --all: every prover, not only the project's
 stack exec fisher -- check [--prover rocq|isabelle] [FILE[:decl]...]   # are Rocq or Isabelle targets proved
 stack exec fisher -- config path | env-path | check | migrate | set KEY VALUE

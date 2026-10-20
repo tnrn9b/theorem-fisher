@@ -96,3 +96,4 @@ tests:
     - fisher-ui
     - bytestring
     - process
+    - yaml
