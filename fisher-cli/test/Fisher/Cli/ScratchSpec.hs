@@ -274,7 +274,9 @@ spec = do
       [c] <- readIORef calls
       doesDirectoryExist (crTarget c) `shouldReturn` True
       out <- newIORef []
-      scratchMainWith d (\l -> modifyIORef' out (<> [l])) [] `shouldReturn` 130
+      -- a resume interrupted again keeps it, with 130
+      let again _ p = writeEvent p (Failed "interrupted") >> pure (Left ("Interrupted; resume with fisher project build " <> T.pack p))
+      scratchMainWith d {sdBuild = again} (\l -> modifyIORef' out (<> [l])) [] `shouldReturn` 130
       readIORef out `shouldReturn` ["(>_<) the base build was interrupted; run fisher scratch again to resume"]
       -- the next scratch builds the kept base instead of a fresh create
       length <$> readIORef calls `shouldReturn` 1
@@ -283,6 +285,14 @@ spec = do
       length <$> readIORef calls `shouldReturn` 1
       doesDirectoryExist r `shouldReturn` True
       readIORef said >>= (`shouldSatisfy` elem "  resuming its interrupted build")
+      -- a resume that fails its preflight (no new event) reports that error with 1, the base kept
+      writeEvent (crTarget c) (Failed "interrupted")
+      let preflightFails _ _ = pure (Left "elan is not on PATH: install elan")
+      scratchWith d {sdBuild = preflightFails} req `shouldReturn` Left "elan is not on PATH: install elan"
+      out2 <- newIORef []
+      scratchMainWith d {sdBuild = preflightFails} (\l -> modifyIORef' out2 (<> [l])) [] `shouldReturn` 1
+      readIORef out2 `shouldReturn` ["(>_<) elan is not on PATH: install elan"]
+      doesDirectoryExist (crTarget c) `shouldReturn` True
       -- a resume that fails (not interrupted) removes the base
       writeEvent (crTarget c) (Failed "interrupted")
       scratchWith d {sdBuild = failing} req `shouldReturn` Left "step cache failed (exit 1); see .fisher/create.log"

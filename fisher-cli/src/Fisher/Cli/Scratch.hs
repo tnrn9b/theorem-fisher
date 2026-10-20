@@ -197,8 +197,9 @@ baseInterrupted = "the base build was interrupted; run fisher scratch again to r
 
 -- | The base, built if it is not ready: an interrupted one is resumed, a
 -- failed or half built one removed and built again. A build that is
--- interrupted keeps the base; one that fails removes it. Called with the
--- base's exclusive lock held.
+-- interrupted keeps the base; one that fails removes it, except a resume
+-- that stopped before it ran anything (no new event), which reports its
+-- error and keeps the base. Called with the base's exclusive lock held.
 ensureBase :: ScratchDeps -> Template -> FilePath -> [(Text, Text)] -> (Bool, Maybe Text) -> IO (Either Text ())
 ensureBase d t base vars (yes, trustRev) = do
   ready <- baseReady base
@@ -211,7 +212,15 @@ ensureBase d t base vars (yes, trustRev) = do
       if resumable
         then do
           sdSay d "  resuming its interrupted build"
-          sdBuild d yes base >>= settle
+          before <- length <$> readEvents base
+          sdBuild d yes base >>= \case
+            Right () -> pure (Right ())
+            Left e -> do
+              after <- length <$> readEvents base
+              -- a resume that stopped before running anything (preflight:
+              -- elan not on PATH, say) wrote no event: its own error, and
+              -- the base stays as it was for the next resume
+              if after == before then pure (Left e) else settle (Left e)
         else do
           exists <- doesPathExist base
           if exists then removeDirectoryRecursive base else pure ()

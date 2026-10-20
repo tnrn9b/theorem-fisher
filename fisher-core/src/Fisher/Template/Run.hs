@@ -29,7 +29,7 @@ module Fisher.Template.Run
   , recordTrustRevision
   ) where
 
-import Control.Concurrent (forkIO, myThreadId, newEmptyMVar, putMVar, readMVar)
+import Control.Concurrent (forkIO, myThreadId, newEmptyMVar, putMVar, readMVar, threadDelay)
 import Control.Exception (IOException, SomeException, mask, onException, try)
 import Control.Monad (unless, void)
 import Data.Aeson (FromJSON (..), ToJSON (..), Value (..), (.:), (.=))
@@ -55,7 +55,7 @@ import System.FilePath (takeDirectory, (</>))
 import System.IO (Handle, IOMode (..), hClose, hFlush, withBinaryFile)
 import System.Posix.Process (getProcessID)
 import System.Posix.Signals (sigKILL, signalProcessGroup)
-import System.Process (CreateProcess (..), StdStream (..), createPipe, createProcess, getPid, proc, waitForProcess)
+import System.Process (CreateProcess (..), StdStream (..), createPipe, createProcess, getPid, getProcessExitCode, proc, waitForProcess, ProcessHandle)
 import System.Timeout (timeout)
 
 import Fisher.Paths (fisherDirName, getFisherHome)
@@ -238,7 +238,9 @@ runOne scale project st = case stepRun st of
           tailRef <- newIORef (Seq.empty, BS.empty)
           readerDone <- newEmptyMVar
           _ <- forkIO (readOutput rEnd tailRef >> putMVar readerDone ())
-          r <- restore (timeout (limit * 1000000) (waitForProcess ph))
+          -- polled, not a blocking wait: without the threaded RTS a blocking
+          -- waitForProcess cannot be interrupted by the time limit
+          r <- restore (timeout (limit * 1000000) (pollExit ph))
                  `onException` (killGroup >> waitForProcess ph)
           outcome <- case r of
             Just c -> pure (Exited (case c of ExitSuccess -> 0; ExitFailure k -> k))
@@ -350,3 +352,7 @@ recordTrustRevision :: FilePath -> Text -> Text -> IO ()
 recordTrustRevision path name rev = do
   m <- readTrust path
   writeAtomic path (BL.toStrict (A.encode (Object (KM.insert (K.fromText name) (String rev) m))))
+
+-- | Wait for a process by polling its exit code every 50 ms.
+pollExit :: ProcessHandle -> IO ExitCode
+pollExit ph = getProcessExitCode ph >>= maybe (threadDelay 50000 >> pollExit ph) pure

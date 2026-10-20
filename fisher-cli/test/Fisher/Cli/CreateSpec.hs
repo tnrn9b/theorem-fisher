@@ -2,6 +2,7 @@ module Fisher.Cli.CreateSpec (spec) where
 
 import Control.Concurrent (forkIO, newEmptyMVar, putMVar, takeMVar, threadDelay)
 import Control.Exception (bracket)
+import Control.Monad (when)
 import Data.Aeson (Value (..), object, toJSON, (.=))
 import qualified Data.Aeson.Key as K
 import qualified Data.Aeson.KeyMap as KM
@@ -13,7 +14,7 @@ import qualified Data.Text.IO as TIO
 import qualified Data.Yaml as Y
 import System.Directory
   ( canonicalizePath, createDirectoryIfMissing, doesDirectoryExist, doesFileExist, emptyPermissions
-  , setOwnerExecutable, setOwnerReadable, setPermissions )
+  , setOwnerExecutable, setOwnerReadable, setOwnerWritable, setPermissions )
 import System.Environment (lookupEnv, setEnv, unsetEnv)
 import System.FilePath ((</>))
 import System.IO (hClose, hPutStr, readFile')
@@ -42,8 +43,10 @@ withHomes k = withTmp $ \d -> bracket save restore (const (mapM_ (uncurry setEnv
 
 writeExe :: FilePath -> String -> IO ()
 writeExe p body = do
+  exists <- doesFileExist p
+  when exists (setPermissions p (setOwnerWritable True (setOwnerReadable True emptyPermissions)))
   writeFile p ("#!/bin/sh\n" <> body)
-  setPermissions p (setOwnerExecutable True (setOwnerReadable True emptyPermissions))
+  setPermissions p (setOwnerExecutable True (setOwnerWritable True (setOwnerReadable True emptyPermissions)))
 
 -- | A bin directory with stand-ins for the named tools.
 toolsDir :: FilePath -> [String] -> IO FilePath
