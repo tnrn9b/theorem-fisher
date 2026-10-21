@@ -121,8 +121,10 @@ parseArgs p args0 = do
     upsert k v acc = filter ((/= k) . fst) acc <> [(k, v)]
 
 providerChoices :: [Text]
-providerChoices = ["openai-codex"]
+providerChoices = ["openai-codex", "claude-code"]
 
+-- | @--console@, @--sso@ and @--email@ go to @claude auth login@ and need
+-- @--provider claude-code@ (checked by the login, not here).
 loginParser :: ArgParser
 loginParser =
   ArgParser
@@ -132,25 +134,33 @@ loginParser =
         loginUsage
           <> "\nRun OAuth device authorization flow for the Fisher CLI\n\noptions:\n\
              \  -h, --help            show this help message and exit\n\
-             \  --provider {openai-codex}\n\
+             \  --provider {openai-codex,claude-code}\n\
              \                        Provider to authenticate with\n\
              \  --no-browser          Do not attempt to open the browser automatically\n\
              \  --timeout TIMEOUT     HTTP request timeout in seconds (default: 15)\n\
              \  --ca-bundle CA_BUNDLE\n\
              \                        Path to CA bundle PEM file for TLS verification\n\
-             \  --insecure            Disable TLS verification (testing only)\n"
+             \  --insecure            Disable TLS verification (testing only)\n\
+             \  --console             claude-code: log in with an Anthropic Console account (API billing)\n\
+             \                        instead of a subscription\n\
+             \  --sso                 claude-code: force SSO\n\
+             \  --email EMAIL         claude-code: the email to log in as\n"
     , apOpts =
         [ OptSpec "--provider" "PROVIDER" (Value (Just providerChoices) False)
         , OptSpec "--no-browser" "" Flag
         , OptSpec "--timeout" "TIMEOUT" (Value Nothing True)
         , OptSpec "--ca-bundle" "CA_BUNDLE" (Value Nothing False)
-        , OptSpec "--insecure" "" Flag ]
+        , OptSpec "--insecure" "" Flag
+        , OptSpec "--console" "" Flag
+        , OptSpec "--sso" "" Flag
+        , OptSpec "--email" "EMAIL" (Value Nothing False) ]
     , apPositional = Nothing
     }
   where
     loginUsage =
-      "usage: fisher login [-h] [--provider {openai-codex}] [--no-browser] [--timeout TIMEOUT]\n\
-      \                    [--ca-bundle CA_BUNDLE] [--insecure]\n"
+      "usage: fisher login [-h] [--provider {openai-codex,claude-code}] [--no-browser]\n\
+      \                    [--timeout TIMEOUT] [--ca-bundle CA_BUNDLE] [--insecure] [--console] [--sso]\n\
+      \                    [--email EMAIL]\n"
 
 logoutParser :: ArgParser
 logoutParser =
@@ -161,13 +171,13 @@ logoutParser =
         usage
           <> "\nRemove stored credentials and reset provider config\n\noptions:\n\
              \  -h, --help            show this help message and exit\n\
-             \  --provider {openai-codex}\n\
+             \  --provider {openai-codex,claude-code}\n\
              \                        Provider to log out from (default: active provider)\n"
     , apOpts = [OptSpec "--provider" "PROVIDER" (Value (Just providerChoices) False)]
     , apPositional = Nothing
     }
   where
-    usage = "usage: fisher logout [-h] [--provider {openai-codex}]\n"
+    usage = "usage: fisher logout [-h] [--provider {openai-codex,claude-code}]\n"
 
 statusParser :: ArgParser
 statusParser =

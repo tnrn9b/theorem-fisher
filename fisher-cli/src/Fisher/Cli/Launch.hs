@@ -148,13 +148,13 @@ requestJson base r =
 
 -- | The subcommands that parse their own flags, wherever they are among
 -- the arguments: @check@ ('Fisher.Cli.Check.parseCheckArgs'), @plan@ and
--- @launch@ ('launchRequest'). They bypass optparse, whose subcommands
+-- @launch@ ('launchRequest'), and @scratch@ ('Fisher.Cli.Scratch'). They bypass optparse, whose subcommands
 -- here stop at the first unknown option before a positional argument
 -- (@noIntersperse@ replaces @forwardOptions@), so that @fisher check
 -- --prover rocq A.v@ and @fisher launch --model M /prove@ ran into
 -- @Invalid option@. @plan@ and @launch@ alone or with @-h@ or @--help@
 -- first still go to optparse, for its usage text.
-data OwnArgs = OwnCheck [String] | OwnPlan [String] | OwnLaunch [String]
+data OwnArgs = OwnCheck [String] | OwnPlan [String] | OwnLaunch [String] | OwnScratch [String]
   deriving (Eq, Show)
 
 ownArgsCommand :: [String] -> Maybe OwnArgs
@@ -162,6 +162,8 @@ ownArgsCommand = \case
   ("check" : rest) -> Just (OwnCheck rest)
   ("plan" : rest) | wanted rest -> Just (OwnPlan rest)
   ("launch" : rest) | wanted rest -> Just (OwnLaunch rest)
+  -- `fisher scratch --list` and `--statement TEXT` start with a flag
+  ("scratch" : rest) | wanted rest -> Just (OwnScratch rest)
   _ -> Nothing
   where
     wanted = \case

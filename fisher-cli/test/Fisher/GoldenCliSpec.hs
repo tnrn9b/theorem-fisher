@@ -122,7 +122,7 @@ spec = do
           env = [("PATH", bin), ("HOME", home), ("FISHER_LEAN_MCP", "uvx")] <> extra
           persistedLookup k = Map.lookup k <$> loadEnvAt fisherHome
           de = DoctorEnv plainStyle (field "config" c) env (Just (tmp </> T.unpack (textField "cwd" c)))
-                 persistedLookup (pure Nothing) "fisher"
+                 persistedLookup (pure Nothing) "fisher" Nothing
       linesRef <- newIORef []
       issuesRef <- newIORef []
       checkManagedWorkflows de (\l -> modifyIORef' linesRef (<> [l])) (\i -> modifyIORef' issuesRef (<> [i]))

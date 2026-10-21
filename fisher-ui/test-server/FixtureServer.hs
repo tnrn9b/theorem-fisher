@@ -14,7 +14,9 @@
 -- board's search root is a copy of test/fixtures/search whose runs name a
 -- scratch Lean project (its path printed as @Search project: DIR@), and a
 -- search the page starts is the fake of 'searchRun'. The home has a
--- config.yaml and a .env for the settings page.
+-- config.yaml and a .env for the settings page. The Claude Code panel's
+-- @claude@ is a fake: logged out at first; @auth login@ prints a URL and a
+-- prompt, reads a code and logs in as x\@y.z (max); @auth logout@ logs out.
 module Main (main) where
 
 import Control.Exception (bracket)
@@ -35,6 +37,7 @@ import System.IO.Temp (withSystemTempDirectory)
 import System.Posix.Files (setFileMode)
 
 import Fisher.UI.Access (Gate (..))
+import Fisher.UI.Api.ClaudeAuth (ClaudeAuthEnv (..), claudeAuthApi, newClaudeAuthEnv, stopClaudeLogins)
 import Fisher.UI.Api.Live (LiveEnv (..), newLiveEnv, stopRuns)
 import Fisher.UI.Api.Runs (stopGates)
 import Fisher.UI.Db (UiEnv (..))
@@ -90,13 +93,33 @@ serveOn want =
     B.writeFile (fxHome fx </> ".env") "# fixture\nOTHER=1\nOPENROUTER_API_KEY=sk-fixture-0000000000001234\nTERMINAL_SSH_HOST=box.local\n"
     -- a step's Lean check: an error on a line with BAD, else clean
     TIO.writeFile lake "#!/bin/sh\nif grep -n BAD \"$3\" > /dev/null; then echo \"$3:$(grep -n BAD \"$3\" | head -1 | cut -d: -f1):2: error: unknown tactic\"; exit 1; fi\nexit 0\n"
-    mapM_ (`setFileMode` 0o755) [fake, ledgerFake, lake]
+    -- the Claude Code panel's claude
+    let claude = repo </> "fake-claude"
+        st = repo </> "claude-status.json"
+        cd = repo </> "claude-code"
+        loggedIn = "{\"loggedIn\": true, \"authMethod\": \"claude.ai\", \"email\": \"x@y.z\", \"subscriptionType\": \"max\"}"
+    B.writeFile st "{\"loggedIn\": false}"
+    B.writeFile cd "1"
+    TIO.writeFile claude . T.pack $ unlines
+      [ "#!/bin/sh"
+      , "case \"$1 $2\" in"
+      , "  'auth status') cat " <> st <> "; exit $(cat " <> cd <> ") ;;"
+      , "  'auth logout') echo '{\"loggedIn\": false}' > " <> st <> "; echo 1 > " <> cd <> " ;;"
+      , "  'auth login')"
+      , "    echo 'Opening your browser to log in.'"
+      , "    echo 'https://claude.ai/oauth/authorize?code=true&state=fixture'"
+      , "    printf 'Paste code here if prompted > '"
+      , "    if read c; then echo '" <> loggedIn <> "' > " <> st <> "; echo 0 > " <> cd <> "; echo 'Login successful.'; exit 0; fi"
+      , "    exit 1 ;;"
+      , "esac" ]
+    mapM_ (`setFileMode` 0o755) [fake, ledgerFake, lake, claude]
     bracket (bindUi want) (close . snd) $ \(port, sock) ->
       bracket (pure env) stopGates $ \e ->
         bracket ((\l -> l {leLake = lake}) <$> newLiveEnv e fake) stopRuns $ \live ->
          bracket (newSearchEnv live root) stopSearches $ \search ->
-          bracket (newCreateEnv live) stopCreates $ \creates -> do
+          bracket (newCreateEnv live) stopCreates $ \creates ->
+          bracket ((\c -> c {caClaude = pure (Just claude)}) <$> newClaudeAuthEnv (fxHome fx)) stopClaudeLogins $ \claudeEnv -> do
           putStrLn ("Fisher UI fixture: " <> T.unpack (uiUrl port (gToken gate)))
           putStrLn ("Search project: " <> proj)
           hFlush stdout
-          runSettingsSocket (setHost "127.0.0.1" (setPort port defaultSettings)) sock (serve gate {gPort = port} (allApis live search creates))
+          runSettingsSocket (setHost "127.0.0.1" (setPort port defaultSettings)) sock (serve gate {gPort = port} (claudeAuthApi claudeEnv : allApis live search creates))

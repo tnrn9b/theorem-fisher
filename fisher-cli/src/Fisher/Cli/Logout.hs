@@ -1,5 +1,6 @@
 -- | @fisher logout [--provider openai-codex]@: argparse, then
--- 'logoutCommand'.
+-- 'logoutCommand'. @--provider claude-code@ runs @claude auth logout@
+-- ('claudeCodeLogout').
 module Fisher.Cli.Logout
   ( logoutMain
   ) where
@@ -7,6 +8,7 @@ module Fisher.Cli.Logout
 import Data.Text (Text)
 
 import Fisher.Cli.AuthArgs
+import Fisher.Cli.ClaudeLogin (claudeCodeLogout)
 import Fisher.LLM.Auth.Env (loadDotenvIntoSys)
 import Fisher.LLM.Auth.Logout (logoutCommand)
 import Fisher.LLM.Sys
@@ -18,4 +20,6 @@ logoutMain sys args = do
   loadDotenvIntoSys sys
   case parseArgs logoutParser args of
     Left (msg, code) -> sysOut sys msg >> pure code
-    Right opts -> logoutCommand sys (optValue "provider" opts)
+    Right opts
+      | optValue "provider" opts == Just "claude-code" -> claudeCodeLogout sys
+      | otherwise -> logoutCommand sys (optValue "provider" opts)

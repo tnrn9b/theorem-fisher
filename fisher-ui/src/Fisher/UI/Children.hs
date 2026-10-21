@@ -12,6 +12,7 @@ module Fisher.UI.Children
   ( Child (..)
   , startChild
   , spawnChild
+  , spawnChildPiped
   , stopChild
   , stopChildWith
   , groupAlive
@@ -35,10 +36,10 @@ import System.Directory (createDirectoryIfMissing)
 import System.Environment (getEnvironment)
 import System.Exit (ExitCode (..))
 import System.FilePath (takeDirectory)
-import System.IO (IOMode (..), hClose, openBinaryFile, withBinaryFile)
+import System.IO (Handle, IOMode (..), hClose, openBinaryFile, withBinaryFile)
 import System.Posix.Process (getProcessGroupID)
 import System.Posix.Signals (Signal, nullSignal, sigKILL, sigTERM, signalProcess, signalProcessGroup)
-import System.Process (CreateProcess (..), Pid, StdStream (..), createProcess, getPid, proc, readProcess, waitForProcess)
+import System.Process (CreateProcess (..), Pid, StdStream (..), createPipe, createProcess, getPid, proc, readProcess, waitForProcess)
 import Text.Read (readMaybe)
 import Text.Printf (printf)
 
@@ -99,6 +100,40 @@ spawnChild logPath cwd' argv env = case argv of
       createDirectoryIfMissing True (takeDirectory p)
       openBinaryFile p AppendMode
     closeAll = mapM_ (\h -> void (try (hClose h) :: IO (Either SomeException ())))
+
+-- | A child that is meant to be interactive (@claude auth login@, which
+-- may read a pasted code): as 'spawnChild', but its stdin is a pipe the
+-- caller writes to, and its stdout and stderr go together to a pipe the
+-- caller reads (nothing is written to disk). The caller closes both.
+spawnChildPiped :: FilePath -> [String] -> [(String, String)] -> IO (Child, MVar ExitCode, Handle, Handle)
+spawnChildPiped cwd' argv env = case argv of
+  [] -> ioError (userError "fisher ui: an empty command")
+  (exe : args) -> do
+    tag <- maybe newTag (pure . T.pack) (lookup "FISHER_UI_TAG" env)
+    base <- getEnvironment
+    let full = M.toList (M.union (M.fromList env) (M.fromList base))
+    (readOut, writeOut) <- createPipe
+    started <- realToFrac <$> getPOSIXTime
+    r <- try $
+      createProcess
+        (proc exe args)
+          { cwd = Just cwd', env = Just full, std_in = CreatePipe, std_out = UseHandle writeOut
+          , std_err = UseHandle writeOut, create_group = True, close_fds = True }
+    void (try (hClose writeOut) :: IO (Either SomeException ()))
+    case r of
+      Left (e :: SomeException) -> do
+        void (try (hClose readOut) :: IO (Either SomeException ()))
+        ioError (userError ("fisher ui: could not start " <> exe <> ": " <> show e))
+      Right (Just hin, _, _, ph) -> do
+        mpid <- getPid ph
+        exited <- newEmptyMVar
+        _ <- forkIO $ do
+          c <- try (waitForProcess ph)
+          putMVar exited (either (\(_ :: SomeException) -> ExitFailure 255) id c)
+        pure (Child tag (fromMaybe0 mpid) started, exited, hin, readOut)
+      Right _ -> ioError (userError "fisher ui: no stdin pipe")
+  where
+    fromMaybe0 = maybe 0 id
 
 -- | Whether any process of the group is still there.
 groupAlive :: Pid -> IO Bool

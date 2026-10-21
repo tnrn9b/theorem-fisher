@@ -11,6 +11,7 @@ module Fisher.Doctor
   , checkManagedWorkflows
   , checkProvers
   , runDoctor
+  , runDoctorTo
   ) where
 
 import Control.Applicative ((<|>))
@@ -30,6 +31,7 @@ import System.Process (CreateProcess (..), proc, readCreateProcessWithExitCode)
 import System.Timeout (timeout)
 import Text.Read (readMaybe)
 
+import Fisher.ClaudeAuth (ClaudeAuthStatus (..), claudeAuthStatusWithEnv)
 import Fisher.Config (saveConfigAt, defaultConfig)
 import Fisher.Paths (configPathIn, envPathIn, expandUser, fisherHomeLabelWith, homeLabel)
 import Fisher.Project
@@ -50,6 +52,11 @@ data DoctorEnv = DoctorEnv
   -- ^ @get_env_value@: the process environment, then the Fisher home's .env.
   , deKeychain :: IO (Maybe Text)
   , deCliName :: Text
+  , deClaudeLogin :: Maybe (FilePath -> IO Bool)
+  -- ^ With @--fix@ on a terminal: ask (after the Claude auth line it is
+  -- about) whether to log in to Claude Code now and, on yes, run @fisher
+  -- login --provider claude-code@ with the @claude@ given. True when it ran
+  -- the login. Nothing: only report.
   }
 
 newtype Out = Out { outLine :: Text -> IO () }
@@ -74,7 +81,17 @@ paren t = "(" <> t <> ")"
 
 -- | @_check_managed_workflow_requirements@.
 checkManagedWorkflows :: DoctorEnv -> (Text -> IO ()) -> (Text -> IO ()) -> IO ()
-checkManagedWorkflows de line issue = do
+checkManagedWorkflows de line issue = checkManagedWorkflowsWith de line issue (pure ())
+
+-- | 'checkManagedWorkflows', with what to do for each issue fixed.
+--
+-- The Claude auth check asks the Claude Code CLI first (@claude auth status
+-- --json@): logged in is enough; logged out names @fisher login --provider
+-- claude-code@ (and, with 'deClaudeLogin', offers to run it). When the CLI
+-- cannot say (not installed, an old CLI, unreadable output), the check
+-- reads the local login, API key and staged variables as before.
+checkManagedWorkflowsWith :: DoctorEnv -> (Text -> IO ()) -> (Text -> IO ()) -> IO () -> IO ()
+checkManagedWorkflowsWith de line issue fixed = do
   let st = deStyle de
       o = Out line
       env = deEnv de
@@ -128,7 +145,47 @@ checkManagedWorkflows de line issue = do
           issue ("Fix the managed workflow working directory: " <> T.pack activeDir)
 
       realHome <- maybe (pure "~") pure (lookup "HOME" env) >>= expandUser >>= canonicalizePath
-      let claudeAuthChecks = do
+      let -- claude is found on the doctor's PATH and run in its environment
+          cliStatusOf = claudeAuthStatusWithEnv env
+          claudeAuthChecks = case auth of
+            -- API-key mode does not use the login: no status run
+            AuthApiKey -> localClaudeAuthChecks
+            _ -> do
+              claudeExe <- whichIn path "claude"
+              cliStatus <- maybe (pure (Left "not installed")) cliStatusOf claudeExe
+              case (claudeExe, cliStatus) of
+                (_, Right s) | casLoggedIn s -> okClaudeLogin s
+                (Just exe, Right _) -> loggedOutClaudeChecks exe
+                _ -> localClaudeAuthChecks
+          okClaudeLogin s = ok st o "Claude auth" (paren ("Claude Code login" <> maybe "" (": " <>) (casEmail s)))
+          loginHint = "`fisher login --provider claude-code`"
+          -- the CLI says logged out: an API key or staged variable still
+          -- serves auto mode; else the line, then (--fix on a terminal) the
+          -- offer to log in, which fixes it once the status says so
+          loggedOutClaudeChecks exe = do
+            apiKey <- hasLocalClaudeApiKey realHome
+            staged <- resolveClaudeAuthEnv (deGetPersisted de) env True
+            let offer = case deClaudeLogin de of
+                  Nothing -> pure Nothing
+                  Just ask ->
+                    ask exe >>= \case
+                      False -> pure Nothing
+                      True -> either (const Nothing) (\s -> if casLoggedIn s then Just s else Nothing) <$> cliStatusOf exe
+                unlessLoggedInNow k = offer >>= \case
+                  Just s -> okClaudeLogin s >> fixed
+                  Nothing -> k
+            case auth of
+              AuthAuto
+                | apiKey -> ok st o "Claude auth" "(local Claude API key)"
+                | Just (k, _) <- staged -> ok st o "Claude auth" (paren ("staged via " <> k))
+                | otherwise -> do
+                    failed st o "Claude auth" "(Claude Code is not logged in)"
+                    unlessLoggedInNow $
+                      issue ("Run " <> loginHint <> ", save `ANTHROPIC_API_KEY`, or set `fisher.autoformalize.auth_mode: login`")
+              _ -> do
+                warn st o "Claude auth" ("(Claude Code is not logged in: run " <> loginHint <> ", or login mode will prompt on first launch)")
+                unlessLoggedInNow (pure ())
+          localClaudeAuthChecks = do
             login <- hasLocalClaudeLogin (deKeychain de) realHome
             apiKey <- hasLocalClaudeApiKey realHome
             staged <- resolveClaudeAuthEnv (deGetPersisted de) env True
@@ -380,10 +437,16 @@ readTextLenient p = either (const "") id <$> (try (TIO.readFile p) :: IO (Either
 runDoctor :: Bool -> Bool -> DoctorEnv -> FilePath -> IO [Text]
 runDoctor fix allProvers de home = do
   linesRef <- newIORef []
+  runDoctorTo (\t -> modifyIORef' linesRef (<> [t])) fix allProvers de home
+  readIORef linesRef
+
+-- | 'runDoctor', each line given to the sink as it comes (so that a
+-- question 'deClaudeLogin' asks comes after the lines before it).
+runDoctorTo :: (Text -> IO ()) -> Bool -> Bool -> DoctorEnv -> FilePath -> IO ()
+runDoctorTo say fix allProvers de home = do
   issuesRef <- newIORef []
   fixedRef <- newIORef (0 :: Int)
   let st = deStyle de
-      say t = modifyIORef' linesRef (<> [t])
       issue t = modifyIORef' issuesRef (<> [t])
       fixed = modifyIORef' fixedRef (+ 1)
       o = Out say
@@ -505,7 +568,7 @@ runDoctor fix allProvers de home = do
       warn st o "ripgrep (rg) not found" "(file search uses grep fallback)"
       info st o "Install for faster search: sudo apt install ripgrep"
 
-  checkManagedWorkflows de say issue
+  checkManagedWorkflowsWith de say issue fixed
   checkProvers allProvers de say issue
 
   say ""
@@ -533,4 +596,3 @@ runDoctor fix allProvers de home = do
           say (color st [green] (T.replicate 60 "─"))
           say (color st [green, bold] "  All checks passed! 🎉")
   say ""
-  readIORef linesRef

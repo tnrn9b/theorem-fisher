@@ -44,6 +44,7 @@ import Text.Read (readMaybe)
 
 import Fisher.Config (getPath, loadConfigAt)
 import Fisher.UI.Access
+import Fisher.UI.Api.ClaudeAuth (claudeAuthApi, newClaudeAuthEnv, stopClaudeLogins)
 import Fisher.UI.Api.Context (contextApi)
 import Fisher.UI.Api.Live (LiveEnv (..), liveApi, newLiveEnv, stopRuns)
 import Fisher.UI.Api.Runs (runsApi, stopGates)
@@ -143,14 +144,16 @@ runUi c = bracket (bindUi (ucPort c)) (close . snd) $ \(port, sock) -> do
     -- and the search runs
     bracket (newSearchEnv live (takeDirectory bench </> "search")) stopSearches $ \search ->
     -- and the creates of the New project view
-    bracket (newCreateEnv live) stopCreates $ \creates -> do
+    bracket (newCreateEnv live) stopCreates $ \creates ->
+    -- and the Settings page's Claude Code login
+    bracket (newClaudeAuthEnv (ucHome c)) stopClaudeLogins $ \claude -> do
     tok <- newToken
     let url = uiUrl port tok
     putStrLn ("Fisher UI: " <> T.unpack url)
     hFlush stdout
     when (ucOpen c) (openBrowser (T.unpack url))
     let settings = setHost "127.0.0.1" (setPort port defaultSettings)
-    runSettingsSocket settings sock (serve (Gate tok port) (allApis live search creates))
+    runSettingsSocket settings sock (serve (Gate tok port) (claudeAuthApi claude : allApis live search creates))
 
 -- | The Fisher repository whose @tools/bench/<b>/report.py@ computes the
 -- gates: the config key @fisher.repo@ when it names a directory, else the

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { api, type Settings as SettingsData, type SettingsWrite } from "../api";
 import { Loaded, useLoad } from "../useLoad";
+import ClaudePanel from "./ClaudePanel";
 import css from "./settings.module.css";
 
 const strategyNotes: Record<string, string> = {
@@ -27,6 +28,9 @@ export default function Settings() {
         started after a save use the new values.
       </p>
       <Loaded load={load}>{(s) => <Form initial={s} />}</Loaded>
+      <div className={css.panel}>
+        <ClaudePanel />
+      </div>
     </main>
   );
 }

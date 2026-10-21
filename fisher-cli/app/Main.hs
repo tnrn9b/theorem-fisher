@@ -9,7 +9,7 @@ import qualified Data.Text.IO as TIO
 import Options.Applicative
 import System.Environment (getEnvironment)
 import System.Exit (ExitCode (..), exitWith)
-import System.IO (hFlush, hGetEcho, hSetEcho, stderr, stdin, stdout)
+import System.IO (hFlush, hGetEcho, hIsTerminalDevice, hSetEcho, stderr, stdin, stdout)
 import System.IO.Error (isEOFError)
 
 import Fisher.Cli.ConfigCmd
@@ -39,6 +39,7 @@ import Fisher.Cli.AgentChat (chatMain, defaultChatDeps, replayMain)
 import Fisher.Cli.Clm (readContextFlag)
 import Fisher.Cli.Acp (acpMain)
 import Fisher.Cli.Cron (cronMain, defaultCronDeps)
+import Fisher.Cli.ClaudeLogin (claudeLoginPrompt)
 import Fisher.Cli.Login (loginMain)
 import Fisher.Cli.Logout (logoutMain)
 import Fisher.Cli.Model (modelMain)
@@ -184,8 +185,11 @@ run = \case
     (cfg, _) <- loadConfigAt home
     env <- getEnvironment
     st <- detectStyle
+    interactive <- (&&) <$> hIsTerminalDevice stdin <*> hIsTerminalDevice stdout
+    -- --fix on a terminal offers the Claude Code login
     let de = DoctorEnv st cfg env Nothing (getEnvValueAt home) readKeychainClaudeCredentials "fisher"
-    runDoctor fix allProvers de home >>= mapM_ TIO.putStrLn
+               (if fix && interactive then Just (claudeLoginPrompt home) else Nothing)
+    runDoctorTo (\l -> TIO.putStrLn l >> hFlush stdout) fix allProvers de home
   ConfigPath -> ensureFisherHome >>= putStrLn . configPathIn
   ConfigEnvPath -> ensureFisherHome >>= putStrLn . envPathIn
   ConfigCheck -> do
@@ -247,11 +251,12 @@ main = do
     (name : rest) | Just c <- lookup name sysCommands -> run (ViaSys c rest)
     -- `fisher chat -q QUERY` / `-Q`: upstream's `chat` command, the native agent
     ("chat" : rest) | any (`elem` ["-q", "--query", "-Q", "--quiet", "-p", "--print"]) rest -> run (ViaSys SysChat rest)
-    -- check, plan and launch take their flags anywhere ('ownArgsCommand')
+    -- check, plan, launch and scratch take their flags anywhere ('ownArgsCommand')
     _ | Just own <- ownArgsCommand args -> run $ case own of
           OwnCheck rest -> Check rest
           OwnPlan rest -> Plan rest
           OwnLaunch rest -> Launch rest
+          OwnScratch rest -> Scratch rest
     _ -> do
       cmd <- execParser (info (parser <**> helper) (fullDesc <> progDesc "Fisher: managed Lean workflows"))
       run cmd

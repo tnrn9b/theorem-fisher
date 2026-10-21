@@ -45,6 +45,11 @@ spec = do
     ownArgsCommand ["launch", "--model", "m", "--print", "/prove", "A.v"] `shouldBe` Just (OwnLaunch ["--model", "m", "--print", "/prove", "A.v"])
     ownArgsCommand ["plan", "--model=m", "/prove"] `shouldBe` Just (OwnPlan ["--model=m", "/prove"])
 
+  it "gives scratch its flags even when the first argument is one" $ do
+    ownArgsCommand ["scratch", "--list"] `shouldBe` Just (OwnScratch ["--list"])
+    ownArgsCommand ["scratch", "--statement", "1 = 1"] `shouldBe` Just (OwnScratch ["--statement", "1 = 1"])
+    ownArgsCommand ["scratch", "--help"] `shouldBe` Nothing
+
   it "leaves help, a bare plan or launch, and the other commands to optparse" $ do
     ownArgsCommand ["launch"] `shouldBe` Nothing
     ownArgsCommand ["plan", "--help"] `shouldBe` Nothing

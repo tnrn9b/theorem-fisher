@@ -1,5 +1,6 @@
 -- | @fisher status [--all] [--deep]@: every section upstream prints, from
--- the environment and keys through the auth providers, terminal backend,
+-- the environment and keys through the auth providers (with Fisher's Claude
+-- Code line, from @claude auth status@), terminal backend,
 -- messaging, gateway service, scheduled jobs and sessions. Ported from
 -- upstream @cli/status.py@. Like upstream it is not read-only: loading the
 -- config makes the home, and the Codex check takes the auth lock and may
@@ -23,6 +24,7 @@ import System.Directory (doesFileExist)
 import System.FilePath ((</>))
 
 import Fisher.Cli.AuthArgs
+import Fisher.Cli.ClaudeLogin (claudeStatusText)
 import Fisher.LLM.Auth.Codex (getCodexAuthStatus)
 import Fisher.LLM.Auth.Config (loadConfigPy)
 import Fisher.LLM.Auth.Env (getEnvValue, loadDotenvIntoSys)
@@ -165,6 +167,8 @@ showStatus info sys showAll deep = do
   refreshed <- formatIsoTimestamp sys (get "last_refresh" codex)
   when (flag "last_refresh" codex) (p ("    Refreshed:  " <> refreshed))
   when (flag "error" codex && not codexIn) (p ("    Error:      " <> maybe "" pyStrOf (get "error" codex)))
+  (claudeIn, claudeText) <- claudeStatusText sys
+  p ("  " <> T.justifyLeft 12 ' ' "Claude Code" <> "  " <> check claudeIn <> " " <> claudeText)
 
   header "API-Key Providers"
   let apiKeyProviders =

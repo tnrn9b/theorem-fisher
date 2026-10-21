@@ -17,3 +17,11 @@
 .error { color: var(--bad); }
 .warn { margin: 0; color: var(--bad); }
 @media (max-width: 40rem) { .keys tr { display: flex; flex-direction: column; padding-bottom: 0.5rem; } }
+.panel { max-width: 48rem; margin-top: 1.5rem; }
+.panelTitle { flex-basis: 100%; margin: 0; font-size: 0.95rem; font-weight: 600; }
+.claudeForm { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; align-items: flex-end; }
+.choices { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; margin: 0; padding: 0; border: 0; flex-basis: 100%; }
+.choices legend { padding: 0; margin-bottom: 0.3rem; font-size: 0.8rem; color: var(--muted); }
+.group label.choice { flex-direction: row; align-items: center; gap: 0.4rem; flex: 0 0 auto; color: var(--fg); font-size: 0.9rem; }
+.output { flex-basis: 100%; margin: 0; padding: 0.5rem 0.6rem; max-height: 16rem; overflow: auto; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; font-family: ui-monospace, Menlo, monospace; font-size: 0.8rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.output a { color: inherit; }

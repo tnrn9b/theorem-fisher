@@ -21,6 +21,7 @@ library
       Fisher.Cli.AgentChat
       Fisher.Cli.AuthArgs
       Fisher.Cli.Check
+      Fisher.Cli.ClaudeLogin
       Fisher.Cli.Clm
       Fisher.Cli.ConfigCmd
       Fisher.Cli.ConfigShow
@@ -160,6 +161,7 @@ test-suite fisher-cli-test
       Fisher.BannerSpec
       Fisher.ChatStreamSpec
       Fisher.Cli.CheckLiveSpec
+      Fisher.Cli.ClaudeLoginSpec
       Fisher.Cli.CreateSpec
       Fisher.Cli.LaunchSpec
       Fisher.Cli.ProverChatSpec

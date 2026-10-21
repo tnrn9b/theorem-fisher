@@ -49,6 +49,9 @@ tests:
     main:        Spec.hs
     source-dirs: test
     build-tools: hspec-discover
+    # ClaudeAuthSpec times out a child: the timer needs the threaded RTS,
+    # as the fisher executable has
+    ghc-options: -threaded
     dependencies:
     - fisher-core
     - hspec

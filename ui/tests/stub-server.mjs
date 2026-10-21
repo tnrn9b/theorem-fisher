@@ -54,6 +54,15 @@
 // OPENROUTER_API_KEY ending in 1234, TERMINAL_SSH_HOST box.local); a key is answered as its last 4
 // characters only, as the real route answers.
 //
+// The Settings page's Claude Code routes (GET /api/claude-auth, POST
+// /api/claude-auth/login, a login's output, input and stop, and POST
+// /api/claude-auth/logout) script the claude CLI in memory: logged out at
+// first; a login prints a line and a URL at once and waits at a prompt
+// (no newline) for a code; a code logs in as x@y.z (max, or the console
+// auth method with console: true), a stop ends it (exit 143). The body is
+// checked as the real route checks it. The scenario claude-missing
+// answers as with no claude installed.
+//
 // The proof canvas's routes keep one step log in memory, the Lean
 // session's (as fisher-ui's fixture: three changes to Main.lean): a check
 // counts sorry as a hole and BAD as an error; a hand back appends a hand
@@ -663,6 +672,105 @@ function settingsRoutes(req, res, u) {
   return true;
 }
 
+// ------------------------------------------------------------- claude auth
+const claude = { loggedIn: false, authMethod: null, subscriptionType: null, email: null, runs: new Map(), n: 0 };
+const claudeMissing = "The 'claude' CLI is not installed. Install it with: npm install -g @anthropic-ai/claude-code";
+
+function claudeGoing() {
+  for (const [tag, r] of claude.runs) if (r.running) return tag;
+  return null;
+}
+
+function claudeView(req) {
+  if (scenarioOf(req) === "claude-missing")
+    return { installed: false, loggedIn: false, authMethod: null, email: null, subscriptionType: null, error: null, login: null };
+  return {
+    installed: true, loggedIn: claude.loggedIn, authMethod: claude.authMethod, email: claude.email,
+    subscriptionType: claude.subscriptionType, error: null, login: claudeGoing(),
+  };
+}
+
+/** The Claude Code routes; true when this request was one of them. */
+function claudeRoutes(req, res, u) {
+  const parts = u.pathname.split("/").filter(Boolean).map(decodeURIComponent);
+  if (parts[0] !== "api" || parts[1] !== "claude-auth") return false;
+  const only = (m) => (req.method === m ? true : (json(res, 405, { error: m }), false));
+  const missing = scenarioOf(req) === "claude-missing";
+  if (parts.length === 2) {
+    if (only("GET")) json(res, 200, claudeView(req));
+    return true;
+  }
+  if (parts.length === 3 && parts[2] === "logout") {
+    if (!only("POST")) return true;
+    if (missing) return json(res, 409, { error: claudeMissing }), true;
+    Object.assign(claude, { loggedIn: false, authMethod: null, subscriptionType: null, email: null });
+    json(res, 200, claudeView(req));
+    return true;
+  }
+  if (parts.length === 3 && parts[2] === "login") {
+    if (!only("POST")) return true;
+    readBody(req).then((b) => {
+      if (!b || typeof b !== "object" || Array.isArray(b)) return json(res, 400, { error: "send {console, sso, email} as a JSON object" });
+      for (const k of ["console", "sso"])
+        if (b[k] !== undefined && b[k] !== null && typeof b[k] !== "boolean") return json(res, 400, { error: `${k} is true or false` });
+      if (b.email !== undefined && b.email !== null) {
+        if (typeof b.email !== "string") return json(res, 400, { error: "email is text" });
+        const e = b.email.trim();
+        if (e && (e.length > 254 || /[\s\x00-\x1f\x7f]/.test(e) || e.startsWith("-")))
+          return json(res, 400, { error: "email is one address: no spaces or line breaks, at most 254 characters" });
+      }
+      if (missing) return json(res, 409, { error: claudeMissing });
+      const going = claudeGoing();
+      if (going) return json(res, 409, { error: "a Claude Code login is already going", tag: going });
+      claude.n += 1;
+      const tag = `stubclaude${claude.n}`;
+      claude.runs.set(tag, {
+        console: b.console === true, running: true, stopping: false, exitCode: null,
+        lines: ["Opening your browser to log in.", "https://claude.ai/oauth/authorize?code=true&state=stub"],
+        partial: "Paste code here if prompted > ",
+      });
+      json(res, 200, { tag });
+    });
+    return true;
+  }
+  const r = parts.length >= 4 && parts[2] === "login" ? claude.runs.get(parts[3]) : undefined;
+  if (!r) return json(res, 404, { error: "no such login" }), true;
+  if (parts.length === 4) {
+    if (!only("GET")) return true;
+    const from = Math.max(0, Math.min(Number(u.searchParams.get("from") ?? 0) || 0, r.lines.length));
+    json(res, 200, {
+      tag: parts[3], running: r.running, stopping: r.stopping, exitCode: r.exitCode,
+      lines: r.lines.slice(from), partial: r.partial, next: r.lines.length, truncated: false,
+    });
+    return true;
+  }
+  if (parts.length === 5 && parts[4] === "input") {
+    if (!only("POST")) return true;
+    readBody(req).then((b) => {
+      if (typeof b?.text !== "string") return json(res, 400, { error: "send {text} as JSON" });
+      if (/[\r\n\0]/.test(b.text)) return json(res, 400, { error: "the text is one line" });
+      if (!r.running) return json(res, 409, { error: "the login has ended" });
+      r.lines.push(r.partial + "Login successful.");
+      r.partial = "";
+      Object.assign(r, { running: false, exitCode: 0 });
+      Object.assign(claude, r.console
+        ? { loggedIn: true, authMethod: "console", subscriptionType: null, email: "x@y.z" }
+        : { loggedIn: true, authMethod: "claude.ai", subscriptionType: "max", email: "x@y.z" });
+      json(res, 200, { sent: true });
+    });
+    return true;
+  }
+  if (parts.length === 5 && parts[4] === "stop") {
+    if (!only("POST")) return true;
+    if (!r.running) return json(res, 409, { error: "the login has ended" }), true;
+    Object.assign(r, { running: false, stopping: true, exitCode: 143 });
+    json(res, 202, { status: "stopping" });
+    return true;
+  }
+  json(res, 404, { error: "no such route" });
+  return true;
+}
+
 function hasCookie(req) {
   return (req.headers.cookie ?? "").split(/;\s*/).includes(`fisher_ui_${port}=${token}`);
 }
@@ -685,6 +793,7 @@ createServer((req, res) => {
   if (u.pathname === "/api" || u.pathname.startsWith("/api/")) {
     if (!hasCookie(req)) return send(res, 401, "text/plain; charset=utf-8", fixture.unauthorized.text ?? "");
     if (settingsRoutes(req, res, u)) return;
+    if (claudeRoutes(req, res, u)) return;
     if (stepRoutes(req, res, u)) return;
     if (searchRoutes(req, res, u)) return;
     if (createRoutes(req, res, u)) return;

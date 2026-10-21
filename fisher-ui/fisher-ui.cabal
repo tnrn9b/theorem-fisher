@@ -15,6 +15,7 @@ build-type:     Simple
 library
   exposed-modules:
       Fisher.UI.Access
+      Fisher.UI.Api.ClaudeAuth
       Fisher.UI.Api.Context
       Fisher.UI.Api.Live
       Fisher.UI.Api.Runs
@@ -124,6 +125,7 @@ test-suite fisher-ui-test
   other-modules:
       Fisher.UI.AccessSpec
       Fisher.UI.ChildrenSpec
+      Fisher.UI.ClaudeAuthSpec
       Fisher.UI.ContextSpec
       Fisher.UI.DiffSpec
       Fisher.UI.FakeFisher

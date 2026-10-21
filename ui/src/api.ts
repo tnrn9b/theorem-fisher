@@ -385,9 +385,43 @@ export interface SettingsWrite {
   keys?: { name: string; value: string }[];
 }
 
+/** What `claude auth status` says (GET /api/claude-auth); no organisation. */
+export interface ClaudeAuth {
+  installed: boolean;
+  loggedIn: boolean;
+  authMethod: string | null;
+  email: string | null;
+  subscriptionType: string | null;
+  /** why the status could not be read */
+  error?: string | null;
+  /** the tag of the login going */
+  login?: string | null;
+}
+
+export interface ClaudeLoginRequest {
+  console?: boolean;
+  sso?: boolean;
+  email?: string;
+}
+
+/** A `claude auth login` child's output from a line on. */
+export interface ClaudeLoginOutput {
+  tag: string;
+  running: boolean;
+  stopping: boolean;
+  exitCode: number | null;
+  lines: string[];
+  /** the line being written (a prompt waits without a newline) */
+  partial: string;
+  next: number;
+  /** the output passed 1 MB; what came after is not kept */
+  truncated?: boolean;
+}
+
 const sid = (id: string) => `/api/sessions/${encodeURIComponent(id)}`;
 const rid = (id: string) => `/api/search/${encodeURIComponent(id)}`;
 const cid = (id: string) => `/api/create/${encodeURIComponent(id)}`;
+const lid = (tag: string) => `/api/claude-auth/login/${encodeURIComponent(tag)}`;
 
 export const api = {
   sessions: (f: SessionFilters = {}) => getJson<SessionSummary[]>(`/api/sessions${filterQuery(f)}`),
@@ -424,6 +458,12 @@ export const api = {
   stopCreate: (id: string) => postJson<{ status: string }>(`${cid(id)}/stop`, {}),
   retryCreate: (id: string) => postJson<{ id: string; from: number }>(`${cid(id)}/retry`, {}),
   createEventsUrl: (id: string, from = 0) => `${cid(id)}/events${from ? `?from=${from}` : ""}`,
+  claudeAuth: () => getJson<ClaudeAuth>("/api/claude-auth"),
+  claudeLogin: (req: ClaudeLoginRequest) => postJson<{ tag: string }>("/api/claude-auth/login", req),
+  claudeLoginOutput: (tag: string, from = 0) => getJson<ClaudeLoginOutput>(`${lid(tag)}?from=${from}`),
+  claudeLoginInput: (tag: string, text: string) => postJson<{ sent: boolean }>(`${lid(tag)}/input`, { text }),
+  claudeLoginStop: (tag: string) => postJson<{ status: string }>(`${lid(tag)}/stop`, {}),
+  claudeLogout: () => postJson<ClaudeAuth>("/api/claude-auth/logout", {}),
 };
 
 /** The statuses of a run that has ended. */
