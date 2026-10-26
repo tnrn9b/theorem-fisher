@@ -29,6 +29,7 @@ module Fisher.Cli.Cron
 import Control.Concurrent (myThreadId, threadDelay, throwTo)
 import Control.Exception (AsyncException (UserInterrupt), SomeException, displayException, finally, fromException, throwIO, try)
 import Control.Monad (forM_, forever, unless, when)
+import qualified Data.Aeson as A
 import qualified Data.ByteString as BS
 import Data.Char (isDigit)
 import Data.IORef
@@ -49,6 +50,7 @@ import System.Posix.Signals (Handler (Catch), installHandler, nullSignal, sigTER
 import Fisher.Agent.Loop
 import Fisher.Agent.Replay (closeReplayLog, logOutcome, logTurn)
 import Fisher.Agent.StoreDB (storeSessionDB)
+import Fisher.Agent.UiHooks (endStatus, runlogGuard, runlogWarn)
 import Fisher.Cli.AgentChat (ChatDeps (..), defaultChatDeps)
 import Fisher.Cli.Native
 import Fisher.Cli.Status (sysStyle)
@@ -63,6 +65,7 @@ import Fisher.LLM.Auth.Resolve (RuntimeRequest (..), resolveRuntimeProvider)
 import Fisher.LLM.Sys
 import Fisher.LLM.Types
 import Fisher.Py.Value
+import Fisher.Runlog (Capture (..), NewRun (..), RunEnd (..), RunKind (..), closeRunlog, endRun, event, openRunlog, runlogPath, startRun)
 import Fisher.Store (closeStore, openStore)
 import Fisher.Term
 
@@ -684,16 +687,44 @@ runJob deps sys env shared job = do
             , nsApiKey = field' "api_key", nsBaseUrlGiven = True, nsDisabled = Just ["cronjob"], nsMaxIterations = maxIter
             , nsReasoning = reasoning, nsPrefill = prefill, nsRouting = routing
             , nsDb = fmap (\s -> storeSessionDB s (sysNow sys)) store, nsReplay = crReplay deps, nsOut = sysOut sys }
-    (do
-        sh <- shared
-        (ag, lg) <- buildNative sys (crChat deps) sh spec
-        let ri = runInput prompt
-        mapM_ (`logTurn` ri) lg
-        res <- runConversation ag ri
-        mapM_ (`logOutcome` res) lg
-        mapM_ closeReplayLog lg
-        pure res)
-      `finally` mapM_ closeStore store
+    -- the run log (docs/superpowers/plans/2026-10-24-run-log-and-learned-policy.md
+    -- task 3): a cron run, started here and ended with its outcome; a
+    -- failure there is one line on stderr and the job goes on
+    warned <- newIORef False
+    runlog <- try @SomeException (openRunlog (runlogPath (sysFisherHome sys))) >>= \case
+      Left e -> runlogWarn warned (T.pack (displayException e)) >> pure Nothing
+      Right (Left e) -> runlogWarn warned e >> pure Nothing
+      Right (Right rl) -> pure (Just rl)
+    started <- sysNow sys
+    let logged k = forM_ runlog (\rl -> runlogGuard warned (k rl))
+        runEnd res = logged $ \rl -> do
+          ended <- sysNow sys
+          (cost, _, _) <- maybe (pure (Nothing, 0, 0)) (agentSessionCost . fst) res
+          let outcome = if endStatus (snd <$> res) == "completed" then "completed" else "failed"
+              calls = case snd <$> res of
+                Just (RunDone d) | Just (PInt n) <- get "api_calls" d -> Just (fromIntegral n)
+                _ -> Nothing
+          event rl sid (max 0 (ended - started)) "outcome" (A.object ["outcome" A..= outcome, "reason" A..= A.Null])
+          endRun rl sid (RunEnd ended Nothing outcome cost Nothing Nothing calls)
+    logged $ \rl ->
+      startRun rl
+        NewRun
+          { nrId = sid, nrKind = CronRun, nrParent = Nothing, nrProject = Nothing, nrProver = Nothing
+          , nrBackend = Just "native", nrModel = Just model, nrTier = Nothing, nrWorkflow = Nothing, nrArgv = []
+          , nrStartedAt = started, nrRawDir = Nothing, nrCapture = ShellOnly }
+    attempt <- try @SomeException $ do
+      sh <- shared
+      (ag, lg) <- buildNative sys (crChat deps) sh spec
+      let ri = runInput prompt
+      mapM_ (`logTurn` ri) lg
+      res <- runConversation ag ri
+      mapM_ (`logOutcome` res) lg
+      mapM_ closeReplayLog lg
+      pure (ag, res)
+    mapM_ closeStore store
+    runEnd (either (const Nothing) Just attempt)
+    forM_ runlog (\rl -> () <$ try @SomeException (closeRunlog rl))
+    either throwIO (pure . snd) attempt
   now <- ceNow env
   let header = "**Job ID:** " <> jid <> "\n**Run Time:** " <> strftimeYmdHms now <> "\n**Schedule:** " <> display <> "\n\n## Prompt\n\n" <> prompt <> "\n\n"
   pure $ case r of

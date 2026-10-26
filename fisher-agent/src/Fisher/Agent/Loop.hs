@@ -150,8 +150,8 @@ defaultAgentConfig =
 
 data Callbacks = Callbacks
   { cbThinking :: Maybe (Text -> IO ())
-  , cbToolProgress :: Maybe (Text -> Maybe PyVal -> PyVal -> IO ())
-  -- ^ name, preview, arguments
+  , cbToolProgress :: Maybe (Text -> Text -> Maybe PyVal -> PyVal -> IO ())
+  -- ^ the call's id, name, preview, arguments
   , cbStep :: Maybe (Int -> [Text] -> IO ())
   , cbToolDone :: Maybe (Text -> Text -> Text -> PyVal -> Either Text Text -> IO ())
   -- ^ Fisher only: each call as it returns: the task id it ran under, the
@@ -2469,9 +2469,9 @@ runConversation' ag ri = do
 
     emojiFor name = toolEmoji (envSkin (agEnv ag)) (trEmoji (envTools (agEnv ag))) name
 
-    progress name args =
+    progress tc name args =
       forM_ (cbToolProgress (envCallbacks (agEnv ag))) $ \f ->
-        void (try @SomeException (f name (buildToolPreviewV name args) args))
+        void (try @SomeException (f (pyStrOf (tcId tc)) name (buildToolPreviewV name args) args))
 
     truncateResult r =
       if T.length r > 100000
@@ -2529,7 +2529,7 @@ runConversation' ag ri = do
                   env = agEnv ag
               noteUse name
               unlessQuiet ag $ mapM_ (say ag) (callLine i name args)
-              progress name args
+              progress tc name args
               t0 <- now ag
               result <-
                 if quiet ag && isJust (localTool name args)
@@ -2589,7 +2589,7 @@ runConversation' ag ri = do
           unlessQuiet ag $ do
             say ag ("  ⚡ Concurrent: " <> int total <> " tool calls — " <> T.intercalate ", " [nm | (_, nm, _) <- parsed])
             forM_ (zip [1 :: Int ..] parsed) $ \(i, (_, nm, args)) -> mapM_ (say ag) (callLine i nm args)
-          forM_ parsed $ \(_, nm, args) -> progress nm args
+          forM_ parsed $ \(tc, nm, args) -> progress tc nm args
           sp <-
             if quiet ag
               then do

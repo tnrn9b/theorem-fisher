@@ -102,7 +102,7 @@ spec = do
               pure tid
             inputs active = do
               envMap <- Map.fromList <$> getEnvironment
-              pure (LaunchInputs (machine gh) cfg1 envMap True (getEnvValueAt gh) (Just (T.unpack active)))
+              pure (LaunchInputs (machine gh) cfg1 envMap True (getEnvValueAt gh) (Just (T.unpack active)) Nothing)
             deps =
               ShellDeps
                 { dOut = Out put, dWidth = pure 80, dAnsi = False, dUnicode = True

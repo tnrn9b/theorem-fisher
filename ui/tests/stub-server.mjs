@@ -771,6 +771,148 @@ function claudeRoutes(req, res, u) {
   return true;
 }
 
+// ------------------------------------------------------------- run log
+// Two runs as fisher-ui's /api/runs-log gives them (Fisher.Runlog's
+// columns): a search in /work/demo and its closed attempt.
+const runRow = (o) => ({
+  parent: null, project: "/work/demo", project_key: "6a1f0e1d2c3b4a59", prover: "lean", backend: null, model: null,
+  tier: null, workflow: null, exit: 0, cost_usd: null, input_tokens: null, output_tokens: null, turns: null,
+  raw_dir: null, capture: "full", ...o,
+});
+const runlog = [
+  runRow({
+    id: "a.20261024-100500", kind: "search-attempt", parent: "s.20261024-100000", backend: "fisher",
+    argv: ["fisher", "search", "Demo.lean", "--attempt"], started_at: 1792836300, ended_at: 1792836330,
+    outcome: "closed", cost_usd: 0.042, turns: 4,
+  }),
+  runRow({
+    id: "s.20261024-100000", kind: "search", argv: ["fisher", "search", "Demo.lean"],
+    started_at: 1792836000, ended_at: 1792836400, outcome: "closed",
+  }),
+];
+const runDetail = {
+  "a.20261024-100500": {
+    goals: [],
+    events: [
+      { seq: 1, t: 0, kind: "attempt", data: { goal: "Demo.main_thm", shape: "eq||Nat|small", backend: "fisher" } },
+      { seq: 2, t: 12.5, kind: "tool_start", data: { name: "lean_check", args: { file: "Demo.lean" } } },
+      { seq: 3, t: 30, kind: "closed", data: { goal: "Demo.main_thm" } },
+    ],
+  },
+  "s.20261024-100000": {
+    goals: [{ name: "Demo.main_thm", statement: "1 + 1 = 2", shape: "eq||Nat|small", status: "closed", closed_by: "fisher", seconds_to_close: 30, dollars_to_close: 0.042 }],
+    events: [{ seq: 1, t: 0, kind: "portfolio", data: { tactics: ["simp", "omega"] } }],
+  },
+};
+
+/** The run log routes; true when this request was one of them. */
+function runlogRoutes(req, res, u) {
+  if (u.pathname === "/api/runs-log") {
+    const kind = u.searchParams.get("kind");
+    const project = u.searchParams.get("project");
+    const rows = runlog.filter((r) => (!kind || r.kind === kind) && (!project || r.project === project));
+    return json(res, 200, rows), true;
+  }
+  const m = u.pathname.match(/^\/api\/runs-log\/([^/]+)$/);
+  if (!m) return false;
+  const id = decodeURIComponent(m[1]);
+  const run = runlog.find((r) => r.id === id);
+  if (!run) return json(res, 404, { error: "no such run" }), true;
+  return json(res, 200, { run, ...runDetail[id], truncated: false }), true;
+}
+
+// ---------------------------------------------------------------- learn
+const armRow = (arm, attempts, closes, rate, cost_per_close, closes_per_hour) => ({ arm, attempts, closes, rate, cost_per_close, closes_per_hour });
+const learnDemo = {
+  stats: {
+    "*": {
+      backends: [armRow("fisher", 12, 9, 0.72, 0.06, 40.5), armRow("claude-code", 10, 3, 0.31, 1.25, 6)],
+      tiers: [],
+      tactics: [armRow("simp", 20, 6, 0.3, null, 120), armRow("omega", 20, 2, 0.12, null, 30)],
+    },
+    "eq||Nat|small": {
+      backends: [armRow("fisher", 8, 7, 0.8, 0.05, 50), armRow("claude-code", 2, 0, 0.25, 2.1, 0)],
+      tiers: [],
+      tactics: [],
+    },
+  },
+  policy: {
+    version: 1, computed_at: 1792836400, project_key: "6a1f0e1d2c3b4a59",
+    shapes: {
+      "*": {
+        backends: ["fisher", "claude-code"], tiers: [], tactics: ["simp", "omega"], attempt_secs: 240,
+        evidence: { backends: { fisher: { attempts: 12, closes: 9, rate: 0.72, cost_per_close: 0.06 } } },
+      },
+    },
+  },
+  changes: [
+    { at: 1792836400, shape: "*", knob: "backends", old: ["claude-code", "fisher"], new: ["fisher", "claude-code"], evidence: { fisher: { attempts: 12, closes: 9 } } },
+  ],
+};
+
+/** The Learn route; true when this request was it. */
+function learnRoutes(req, res, u) {
+  if (u.pathname !== "/api/learn") return false;
+  const project = u.searchParams.get("project");
+  const projects = ["/work/demo", "/work/other"];
+  if (project && !project.startsWith("/")) return json(res, 400, { error: "project is the absolute path of a project's root" }), true;
+  const base = { project, project_key: project ? "0000000000000000" : null, projects, policy_error: null };
+  if (project === "/work/demo") return json(res, 200, { ...base, project_key: "6a1f0e1d2c3b4a59", ...learnDemo }), true;
+  const stats = project ? { "*": { backends: [], tiers: [], tactics: [] } } : {};
+  return json(res, 200, { ...base, stats, policy: null, changes: [] }), true;
+}
+
+// ---------------------------------------------------------------- lessons
+const lessonRow = (o) => ({
+  project_key: "6a1f0e1d2c3b4a59", kind: "unknown_identifier", agreements: 0, first_seen: 1792836000,
+  activated_at: null, retired_at: null, runs_active: [], hits_while_active: 0, attempts_while_active: 0,
+  hits_before: 0, attempts_before: 0, runs_before: 0, proposed: false, ...o,
+});
+const lessons = [
+  lessonRow({ id: 1, key: "k:build", text: "Run `lake build` before finishing.", status: "candidate", evidence_runs: ["a.20261024-100500", "s.20261024-100000"] }),
+  lessonRow({ id: 2, key: "k:foo", text: "In this project `Nat.foo` does not exist.", status: "active", evidence_runs: ["a.20261024-100500"], activated_at: 1792836400 }),
+  lessonRow({ id: 4, kind: "judged", key: "foo.bar_baz", text: "Check `Foo.bar_baz` before using it.", status: "candidate", evidence_runs: ["r1", "r2", "r3"], agreements: 2, proposed: true }),
+  lessonRow({ id: 3, project_key: "*", key: "k:compile", text: "Always check the file compiles before you finish.", status: "active", evidence_runs: ["a.20261024-100500"], activated_at: 1792836400 }),
+];
+
+/** The pin, unpin and drop rules of Fisher.Learn.Lessons.actionTarget: the new status, or why not. */
+function lessonTarget(action, status) {
+  if (action === "pin") return status === "pinned" ? [null, "already pinned"] : status === "dropped" ? [null, "dropped"] : ["pinned"];
+  if (action === "unpin") return status === "pinned" ? ["active"] : [null, "not pinned"];
+  return status === "dropped" ? [null, "already dropped"] : ["dropped"];
+}
+
+/** The Lessons routes; true when this request was one of them. */
+function lessonsRoutes(req, res, u) {
+  if (u.pathname !== "/api/lessons") return false;
+  if (req.method === "POST") {
+    readBody(req).then((b) => {
+      if (!b || !Number.isInteger(b.id) || !["pin", "unpin", "drop"].includes(b.action))
+        return json(res, 400, { error: "send {id, action, project} as JSON (action one of pin, unpin, drop)" });
+      const l = lessons.find((x) => x.id === b.id);
+      if (!l) return json(res, 404, { error: "no such lesson" });
+      // the global lesson stands in for a refusal the server would give
+      if (l.id === 3) return json(res, 409, { error: "the stub refuses" });
+      const [st, why] = lessonTarget(b.action, l.status);
+      if (!st) return json(res, 409, { error: why });
+      // an unpinned judged or self lesson is a candidate again, proposed (Fisher.Learn.Lessons.applyTo)
+      const judged = l.kind === "judged" || l.kind === "self";
+      l.status = b.action === "unpin" && judged ? "candidate" : st;
+      l.proposed = l.status === "candidate" && judged;
+      json(res, 200, l);
+    });
+    return true;
+  }
+  const project = u.searchParams.get("project");
+  if (project && !project.startsWith("/")) return json(res, 400, { error: "project is the absolute path of a project's root" }), true;
+  const key = project === "/work/demo" ? "6a1f0e1d2c3b4a59" : project ? "0000000000000000" : null;
+  return json(res, 200, {
+    project, project_key: key,
+    lessons: lessons.filter((l) => key && l.project_key === key),
+    global: lessons.filter((l) => l.project_key === "*"),
+  }), true;
+}
+
 function hasCookie(req) {
   return (req.headers.cookie ?? "").split(/;\s*/).includes(`fisher_ui_${port}=${token}`);
 }
@@ -797,6 +939,9 @@ createServer((req, res) => {
     if (stepRoutes(req, res, u)) return;
     if (searchRoutes(req, res, u)) return;
     if (createRoutes(req, res, u)) return;
+    if (runlogRoutes(req, res, u)) return;
+    if (learnRoutes(req, res, u)) return;
+    if (lessonsRoutes(req, res, u)) return;
     if (live(req, res, u)) return;
     const path = canonical(req.url);
     let a = fromScenario(req, path);

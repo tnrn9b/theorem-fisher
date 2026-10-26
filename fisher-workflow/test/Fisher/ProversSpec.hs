@@ -181,7 +181,7 @@ plan fx command k = do
         cfg = object (("fisher" .= Object (KM.insert "autoformalize" auto ownFisher)) : [k .= v | (k, v) <- fxConfig fx, k /= "fisher"])
         -- the launch's notes and warnings go to notes.log
         machine = (machineFor file (root </> "fisher-home")) {mNote = \t -> TIO.appendFile (root </> "notes.log") (t <> "\n")}
-        li = LaunchInputs machine cfg base False (const (pure Nothing)) (Just (proj </> fxSubdir fx))
+        li = LaunchInputs machine cfg base False (const (pure Nothing)) (Just (proj </> fxSubdir fx)) Nothing
     createDirectoryIfMissing True (proj </> fxSubdir fx)
     r <- withProcessEnv base (resolveWorkflowRequest li command)
     k root base r
@@ -599,7 +599,7 @@ spec = do
             run cwd pid pdir = do
               let base = foldr (uncurry Map.insert) base0
                     [ ("FAKE_PLUGIN_ID", pid), ("FAKE_PLUGIN_DIR", pdir), ("ANTHROPIC_API_KEY", "sk-ant-test") ]
-                  li = LaunchInputs (machineFor file (root </> "fisher-home")) cfg base False (const (pure Nothing)) (Just cwd)
+                  li = LaunchInputs (machineFor file (root </> "fisher-home")) cfg base False (const (pure Nothing)) (Just cwd) Nothing
               r <- withProcessEnv base (resolveWorkflowRequest li "/prove Main")
               _ <- ok r
               cj <- readJson (managedHome </> ".claude.json")
@@ -821,3 +821,36 @@ spec = do
         let table = takeWhile (not . T.isPrefixOf "[mcp_servers.isabelle.env]") (dropWhile (/= "[mcp_servers.isabelle]") toml)
         table `shouldContain` ["cwd = \"" <> T.pack (root </> "isaproj") <> "\""]
         table `shouldContain` ["tool_timeout_sec = 300"]
+
+  describe "the lessons block" $ do
+    let heading = "Lessons from earlier runs on this project" :: Text
+        withLessons fx = fx {fxProjectDir = Just $ \root -> do
+          p <- makeProject root (fxKind fx)
+          TIO.writeFile (p </> ".fisher" </> "lessons.md") "Project note.\n"
+          createDirectoryIfMissing True (root </> "fisher-home" </> "fisher")
+          TIO.writeFile (root </> "fisher-home" </> "fisher" </> "lessons.md") "Global note.\n"
+          pure p}
+        files p = do
+          let c = wpContext p
+              readOr = maybe (pure "") TIO.readFile
+          (,) <$> readOr (mcStartupContext c) <*> readOr (mcInstructions c)
+        lastBlock body = do
+          T.count heading body `shouldBe` 1
+          let rest = snd (T.breakOn heading body)
+          T.isInfixOf "Your notes:\nProject note.\nGlobal note.\n" rest `shouldBe` True
+          T.isInfixOf "\n#" rest `shouldBe` False
+        cases =
+          [ ("claude-code", fixture "claude-code" Rocq, True)
+          , ("codex", fixture "codex" Rocq, False)
+          , ("fisher", native Rocq, False) ]
+    forM_ cases $ \(b, fx, inStartup) -> do
+      it ("is last, once, in the " <> (if inStartup then "startup context" else "instructions file") <> " on " <> T.unpack b) $
+        plan (withLessons fx) "/prove" $ \_ _ r -> do
+          (ctx, instr) <- files =<< ok r
+          let (with, without) = if inStartup then (ctx, instr) else (instr, ctx)
+          lastBlock with
+          T.count heading without `shouldBe` 0
+      it ("is not there with FISHER_LESSONS=0 on " <> T.unpack b) $
+        plan (withLessons fx) {fxEnv = ("FISHER_LESSONS", "0") : fxEnv fx} "/prove" $ \_ _ r -> do
+          (ctx, instr) <- files =<< ok r
+          T.count heading (ctx <> instr) `shouldBe` 0

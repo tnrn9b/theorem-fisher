@@ -1,0 +1,7 @@
+{"seq":1,"t":1.0,"kind":"tool_start","data":{"name":"mcp_lean_lsp_lean_diagnostic_messages","args":{"file_path":"Foo.lean"},"call_id":"c1"}}
+{"seq":2,"t":2.0,"kind":"tool_end","data":{"name":"mcp_lean_lsp_lean_diagnostic_messages","call_id":"c1","ok":true,"ms":500,"result":"{\"success\":true,\"timed_out\":false,\"items\":[]}","preview":"{\"success\":true"}}
+{"seq":3,"t":3.0,"kind":"tool_start","data":{"name":"write_file","args":{"path":"Foo.lean","content":"theorem foo : 1 + 1 = 2 := by\n  norm_num\n"},"call_id":"c2"}}
+{"seq":4,"t":3.5,"kind":"tool_end","data":{"name":"write_file","call_id":"c2","ok":true,"ms":10,"result":"wrote Foo.lean","preview":"wrote Foo.lean"}}
+{"seq":5,"t":4.0,"kind":"tool_start","data":{"name":"mcp_lean_lsp_lean_run_code","args":{"code":"example : 1 + 1 = 2 := by norm_num"},"call_id":"c3"}}
+{"seq":6,"t":5.0,"kind":"tool_end","data":{"name":"mcp_lean_lsp_lean_run_code","call_id":"c3","ok":true,"ms":900,"result":"{\"success\":true,\"timed_out\":false,\"diagnostics\":[]}","preview":"{\"success\":true"}}
+{"seq":7,"t":6.0,"kind":"message","data":{"role":"assistant","text":"Done."}}

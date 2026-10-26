@@ -423,6 +423,160 @@ const rid = (id: string) => `/api/search/${encodeURIComponent(id)}`;
 const cid = (id: string) => `/api/create/${encodeURIComponent(id)}`;
 const lid = (tag: string) => `/api/claude-auth/login/${encodeURIComponent(tag)}`;
 
+/** A run of the run log (Fisher.Runlog's runs table, by column name). */
+export interface RunlogRow {
+  id: string;
+  kind: string;
+  parent: string | null;
+  project: string | null;
+  project_key: string | null;
+  prover: string | null;
+  backend: string | null;
+  model: string | null;
+  tier: string | null;
+  workflow: string | null;
+  argv: string[];
+  started_at: number;
+  ended_at: number | null;
+  exit: number | null;
+  outcome: string | null;
+  cost_usd: number | null;
+  input_tokens: number | null;
+  output_tokens: number | null;
+  turns: number | null;
+  raw_dir: string | null;
+  capture: string;
+}
+
+export interface RunlogGoal {
+  name: string;
+  statement: string;
+  shape: string;
+  status: string;
+  closed_by: string | null;
+  seconds_to_close: number | null;
+  dollars_to_close: number | null;
+}
+
+export interface RunlogEvent {
+  seq: number;
+  /** seconds since the run started */
+  t: number;
+  kind: string;
+  data: unknown;
+}
+
+export interface RunlogDetail {
+  run: RunlogRow;
+  goals: RunlogGoal[];
+  /** the first 500 events */
+  events: RunlogEvent[];
+  truncated: boolean;
+}
+
+/** The run kinds Fisher.Runlog records. */
+export const runKinds = ["search", "search-attempt", "launch", "chat", "ui-run", "cron", "bench-import", "import"];
+
+export interface RunlogFilters {
+  kind?: string;
+  project?: string;
+  since?: number;
+  limit?: number;
+}
+
+/** One arm of a knob's table (Fisher.Learn.Stats.statsTable). */
+export interface ArmStats {
+  arm: string;
+  attempts: number;
+  closes: number;
+  rate: number;
+  /** null when the arm has no recorded dollars */
+  cost_per_close: number | null;
+  closes_per_hour: number;
+}
+
+export type KnobName = "backends" | "tiers" | "tactics";
+
+export interface ShapePolicy {
+  backends: string[];
+  tiers: string[];
+  tactics: string[];
+  attempt_secs: number | null;
+  evidence: Record<string, Record<string, { attempts?: number; closes?: number; rate?: number; cost_per_close?: number }>>;
+}
+
+export interface PolicyFile {
+  version: number;
+  computed_at: number;
+  project_key: string;
+  shapes: Record<string, ShapePolicy>;
+}
+
+export interface PolicyChange {
+  at: number;
+  shape: string;
+  knob: string;
+  old: unknown;
+  new: unknown;
+  evidence: unknown;
+}
+
+export interface LearnView {
+  project: string | null;
+  project_key: string | null;
+  projects: string[];
+  /** by shape ("*": the project as a whole), by knob */
+  stats: Record<string, Partial<Record<KnobName, ArmStats[]>>>;
+  policy: PolicyFile | null;
+  policy_error: string | null;
+  changes: PolicyChange[];
+}
+
+export type LessonStatus = "candidate" | "active" | "pinned" | "retired" | "dropped";
+export type LessonAction = "pin" | "unpin" | "drop";
+
+/** One lesson as runs.db stores it (Fisher.Runlog.lessonRowJson). */
+export interface Lesson {
+  id: number;
+  /** "*" for a global lesson */
+  project_key: string;
+  kind: string;
+  key: string;
+  text: string;
+  status: LessonStatus;
+  evidence_runs: string[];
+  agreements: number;
+  first_seen: number;
+  activated_at: number | null;
+  retired_at: number | null;
+  runs_active: string[];
+  hits_while_active: number;
+  attempts_while_active: number;
+  hits_before: number;
+  attempts_before: number;
+  /** set when a lessons file could not be written after an action */
+  regenerate_error?: string;
+  /** in a listing: a judged or self candidate with the counts that would promote a rule, which waits for a Pin */
+  proposed?: boolean;
+}
+
+export interface LessonsView {
+  project: string | null;
+  project_key: string | null;
+  lessons: Lesson[];
+  global: Lesson[];
+}
+
+function runlogQuery(f: RunlogFilters): string {
+  const q = new URLSearchParams();
+  if (f.kind) q.set("kind", f.kind);
+  if (f.project) q.set("project", f.project);
+  if (f.since !== undefined) q.set("since", String(f.since));
+  if (f.limit !== undefined) q.set("limit", String(f.limit));
+  const s = q.toString();
+  return s ? `?${s}` : "";
+}
+
 export const api = {
   sessions: (f: SessionFilters = {}) => getJson<SessionSummary[]>(`/api/sessions${filterQuery(f)}`),
   session: (id: string) => getJson<SessionDetail>(`/api/sessions/${encodeURIComponent(id)}`),
@@ -464,6 +618,14 @@ export const api = {
   claudeLoginInput: (tag: string, text: string) => postJson<{ sent: boolean }>(`${lid(tag)}/input`, { text }),
   claudeLoginStop: (tag: string) => postJson<{ status: string }>(`${lid(tag)}/stop`, {}),
   claudeLogout: () => postJson<ClaudeAuth>("/api/claude-auth/logout", {}),
+  runlog: (f: RunlogFilters = {}) => getJson<RunlogRow[]>(`/api/runs-log${runlogQuery(f)}`),
+  runlogRun: (id: string) => getJson<RunlogDetail>(`/api/runs-log/${encodeURIComponent(id)}`),
+  learn: (project?: string) =>
+    getJson<LearnView>(`/api/learn${project ? `?project=${encodeURIComponent(project)}` : ""}`),
+  lessons: (project?: string) =>
+    getJson<LessonsView>(`/api/lessons${project ? `?project=${encodeURIComponent(project)}` : ""}`),
+  lessonAction: (id: number, action: LessonAction, project?: string) =>
+    postJson<Lesson>("/api/lessons", project ? { id, action, project } : { id, action }),
 };
 
 /** The statuses of a run that has ended. */

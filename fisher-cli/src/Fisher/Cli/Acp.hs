@@ -394,7 +394,7 @@ makeAgent sv ss sid model provider = do
           , nsCallbacks =
               Callbacks
                 (Just (\t -> hooks (\h -> hkThinking h t)))
-                (Just (\name _ args -> hooks (\h -> hkProgress h name args)))
+                (Just (\_ name _ args -> hooks (\h -> hkProgress h name args)))
                 (Just (\_ names -> hooks (\h -> hkStep h names)))
                 Nothing }
   sh <- sharedFor sv

@@ -87,8 +87,8 @@ expectRight = either (\m -> expectationFailure (T.unpack m) >> fail "Left") pure
 builtin :: Text -> IO Template
 builtin n = withHomes (\_ -> findTemplate (object []) n) >>= expectRight
 
-noResolver :: Text -> IO (Either Text Text)
-noResolver w = fail ("the resolver was called for " <> T.unpack w)
+noResolver :: Text -> [(Text, Text)] -> IO (Either Text Text)
+noResolver w _ = fail ("the resolver was called for " <> T.unpack w)
 
 git :: FilePath -> [String] -> IO ()
 git dir args = runProcess_ (setWorkingDir dir (proc "git" (identity <> args)))
@@ -136,8 +136,8 @@ spec = do
       tplName t `shouldBe` "lean-mathlib"
       tplProver t `shouldBe` Lean4
       tplDescription t `shouldBe` "A Lean 4 package with Mathlib, its cache fetched"
-      map varName (tplVariables t) `shouldBe` ["project", "mathlib"]
-      map varDefault (tplVariables t) `shouldBe` ["", "latest"]
+      map varName (tplVariables t) `shouldBe` ["project", "mathlib", "smt"]
+      map varDefault (tplVariables t) `shouldBe` ["", "latest", "latest"]
       tplFiles t `shouldBe` ["lakefile.toml", "lean-toolchain", "{{project}}.lean", "{{project}}/Sample.lean"]
       tplSteps t `shouldBe` [Step "cache" ["lake", "exe", "cache", "get"] 30, Step "build" ["lake", "build"] 30]
       tplSample t `shouldBe` "{{project}}/Sample.lean"
@@ -174,7 +174,7 @@ spec = do
     forM_ ["lean", "lean-mathlib"] $ \n ->
       it ("renders " <> T.unpack n <> " as its golden") $ do
         Right golden <- eitherDecodeFileStrict ("test/golden/templates/" <> T.unpack n <> ".json") :: IO (Either String Value)
-        let vars = [("project", "Demo"), ("lean", "v4.24.0"), ("mathlib", "v4.24.0")]
+        let vars = [("project", "Demo"), ("lean", "v4.24.0"), ("mathlib", "v4.24.0"), ("smt", "main")]
         files <- withHomes (\_ -> findTemplate (object []) n >>= expectRight >>= \t -> renderFiles t vars) >>= expectRight
         let want = case golden of
               Object o | Just (Array fs) <- KM.lookup "files" o ->
@@ -183,6 +183,38 @@ spec = do
               _ -> []
         want `shouldNotBe` []
         files `shouldBe` want
+    it "templates: lean-mathlib lakefile has the smt block" $ do
+      let vars = [("project", "Demo"), ("mathlib", "v4.24.0"), ("smt", "abc1234")]
+      files <- withHomes (\_ -> findTemplate (object []) "lean-mathlib" >>= expectRight >>= \t -> renderFiles t vars) >>= expectRight
+      let text p = maybe "" (T.unpack . TE.decodeUtf8) (lookup p files)
+          mathlibBlock = "[[require]]\nname = \"mathlib\"\nscope = \"leanprover-community\"\nrev = \"v4.24.0\"\n"
+          smtBlock = "[[require]]\nname = \"smt\"\nscope = \"ufmg-smite\"\nrev = \"abc1234\"\n"
+      text "lakefile.toml" `shouldContain` (smtBlock <> "\n[[require]]\nname = \"mathlib\"")
+      text "lakefile.toml" `shouldContain` (mathlibBlock <> "\n[[lean_lib]]")
+      text "lakefile.toml" `shouldNotContain` "{{"
+      let sample = lines (text "Demo/Sample.lean")
+      take 2 sample `shouldBe` ["import Mathlib", "import Smt"]
+      sample `shouldContain` ["theorem fisher_sample (a b : ℕ) : a + b = b + a := by ring"]
+      reverse (dropWhile null (reverse sample)) `shouldEndWith` ["", "example : ∀ x : Int, x + 0 = x := by smt"]
+    it "templates: lean-mathlib with smt none has no lean-smt at all" $ do
+      let vars = [("project", "Demo"), ("mathlib", "v4.24.0"), ("smt", "none")]
+      files <- withHomes (\_ -> findTemplate (object []) "lean-mathlib" >>= expectRight >>= \t -> renderFiles t vars) >>= expectRight
+      let text p = maybe "" (T.unpack . TE.decodeUtf8) (lookup p files)
+      text "lakefile.toml" `shouldNotContain` "smt"
+      text "lakefile.toml" `shouldContain` "defaultTargets = [\"Demo\"]\n\n[leanOptions]"
+      text "lakefile.toml" `shouldContain` "relaxedAutoImplicit = false\n\n[[require]]\nname = \"mathlib\""
+      text "Demo/Sample.lean"
+        `shouldBe` "import Mathlib\n\n-- A sample theorem: the project is ready when this builds without `sorry`.\ntheorem fisher_sample (a b : ℕ) : a + b = b + a := by ring\n"
+    it "renderGuards keeps or drops a block, and refuses a bad one" $ do
+      let src = "a\n{{#if smt}}\nb {{smt}}\n{{/if}}\nc\n"
+      renderGuards [("smt", "x")] src `shouldBe` Right "a\nb {{smt}}\nc\n"
+      renderGuards [("smt", "none")] src `shouldBe` Right "a\nc\n"
+      renderGuards [("smt", "")] src `shouldBe` Right "a\nc\n"
+      renderGuards [] "no guards {{x}}" `shouldBe` Right "no guards {{x}}"
+      renderGuards [] src `shouldSatisfy` either (const True) (const False)
+      renderGuards [("smt", "x")] "{{#if smt}}\na\n" `shouldSatisfy` either (const True) (const False)
+      renderGuards [("smt", "x")] "a\n{{/if}}\n" `shouldSatisfy` either (const True) (const False)
+      renderGuards [("smt", "x")] "{{#if smt}}\n{{#if smt}}\n{{/if}}\n{{/if}}\n" `shouldSatisfy` either (const True) (const False)
     it "gives a 64-digit revision that does not change between calls" $ do
       t <- builtin "lean"
       r1 <- templateRevision t
@@ -284,16 +316,31 @@ spec = do
     it "calls the resolver only for latest, with the variable's name" $ do
       t <- builtin "lean-mathlib"
       calls <- newIORef []
-      let resolver w = modifyIORef' calls (w :) >> pure (Right "v4.24.0")
-      r1 <- resolveVariables t "/w/Demo" [("mathlib", "v4.20.0")] resolver >>= expectRight
+      let resolver w _ = modifyIORef' calls (w :) >> pure (Right "v4.24.0")
+      r1 <- resolveVariables t "/w/Demo" [("mathlib", "v4.20.0"), ("smt", "main")] resolver >>= expectRight
       lookup "mathlib" r1 `shouldBe` Just "v4.20.0"
+      lookup "smt" r1 `shouldBe` Just "main"
       readIORef calls `shouldReturn` []
-      r2 <- resolveVariables t "/w/Demo" [] resolver >>= expectRight
+      r2 <- resolveVariables t "/w/Demo" [("smt", "main")] resolver >>= expectRight
       lookup "mathlib" r2 `shouldBe` Just "v4.24.0"
       readIORef calls `shouldReturn` ["mathlib"]
+    it "resolves in the template's order: the resolver sees mathlib resolved when asked for smt" $ do
+      t <- builtin "lean-mathlib"
+      calls <- newIORef []
+      let resolver w done = do
+            modifyIORef' calls (<> [(w, done)])
+            pure (Right (if w == "smt" then "abc1234" else "v4.34.0"))
+      r <- resolveVariables t "/w/Demo" [] resolver >>= expectRight
+      r `shouldBe` [("project", "Demo"), ("mathlib", "v4.34.0"), ("smt", "abc1234")]
+      readIORef calls `shouldReturn`
+        [("mathlib", [("project", "Demo")]), ("smt", [("project", "Demo"), ("mathlib", "v4.34.0")])]
+      bad <- resolveVariables t "/w/Demo" [("mathlib", "v4.34.0")] (\_ _ -> pure (Right "not-a-rev"))
+      expectLeft bad ["smt", "not-a-rev"]
+      none <- resolveVariables t "/w/Demo" [("mathlib", "v4.34.0")] (\_ _ -> pure (Left "offline"))
+      none `shouldBe` Left "could not resolve the latest smt revision; pass --var smt=main"
     it "names the --var to pass when the latest release cannot be resolved" $ do
       t <- builtin "lean-mathlib"
-      r <- resolveVariables t "/w/Demo" [] (\_ -> pure (Left "no network"))
+      r <- resolveVariables t "/w/Demo" [] (\_ _ -> pure (Left "no network"))
       r `shouldBe` Left "could not resolve the latest release; pass --var mathlib=v4.x"
     it "refuses a value that does not match before resolving anything" $ do
       t <- builtin "lean"

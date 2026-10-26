@@ -17,6 +17,8 @@ module Fisher.Workflow.Plan
   , claudeModel
   , nativeProvider
   , nativeOpenRouterModel
+  , lessonsBlockFor
+  , promptLessonsFor
   ) where
 
 import Control.Exception (SomeException, try)
@@ -33,6 +35,8 @@ import qualified Data.Text.IO as TIO
 import System.Environment (getExecutablePath)
 import System.FilePath (searchPathSeparator, (</>))
 
+import Fisher.Config (getPath, lessonsAutoJudged)
+import Fisher.Lessons.Prompt (PromptLessons (..), promptLessonsAt)
 import Fisher.Paths (expandUser)
 import Fisher.Project
 import Fisher.Prover (Prover (..), ProverKind (..), ServerSpec (..), findProverRoot, prover, proverTitle, pvToolsFor)
@@ -82,7 +86,38 @@ data LaunchInputs = LaunchInputs
   -- base environment was passed in).
   , liGetPersisted :: Text -> IO (Maybe Text)
   , liActiveCwd :: Maybe FilePath
+  , liLessons :: Maybe PromptLessons
+  -- ^ The lessons block computed once for this launch (a search computes
+  -- it at its start, logs its ids and hash, and hands it to every
+  -- attempt), so the prompt carries exactly what the run's @lessons@
+  -- event records; Nothing: computed when the plan is made.
   }
+
+-- | The lessons block for a launch in the project at @root@
+-- ('promptLessonsFor'), or "" when lessons are off.
+lessonsBlockFor :: LaunchInputs -> FilePath -> IO Text
+lessonsBlockFor li root = maybe "" plBlock <$> promptLessonsFor li root
+
+-- | The lessons of a launch in the project at @root@: 'liLessons' when it
+-- was computed already, else 'promptLessonsAt' (the numbered lines from
+-- the shown rows of the Fisher home's @runs.db@, opened read-only, and
+-- the Yours lines of the project's @.fisher/lessons.md@ and the home's
+-- @fisher/lessons.md@, with @fisher.lessons.auto_judged@ from the
+-- config); Nothing when lessons are off (@FISHER_LESSONS=0@ in the base
+-- environment, which the search parent sets, or
+-- @fisher.lessons.enabled: false@). When runs.db is there but cannot be
+-- read, one note says so ('mNote'). A project without @.fisher@ stays
+-- without one, and no run log is made or changed.
+promptLessonsFor :: LaunchInputs -> FilePath -> IO (Maybe PromptLessons)
+promptLessonsFor li root
+  | Map.lookup "FISHER_LESSONS" (liBaseEnv li) == Just "0" = pure Nothing
+  | getPath ["fisher", "lessons", "enabled"] (liConfig li) == Just (Bool False) = pure Nothing
+  | Just pl <- liLessons li = pure (Just pl)
+  | otherwise = do
+      let m = liMachine li
+      pl <- promptLessonsAt (lessonsAutoJudged (liConfig li)) (mFisherHome m) root
+      forM_ (plWarning pl) $ \why -> mNote m ("lessons not read from the run log: " <> why <> "; only your notes are shown")
+      pure (Just pl)
 
 data ManagedContext = ManagedContext
   { mcBackend :: Text
@@ -334,8 +369,9 @@ claudeRuntime li mode instruction ws b = do
   let skills = pluginRoot </> "skills" </> "lean4"
   stageClaudeCredentials m (bRealHome b) backendHome (capEnv auth) (capCopyOauth auth) (capCopyKey auth)
     (Just (KM.fromList [("lean-lsp", server)]))
+  lessons <- lessonsBlockFor li (projectRoot project)
   ctx <- writeStartupContext m (bStartup b) "claude-code" (projectRoot project) leanRoot (bActive b) instruction ws
-           pluginRoot mcpPath (Just backendConfig) (Just skills)
+           pluginRoot mcpPath (Just backendConfig) (Just skills) lessons
   let c = ManagedContext "claude-code" (bManaged b) (projectRoot project) leanRoot backendHome pluginRoot mcpPath
             (Just ctx) (bAssets b) (Just (projectManifestPath project)) (Just backendConfig) (Just skills) Nothing
       child =
@@ -347,7 +383,7 @@ claudeRuntime li mode instruction ws b = do
           . setAll [(T.unpack k, T.unpack v) | Just (k, v) <- [capEnv auth]]
           . (if capStrip auth then stripKeys claudeAuthEnvKeys else id)
           $ env
-  ensureProjectToolPermissions (projectRoot project)
+  ensureProjectToolPermissions (bRealHome b) (mFisherHome m) (projectRoot project)
   prompt <- startupPrompt c ws
   pure ([T.pack exe, "--model", fromMaybe claudeModel (bModel b)] <> permissionArgs m <> maybe [] pure prompt, child, c)
 
@@ -368,10 +404,12 @@ codexRuntime li mode instruction ws b = do
   mapM_ (createDirectoryIfMissing True) [backendHome, codexHome, backendHome </> ".agents" </> "skills"]
   stageTree (lpSkill lp) skills (bRevision b)
   stageCodexAuth codexHome (xapSource auth) (xapKey auth)
+  -- the block goes in the instructions file only, once
+  lessons <- lessonsBlockFor li (projectRoot project)
   ctx <- writeStartupContext m (bStartup b) "codex" (projectRoot project) leanRoot (bActive b) instruction ws
-           (lpPlugin lp) cfgPath (Just cfgPath) (Just skills)
+           (lpPlugin lp) cfgPath (Just cfgPath) (Just skills) ""
   writeCodexInstructions instructions (Just ctx) (projectRoot project) leanRoot (bActive b) skills (lpPlugin lp)
-    (lpScripts lp) (skills </> "references") (Just ws)
+    (lpScripts lp) (skills </> "references") (Just ws) lessons
   writeCodexConfig cfgPath instructions (bRunner b) leanRoot
   let c = ManagedContext "codex" (bManaged b) (projectRoot project) leanRoot backendHome (lpPlugin lp) cfgPath
             (Just ctx) (bAssets b) (Just (projectManifestPath project)) (Just cfgPath) (Just skills) (Just instructions)
@@ -407,9 +445,11 @@ fisherRuntime li mode instruction ws b = do
       mcpPath = bMcp b </> "lean-lsp.mcp.json"
   writeMcpConfig mcpPath (bRunner b) leanRoot
   authEnv <- nativeAuthEnv li mode provider (bManaged b) (bRealHome b) True
+  -- the block goes in the system prompt only, once
+  lessons <- lessonsBlockFor li (projectRoot project)
   ctx <- writeStartupContext m (bStartup b) "fisher" (projectRoot project) leanRoot (bActive b) instruction ws
-           (lpPlugin lp) mcpPath Nothing (Just (lpSkill lp))
-  systemPrompt <- fisherSystemPrompt lp ws
+           (lpPlugin lp) mcpPath Nothing (Just (lpSkill lp)) ""
+  systemPrompt <- appendLessons lessons <$> fisherSystemPrompt lp ws
   let promptPath = ctx <> ".system.md"
   TIO.writeFile promptPath systemPrompt
   let home = if provider == "anthropic" then bManaged b </> "fisher-home" else bRealHome b
@@ -658,8 +698,9 @@ proverClaudeRuntime li mode ws pb = do
       guide = pluginRoot </> "commands" </> (T.unpack (wsKind ws) <> ".md")
   stageClaudeCredentials m (pbRealHome pb) backendHome (capEnv auth) (capCopyOauth auth) (capCopyKey auth)
     (Just (KM.fromList [(K.fromText server, entry)]))
+  lessons <- lessonsBlockFor li (projectRoot project)
   ctx <- writeProverStartupContext m (pbStartup pb) kind "claude-code" (projectRoot project) root (pbActive pb) (wsArgs ws) ws
-           (skills </> "SKILL.md") guide mcpPath (pbFisher pb)
+           (skills </> "SKILL.md") guide mcpPath (pbFisher pb) lessons
   let c = ManagedContext "claude-code" (pbManaged pb) (projectRoot project) root backendHome pluginRoot mcpPath
             (Just ctx) (pbAssets pb) (Just (projectManifestPath project)) (Just backendConfig) (Just skills) Nothing
       child =
@@ -671,7 +712,7 @@ proverClaudeRuntime li mode ws pb = do
           . setAll [(T.unpack k, T.unpack v) | Just (k, v) <- [capEnv auth]]
           . (if capStrip auth then stripKeys claudeAuthEnvKeys else id)
           $ env
-  ensureProjectToolPermissions (projectRoot project)
+  ensureProjectToolPermissions (pbRealHome pb) (mFisherHome m) (projectRoot project)
   let prompt = proverStartupPrompt kind "claude-code" ctx ws (Just skills)
   pure ([T.pack exe, "--model", fromMaybe claudeModel (pbModel pb)] <> permissionArgs m <> [prompt], child, c)
 
@@ -694,9 +735,11 @@ proverCodexRuntime li mode ws pb = do
   mapM_ (createDirectoryIfMissing True) [backendHome, codexHome, backendHome </> ".agents" </> "skills"]
   stageCodexProverSkill kind skills
   stageCodexAuth codexHome (xapSource auth) (xapKey auth)
+  -- the block goes in the instructions file only, once
+  lessons <- lessonsBlockFor li (projectRoot project)
   ctx <- writeProverStartupContext m (pbStartup pb) kind "codex" (projectRoot project) root (pbActive pb) (wsArgs ws) ws
-           (skills </> "SKILL.md") guide cfgPath (pbFisher pb)
-  writeProverCodexInstructions instructions kind ctx (projectRoot project) root (pbActive pb) skills ws
+           (skills </> "SKILL.md") guide cfgPath (pbFisher pb) ""
+  writeProverCodexInstructions instructions kind ctx (projectRoot project) root (pbActive pb) skills ws lessons
   writeCodexConfigFor kind cfgPath instructions (pbCommand pb) root (pbCoqc pb)
   let c = ManagedContext "codex" (pbManaged pb) (projectRoot project) root backendHome skills cfgPath
             (Just ctx) (pbAssets pb) (Just (projectManifestPath project)) (Just cfgPath) (Just skills) (Just instructions)
@@ -736,10 +779,12 @@ proverFisherRuntime li mode ws pb = do
   let pluginRoot = market </> T.unpack name
       skills = pluginRoot </> "skills" </> T.unpack name
       guide = pluginRoot </> "commands" </> (T.unpack (wsKind ws) <> ".md")
+  -- the block goes in the system prompt only, once
+  lessons <- lessonsBlockFor li (projectRoot project)
   ctx <- writeProverStartupContext m (pbStartup pb) kind "fisher" (projectRoot project) root (pbActive pb) (wsArgs ws) ws
-           (skills </> "SKILL.md") guide mcpPath (pbFisher pb)
+           (skills </> "SKILL.md") guide mcpPath (pbFisher pb) ""
   let promptPath = ctx <> ".system.md"
-  TIO.writeFile promptPath (proverSystemPrompt kind ws pluginRoot pet)
+  TIO.writeFile promptPath (appendLessons lessons (proverSystemPrompt kind ws pluginRoot pet))
   let home = if provider == "anthropic" then pbManaged pb </> "fisher-home" else pbRealHome pb
       c = ManagedContext "fisher" (pbManaged pb) (projectRoot project) root home pluginRoot mcpPath
             (Just ctx) (pbAssets pb) (Just (projectManifestPath project)) Nothing (Just skills) (Just promptPath)

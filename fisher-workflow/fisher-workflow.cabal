@@ -78,6 +78,7 @@ test-suite fisher-workflow-test
       Fisher.LeanMcpRunnerSpec
       Fisher.PlanGoldenSpec
       Fisher.ProversSpec
+      Fisher.Workflow.LessonsPromptSpec
       Paths_fisher_workflow
   autogen-modules:
       Paths_fisher_workflow

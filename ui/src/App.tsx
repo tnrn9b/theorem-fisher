@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { Link, NavLink, Navigate, Route, Routes } from "react-router-dom";
 import Context from "./views/Context";
 import GoalBoard from "./views/GoalBoard";
+import Learn from "./views/Learn";
 import LiveSession from "./views/LiveSession";
 import NewProject from "./views/NewProject";
+import Runlog from "./views/Runlog";
 import Runs from "./views/Runs";
 import Session from "./views/Session";
 import Sessions from "./views/Sessions";
@@ -32,6 +34,8 @@ function Bar() {
         <NavLink to="/sessions">Sessions</NavLink>
         <NavLink to="/search">Search</NavLink>
         <NavLink to="/runs">Runs</NavLink>
+        <NavLink to="/runlog">Run log</NavLink>
+        <NavLink to="/learn">Learn</NavLink>
         <NavLink to="/settings">Settings</NavLink>
       </nav>
       <span className="conn" data-testid="link" data-state={link}>
@@ -69,6 +73,9 @@ export default function App() {
         <Route path="/search/:run" element={<GoalBoard />} />
         <Route path="/runs" element={<Runs />} />
         <Route path="/runs/:bench" element={<Runs />} />
+        <Route path="/runlog" element={<Runlog />} />
+        <Route path="/runlog/:id" element={<Runlog />} />
+        <Route path="/learn" element={<Learn />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

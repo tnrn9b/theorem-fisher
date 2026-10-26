@@ -28,7 +28,7 @@ auto = defaultAutoConfig {acTactics = ["rfl", "simp_all"]}
 
 -- | A run with the automation on, the fake server behaving as given.
 runA :: LeanRun -> Fake -> GraphConfig -> Text -> [(Text, [Run])] -> [Reply] -> IO Out
-runA lean f = runGAuto lean (Just (\tr -> AutoEnv auto (fakeLsp tr f)))
+runA lean f = runGAuto lean (Just (\tr -> AutoEnv auto (fakeLsp tr f) Nothing))
 
 closes :: [Text] -> Fake
 closes gs = fake0 {fClose = \g _ -> if g `elem` gs then Just Nothing else Nothing}
@@ -116,7 +116,7 @@ spec = describe "the automation in graph mode" $ do
       [("r1", [bad]), ("l", [ok])]
       [say Planner (plan [("l", "P")] "theorem r1 : A" "exact use l"), say Verifier accept]
     let l = nodeId o "l"
-    [(i, k, x) | NodeDisproved _ i k x <- oEvents o] `shouldBe` [(l, "false", "decide")]
+    [(i, k, x) | NodeDisproved _ i k x _ _ <- oEvents o] `shouldBe` [(l, "false", "decide")]
     ["added l", "disproved l false", "failed l", "split failed r1"] `shouldSatisfy` (`infixOf` tags o)
     statusOf o "l" `shouldBe` NFailed "false: the negation is proved by decide"
     sStatus (splitOf o "r1" 0) `shouldBe` SFailed "lemma l failed"
@@ -129,7 +129,7 @@ spec = describe "the automation in graph mode" $ do
       [("r1", [bad]), ("l", [bad, bad])]
       [say Planner (plan [("l", "P")] "theorem r1 : A" "exact use l"), say Verifier accept]
     let l = nodeId o "l"
-    [(i, k, x) | NodeDisproved _ i k x <- oEvents o] `shouldBe` [(l, "suspect", "x := 0")]
+    [(i, k, x) | NodeDisproved _ i k x _ _ <- oEvents o] `shouldBe` [(l, "suspect", "x := 0")]
     board o 1 `shouldSatisfy` T.isInfixOf "l: SUSPECT: plausible found a counterexample: x := 0"
     -- the lemma goes on: its workers read the counterexample on the whiteboard
     length (briefsOf o "l") `shouldBe` 2
@@ -171,7 +171,7 @@ spec = describe "the automation in graph mode" $ do
   it "disproves a node once after its second failed attempt" $ do
     o <- runA keyLean fake0 {fSuspects = ["r1"]} cfg {gcMaxDepth = 0} oneRoot
       [("r1", [bad, bad])] []
-    [(k, x) | NodeDisproved _ _ k x <- oEvents o] `shouldBe` [("false", "decide")]
+    [(k, x) | NodeDisproved _ _ k x _ _ <- oEvents o] `shouldBe` [("false", "decide")]
     count "plausible r1" (oTrace o) `shouldBe` 1
     -- after the second attempt, not at the pre-pass or after the first
     (>) <$> firstAt o "plausible r1" <*> lastAt o "worker r1" `shouldBe` Just True
@@ -202,7 +202,7 @@ spec = describe "the automation in graph mode" $ do
     (grAutoRan (oRep o), grAutoOff (oRep o)) `shouldBe` (False, Just "server died")
 
   it "logs a root's Auto call cut off at its cap as an auto timeout; the automation ran" $ do
-    let slowAuto tr = AutoEnv auto {acSeconds = 0.3} (fakeLsp tr fake0 {fDelay = \m -> if m == "attempts" then 2000 else 0})
+    let slowAuto tr = AutoEnv auto {acSeconds = 0.3} (fakeLsp tr fake0 {fDelay = \m -> if m == "attempts" then 2000 else 0}) Nothing
     o <- runGAuto keyLean (Just slowAuto) cfg {gcMaxDepth = 0} oneRoot [("r1", [ok])] []
     [(i, step) | NodeAutoTimeout _ i step <- oEvents o] `shouldBe` [(1, "auto")]
     statusOf o "r1" `shouldBe` NProved
@@ -210,7 +210,7 @@ spec = describe "the automation in graph mode" $ do
 
   it "renders the new events" $ do
     let evs = [ NodeAutoClosed 1 3 "rfl; omega", NodeRepaired 2 4 3 2 1
-              , NodeDisproved 3 3 "false" "decide", NodeDisproved 4 5 "suspect" "x := 0\ny := 1", GraphAutoOff 5 "server died"
+              , NodeDisproved 3 3 "false" "decide" "plausible" Nothing, NodeDisproved 4 5 "suspect" "x := 0\ny := 1" "plausible" Nothing, GraphAutoOff 5 "server died"
               , NodeAutoTimeout 6 3 "disprove" ]
     map (field "event" . graphEventJson) evs
       `shouldBe` map (toJSON :: Text -> Value) ["auto closed", "repaired", "disproved", "disproved", "auto off", "auto timeout"]

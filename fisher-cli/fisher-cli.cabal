@@ -18,6 +18,7 @@ extra-source-files:
 library
   exposed-modules:
       Fisher.Cli.Acp
+      Fisher.Cli.AddSmt
       Fisher.Cli.AgentChat
       Fisher.Cli.AuthArgs
       Fisher.Cli.Check
@@ -27,16 +28,22 @@ library
       Fisher.Cli.ConfigShow
       Fisher.Cli.Create
       Fisher.Cli.Cron
+      Fisher.Cli.LakeRun
       Fisher.Cli.Launch
+      Fisher.Cli.Learn
+      Fisher.Cli.Lessons
       Fisher.Cli.LlmCheck
       Fisher.Cli.Login
       Fisher.Cli.Logout
+      Fisher.Cli.Mine
       Fisher.Cli.Model
       Fisher.Cli.Native
       Fisher.Cli.NetTools
       Fisher.Cli.Prompt
       Fisher.Cli.ProverChat
       Fisher.Cli.Rlm
+      Fisher.Cli.Runs
+      Fisher.Cli.RunsImport
       Fisher.Cli.Scratch
       Fisher.Cli.Search
       Fisher.Cli.SearchLsp
@@ -160,11 +167,15 @@ test-suite fisher-cli-test
       Fisher.AutoTimingSpec
       Fisher.BannerSpec
       Fisher.ChatStreamSpec
+      Fisher.Cli.AddSmtSpec
       Fisher.Cli.CheckLiveSpec
       Fisher.Cli.ClaudeLoginSpec
       Fisher.Cli.CreateSpec
       Fisher.Cli.LaunchSpec
+      Fisher.Cli.LearnSpec
+      Fisher.Cli.LessonsSpec
       Fisher.Cli.ProverChatSpec
+      Fisher.Cli.RunsSpec
       Fisher.Cli.ScratchSpec
       Fisher.Cli.SearchSpec
       Fisher.Cli.WatchSpec

@@ -35,10 +35,11 @@ import Numeric (showFFloat)
 import Fisher.Search.Headless (nativeBackend)
 import Fisher.Search.Child
 import Fisher.Search.Controller (Stop (..), stopReasonText)
-import Fisher.Search.Disprove (Disproof (..))
+import Fisher.Search.Disprove (Disproof (..), sourceName)
 import Fisher.Search.Graph
 import Fisher.Search.GraphRun (GraphEvent (..), GraphReport (..), Role (..))
 import Fisher.Search.Lean (Decl (..), declarations, proofCode)
+import Fisher.Search.Outcome (outcomeClass)
 import Fisher.Search.Retrieval (GoalRetrieval (..), RetrievalReport (..))
 import Fisher.Search.Scheduler
 
@@ -76,9 +77,11 @@ eventJson = \case
   Repaired t i g before after closed ->
     object [ "event" .= ("repaired" :: Text), "t" .= round1 t, "attempt" .= i, "goal" .= g
            , "holes_before" .= before, "holes_after" .= after, "auto_closed" .= closed ]
-  GoalDisproved t g kind detail ->
-    object [ "event" .= ("disproved" :: Text), "t" .= round1 t, "goal" .= g, "result" .= kind
-           , (if kind == "false" then "tactic" else "counterexample") .= detail ]
+  GoalDisproved t g kind detail src wit ->
+    object $ [ "event" .= ("disproved" :: Text), "t" .= round1 t, "goal" .= g, "result" .= kind
+             , (if kind == "false" then "tactic" else "counterexample") .= detail, "source" .= src ]
+      <> ["witness" .= w | Just w <- [wit]]
+  DisproveRan t g src res -> object ["event" .= ("disprove" :: Text), "t" .= round1 t, "goal" .= g, "source" .= src, "result" .= res]
   AutoOff t why -> object ["event" .= ("auto off" :: Text), "t" .= round1 t, "reason" .= why]
   AutoTimeout t g step -> object ["event" .= ("auto timeout" :: Text), "t" .= round1 t, "goal" .= g, "step" .= step]
   IndexBuilt t files decls secs ->
@@ -94,6 +97,9 @@ eventJson = \case
   Escalated t g a b -> object ["event" .= ("escalated" :: Text), "t" .= round1 t, "goal" .= g, "from" .= a, "to" .= b]
   TierSkipped t m why -> object ["event" .= ("tier skipped" :: Text), "t" .= round1 t, "model" .= m, "reason" .= why]
   LedgerUnread t i why -> object ["event" .= ("ledger unread" :: Text), "t" .= round1 t, "attempt" .= i, "reason" .= why]
+  PolicyApplied t g knob dflt applied ev explore ->
+    object [ "event" .= ("policy" :: Text), "t" .= round1 t, "goal" .= g, "knob" .= knob, "default" .= dflt
+           , "applied" .= applied, "evidence" .= ev, "exploration" .= explore ]
 
 clock :: Double -> Text
 clock t =
@@ -118,9 +124,10 @@ eventLine = \case
   AutoMissed t g secs -> clock t <> "  auto missed " <> g <> " (" <> secs0 secs <> " s)"
   Repaired t i g before after closed -> clock t <> "  #" <> tshow i <> " " <> g <> ": repaired, holes " <> tshow before <> " -> " <> tshow after
     <> " (auto closed " <> tshow closed <> ")"
-  GoalDisproved t g kind detail
+  GoalDisproved t g kind detail _ _
     | kind == "false" -> clock t <> "  DISPROVED " <> g <> " (negation by " <> detail <> ")"
     | otherwise -> clock t <> "  suspect " <> g <> ": counterexample " <> T.intercalate "; " (T.lines detail)
+  DisproveRan t g src res -> clock t <> "  disprove " <> g <> ": " <> src <> " " <> res
   AutoOff t why -> clock t <> "  auto off: " <> why
   AutoTimeout t g step -> clock t <> "  auto timeout " <> g <> " (" <> step <> ")"
   IndexBuilt t files decls secs -> clock t <> "  index: " <> tshow decls <> " declarations in " <> tshow files <> " files (" <> secs0 secs <> " s)"
@@ -134,6 +141,7 @@ eventLine = \case
   Escalated t g a b -> clock t <> "  escalated " <> g <> ": tier " <> tshow a <> " -> " <> tshow b
   TierSkipped t m why -> clock t <> "  tier skipped " <> m <> ": " <> why
   LedgerUnread t i why -> clock t <> "  #" <> tshow i <> ": ledger unread: " <> why
+  PolicyApplied t g knob _ applied _ _ -> clock t <> "  policy: " <> g <> " " <> knob <> " " <> applied
   where tshow :: Show a => a -> Text
         tshow = T.pack . show
         secs0 x = T.pack (showFFloat (Just 0) x "")
@@ -172,9 +180,11 @@ reportJson extra r =
       | not (srAuto r) = []
       | otherwise =
           ("closedBy" .= closedBy s) : case gsDisproof s of
-            Just (DFalse tac) -> ["disproof" .= object ["verdict" .= ("false" :: Text), "tactic" .= tac]]
-            Just (DSuspect c) -> ["disproof" .= object ["verdict" .= ("suspect" :: Text), "counterexample" .= c]]
+            Just (DFalse tac) -> ["disproof" .= object (["verdict" .= ("false" :: Text), "tactic" .= tac] <> origin s)]
+            Just (DSuspect c) -> ["disproof" .= object (["verdict" .= ("suspect" :: Text), "counterexample" .= c] <> origin s)]
             _ -> []
+    -- the disproof's source and, when a solver's model certified it, the model
+    origin s = ["source" .= sourceName src | Just src <- [gsDisproofSource s]] <> ["witness" .= w | Just w <- [gsDisproofWitness s]]
     count p = length [() | (_, s) <- srGoals r, p s]
     -- with retrieval and the library off, nothing
     retrievalFields g = case srRetrieval r of
@@ -220,7 +230,7 @@ retrievalTotals = \case
 attemptPairs :: AttemptRecord -> [Pair]
 attemptPairs a =
   [ "attempt" .= arId a, "goal" .= arGoal a, "backend" .= arBackend a, "outcome" .= arOutcome a
-  , "started_s" .= round1 (arStarted a), "ended_s" .= round1 (arEnded a), "stats" .= fmap statsJson (arChild a) ]
+  , "outcome_class" .= outcomeClass a, "started_s" .= round1 (arStarted a), "ended_s" .= round1 (arEnded a), "stats" .= fmap statsJson (arChild a) ]
 
 -- | An attempt's controller fields; with the controller off, nothing.
 controlAttempt :: Bool -> AttemptRecord -> [Pair]
@@ -253,6 +263,7 @@ roleName = \case
   Worker -> "worker"
   Planner -> "planner"
   Verifier -> "verifier"
+  Judge -> "judge"
 
 nodeStatusName :: NodeStatus -> Text
 nodeStatusName = \case
@@ -403,8 +414,10 @@ graphEventJson = \case
   GraphStopped t why -> ev "stopped" t ["reason" .= why]
   NodeAutoClosed t i snips -> ev "auto closed" t ["node" .= i, "snippets" .= snips]
   NodeRepaired t a i before after -> ev "repaired" t ["attempt" .= a, "node" .= i, "holes_before" .= before, "holes_after" .= after]
-  NodeDisproved t i kind detail ->
-    ev "disproved" t ["node" .= i, "result" .= kind, (if kind == "false" then "tactic" else "counterexample") .= detail]
+  NodeDisproved t i kind detail src wit ->
+    ev "disproved" t (["node" .= i, "result" .= kind, (if kind == "false" then "tactic" else "counterexample") .= detail, "source" .= src]
+                      <> ["witness" .= w | Just w <- [wit]])
+  NodeDisproveRan t i src res -> ev "disprove" t ["node" .= i, "source" .= src, "result" .= res]
   GraphAutoOff t why -> ev "auto off" t ["reason" .= why]
   NodeAutoTimeout t i step -> ev "auto timeout" t ["node" .= i, "step" .= step]
   NodeFacts t i n chars cut -> ev "facts" t ["node" .= i, "entries" .= n, "chars" .= chars, "cut" .= cut]
@@ -437,9 +450,10 @@ graphEventLine e = clock (at e) <> "  " <> case e of
   GraphStopped _ why -> "stopped: " <> why
   NodeAutoClosed _ i snips -> "AUTO closed node " <> tshow i <> ": " <> snips
   NodeRepaired _ a i before after -> "#" <> tshow a <> " node " <> tshow i <> ": repaired, holes " <> tshow before <> " -> " <> tshow after
-  NodeDisproved _ i kind detail
+  NodeDisproved _ i kind detail _ _
     | kind == "false" -> "DISPROVED node " <> tshow i <> " (negation by " <> detail <> ")"
     | otherwise -> "node " <> tshow i <> " suspect: counterexample " <> T.intercalate "; " (T.lines detail)
+  NodeDisproveRan _ i src res -> "disprove node " <> tshow i <> ": " <> src <> " " <> res
   GraphAutoOff _ why -> "auto off: " <> why
   NodeAutoTimeout _ i step -> "auto timeout node " <> tshow i <> " (" <> step <> ")"
   NodeFacts _ i n chars cut -> "facts node " <> tshow i <> ": " <> tshow n <> " (" <> tshow chars <> " chars)" <> cutOff cut
@@ -468,7 +482,8 @@ graphEventLine e = clock (at e) <> "  " <> case e of
       GraphStopped t _ -> t
       NodeAutoClosed t _ _ -> t
       NodeRepaired t _ _ _ _ -> t
-      NodeDisproved t _ _ _ -> t
+      NodeDisproved t _ _ _ _ _ -> t
+      NodeDisproveRan t _ _ _ -> t
       GraphAutoOff t _ -> t
       NodeAutoTimeout t _ _ -> t
       NodeFacts t _ _ _ _ -> t

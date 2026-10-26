@@ -1,11 +1,13 @@
 -- | The parts of the doctor run around the managed section.
 module Fisher.DoctorSpec (spec) where
 
+import Control.Exception (bracket)
 import Data.Aeson (object, (.=))
 import Data.IORef
 import Data.Text (Text)
 import qualified Data.Text as T
 import System.Directory (createDirectoryIfMissing, doesFileExist, doesDirectoryExist, getPermissions, setOwnerExecutable, setPermissions)
+import System.Environment (lookupEnv, setEnv, unsetEnv)
 import System.FilePath ((</>))
 import Test.Hspec
 
@@ -15,7 +17,7 @@ import Fisher.Term (plainStyle)
 import Fisher.TestUtil (withTmp)
 
 envFor :: FilePath -> DoctorEnv
-envFor tmp = DoctorEnv plainStyle (object []) [("PATH", ""), ("HOME", tmp)] (Just tmp) (const (pure Nothing)) (pure Nothing) "fisher" Nothing
+envFor tmp = DoctorEnv plainStyle (object []) [("PATH", ""), ("HOME", tmp)] (Just tmp) (const (pure Nothing)) (pure Nothing) "fisher" Nothing Nothing
 
 spec :: Spec
 spec = do
@@ -61,6 +63,7 @@ spec = do
 
   describe "provers" proverSpec
   describe "Claude auth" claudeSpec
+  describe "SMT" smtSpec
 
 -- | An executable shell script in @dir@.
 stub :: FilePath -> String -> String -> IO ()
@@ -77,7 +80,7 @@ echo t = "echo '" <> t <> "'"
 doctorIn :: Bool -> FilePath -> FilePath -> FilePath -> [(String, String)] -> IO [Text]
 doctorIn allProvers tmp proj bin extra =
   runDoctor False allProvers
-    (DoctorEnv plainStyle (object []) ([("PATH", bin), ("HOME", tmp)] <> extra) (Just proj) (const (pure Nothing)) (pure Nothing) "fisher" Nothing)
+    (DoctorEnv plainStyle (object []) ([("PATH", bin), ("HOME", tmp)] <> extra) (Just proj) (const (pure Nothing)) (pure Nothing) "fisher" Nothing Nothing)
     (tmp </> "gh")
 
 -- | uvx and Python 3.12 stubs.
@@ -303,7 +306,7 @@ loggedInJson = "{\"loggedIn\": true, \"authMethod\": \"claude.ai\", \"email\": \
 claudeDoctor :: Bool -> Maybe (FilePath -> IO Bool) -> FilePath -> FilePath -> IO [Text]
 claudeDoctor fix hook tmp bin =
   runDoctor fix False
-    (DoctorEnv plainStyle (object []) [("PATH", bin), ("HOME", tmp)] (Just tmp) (const (pure Nothing)) (pure Nothing) "fisher" hook)
+    (DoctorEnv plainStyle (object []) [("PATH", bin), ("HOME", tmp)] (Just tmp) (const (pure Nothing)) (pure Nothing) "fisher" hook Nothing)
     (tmp </> "gh")
 
 claudeSpec :: Spec
@@ -361,7 +364,7 @@ claudeSpec = do
     printed <- newIORef []
     let hook _ = readIORef printed >>= writeIORef seen >> pure False
     runDoctorTo (\l -> modifyIORef printed (<> [l])) True False
-      (DoctorEnv plainStyle (object []) [("PATH", bin), ("HOME", tmp)] (Just tmp) (const (pure Nothing)) (pure Nothing) "fisher" (Just hook))
+      (DoctorEnv plainStyle (object []) [("PATH", bin), ("HOME", tmp)] (Just tmp) (const (pure Nothing)) (pure Nothing) "fisher" (Just hook) Nothing)
       (tmp </> "gh")
     printedFirst <- readIORef seen
     take 1 (reverse printedFirst) `shouldBe` ["  ✗ Claude auth (Claude Code is not logged in)"]
@@ -369,7 +372,7 @@ claudeSpec = do
     let bin = tmp </> "bin"
     stub bin "claude" ("if [ -n \"$FISHER_DOCTOR_FAKE\" ]; then echo '" <> loggedInJson <> "'; else echo '{\"loggedIn\": false}'; exit 1; fi")
     out <- runDoctor False False
-      (DoctorEnv plainStyle (object []) [("PATH", bin), ("HOME", tmp), ("FISHER_DOCTOR_FAKE", "1")] (Just tmp) (const (pure Nothing)) (pure Nothing) "fisher" Nothing)
+      (DoctorEnv plainStyle (object []) [("PATH", bin), ("HOME", tmp), ("FISHER_DOCTOR_FAKE", "1")] (Just tmp) (const (pure Nothing)) (pure Nothing) "fisher" Nothing Nothing)
       (tmp </> "gh")
     out `shouldSatisfy` elem "  ✓ Claude auth (Claude Code login: x@y.z)"
   it "does not run claude auth status in api_key mode" $ withTmp $ \tmp -> do
@@ -377,7 +380,7 @@ claudeSpec = do
     stub bin "claude" ("echo \"$*\" >> " <> tmp </> "argv")
     _ <- runDoctor False False
       (DoctorEnv plainStyle (object ["fisher" .= object ["autoformalize" .= object ["auth_mode" .= ("api_key" :: Text)]]])
-         [("PATH", bin), ("HOME", tmp)] (Just tmp) (const (pure Nothing)) (pure Nothing) "fisher" Nothing)
+         [("PATH", bin), ("HOME", tmp)] (Just tmp) (const (pure Nothing)) (pure Nothing) "fisher" Nothing Nothing)
       (tmp </> "gh")
     doesFileExist (tmp </> "argv") `shouldReturn` False
   it "in login mode, warns with the login command" $ withTmp $ \tmp -> do
@@ -385,6 +388,43 @@ claudeSpec = do
     claudeStub tmp bin
     out <- runDoctor False False
       (DoctorEnv plainStyle (object ["fisher" .= object ["autoformalize" .= object ["auth_mode" .= ("login" :: Text)]]])
-         [("PATH", bin), ("HOME", tmp)] (Just tmp) (const (pure Nothing)) (pure Nothing) "fisher" Nothing)
+         [("PATH", bin), ("HOME", tmp)] (Just tmp) (const (pure Nothing)) (pure Nothing) "fisher" Nothing Nothing)
       (tmp </> "gh")
     out `shouldSatisfy` elem "  ⚠ Claude auth (Claude Code is not logged in: run `fisher login --provider claude-code`, or login mode will prompt on first launch)"
+
+-- | Run with the process PATH set to @p@ (the solver lookup reads it).
+withPath :: FilePath -> IO a -> IO a
+withPath p act = bracket (lookupEnv "PATH") restore (\_ -> setEnv "PATH" p >> act)
+  where restore = maybe (unsetEnv "PATH") (setEnv "PATH")
+
+smtSpec :: Spec
+smtSpec = do
+  it "doctor names the solver" $ withTmp $ \tmp -> do
+    let bin = tmp </> "bin"
+    stub bin "z3" (echo "Z3 version 4.13.4 - 64 bit")
+    out <- withPath bin (runDoctor False False (envFor tmp) (tmp </> "gh"))
+    out `shouldSatisfy` elem "  ✓ SMT solver: z3 4.13.4"
+  it "doctor says none without a solver" $ withTmp $ \tmp -> do
+    let bin = tmp </> "bin"
+    createDirectoryIfMissing True bin
+    out <- withPath bin (runDoctor False False (envFor tmp) (tmp </> "gh"))
+    out `shouldSatisfy` elem "  ⚠ SMT solver: none (fisher project add smt still works; the smt tactic needs no solver on PATH)"
+  it "doctor reports lean-smt from the manifest" $ withTmp $ \tmp -> do
+    let bin = tmp </> "bin"
+        manifest names = "{\"version\": \"1.1.0\", \"packages\": [" <> commaSep ["{\"name\": \"" <> n <> "\", \"type\": \"git\"}" | n <- names] <> "], \"name\": \"Foo\"}"
+        commaSep = foldr1' (\a b -> a <> "," <> b)
+        foldr1' _ [] = ""
+        foldr1' f xs = foldr1 f xs
+        project name pkgs = do
+          let d = tmp </> name
+          createDirectoryIfMissing True d
+          writeFile (d </> "lake-manifest.json") (manifest pkgs)
+          writeFile (d </> "lean-toolchain") "leanprover/lean4:v4.24.0\n"
+          pure d
+    createDirectoryIfMissing True bin
+    with <- project "with" ["smt", "mathlib"]
+    without <- project "without" ["mathlib"]
+    a <- withPath bin (runDoctor False False (envFor tmp) { deActiveCwd = Just with } (tmp </> "gh"))
+    a `shouldSatisfy` elem "  ✓ lean-smt: in lake-manifest.json"
+    b <- withPath bin (runDoctor False False (envFor tmp) { deActiveCwd = Just without } (tmp </> "gh"))
+    b `shouldSatisfy` elem "  ✓ lean-smt: not required (fisher project add smt)"

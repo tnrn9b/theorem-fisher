@@ -1,0 +1,38 @@
+# One lesson template per mistake kind (Fisher.Learn.Mistakes). Copy this
+# file to $FISHER_HOME/fisher/lessons-templates.yaml to edit it: that copy
+# wins when present. {name} and {new} are filled from the mistake; a value
+# the mistake does not carry renders as ?. global: true marks the kinds
+# that carry no project name and may become global lessons.
+- kind: unknown_identifier
+  text: "In this project `{name}` does not exist. Search with `lean_loogle` or `exact?` before naming a lemma."
+  global: false
+- kind: deprecated
+  text: "`{name}` is deprecated here; use `{new}`."
+  global: false
+- kind: lean3_syntax
+  text: "Write Lean 4 syntax only: `fun x =>` instead of `λ x,`, `intro` instead of `assume`, and use `by` instead of `begin ... end`."
+  global: false
+- kind: sorry_left
+  text: "Remove every `sorry` and confirm the file has none before you finish."
+  global: true
+- kind: statement_changed
+  text: "Keep the theorem statement exactly as given and change only the proof."
+  global: false
+- kind: axiom_used
+  text: "Prove the goal without `{name}` or any other axiom beyond the allowed ones."
+  global: false
+- kind: timeout_loop
+  text: "When a Lean call times out, simplify the proof or split the goal instead of retrying the same call."
+  global: true
+- kind: repeated_call
+  text: "Never repeat a tool call with the same arguments; change the approach after a call fails."
+  global: true
+- kind: no_check_before_finish
+  text: "After your last edit, run `lean_diagnostic_messages` or `lean_build` and fix every error before you finish."
+  global: true
+- kind: budget_burn
+  text: "Write a first proof attempt to the file early and refine it, rather than spending the budget exploring."
+  global: true
+- kind: smt_unknown_loop
+  text: "The solver cannot decide this shape; cut the query down or prove this part by hand."
+  global: true

@@ -79,6 +79,7 @@ import Fisher.Workflow.Assets (removeExistingPath)
 import Fisher.Workflow.Command (WorkflowSpec (..))
 import Fisher.Workflow.Json (writeJsonObject)
 import Fisher.Workflow.Run (runStaging, shlexQuote, whichPath)
+import Fisher.Workflow.Stage (appendLessons)
 import Fisher.Workflow.Types
 
 proverMarketplaceName :: Text
@@ -637,17 +638,18 @@ proverStartupPrompt k backend ctx ws skills =
         else intro <> " Then run this command inside the active project as your first workflow action: " <> wsBackend ws
 
 -- | The startup context, named and placed as the Lean one is, with the
--- absolute @fisher check@ command of this Fisher. Returns the file written.
+-- absolute @fisher check@ command of this Fisher, the lessons block (if
+-- any) last. Returns the file written.
 writeProverStartupContext
   :: Machine -> FilePath -> ProverKind -> Text -> FilePath -> FilePath -> FilePath -> Text -> WorkflowSpec
-  -> FilePath -> FilePath -> FilePath -> FilePath -> IO FilePath
-writeProverStartupContext m dir k backend projectRoot root cwd instruction ws skillDoc guide mcp fisherExe = do
+  -> FilePath -> FilePath -> FilePath -> FilePath -> Text -> IO FilePath
+writeProverStartupContext m dir k backend projectRoot root cwd instruction ws skillDoc guide mcp fisherExe lessons = do
   stamp <- mStamp m
   let path = dir </> (stamp <> "-" <> T.unpack (wsKind ws) <> ".md")
       t = T.pack
       title = proverTitle k
       codex = backend == "codex"
-  TIO.writeFile path . T.intercalate "\n" $
+  TIO.writeFile path . appendLessons lessons . T.intercalate "\n" $
     [ "# Fisher Managed " <> title <> " Workflow Session"
     , ""
     , "- Managed backend: `" <> backend <> "`"
@@ -684,14 +686,14 @@ writeProverStartupContext m dir k backend projectRoot root cwd instruction ws sk
           , "" ]
   pure path
 
--- | Codex's instructions file for a prover session.
+-- | Codex's instructions file for a prover session, the lessons block last.
 writeProverCodexInstructions
-  :: FilePath -> ProverKind -> FilePath -> FilePath -> FilePath -> FilePath -> FilePath -> WorkflowSpec -> IO ()
-writeProverCodexInstructions path k ctx projectRoot root cwd skills ws = do
+  :: FilePath -> ProverKind -> FilePath -> FilePath -> FilePath -> FilePath -> FilePath -> WorkflowSpec -> Text -> IO ()
+writeProverCodexInstructions path k ctx projectRoot root cwd skills ws lessons = do
   let t = T.pack
       title = proverTitle k
       n = nameOf k
-  TIO.writeFile path . T.intercalate "\n" $
+  TIO.writeFile path . appendLessons lessons . T.intercalate "\n" $
     [ "# Fisher Managed " <> title <> " Workflow Instructions"
     , ""
     , "You are in a Fisher-managed " <> title <> " workflow session."

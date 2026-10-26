@@ -11,14 +11,15 @@ module Fisher.Shell
   , newSessionId
   ) where
 
-import Control.Concurrent (threadDelay)
+import Control.Concurrent (forkIO, threadDelay)
 import Control.Exception (SomeException, try)
-import Control.Monad (forM_, unless, when)
+import Control.Monad (forM_, unless, void, when)
 import Control.Monad.IO.Class (liftIO)
 import Data.Char (intToDigit)
 import Data.IORef
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
+import Data.Aeson (Value)
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
@@ -34,6 +35,7 @@ import System.Process (readCreateProcessWithExitCode, shell)
 import System.Timeout (timeout)
 
 import Fisher.Cli.AgentChat (ChatOptions (..), ChatUi (..), ShellChat (..), defaultChatDeps, defaultChatOptions, shellChat)
+import Fisher.Cli.Mine (mineImported)
 import Fisher.Cli.Session (activeCwd, cliSession, saveOverride)
 import Fisher.LLM.Auth.Env (loadDotenvIntoSys)
 import Fisher.LLM.SysIO (newSysIO)
@@ -44,9 +46,11 @@ import Fisher.Prover (ProverKind (..))
 import Fisher.ProjectCommand (ProjectSession (..), ProjectState (..), handleProjectTokens, projectState)
 import Fisher.Shell.CliConfig
 import Fisher.Shell.Commands
+import Fisher.Runlog (runlogPath)
 import Fisher.Skin (skinBranding, skinColor)
 import Fisher.Swarm
 import Fisher.Swarm.Event (Progress (..))
+import Fisher.Swarm.Import (importFinished, importRunId, sessionHomeOf)
 import Fisher.Swarm.Pty (getWinSize)
 import Fisher.Swarm.Types
 import Fisher.Term (Style (..), detectStyle, renderText)
@@ -147,14 +151,41 @@ runShell opts = do
   sid <- newSessionId
   external <- newIORef (\t -> TIO.putStrLn t >> hFlush stdout)
   chatRef <- newIORef Nothing
+  -- each workflow task's backend, session home (Claude Code's HOME, Codex's
+  -- CODEX_HOME) and cwd, for importing its session file into the run log
+  -- when it ends
+  imports <- newIORef (Map.empty :: Map.Map Text (Text, FilePath, FilePath))
   llmSys <- newSysIO realHome home
   loadDotenvIntoSys llmSys
   let out = Out (\t -> readIORef external >>= \f -> f t)
       inputsFor active = do
         (cfg, _) <- loadConfigAt home
         env <- Map.fromList <$> getEnvironment
-        pure (LaunchInputs machine cfg env True (getEnvValueAt home) (Just (T.unpack active)))
+        pure (LaunchInputs machine cfg env True (getEnvValueAt home) (Just (T.unpack active)) Nothing)
       spawn spec = tiTaskId . taskInfo <$> spawnInteractive sw spec
+      spawnLogged p spec = do
+        tid <- spawn spec
+        let c = wpContext p
+            r = wpRequest p
+        modifyIORef' imports (Map.insert tid (mcBackend c, sessionHomeOf (mcBackend c) (mcBackendHome c) (hrEnv r), hrCwd r))
+        pure tid
+      -- off the swarm's thread: the import never holds up the task's end;
+      -- a task that ends before its spawn returned is looked up again
+      importDone v = void . forkIO $ do
+        let tid = tiTaskId (tvInfo v)
+            target = Map.lookup tid <$> readIORef imports
+        found <- target >>= maybe (threadDelay 500000 >> target) (pure . Just)
+        forM_ found $ \(backend, sessionHome, taskCwd) -> do
+          modifyIORef' imports (Map.delete tid)
+          importFinished (runlogPath home) backend sessionHome taskCwd v
+          -- the lessons' rules over the imported run (the native backend
+          -- logs its own runs, which are not imported)
+          -- (warnings through the shell's output, not over its prompt)
+          let warn t = readIORef external >>= \f -> f ("fisher: lessons: " <> t)
+          when (backend /= "fisher") $
+            (try (loadConfigAt home) :: IO (Either SomeException (Value, [Text]))) >>= \case
+              Left e -> warn (T.pack (show e))
+              Right (cfg, _) -> mineImported warn home cfg (tiProjectRoot (tvInfo v)) (importRunId v)
       deps =
         ShellDeps
           { dOut = out
@@ -182,7 +213,7 @@ runShell opts = do
           , dSaveConfigValue = saveConfigValueAt configPath
           , dResolveWorkflow = \cmd active -> do
               li <- inputsFor active
-              fmap (`resolvedWorkflow` spawn) <$> resolveWorkflowRequest' li cmd
+              fmap (\p -> resolvedWorkflow p (spawnLogged p)) <$> resolveWorkflowRequest' li cmd
           , dResolveChat = \payload active -> do
               li <- inputsFor active
               fmap (`resolvedChat` spawn) <$> resolveChatRequest' li payload
@@ -238,7 +269,7 @@ runShell opts = do
           defaultChatOptions {coContext = soContext opts}
           chatRef
   state <- newShellState deps cliCfg sid
-  setOnComplete sw (Just (onTaskDone deps state . toRow))
+  setOnComplete sw (Just (\v -> importDone v >> onTaskDone deps state (toRow v)))
   writeIORef (ssCompact state) (soCompact opts)
   showBanner deps state
   plainPrint deps ""

@@ -36,5 +36,5 @@ bumpLemma = Lemma "P.bump_eq" "theorem P.bump_eq (n : Nat) : P.bump n = n + 1 :=
 retrievalIn :: Maybe Library -> FilePath -> IO RetrievalEnv
 retrievalIn lib root = do
   (ix, _) <- buildIndex root (root </> "index.json")
-  pure (RetrievalEnv ix (Just defaultFacts) lib True (root </> "lib") root (root </> "run") retrievalCutoff)
+  pure (RetrievalEnv ix (Just defaultFacts) lib True (root </> "lib") root (root </> "run") retrievalCutoff "")
 

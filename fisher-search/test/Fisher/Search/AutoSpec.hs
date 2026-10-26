@@ -46,6 +46,16 @@ fixedClock = pure 0
 
 spec :: Spec
 spec = do
+  describe "the smt arm" $ do
+    it "defaultTactics has smt before exact?" $
+      defaultTactics `shouldBe` ["rfl", "decide", "omega", "simp_all", "aesop", "grind", "smt", "exact?"]
+    it "gateTactics drops smt when unavailable" $ do
+      gateTactics False defaultTactics `shouldBe` ["rfl", "decide", "omega", "simp_all", "aesop", "grind", "exact?"]
+      gateTactics True defaultTactics `shouldBe` defaultTactics
+    it "keeps the rest in order" $ do
+      gateTactics False ["smt", "omega", "simp", "smt", "rfl"] `shouldBe` ["omega", "simp", "rfl"]
+      gateTactics False ["omega", "simp"] `shouldBe` ["omega", "simp"]
+      gateTactics True ["smt", "omega"] `shouldBe` ["smt", "omega"]
   describe "holesIn" $ do
     it "finds a tactic hole" $
       holes "theorem a : P := by\n  intro x\n  sorry" `shouldBe` [Hole 3 2 False]

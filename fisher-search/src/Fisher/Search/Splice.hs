@@ -15,6 +15,8 @@ module Fisher.Search.Splice
   , splice
   , deniedLine
   , usesSorry
+  , smtKept
+  , applySmtImport
   ) where
 
 import Data.List (sortOn)
@@ -23,6 +25,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 
 import Fisher.Search.Lean
+import Fisher.Smt.Lake (stripImportSmt)
 
 data SpliceError
   = TargetMissing Text
@@ -117,8 +120,34 @@ trimRun = reverse . dropWhile blank . reverse . dropWhile blank
   where blank = T.null . T.strip
 
 usesSorry :: Text -> Bool
-usesSorry t = any (`elem` ["sorry", "admit"]) (T.split (\c -> not (isIdent c)) t)
+usesSorry t = any (`elem` ["sorry", "admit"]) (identTokens t)
+
+-- | The text cut at every character that cannot be part of an identifier.
+identTokens :: Text -> [Text]
+identTokens = T.split (not . isIdent)
   where isIdent c = c == '_' || c == '.' || c == '\'' || ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9')
+
+-- | Whether a proof the search kept uses the @smt@ tactic, given the base
+-- at the start and the merged text: a kept proof is a declaration of the
+-- merged text that the start does not have as it is (a goal's new proof,
+-- a helper merged with it), and it uses @smt@ when the token stands in its
+-- code (comments left out; @simp@ or @smt_show@ do not count).
+smtKept :: Text -> Text -> Bool
+smtKept start final = any usesSmt kept
+  where
+    key d = (dName d, dStatement d, dProof d)
+    before = Set.fromList (map key (declarations start))
+    kept = [d | d <- declarations final, not (Set.member (key d) before)]
+    usesSmt d = any (elem "smt" . identTokens) (proofCode d)
+
+-- | The merged text as @--apply@ writes it, given the base at the start
+-- (which carries the @import Smt@ marker line the search put in): the
+-- marker stays only when a kept proof uses @smt@ ('smtKept'), else it is
+-- removed ('stripImportSmt'; a user's own @import Smt@ stays).
+applySmtImport :: Text -> Text -> Text
+applySmtImport start final
+  | smtKept start final = final
+  | otherwise = stripImportSmt final
 
 -- | The rule as other modules apply it to a line.
 deniedLine :: Text -> Bool

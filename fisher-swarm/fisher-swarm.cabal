@@ -16,6 +16,7 @@ library
   exposed-modules:
       Fisher.Swarm
       Fisher.Swarm.Event
+      Fisher.Swarm.Import
       Fisher.Swarm.Launch
       Fisher.Swarm.Pty
       Fisher.Swarm.Render
@@ -56,6 +57,7 @@ test-suite fisher-swarm-test
   main-is: Spec.hs
   other-modules:
       Fisher.Golden
+      Fisher.Swarm.ImportSpec
       Fisher.SwarmGoldenSpec
       Fisher.SwarmSpec
       Paths_fisher_swarm

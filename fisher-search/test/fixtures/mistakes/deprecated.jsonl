@@ -1,0 +1,2 @@
+{"seq":1,"t":1.0,"kind":"tool_start","data":{"name":"mcp__lean-lsp__lean_run_code","args":{"code":"example (h : a ≤ b) (k : b ≤ c) : a ≤ c := Array.le_trans' h k"},"call_id":"c1"}}
+{"seq":2,"t":2.0,"kind":"tool_end","data":{"name":"mcp__lean-lsp__lean_run_code","call_id":"c1","ok":true,"ms":1200,"result":"{\"success\":true,\"timed_out\":false,\"diagnostics\":[{\"severity\":\"warning\",\"message\":\"`Array.le_trans'` has been deprecated, use `Array.le_trans` instead.\",\"line\":1,\"column\":4,\"category\":null,\"hint\":null}]}","preview":"{\"success\":true"}}

@@ -28,6 +28,7 @@ extra-source-files:
     data/templates/lean/fisher-template.yaml
     data/templates/lean/lakefile.toml
     data/templates/lean/lean-toolchain
+    data/lessons/templates.yaml
 
 library
   exposed-modules:
@@ -41,9 +42,12 @@ library
       Fisher.Cron.Jobs
       Fisher.Cron.Tool
       Fisher.Cron.Zone
+      Fisher.Db.ReadOnly
       Fisher.Difflib
       Fisher.Env
       Fisher.EnvVars
+      Fisher.Lessons.File
+      Fisher.Lessons.Prompt
       Fisher.Paths
       Fisher.Project
       Fisher.ProjectCommand
@@ -57,12 +61,18 @@ library
       Fisher.Py.JsonError
       Fisher.Py.Re
       Fisher.Py.Value
+      Fisher.Redact
       Fisher.Rich.Cells
       Fisher.Rich.Render
       Fisher.Rich.Style
       Fisher.Rich.Text
+      Fisher.Runlog
+      Fisher.Runlog.Stream
       Fisher.Sha256
       Fisher.Shlex
+      Fisher.Smt
+      Fisher.Smt.Lake
+      Fisher.Smt.Reservoir
       Fisher.Store
       Fisher.Template
       Fisher.Template.Run
@@ -94,6 +104,7 @@ library
     , resourcet
     , scientific
     , sqlite-simple
+    , temporary
     , text
     , time
     , typed-process
@@ -115,6 +126,8 @@ test-suite fisher-core-test
       Fisher.EnvSpec
       Fisher.Golden
       Fisher.GoldenCoreSpec
+      Fisher.Lessons.FileSpec
+      Fisher.Lessons.PromptSpec
       Fisher.MigrateSpec
       Fisher.NamesSpec
       Fisher.ProjectSpec
@@ -124,8 +137,13 @@ test-suite fisher-core-test
       Fisher.PyJsonSpec
       Fisher.PyLibSpec
       Fisher.PyValueSpec
+      Fisher.RedactSpec
       Fisher.RichSpec
+      Fisher.RunlogSpec
       Fisher.ShlexTermSpec
+      Fisher.Smt.LakeSpec
+      Fisher.Smt.ReservoirSpec
+      Fisher.SmtSpec
       Fisher.Template.RunSpec
       Fisher.TemplateSpec
       Fisher.TestUtil
@@ -137,12 +155,13 @@ test-suite fisher-core-test
   default-extensions:
       OverloadedStrings
       LambdaCase
-  ghc-options: -Wall -Wcompat -threaded
+  ghc-options: -Wall -Wcompat -threaded -with-rtsopts=-N2
   build-tool-depends:
       hspec-discover:hspec-discover
   build-depends:
       QuickCheck
     , aeson
+    , async
     , attoparsec
     , base >=4.14 && <5
     , bytestring

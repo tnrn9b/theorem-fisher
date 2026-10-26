@@ -1,0 +1,93 @@
+{
+  "schemaVersion": "1.2.0",
+  "data": [
+    {
+      "built": false,
+      "tested": null,
+      "toolchain": "leanprover/lean4:v4.36.0-rc1",
+      "requiredUpdate": false,
+      "archiveSize": null,
+      "archiveHash": null,
+      "runAt": "2026-10-18T14:07:27Z",
+      "url": "https://github.com/leanprover/reservoir/actions/runs/39134399986/job/117696236189#step:4:1",
+      "revision": "79ef7b3d5e06608d031d75b6d015949b90016875"
+    },
+    {
+      "built": true,
+      "tested": false,
+      "toolchain": "leanprover/lean4:v4.34.0",
+      "requiredUpdate": false,
+      "archiveSize": 20516779,
+      "archiveHash": null,
+      "runAt": "2026-10-12T14:12:49Z",
+      "url": "https://github.com/leanprover/reservoir/actions/runs/38260856871/job/114850872694#step:4:1",
+      "revision": "9abdd01c13dc7ac2bac4d68d17ee661c63ed0894"
+    },
+    {
+      "built": false,
+      "tested": null,
+      "toolchain": "leanprover/lean4:v4.35.0-rc4",
+      "requiredUpdate": false,
+      "archiveSize": null,
+      "archiveHash": null,
+      "runAt": "2026-10-11T14:10:50Z",
+      "url": "https://github.com/leanprover/reservoir/actions/runs/38145842368/job/114489205223#step:4:1",
+      "revision": "9abdd01c13dc7ac2bac4d68d17ee661c63ed0894"
+    },
+    {
+      "built": true,
+      "tested": false,
+      "toolchain": "leanprover/lean4:v4.34.0",
+      "requiredUpdate": false,
+      "archiveSize": 20517491,
+      "archiveHash": null,
+      "runAt": "2026-10-09T14:07:05Z",
+      "url": "https://github.com/leanprover/reservoir/actions/runs/37941378886/job/113856575755#step:4:1",
+      "revision": "2956f2966ff443b27a86fe2a4fb82dc56efafc51"
+    },
+    {
+      "built": false,
+      "tested": null,
+      "toolchain": "leanprover/lean4:v4.35.0-rc3",
+      "requiredUpdate": false,
+      "archiveSize": null,
+      "archiveHash": null,
+      "runAt": "2026-10-04T15:34:16Z",
+      "url": "https://github.com/leanprover/reservoir/actions/runs/37213328737/job/111469048834#step:4:1",
+      "revision": "5bdc51674065a074ece67b04e10024e9f426ec1f"
+    },
+    {
+      "built": false,
+      "tested": null,
+      "toolchain": "leanprover/lean4:v4.34.1",
+      "requiredUpdate": false,
+      "archiveSize": null,
+      "archiveHash": null,
+      "runAt": "2026-10-03T15:00:44Z",
+      "url": "https://github.com/leanprover/reservoir/actions/runs/37131318821/job/111227123624#step:4:1",
+      "revision": "5bdc51674065a074ece67b04e10024e9f426ec1f"
+    },
+    {
+      "built": true,
+      "tested": false,
+      "toolchain": "leanprover/lean4:v4.33.0",
+      "requiredUpdate": false,
+      "archiveSize": 20542008,
+      "archiveHash": null,
+      "runAt": "2026-10-02T14:08:02Z",
+      "url": "https://github.com/leanprover/reservoir/actions/runs/37017181975/job/110871016858#step:4:1",
+      "revision": "5bdc51674065a074ece67b04e10024e9f426ec1f"
+    },
+    {
+      "built": false,
+      "tested": null,
+      "toolchain": "leanprover/lean4:v4.34.0",
+      "requiredUpdate": false,
+      "archiveSize": null,
+      "archiveHash": null,
+      "runAt": "2026-09-19T14:14:03Z",
+      "url": "https://github.com/leanprover/reservoir/actions/runs/35447854665/job/105909989611#step:4:1",
+      "revision": "5bdc51674065a074ece67b04e10024e9f426ec1f"
+    }
+  ]
+}

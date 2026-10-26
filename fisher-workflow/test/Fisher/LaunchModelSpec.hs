@@ -37,7 +37,7 @@ planLean caseName backend auto extraEnv command k = do
     base0 <- setupCase root (field "extras" c)
     let base = foldr (uncurry Map.insert) (Map.delete "OPENROUTER_API_KEY" base0) extraEnv
         cfg = object ["fisher" .= object ["autoformalize" .= object (["backend" .= backend, "auth_mode" .= textField "auth_mode" c] <> auto)]]
-        li = LaunchInputs (machineFor file (root </> "fisher-home")) cfg base False (const (pure Nothing)) (Just (root </> "project"))
+        li = LaunchInputs (machineFor file (root </> "fisher-home")) cfg base False (const (pure Nothing)) (Just (root </> "project")) Nothing
     r <- withProcessEnv base (resolveWorkflowRequest li command)
     k r
 

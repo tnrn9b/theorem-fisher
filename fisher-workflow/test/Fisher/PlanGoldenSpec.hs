@@ -76,7 +76,7 @@ runCase :: Value -> Value -> (LaunchInputs -> IO (Either WorkflowError (FilePath
 runCase file c resolve = withRoot $ \root -> do
   base <- setupCase root (field "extras" c)
   let li = LaunchInputs (machineFor file (root </> "fisher-home")) (configFor c root) base False
-             (const (pure Nothing)) (Just (cwdFor c root))
+             (const (pure Nothing)) (Just (cwdFor c root)) Nothing
   snapBefore <- snapshot root
   result <- withProcessEnv base (resolve li)
   snapAfter <- snapshot root
@@ -141,7 +141,7 @@ spec = do
     (file, cases) <- runIO (loadFile (golden "prewarm.json"))
     forM_ cases $ \c -> it (T.unpack (textField "name" c)) $ withRoot $ \root -> do
       base <- setupCase root (field "extras" c)
-      let li = LaunchInputs (machineFor file (root </> "fisher-home")) (object []) base False (const (pure Nothing)) Nothing
+      let li = LaunchInputs (machineFor file (root </> "fisher-home")) (object []) base False (const (pure Nothing)) Nothing Nothing
       snapBefore <- snapshot root
       result <- withProcessEnv base (prepareManagedRuntimeAssets li)
       snapAfter <- snapshot root

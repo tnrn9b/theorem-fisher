@@ -1,0 +1,4 @@
+{"seq":1,"t":0.5,"kind":"message","data":{"role":"assistant","text":"Let me check the file."}}
+{"seq":2,"t":1.0,"kind":"tool_start","data":{"name":"mcp_lean_lsp_lean_diagnostic_messages","args":{"file_path":"Foo.lean"},"call_id":"c1"}}
+{"seq":3,"t":2.0,"kind":"tool_end","data":{"name":"mcp_lean_lsp_lean_diagnostic_messages","call_id":"c1","ok":true,"ms":900,"result":"{\"success\":false,\"timed_out\":false,\"items\":[{\"severity\":\"error\",\"message\":\"unknown identifier 'Nat.foo_bar'\",\"line\":3,\"column\":2,\"category\":null,\"hint\":null},{\"severity\":\"error\",\"message\":\"unknown identifier 'Nat.foo_bar'\",\"line\":5,\"column\":2,\"category\":null,\"hint\":null}]}","preview":"{\"success\":false"}}
+{"seq":4,"t":3.0,"kind":"outcome","data":{"outcome":"completed"}}

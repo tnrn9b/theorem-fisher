@@ -6,6 +6,8 @@ module Fisher.Search.Review
   , falseMessages
   , parseFalse
   , retryMessages
+  , jsonObject
+  , textOr
   ) where
 
 import Data.Foldable (toList)

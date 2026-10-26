@@ -22,7 +22,7 @@ import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
 
 import Fisher.Agent.Context.Rlm (RlmState (..), StoredTurn (..), stateToPy)
-import Fisher.Agent.Loop (ToolRunner (..), agentRlmState)
+import Fisher.Agent.Loop (ToolRunner (..), agentRlmState, agentTools)
 import Fisher.Cli.AgentChat
 import Fisher.Cli.Native
 import Fisher.LLM.Errors (LLMError (..))
@@ -258,3 +258,21 @@ spec = do
           count ("fisher.context: " <> strategy <> " is not supported here yet; this session uses the compressor.\n") said `shouldBe` 1
           agentRlmState ag >>= (`shouldBe` Nothing) )
       ["clm", "rlm"]
+  describe "smt_check (buildNative)" $ do
+    -- the tool's definitions as the agent got them, with the chat's which
+    -- answering z3 or nothing, and the config given
+    let toolNames which config = withSystemTempDirectory "fisher-smt-native" $ \tmp -> do
+          w <- world tmp []
+          BS.writeFile (wFisher w </> "config.yaml") config
+          let deps = (wDeps w) {cdTools = Nothing, cdWhich = which}
+          sh <- newNativeShared (wSys w) deps (\_ -> pure ())
+          let spec' = (nativeSpec "acp" "s1") {nsApiKey = "sk-or-test-1234567890", nsReplay = False, nsEnabled = Just ["fisher-acp"]}
+          (ag, _) <- buildNative (wSys w) deps sh spec'
+          pure [n | d <- agentTools ag, Just (PStr n) <- [get "function" d >>= get "name"]]
+        z3Only n = pure (if n == "z3" then Just "/opt/fake/z3" else Nothing)
+    it "a solver the lookup finds puts smt_check in a fisher-* toolset's definitions" $
+      toolNames z3Only "fisher:\n  smt:\n    solver: auto\n" >>= (`shouldSatisfy` elem "smt_check")
+    it "no solver found, or fisher.smt.enabled false: no smt_check" $ do
+      toolNames (\_ -> pure Nothing) "fisher:\n  smt:\n    solver: auto\n" >>= (`shouldSatisfy` notElem "smt_check")
+      toolNames z3Only "fisher:\n  smt:\n    enabled: false\n" >>= (`shouldSatisfy` notElem "smt_check")
+      toolNames z3Only "fisher:\n  smt:\n    solver: cvc5\n" >>= (`shouldSatisfy` notElem "smt_check")

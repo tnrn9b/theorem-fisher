@@ -69,7 +69,9 @@ import Fisher.LLM.Types
 import Fisher.Mcp.Client
 import Fisher.Mcp.HttpClient (tlsHttpClient)
 import Fisher.Paths (homeLabel)
+import Fisher.Runlog (Capture (..), NewRun (..), RunKind (..), RunRow (..), Runlog, closeRunlog, event, getRun, openRunlog, runlogPath, startRun)
 import Fisher.Py.Value
+import Fisher.Smt (smtConfig)
 import Fisher.Rich.Render
 import Fisher.Rich.Style (parseStyle)
 import Fisher.Rich.Text (Justify (..), plainText)
@@ -92,6 +94,7 @@ import Fisher.Tools.Registry
 import qualified Fisher.Tools.Sandbox as Sb
 import Fisher.Tools.Sandbox.Config (cleanupAll, cleanupTask)
 import Fisher.Tools.Sandbox.Local (SandboxEnv (..))
+import Fisher.Tools.Smt (registerSmtTool)
 
 -- | How the CLI prints.
 data ChatUi = ChatUi
@@ -536,11 +539,14 @@ buildAgent cs store = do
         hPutStrLn stderr ("fisher: session " <> T.unpack uiKey <> " is running in another process too (" <> runPidPath home uiKey <> ")")
       -- a step's file is the one the tool wrote: its path through the
       -- tool's own FileOps (TERMINAL_CWD, ~)
-      h <- newUiHooks ledger (stepsPath home uiKey) (toolPathResolver (ftOps (atFileTools at)) (cdCwd deps))
+      -- the run log, always on (docs/superpowers/plans/2026-10-24-run-log-and-learned-policy.md
+      -- task 3); a failure there is one line on stderr and the chat goes on
+      runlog <- chatRunlog sys0 sid model (maybe False (not . T.null . T.strip) tag)
+      h <- newUiHooks ledger (stepsPath home uiKey) (toolPathResolver (ftOps (atFileTools at)) (cdCwd deps)) runlog
       writeIORef (csUiHooks cs) (Just h)
       -- how this chat was started (its flags and the workflow's variables,
       -- never a key), so the UI can resume it as it ran
-      when (uiHasLedger h) $ do
+      when (uiHasLedger h || uiHasRunlog h) $ do
         vars <- map (\(k, v) -> (K.fromText k, A.String v)) <$> resumeVarsOf (sysGetEnv sys0)
         let o = csOpts cs
             jtext = maybe A.Null A.String
@@ -570,6 +576,10 @@ buildAgent cs store = do
       pure n
   registerNetTools reg net
   registerChatToolsets reg enabledSets
+  -- Fisher only: smt_check, when fisher.smt is on and a solver is found;
+  -- after the chat's toolsets (it joins every fisher-* one) and before the
+  -- definitions, so this agent has it (unlike todo below)
+  registerSmtTool (fmap (fmap T.unpack) . cdWhich deps) reg (smtConfig (toAeson (csConfig cs)))
   let browserEnv = ntBrowser net
   (defs0, printed) <- getToolDefinitions reg (Just enabledSets) Nothing
   let defs = maybe defs0 fst (cdTools deps)
@@ -582,8 +592,8 @@ buildAgent cs store = do
       , ("tools", PList (map PStr names))
       , ("mcp_servers", PList [PDict [("name", PStr n), ("status", PStr (status n))] | (n, _) <- servers]) ]
   emojis <- forM [tdName' d | d <- defs] $ \n -> (,) n <$> emojiFor reg n
-  -- cost events only when there is a ledger to write them to
-  let tr = (if uiHasLedger hooks then uiTransport hooks else id) (recordTransport lg tr0)
+  -- cost events only when there is a ledger or a run log to write them to
+  let tr = (if uiHasLedger hooks || uiHasRunlog hooks then uiTransport hooks else id) (recordTransport lg tr0)
       runner0 =
         ToolRunner
           { trDefinitions = defs
@@ -656,12 +666,62 @@ buildAgent cs store = do
   where
     tdName' d = maybe "" pyStrOf (get "function" d >>= get "name")
     -- the loop reports each call it runs once, before running it
-    progress name _ args = do
+    progress _ name _ args = do
       modifyIORef' (csToolCalls cs) (+ 1)
       when (coStream (csOpts cs)) $
         streamEvent (csEvents cs) $ PDict
           [ ("type", PStr "assistant")
           , ("message", PDict [("role", PStr "assistant"), ("content", PList [PDict [("type", PStr "tool_use"), ("name", PStr name), ("input", args)]])]) ]
+
+-- | The chat's run in the run log: @FISHER_RUN_ID@'s row when that is set
+-- (a search attempt its parent made, under @FISHER_RUN_PARENT@), else
+-- @chat-<sid>@ (under @FISHER_RUN_ID@ with a @session@ @{sid}@ event).
+-- A run it starts is a @search-attempt@ under @FISHER_RUN_ID@, else a
+-- @ui-run@ when the web app started it (the flag: @FISHER_UI_TAG@ was
+-- set), else a @chat@.
+-- A row already there (the parent's, or a resumed chat's) is
+-- added to, never started afresh, and its start is the run's; a missing
+-- row is started now. Nothing (after one line on stderr) when the log
+-- cannot be opened or the row cannot be read or made.
+chatRunlog :: Sys -> Text -> Text -> Bool -> IO (Maybe (Runlog, Text, Double))
+chatRunlog sys sid model fromUi = do
+  warned <- newIORef False
+  runId <- nonEmpty <$> sysGetEnv sys "FISHER_RUN_ID"
+  parent <- nonEmpty <$> sysGetEnv sys "FISHER_RUN_PARENT"
+  project <- nonEmpty <$> sysGetEnv sys "FISHER_PROJECT_ROOT"
+  -- the ids name this process's run only, as FISHER_UI_TAG does: a chat
+  -- the tools start is not it
+  mapM_ (\k -> () <$ try @SomeException (unsetEnv k)) ["FISHER_RUN_ID", "FISHER_RUN_PARENT"]
+  now <- sysNow sys
+  let rid = fromMaybe ("chat-" <> sid) runId
+  opened <- try @SomeException (openRunlog (runlogPath (sysFisherHome sys)))
+  case either (Left . T.pack . displayException) id opened of
+    Left e -> runlogWarn warned e >> pure Nothing
+    Right rl -> do
+      r <- try @SomeException $ do
+        start <- getRun rl rid >>= \case
+          Just row -> pure (rrStartedAt row)
+          Nothing -> do
+            startRun rl
+              NewRun
+                { nrId = rid, nrKind = maybe (if fromUi then UiRun else ChatRun) (const SearchAttempt) runId, nrParent = parent
+                , nrProject = T.unpack <$> project, nrProver = Nothing, nrBackend = Just "native", nrModel = Just model
+                , nrTier = Nothing, nrWorkflow = Nothing, nrArgv = [], nrStartedAt = now, nrRawDir = Nothing, nrCapture = Full }
+            pure now
+        -- a run under another id names its session, so fisher runs
+        -- import-sessions does not log the session twice
+        when (isJust runId) $ event rl rid (max 0 (now - start)) "session" (A.object ["sid" A..= sid])
+        pure start
+      case r of
+        Left e -> do
+          runlogWarn warned (T.pack (displayException e))
+          () <$ try @SomeException (closeRunlog rl)
+          pure Nothing
+        Right start -> pure (Just (rl, rid, start))
+  where
+    nonEmpty = \case
+      Just t | not (T.null (T.strip t)) -> Just t
+      _ -> Nothing
 
 -- | One line of @--output-format stream-json@ (Claude Code's event shapes:
 -- @system/init@, @assistant@ with @tool_use@ blocks, @result@).
@@ -982,7 +1042,8 @@ chatMain deps sys0 args = do
                       res <- case r of
                         Right res -> forM_ lg (`logOutcome` res) >> pure res
                         Left e -> pure (RunRaised "Exception" (T.pack (displayException e)))
-                      readIORef (csUiHooks cs) >>= mapM_ (\uh -> uiEnd uh (endStatus (Just res)))
+                      -- a headless run ends with its one turn
+                      readIORef (csUiHooks cs) >>= mapM_ (\uh -> uiEnd uh (endStatus (Just res)) >> uiFinish uh)
                       if stream
                         then readIORef (csToolCalls cs) >>= \n -> streamResult events sid (Just ag) n (Just res)
                         else do
@@ -1011,6 +1072,7 @@ chatMain deps sys0 args = do
                   outLn sysH ""
                   uiConsole ui ("[bold blue]Query:[/] " <> q)
                   (_, res) <- chatTurnWith cs q
+                  readIORef (csUiHooks cs) >>= mapM_ uiFinish
                   printExitSummary cs
                   when stream $ do
                     ag <- readIORef (csAgent cs)

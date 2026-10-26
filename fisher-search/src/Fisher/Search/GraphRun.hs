@@ -63,7 +63,7 @@ import Fisher.Search.Check (Verdict (..))
 import Fisher.Search.Child (ChildStats (..))
 import Fisher.Search.Controller (Health, emptyHealth, modelFailureText, noteResult, stopReasonText, tierFor)
 import qualified Fisher.Search.Controller as Ctl
-import Fisher.Search.Disprove (Disproof (..), disprove)
+import Fisher.Search.Disprove (Disproof (..), DisproveInfo (..), DisproveSource (..), disprove, sourceName)
 import Fisher.Search.Graph
 import Fisher.Search.GraphJobs
 import Fisher.Search.Headless (nativeBackend)
@@ -124,8 +124,12 @@ data GraphEvent
   -- ^ time, node, the snippets joined by @; @
   | NodeRepaired Double Int NodeId Int Int
   -- ^ time, attempt, node, holes before Auto, holes after
-  | NodeDisproved Double NodeId Text Text
-  -- ^ time, node, @false@ or @suspect@, the negation's tactic or the counterexample
+  | NodeDisproved Double NodeId Text Text Text (Maybe Text)
+  -- ^ time, node, @false@ or @suspect@, the negation's tactic or the
+  -- counterexample, the source (@plausible@ or @smt@), and for a negation
+  -- proved by a model's witness tactic the model
+  | NodeDisproveRan Double NodeId Text Text
+  -- ^ time, node, the source, its result (as 'DisproveRan')
   | GraphAutoOff Double Text
   -- ^ time, why
   | NodeAutoTimeout Double NodeId Text
@@ -1013,16 +1017,22 @@ disproveNode c n = do
     modify c (\x -> x {stDisproveTried = IS.insert n (stDisproveTried x)})
     let ck = cCk c
         go ae
-          | acDisprove (aeConfig ae) = disprove (aeConfig ae) (aeLsp ae) (ckLean ck) (ckPolicy ck) (ckRoot ck) (ckRel ck) (stBase s) (nameOf s n)
+          | acDisprove (aeConfig ae) =
+              disprove (aeSmt ae) [ViaPlausible, ViaSmt] (aeConfig ae) (aeLsp ae) (ckLean ck) (ckPolicy ck) (ckRoot ck) (ckRel ck) (stBase s) (nameOf s n)
           | otherwise = pure (Left Missed)
     r <- withAuto c "disprove" n go pure
+    forM_ r $ \case
+      Right (_, _, info) -> forM_ (diSteps info) $ \(src, res) -> logG c (\t -> NodeDisproveRan t n (sourceName src) res)
+      Left _ -> pure ()
     case r of
-      Just (Right (DFalse tac)) -> do
-        logG c (\t -> NodeDisproved t n "false" tac)
+      Just (Right (DFalse tac, src, info)) -> do
+        logG c (\t -> NodeDisproved t n "false" tac (maybe "" sourceName src) (diWitness info))
         falseNode c n ("the negation is proved by " <> tac)
-      Just (Right (DSuspect cx)) -> do
-        logG c (\t -> NodeDisproved t n "suspect" cx)
-        failureLine c n ("SUSPECT: plausible found a counterexample: " <> cx)
+      Just (Right (DSuspect cx, src, _)) -> do
+        logG c (\t -> NodeDisproved t n "suspect" cx (maybe "" sourceName src) Nothing)
+        failureLine c n $ case src of
+          Just ViaSmt -> "SUSPECT: an SMT solver found a countermodel: " <> cx
+          _ -> "SUSPECT: plausible found a counterexample: " <> cx
       _ -> pure ()
 
 -- | Repair on a failed attempt's file. A partial proof with holes left

@@ -10,6 +10,9 @@
 -- giving upstream's results; the requests, the output files (a failed
 -- run's up to upstream's Python traceback), jobs.json, the session rows
 -- and the agent's printing.
+--
+-- The run log: a job's run is a @cron@ run in runs.db, with its outcome and
+-- its cost.
 module Fisher.CronCliSpec (spec) where
 
 import Control.Monad (forM_, when)
@@ -40,6 +43,7 @@ import Fisher.LLM.Http
 import Fisher.LLM.Sys
 import Fisher.LLM.Types
 import Fisher.Py.Value
+import Fisher.Runlog
 import Fisher.Store (closeStore, openStore, snapshotRows)
 import Fisher.Tools.Agent (AgentTools (..), newAgentTools)
 import Fisher.Tools.Registry (getToolDefinitions)
@@ -304,7 +308,69 @@ spec = do
               PList [pick ["id", "source", "model", "parent_session_id", "message_count", "tool_call_count", "title"] r | r <- sortOn (\row -> maybe "" pyStrOf (lookup "id" row)) ss]
                 `shouldBe` fld "sessions" db
               PList [pick ["session_id", "role", "content", "tool_name"] m | m <- ms] `shouldBe` fld "messages" db
+  describe "the run log" $ do
+    it "records a job's run as a cron run, completed, with its cost" $ cronRunlog 200 $ \fisher runs -> case runs of
+      [r] -> do
+        rrKind r `shouldBe` CronRun
+        rrId r `shouldBe` "cron_c0ffee000001_20261002_052007"
+        rrModel r `shouldBe` Just "anthropic/claude-opus-4.6"
+        rrOutcome r `shouldBe` Just "completed"
+        rrCostUsd r `shouldBe` Just 0.0123
+        rrTurns r `shouldBe` Just 1
+        rrEndedAt r `shouldSatisfy` (/= Nothing)
+        BS.readFile (runlogPath fisher) >>= (`shouldNotSatisfy` BS.isInfixOf "sk-or-test-1234567890")
+      _ -> expectationFailure ("runs: " <> show (map rrId runs))
+    it "records a job whose model call fails as failed" $ cronRunlog 400 $ \_ runs ->
+      [(rrKind r, rrOutcome r) | r <- runs] `shouldBe` [(CronRun, Just "failed")]
   where
+    -- one job due, the model answering with the given status (200: a
+    -- priced answer), then the runs in the log
+    cronRunlog :: Int -> (FilePath -> [RunRow] -> IO ()) -> IO ()
+    cronRunlog status check = withSystemTempDirectory "fisher-cron-runlog" $ \tmp0 -> do
+      home <- canonicalizePath tmp0
+      let fisher = home </> ".fisher"
+          work = home </> "work"
+      createDirectoryIfMissing True (fisher </> "memories")
+      createDirectoryIfMissing True work
+      env <- newIORef (M.fromList [("HOME", T.pack home), ("NO_COLOR", "1"), ("FISHER_TIMEZONE", "UTC"), ("OPENROUTER_API_KEY", "sk-or-test-1234567890")])
+      BS.writeFile (fisher </> ".env") "OPENROUTER_API_KEY=sk-or-test-1234567890\n"
+      offset <- newIORef 0
+      uuidN <- newIORef 0
+      outBuf <- newIORef []
+      clock <- newIORef (dtInstantMicros clockStart)
+      ids <- newIORef 0
+      let sys = newSys home env offset uuidN outBuf
+          cenv = cronEnvFor fisher clock ids
+          answer =
+            PDict
+              [ ("id", PStr "gen-1"), ("object", PStr "chat.completion"), ("model", PStr "anthropic/claude-opus-4.6")
+              , ("choices", PList [PDict [("index", PInt 0), ("message", PDict [("role", PStr "assistant"), ("content", PStr "Hello from cron.")]), ("finish_reason", PStr "stop")]])
+              , ("usage", PDict [("prompt_tokens", PInt 100), ("completion_tokens", PInt 10), ("total_tokens", PInt 110), ("cost", PFloat 0.0123)]) ]
+          failure = PDict [("error", PDict [("message", PStr "bad request"), ("code", PInt 400)])]
+          respond hr =
+            if hrMethod hr == "GET"
+              then pure (Right (HttpResp 200 [] (TE.encodeUtf8 (dumpsAscii models))))
+              else pure (Right (HttpResp status [] (TE.encodeUtf8 (dumpsAscii (if status == 200 then answer else failure)))))
+      _ <- either (fail . T.unpack) pure =<< createJob cenv (createArgs "Say hello" "every 30m") {caName = Just "greeter"}
+      modifyIORef clock (+ 1800 * 1000000)
+      at <- newAgentTools fisher
+      (defs, _) <- getToolDefinitions (atRegistry at) Nothing (Just ["cronjob"])
+      let chat =
+            ChatDeps
+              { cdTransport = pure (Transport (\hr _ -> respond hr) (\_ _ _ -> pure (Left ConnectionError)))
+              , cdTools = Just (defs, \tr -> tr {trCall = \_ _ _ _ -> pure "{}", trReadFilesSummary = \_ -> pure []})
+              , cdNowLocal = pure (LocalTime (fromGregorian 2026 10 2) (TimeOfDay 5 20 7))
+              , cdRuntime = Runtime ((1790000000 +) <$> readIORef offset) (\d -> modifyIORef offset (+ d)) (pure 0)
+              , cdChoice = \_ -> pure 0
+              , cdAnimate = pure False
+              , cdCwd = pure work
+              , cdWhich = \_ -> pure Nothing
+              , cdBannerInfo = pure ("<WORK>", Nothing, True) }
+          deps = (defaultCronDeps) {crChat = chat, crEnv = \_ -> pure cenv, crTicker = \_ -> pure Nothing, crErr = \_ -> pure (), crReplay = False}
+      n <- tick deps sys
+      n `shouldBe` 1
+      runs <- withRunlog (runlogPath fisher) (\rl -> listRuns rl Nothing Nothing Nothing 0)
+      check fisher runs
     models =
       PDict
         [ ( "data"

@@ -10,8 +10,12 @@
 -- in the steps' argv and in the sample path is replaced by the variable's
 -- value. The variable @project@ is always present. @{{{{@ renders as a
 -- literal @{{@ and @}}}}@ as @}}@, for a file that needs double braces of
--- its own (a Lean set of sets, say). Symbolic links in a template are
--- refused, so nothing outside it is copied.
+-- its own (a Lean set of sets, say). In file contents a line holding only
+-- @{{#if var}}@ starts a guarded block that a line holding only @{{/if}}@
+-- ends: the lines between are kept unless the variable's value is @none@
+-- (or empty), and the two guard lines are always dropped. Guards do not
+-- nest. Symbolic links in a template are refused, so nothing outside it is
+-- copied.
 --
 -- The built-ins live under @data/templates/<name>@ in this package. A
 -- @__var__@ in a path there stands for @{{var}}@ (braces are glob syntax for
@@ -43,6 +47,7 @@ module Fisher.Template
   , resolveVariables
   , reservedProjectNames
   , renderText
+  , renderGuards
   , renderFiles
   , renderSteps
   , renderSample
@@ -192,6 +197,41 @@ renderText vals t = T.concat <$> mapM one (pieces t)
     one (Lit s) = Right s
     one (Ref n) = maybe (Left ("No value for `{{" <> n <> "}}`")) Right (lookup n vals)
 
+-- | The guard a line holds: @Just (Just var)@ for @{{#if var}}@, @Just
+-- Nothing@ for @{{/if}}@, else Nothing.
+guardLine :: Text -> Maybe (Maybe Text)
+guardLine l = case T.stripSuffix "}}" =<< T.stripPrefix "{{" (T.strip l) of
+  Just "/if" -> Just Nothing
+  Just inner
+    | Just n <- T.stripPrefix "#if " inner, isIdent (T.strip n) -> Just (Just (T.strip n))
+  _ -> Nothing
+
+-- | The variables the guards in a text name.
+guardRefs :: Text -> [Text]
+guardRefs t = [n | l <- T.splitOn "\n" t, Just (Just n) <- [guardLine l]]
+
+-- | The guarded blocks resolved (see the module header): a block whose
+-- variable is @none@ or empty is dropped, the guard lines always. An
+-- unclosed block, a stray @{{/if}}@, a nested guard or a variable with no
+-- value is refused.
+renderGuards :: [(Text, Text)] -> Text -> Either Text Text
+renderGuards vals t
+  | not (any (isJust . guardLine) ls) = Right t
+  | otherwise = T.intercalate "\n" <$> go Nothing ls
+  where
+    ls = T.splitOn "\n" t
+    -- the open block: Nothing outside one, Just keep inside
+    go open [] = maybe (Right []) (const (Left "An `{{#if ...}}` block has no `{{/if}}`")) open
+    go open (l : rest) = case (guardLine l, open) of
+      (Just (Just n), Nothing) -> case lookup n vals of
+        Nothing -> Left ("No value for `{{#if " <> n <> "}}`")
+        Just v -> go (Just (v `notElem` ["", "none"])) rest
+      (Just (Just _), Just _) -> Left "`{{#if ...}}` blocks do not nest"
+      (Just Nothing, Nothing) -> Left "`{{/if}}` with no `{{#if ...}}`"
+      (Just Nothing, Just _) -> go Nothing rest
+      (Nothing, Just False) -> go open rest
+      (Nothing, _) -> (l :) <$> go open rest
+
 -- * Parsing
 
 -- | The template at a root, from its manifest's bytes: the fields checked,
@@ -325,7 +365,7 @@ validName n = not (T.null n) && T.all (\c -> isAsciiLower c || isDigit c || c ==
 checkTemplate :: Template -> Text -> IO (Either Text Template)
 checkTemplate t sample = do
   let known = map varName (tplVariables t)
-      bad where_ txt = [(n, where_) | n <- refs txt, n `notElem` known]
+      bad where_ txt = [(n, where_) | n <- refs txt <> guardRefs txt, n `notElem` known]
   fromContents <- forM (tplFiles t) $ \f -> do
     bytes <- BS.readFile (tplRoot t </> f)
     pure $ case TE.decodeUtf8' bytes of
@@ -653,10 +693,11 @@ reservedProjectNames =
 -- | The value of every variable, in the template's order: @--var@ pairs
 -- (the last one of a name wins), else the default; @project@ defaults to the
 -- target's base name. Unknown names and values that do not match are
--- refused before anything is resolved; then a @lean@ or @mathlib@ of
--- @latest@ is resolved by the given function (called with the variable's
--- name).
-resolveVariables :: Template -> FilePath -> [(Text, Text)] -> (Text -> IO (Either Text Text)) -> IO (Either Text [(Text, Text)])
+-- refused before anything is resolved; then a @lean@, @mathlib@ or @smt@
+-- of @latest@ is resolved, in the template's order, by the given function
+-- (called with the variable's name and the values resolved before it, so
+-- @smt@ sees the resolved @mathlib@).
+resolveVariables :: Template -> FilePath -> [(Text, Text)] -> (Text -> [(Text, Text)] -> IO (Either Text Text)) -> IO (Either Text [(Text, Text)])
 resolveVariables t target0 given resolver = do
  target <- normalisePath <$> makeAbsolute target0
  let base = T.pack (lastSegment target)
@@ -680,14 +721,20 @@ resolveVariables t target0 given resolver = do
       pure (Left ("Unknown variable `" <> n <> "` for template `" <> tplName t <> "` (known: " <> T.intercalate ", " names <> ")"))
     [] -> case mapM checked (tplVariables t) of
       Left e -> pure (Left e)
-      Right vals -> fmap sequence . forM vals $ \(v, x) ->
-        if x == "latest" && varName v `elem` ["lean", "mathlib"]
-          then
-            resolver (varName v) >>= \case
-              Left _ -> pure (Left ("could not resolve the latest release; pass --var " <> varName v <> "=v4.x"))
-              Right r -> pure (fmap (\r' -> (varName v, r')) (matching v r))
-          else pure (Right (varName v, x))
+      Right vals -> fmap (fmap reverse) (resolveIn [] vals)
   where
+    -- the values so far, latest first
+    resolveIn done [] = pure (Right done)
+    resolveIn done ((v, x) : rest)
+      | x == "latest" && varName v `elem` ["lean", "mathlib", "smt"] =
+          resolver (varName v) (reverse done) >>= \case
+            Left _
+              | varName v == "smt" -> pure (Left "could not resolve the latest smt revision; pass --var smt=main")
+              | otherwise -> pure (Left ("could not resolve the latest release; pass --var " <> varName v <> "=v4.x"))
+            Right r -> case matching v r of
+              Left e -> pure (Left e)
+              Right r' -> resolveIn ((varName v, r') : done) rest
+      | otherwise = resolveIn ((varName v, x) : done) rest
     names = map varName (tplVariables t)
     -- @.@ dropped and @..@ taken back a level, without touching the disk.
     normalisePath p = joinPath (reverse (foldl step [] (splitDirectories p)))
@@ -718,7 +765,7 @@ renderFiles t vals = do
       bytes <- BS.readFile (tplRoot t </> f)
       pure $ case TE.decodeUtf8' bytes of
         Left _ -> Right (p, bytes)
-        Right txt -> (\c -> (p, TE.encodeUtf8 c)) <$> renderText vals txt
+        Right txt -> (\c -> (p, TE.encodeUtf8 c)) <$> (renderGuards vals txt >>= renderText vals)
   pure $ do
     out <- sequence rendered
     case [p | (p, n) <- counts (map fst out), n > 1] of

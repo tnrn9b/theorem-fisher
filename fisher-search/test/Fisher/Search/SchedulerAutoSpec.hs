@@ -20,12 +20,16 @@ import Test.Hspec
 
 import Fisher.Search.Auto
 import Fisher.Search.Check (AxiomPolicy (..), LeanRun (..), standardAxioms)
-import Fisher.Search.Disprove (Disproof (..))
+import Fisher.Search.Disprove (Disproof (..), DisproveSource (..), SmtEnv (..), certifyTactics)
 import Fisher.Search.FakeLean (fakeLean)
 import Fisher.Search.FakeLsp
 import Fisher.Search.Lean
 import Fisher.Search.Report
 import Fisher.Search.Scheduler
+import Fisher.Search.Splice (applySmtImport, smtKept)
+import Fisher.Smt (Model (..), SmtResult (..), Solver (..), Sort (..))
+import qualified Fisher.Smt as Smt
+import Fisher.Smt.Lake (importSmtLine, insertImportSmt, stripImportSmt)
 
 three :: Text
 three = T.unlines
@@ -49,7 +53,11 @@ data Run = Run
   }
 
 search :: SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> Script -> IO Run
-search cfg ac f lean file script0 = withSystemTempDirectory "search" $ \root -> do
+search = searchSmt Nothing
+
+-- | 'search' with Disprove's SMT source on the given solver stand-in.
+searchSmt :: Maybe SmtEnv -> SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> Script -> IO Run
+searchSmt smt cfg ac f lean file script0 = withSystemTempDirectory "search" $ \root -> do
   BS.writeFile (root </> "F.lean") (TE.encodeUtf8 file)
   events <- newIORef []
   specs <- newIORef []
@@ -69,7 +77,7 @@ search cfg ac f lean file script0 = withSystemTempDirectory "search" $ \root -> 
         pure (plainResult (Just out) Nothing "")
       env = SearchEnv run lean (AxiomPolicy standardAxioms False) root "F.lean"
               (realToFrac <$> getPOSIXTime) (\e -> modifyIORef events (e :)) (\_ -> pure ())
-              (fmap (\c -> AutoEnv c (fakeLsp calls f)) ac) Nothing (\_ -> pure Nothing)
+              (fmap (\c -> AutoEnv c (fakeLsp calls f) smt) ac) Nothing (\_ -> pure Nothing)
   r <- runSearch cfg env file
   es <- reverse <$> readIORef events
   ss <- readIORef specs
@@ -276,7 +284,7 @@ spec = describe "the automation pre-pass in flat search" $ do
     let gs = goalOf "t" (rReport r)
     gsStatus gs `shouldBe` Disproved
     gsDisproof gs `shouldBe` Just (DFalse "decide")
-    [(g, k, x) | GoalDisproved _ g k x <- rEvents r] `shouldBe` [("t", "false", "decide")]
+    [(g, k, x) | GoalDisproved _ g k x _ _ <- rEvents r] `shouldBe` [("t", "false", "decide")]
     [g | AttemptCancelled _ _ g _ <- rEvents r] `shouldBe` ["t"]
     [(arBackend a, arOutcome a) | a <- srAttempts (rReport r), "cancelled" `T.isPrefixOf` arOutcome a]
       `shouldBe` [("z", "cancelled: the goal was disproved")]
@@ -287,13 +295,149 @@ spec = describe "the automation pre-pass in flat search" $ do
   it "passes a counterexample it cannot certify to the next brief and goes on" $ do
     r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 4, scBudget = 30, scParallelPerGoal = False}) (Just auto) fake0 {fSuspects = ["t"]} noCertify one
       (Map.fromList [(("t", "*"), [("BAD", 5), ("BAD", 5), ("ok", 5)])])
-    [(g, k, x) | GoalDisproved _ g k x <- rEvents r] `shouldBe` [("t", "suspect", "x := 0")]
+    [(g, k, x) | GoalDisproved _ g k x _ _ <- rEvents r] `shouldBe` [("t", "suspect", "x := 0")]
     map (T.isInfixOf "x := 0" . asBrief) (specsFor "t" r) `shouldBe` [False, False, True]
     let gs = goalOf "t" (rReport r)
     gsStatus gs `shouldBe` Closed
     gsDisproof gs `shouldBe` Just (DSuspect "x := 0")
     length (filter ("plausible" `T.isPrefixOf`) (rCalls r)) `shouldBe` 1
 
+  it "the early step runs smt before the first attempt and the late step skips it" $ do
+    solved <- newIORef (0 :: Int)
+    let smt = SmtEnv (Z3 "/nonexistent/z3") 5 "smt_show" (\_ _ _ -> modifyIORef solved (+ 1) >> pure Unsat)
+    r <- searchSmt (Just smt) (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = False})
+           (Just auto) fake0 {fQuery = const (Just "(assert false)")} fakeLean one
+           (Map.fromList [(("t", "*"), [("BAD", 5), ("BAD", 5), ("ok", 5)])])
+    let tags = [ x | e <- rEvents r, x <- case e of
+                   Launched {} -> ["launched"]
+                   DisproveRan _ g s res -> [g <> " " <> s <> " " <> res]
+                   _ -> [] ]
+    tags `shouldBe` ["t smt unsat", "launched", "launched", "t plausible none", "launched"]
+    -- the pre-pass's trials, then the query; plausible once, later
+    take 1 (dropWhile (== "attempts t") (rCalls r)) `shouldBe` ["smt_show t"]
+    filter (`elem` ["smt_show t", "plausible t"]) (rCalls r) `shouldBe` ["smt_show t", "plausible t"]
+    length (filter ("smt_show" `T.isPrefixOf`) (rCalls r)) `shouldBe` 1
+    length (filter ("plausible" `T.isPrefixOf`) (rCalls r)) `shouldBe` 1
+    readIORef solved `shouldReturn` 1
+    let gs = goalOf "t" (rReport r)
+    (gsStatus gs, gsSmtTried gs, gsDisproof gs) `shouldBe` (Closed, True, Just DUnknown)
+    -- the disprove event's JSON and line
+    let ev = DisproveRan 1 "t" "smt" "unsat"
+    map (\k -> field k (eventJson ev)) ["event", "goal", "source", "result"] `shouldBe` map (toJSON :: Text -> Value) ["disprove", "t", "smt", "unsat"]
+    eventLine ev `shouldBe` "00:00:01  disprove t: smt unsat"
+
+  it "a model the witness certifies disproves the goal before any attempt" $ do
+    let smt = SmtEnv (Z3 "/nonexistent/z3") 5 "smt_show" (\_ _ _ -> pure (Sat (Model [("x", SInt, Smt.VInt 1)] [])))
+        file = T.unlines ["import Mathlib", "", "theorem t : \8704 x : Int, x = 0 := by", "  sorry"]
+    r <- searchSmt (Just smt) (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = False})
+           (Just auto) fake0 {fQuery = const (Just "(declare-const x Int)\n(assert (not (= x 0)))")} fakeLean file
+           (Map.fromList [(("t", "*"), [("ok", 5)])])
+    [() | Launched {} <- rEvents r] `shouldBe` []
+    let w = "push_neg; refine \10216(1 : Int), ?_\10217; first | decide | norm_num | omega | simp_all"
+    [(g, k, x, s, wt) | GoalDisproved _ g k x s wt <- rEvents r] `shouldBe` [("t", "false", w, "smt", Just "x := 1")]
+    gsStatus (goalOf "t" (rReport r)) `shouldBe` Disproved
+
+  it "a model that does not certify goes into the first brief as the solver's" $ do
+    let smt = SmtEnv (Z3 "/nonexistent/z3") 5 "smt_show" (\_ _ _ -> pure (Sat (Model [("x", SInt, Smt.VInt 1)] [])))
+    r <- searchSmt (Just smt) (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = False})
+           (Just auto) fake0 {fQuery = const (Just "(assert true)")} noCertify one
+           (Map.fromList [(("t", "*"), [("ok", 5)])])
+    [(k, x, s) | GoalDisproved _ _ k x s _ <- rEvents r] `shouldBe` [("suspect", "x := 1", "smt")]
+    map asBrief (specsFor "t" r) `shouldSatisfy` all (T.isInfixOf (suspectBrief ViaSmt "x := 1"))
+
+  it "the early step certifies with the witness tactic only" $ do
+    -- negation probes counted; noCertify makes every one fail
+    let counting ref = LeanRun $ \root rel -> do
+          t <- TE.decodeUtf8 <$> BS.readFile (root </> rel)
+          if "theorem _fisher_neg_" `T.isInfixOf` t then modifyIORef ref (+ 1) else pure ()
+          runLean noCertify root rel
+        file = T.unlines ["import Mathlib", "", "theorem t : \8704 x : Int, x = 0 := by", "  sorry"]
+        probesWith m = do
+          ref <- newIORef (0 :: Int)
+          let smt = SmtEnv (Z3 "/nonexistent/z3") 5 "smt_show" (\_ _ _ -> pure (Sat m))
+          r <- searchSmt (Just smt) (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = False})
+                 (Just auto) fake0 {fQuery = const (Just "(assert true)")} (counting ref) file
+                 (Map.fromList [(("t", "*"), [("ok", 5)])])
+          gsStatus (goalOf "t" (rReport r)) `shouldBe` Closed
+          readIORef ref
+    -- a model with a function has no witness: no probe at all
+    probesWith (Model [("x", SInt, Smt.VInt 1)] ["f"]) `shouldReturn` 0
+    -- a model with a witness: that one probe, no certifyTactics after it
+    probesWith (Model [("x", SInt, Smt.VInt 1)] []) `shouldReturn` 1
+
+  it "the late step probes certifyTactics on the early step's uncertified model" $ do
+    -- negation probes counted; @passing@ says which negation tactics pass
+    let counting ref passing = LeanRun $ \root rel -> do
+          t <- TE.decodeUtf8 <$> BS.readFile (root </> rel)
+          let negLine = [l | l <- T.lines t, "theorem _fisher_neg_" `T.isPrefixOf` l]
+          case negLine of
+            (l : _) -> do
+              modifyIORef ref (\xs -> xs <> [l])
+              if passing l then runLean fakeLean root rel else pure (1, T.pack rel <> ":1:1: error: nope")
+            [] -> runLean fakeLean root rel
+        file = T.unlines ["import Mathlib", "", "theorem t : \8704 x : Int, x = 0 := by", "  sorry"]
+        -- a model with a function: the early step has no witness to probe
+        smt = SmtEnv (Z3 "/nonexistent/z3") 5 "smt_show" (\_ _ _ -> pure (Sat (Model [("x", SInt, Smt.VInt 1)] ["f"])))
+        runWith passing = do
+          ref <- newIORef []
+          r <- searchSmt (Just smt) (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = False})
+                 (Just auto) fake0 {fQuery = const (Just "(assert true)")} (counting ref passing) file
+                 (Map.fromList [(("t", "*"), [("BAD", 5), ("BAD", 5), ("ok", 5)])])
+          (,) r <$> readIORef ref
+        tacticOf l = T.strip (snd (T.breakOnEnd " in " l))
+        mt = "x := 1\nf := (a function)"
+    -- nothing passes: plausible finds nothing, the four tactics are probed
+    -- once, and the goal keeps its suspect
+    (r0, probes0) <- runWith (const False)
+    map tacticOf probes0 `shouldBe` certifyTactics
+    [(s, res) | DisproveRan _ _ s res <- rEvents r0] `shouldBe` [("smt", "sat"), ("plausible", "none")]
+    let g0 = goalOf "t" (rReport r0)
+    (gsStatus g0, gsDisproof g0) `shouldBe` (Closed, Just (DSuspect mt))
+    -- a passing decide: Disproved from the solver's source, no third attempt
+    (r1, probes1) <- runWith (T.isSuffixOf " decide")
+    map tacticOf probes1 `shouldBe` ["decide"]
+    let g1 = goalOf "t" (rReport r1)
+    (gsStatus g1, gsDisproof g1, gsDisproofSource g1) `shouldBe` (Disproved, Just (DFalse "decide"), Just ViaSmt)
+    [(k, x, s, w) | GoalDisproved _ _ k x s w <- rEvents r1] `shouldBe` [("suspect", mt, "smt", Nothing), ("false", "decide", "smt", Nothing)]
+    length [() | Launched {} <- rEvents r1] `shouldBe` 2
+
+  it "no env: unchanged behaviour" $ do
+    r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = False})
+           (Just auto) fake0 {fQuery = const (Just "(assert false)")} fakeLean one
+           (Map.fromList [(("t", "*"), [("BAD", 5), ("BAD", 5), ("ok", 5)])])
+    [(s, res) | DisproveRan _ _ s res <- rEvents r] `shouldBe` [("plausible", "none")]
+    filter ("smt_show" `T.isPrefixOf`) (rCalls r) `shouldBe` []
+    gsSmtTried (goalOf "t" (rReport r)) `shouldBe` False
+
+  it "apply keeps the import only when a kept proof uses smt" $ do
+    let marked = insertImportSmt one
+        closeT = fake0 {fClose = \g _ -> if g == "t" then Just Nothing else Nothing}
+    T.lines marked `shouldBe` ["import Mathlib", importSmtLine, "", "theorem t : T := by", "  sorry"]
+    rS <- search cfg0 (Just auto {acTactics = ["smt"]}) closeT fakeLean marked Map.empty
+    rO <- search cfg0 (Just auto {acTactics = ["omega"]}) closeT fakeLean marked Map.empty
+    let baseS = srBase (rReport rS)
+        baseO = srBase (rReport rO)
+    [s | AutoClosed _ _ s _ <- rEvents rS] `shouldBe` ["set_option maxHeartbeats 200000 in smt"]
+    [s | AutoClosed _ _ s _ <- rEvents rO] `shouldBe` ["set_option maxHeartbeats 200000 in omega"]
+    -- both runs saw the marked base throughout
+    importSmtLine `T.isInfixOf` baseS `shouldBe` True
+    importSmtLine `T.isInfixOf` baseO `shouldBe` True
+    (smtKept marked baseS, smtKept marked baseO) `shouldBe` (True, False)
+    applySmtImport marked baseS `shouldBe` baseS
+    applySmtImport marked baseO `shouldBe` stripImportSmt baseO
+    importSmtLine `T.isInfixOf` applySmtImport marked baseO `shouldBe` False
+  it "a kept proof uses smt only as a token: simp, smt_show and a comment do not count" $ do
+    let marked = insertImportSmt one
+        with p = T.replace "  sorry" p marked
+    smtKept marked (with "  simp") `shouldBe` False
+    smtKept marked (with "  smt_show") `shouldBe` False
+    smtKept marked (with "  omega -- smt failed") `shouldBe` False
+    smtKept marked (with "  smt [h]") `shouldBe` True
+    smtKept marked (with "  first | omega | smt +mono") `shouldBe` True
+    -- a proof that was there at the start is not a kept one
+    smtKept (with "  smt") (with "  smt") `shouldBe` False
+    -- a helper the merge added is
+    smtKept marked (with "  exact h\n\ntheorem h : T := by\n  smt") `shouldBe` True
   it "turns auto off once when the server fails at the pre-pass, and searches as today" $ do
     r <- search cfg0 {scSlots = 1} (Just auto) fake0 {fDown = const True} fakeLean three
       (Map.fromList [((g, "*"), [("BAD", 5), ("BAD", 5), ("ok", 5)]) | g <- ["a", "b", "c"]])
@@ -320,7 +464,7 @@ spec = describe "the automation pre-pass in flat search" $ do
     (srAutoRan (rReport r), srAutoOff (rReport r)) `shouldBe` (True, Just "server died")
 
   describe "the report" $ do
-    let st = GoalState Closed ["x"] [] (Just (1, "x")) (Just 2) Nothing Nothing Nothing False Nothing []
+    let st = GoalState Closed ["x"] [] (Just (1, "x")) (Just 2) Nothing Nothing Nothing False False Nothing Nothing Nothing []
         rep = SearchReport
           { srGoals =
               [ ("a", st {gsBy = Nothing, gsClosedBy = Just "auto"})
@@ -356,7 +500,7 @@ spec = describe "the automation pre-pass in flat search" $ do
       keysOf (reportJson [] rep {srAuto = False}) `shouldBe` sort ["elapsed_s", "goals_total", "goals_closed", "closed_per_hour", "budget_spent", "goals", "backends", "attempts"]
     it "renders the new events" $ do
       let evs = [ AutoClosed 1 "a" "rfl; omega" 2.5, AutoMissed 2 "b" 60, Repaired 3 4 "c" 2 1 1
-                , GoalDisproved 4 "d" "false" "decide", GoalDisproved 5 "e" "suspect" "x := 0\ny := 1", AutoOff 6 "server died"
+                , GoalDisproved 4 "d" "false" "decide" "plausible" Nothing, GoalDisproved 5 "e" "suspect" "x := 0\ny := 1" "plausible" Nothing, AutoOff 6 "server died"
                 , AutoTimeout 7 "f" "repair" ]
       map (field "event" . eventJson) evs
         `shouldBe` map (toJSON :: Text -> Value) ["auto closed", "auto missed", "repaired", "disproved", "disproved", "auto off", "auto timeout"]

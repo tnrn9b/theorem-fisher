@@ -11,7 +11,7 @@ import System.FilePath (takeFileName, (</>))
 import Test.Hspec
 
 import Fisher.Project
-import Fisher.ProjectCommand (CreateRequest (..), ProjectSession (..), TemplateOps (..), handleProjectTokens, handleProjectTokensStatus, interruptedLead, projectUsage)
+import Fisher.ProjectCommand (AddSmtOpts (..), CreateRequest (..), ProjectSession (..), TemplateOps (..), handleProjectTokens, handleProjectTokensStatus, interruptedLead, projectUsage)
 import Fisher.Prover (ProverKind (..))
 import Fisher.Py (lookupKey)
 import Fisher.TestUtil
@@ -64,8 +64,18 @@ fakeSession cwd = do
               | crTarget r == cwd </> "Stopped" -> ["(>_<) " <> interruptedLead <> T.pack (crTarget r)]
               | otherwise -> ["created"]
         , toBuild = \yes p -> modifyIORef' calls (<> [Right (yes, p)]) >> pure (if takeFileName p == "Stopped" then ["(>_<) " <> interruptedLead <> T.pack p] else ["built"])
-        , toList = pure ["listed"] }
+        , toList = pure ["listed"]
+        , toAddSmt = \_ _ -> pure (0, ["added"]) }
   pure (s {sessionTemplates = Just ops}, calls)
+
+-- | A session whose @add smt@ records what it was asked and answers with
+-- the status and lines given.
+addSession :: FilePath -> (Int, [T.Text]) -> IO (ProjectSession, IORef [(AddSmtOpts, FilePath)])
+addSession cwd answer = do
+  (s, _) <- fakeSession cwd
+  calls <- newIORef []
+  let add o p = modifyIORef' calls (<> [(o, p)]) >> pure answer
+  pure (s {sessionTemplates = (\ops -> ops {toAddSmt = add}) <$> sessionTemplates s}, calls)
 
 -- | HOME and FISHER_HOME in a scratch directory, for the built-ins.
 withHomes :: (FilePath -> IO a) -> IO a
@@ -475,6 +485,45 @@ spec = do
       s2 <- (\r -> s {sessionOverride = r}) <$> newIORef Nothing
       _ <- handleProjectTokens s2 ["create", "P"]
       readIORef (sessionOverride s2) `shouldReturn` Nothing
+
+    it "add smt hands its words to the command line" $ withTmp $ \tmp -> do
+      (s, calls) <- addSession tmp (0, ["added"])
+      handleProjectTokensStatus s ["add", "smt"] `shouldReturn` (0, ["added"])
+      _ <- handleProjectTokensStatus s ["add", "smt", "P", "--rev", "abc1234", "--no-build", "--yes"]
+      readIORef calls `shouldReturn`
+        [ (AddSmtOpts {asRev = Nothing, asNoBuild = False, asYes = False}, tmp)
+        , (AddSmtOpts {asRev = Just "abc1234", asNoBuild = True, asYes = True}, tmp </> "P") ]
+      (f, _) <- addSession tmp (1, ["(>_<) lake build failed"])
+      handleProjectTokensStatus f ["add", "smt"] `shouldReturn` (1, ["(>_<) lake build failed"])
+
+    it "add smt refuses a --rev that is not a revision" $ withTmp $ \tmp -> do
+      (s, calls) <- addSession tmp (0, [])
+      (code, out) <- handleProjectTokensStatus s ["add", "smt", "--rev", "main\" @ \"x"]
+      code `shouldBe` 2
+      take 1 out `shouldBe` ["(>_<) `--rev` takes main, no_mathlib or a commit of 7 to 40 hex digits, not main\" @ \"x"]
+      readIORef calls `shouldReturn` []
+
+    it "add smt finds the Lean root above the directory" $ withTmp $ \tmp -> do
+      writeLeanRoot (tmp </> "L")
+      createDirectoryIfMissing True (tmp </> "L" </> "sub")
+      (s, calls) <- addSession tmp (0, [])
+      _ <- handleProjectTokensStatus s ["add", "smt", "L/sub"]
+      map snd <$> readIORef calls `shouldReturn` [tmp </> "L"]
+
+    it "add with anything but smt is a usage error" $ withTmp $ \tmp -> do
+      (s, calls) <- addSession tmp (0, [])
+      (code, out) <- handleProjectTokensStatus s ["add", "foo"]
+      code `shouldBe` 2
+      take 1 out `shouldBe` ["(>_<) `/project add` adds smt only: add smt [PATH] [--rev REV] [--no-build] [--yes]"]
+      (code2, _) <- handleProjectTokensStatus s ["add"]
+      code2 `shouldBe` 2
+      readIORef calls `shouldReturn` []
+
+    it "add smt needs the command line without the template functions" $ withTmp $ \tmp -> do
+      s <- session tmp
+      (code, out) <- handleProjectTokensStatus s ["add", "smt"]
+      code `shouldBe` 1
+      take 1 out `shouldBe` ["(>_<) Adding lean-smt needs the fisher command line."]
 
     it "builds a path, the session directory by default" $ withTmp $ \tmp -> do
       (s, calls) <- fakeSession tmp

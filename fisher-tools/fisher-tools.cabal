@@ -28,6 +28,7 @@ library
       Fisher.Tools.Sandbox.Local
       Fisher.Tools.Sandbox.Process
       Fisher.Tools.Sandbox.Remote
+      Fisher.Tools.Smt
       Fisher.Tools.V4a
   other-modules:
       Paths_fisher_tools
@@ -67,6 +68,7 @@ test-suite fisher-tools-test
       Fisher.Tools.PureSpec
       Fisher.Tools.RegistrySpec
       Fisher.Tools.SandboxSpec
+      Fisher.Tools.SmtSpec
       Fisher.Tools.TestUtil
       Paths_fisher_tools
   autogen-modules:

@@ -1,0 +1,10 @@
+{"version": 6,
+ "packagesDir": "lake-packages",
+ "packages":
+ [{"git":
+   {"url": "https://github.com/ufmg-smite/lean-smt.git",
+    "subDir": null,
+    "rev": "abc123",
+    "name": "smt",
+    "inputRev": "main"}}],
+ "name": "Foo"}

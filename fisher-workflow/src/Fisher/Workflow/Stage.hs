@@ -13,8 +13,10 @@ module Fisher.Workflow.Stage
   , writeCodexConfig
   , writeCodexInstructions
   , writeStartupContext
+  , appendLessons
   , workflowDocPath
   , ensureProjectToolPermissions
+  , fisherDenyRules
   , copyTree
   , copyTreeKeepingLinks
   ) where
@@ -24,6 +26,7 @@ import Data.Aeson (Value (..), encode, object, (.=))
 import qualified Data.Aeson.Key as K
 import qualified Data.Aeson.KeyMap as KM
 import qualified Data.ByteString.Lazy.Char8 as BL8
+import Data.List (nub)
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -92,27 +95,55 @@ stageOptionalTreeCopy src dst = do
     copyTreeKeepingLinks src dst
   pure ok
 
--- | Add tools to a settings file's @permissions.allow@ list, keeping what
--- is there; rewrite only when something was added.
-addAllowed :: FilePath -> [Text] -> Bool -> IO ()
-addAllowed path needed alwaysWrite = do
+-- | Add tools to a settings file's @permissions.allow@ list and rules to
+-- its @permissions.deny@ list, keeping what is there (the other keys of
+-- @permissions@ too); rewrite only when something was added.
+addPermissions :: FilePath -> [Text] -> [Text] -> Bool -> IO ()
+addPermissions path needed denied alwaysWrite = do
   createDirectoryIfMissing True (takeDirectory path)
   d <- loadJsonObject path
   let perms = fromMaybe KM.empty (objectOf (KM.lookup "permissions" d))
-      allow = case KM.lookup "allow" perms of
+      listOf k = case KM.lookup k perms of
         Just (Array xs) -> V.toList xs
         _ -> []
+      allow = listOf "allow"
+      deny = listOf "deny"
       missing = [String n | n <- needed, String n `notElem` allow]
+      missingDeny = [String n | n <- nub denied, String n `notElem` deny]
       perms' = KM.insert "allow" (Array (V.fromList (allow <> missing))) perms
-  when (alwaysWrite || not (null missing)) $
-    writeJsonObject path (KM.insert "permissions" (Object perms') d)
+      perms'' = if null deny && null missingDeny then perms' else KM.insert "deny" (Array (V.fromList (deny <> missingDeny))) perms'
+  when (alwaysWrite || not (null missing) || not (null missingDeny)) $
+    writeJsonObject path (KM.insert "permissions" (Object perms'') d)
+
+-- | The rules that keep Claude Code's own tools off what steers Fisher's
+-- prompts and policy, under the real home's @.fisher@ and under the
+-- Fisher home: @config.yaml@, the global lessons file, the templates and
+-- the run log; and every project's @.fisher/lessons.md@. Edit, Write and
+-- MultiEdit rules on each path (an absolute path is written @//path@),
+-- and Bash rules on commands naming one. Defence in depth: the backend is
+-- started with its permissions skipped, and a deny rule is the one check
+-- that still applies there; it is not a guarantee (a command can name a
+-- file in ways no pattern sees).
+fisherDenyRules :: FilePath -> FilePath -> [Text]
+fisherDenyRules realHome fisherHome =
+  [tool <> "(/" <> T.pack p <> ")" | p <- protected, tool <- fileTools]
+    <> [tool <> "(**/.fisher/lessons.md)" | tool <- fileTools]
+    <> ["Bash(*" <> n <> "*)" | n <- ["fisher/lessons.md", "lessons-templates.yaml", "fisher/runs.db", ".fisher/config.yaml", T.pack (fisherHome </> "config.yaml")]]
+  where
+    fileTools = ["Edit", "Write", "MultiEdit"]
+    homes = nub [realHome </> ".fisher", fisherHome]
+    protected =
+      [ h </> f | h <- homes
+      , f <- ["config.yaml", "fisher" </> "lessons.md", "fisher" </> "lessons-templates.yaml", "fisher" </> "runs.db", "fisher" </> "runs.db-wal", "fisher" </> "runs.db-shm"] ]
 
 -- | @_ensure_project_tool_permissions@: the project's own
--- @.claude/settings.local.json@ allows the tools a managed session uses.
-ensureProjectToolPermissions :: FilePath -> IO ()
-ensureProjectToolPermissions root =
-  addAllowed (root </> ".claude" </> "settings.local.json")
-    ["Read", "Write", "Edit", "Bash(*)", "mcp__*", "WebSearch", "WebFetch"] False
+-- @.claude/settings.local.json@ allows the tools a managed session uses,
+-- and denies them Fisher's own files ('fisherDenyRules', given the real
+-- home and the Fisher home).
+ensureProjectToolPermissions :: FilePath -> FilePath -> FilePath -> IO ()
+ensureProjectToolPermissions realHome fisherHome root =
+  addPermissions (root </> ".claude" </> "settings.local.json")
+    ["Read", "Write", "Edit", "Bash(*)", "mcp__*", "WebSearch", "WebFetch"] (fisherDenyRules realHome fisherHome) False
 
 -- | The MCP servers Fisher stages, one per prover: Lean's, Rocq's and
 -- Isabelle's.
@@ -132,7 +163,8 @@ writeMcpConfig path runner leanRoot = do
 
 -- | @_stage_claude_credentials@: the OAuth file (or the Keychain entry),
 -- the user's @.claude.json@ with or without its API key, staged auth, MCP
--- servers, and an allow-everything @settings.local.json@.
+-- servers, and an allow-everything @settings.local.json@ that denies
+-- Fisher's own files ('fisherDenyRules').
 stageClaudeCredentials
   :: Machine -> FilePath -> FilePath -> Maybe (Text, Text) -> Bool -> Bool -> Maybe (KM.KeyMap Value) -> IO ()
 stageClaudeCredentials m realHome claudeHome authEnv copyOauth copyKey mcpServers = do
@@ -168,8 +200,8 @@ stageClaudeCredentials m realHome claudeHome authEnv copyOauth copyKey mcpServer
       p5 = if KM.member "theme" p4 then p4 else KM.insert "theme" (String "dark") p4
       p6 = KM.insert "hasCompletedOnboarding" (Bool True) p5
   writeJsonObject keyPath p6
-  addAllowed (dir </> "settings.local.json")
-    ["Read", "Write", "Edit", "Bash(*)", "WebSearch", "WebFetch", "mcp__*", "Bash"] True
+  addPermissions (dir </> "settings.local.json")
+    ["Read", "Write", "Edit", "Bash(*)", "WebSearch", "WebFetch", "mcp__*", "Bash"] (fisherDenyRules realHome (mFisherHome m)) True
 
 -- | @_stage_codex_auth@: copy the user's auth.json, or write an API-key one.
 stageCodexAuth :: FilePath -> Maybe FilePath -> Text -> IO ()
@@ -209,12 +241,20 @@ workflowDocPath pluginRoot kind = do
   ok <- doesFileExist p
   pure (if ok then Just p else Nothing)
 
+-- | A prompt with the lessons block as its last section, after a blank
+-- line; the prompt as it is when the block is empty.
+appendLessons :: Text -> Text -> Text
+appendLessons block body
+  | T.null block = body
+  | otherwise = T.dropWhileEnd (== '\n') body <> "\n\n" <> block
+
+-- | Codex's instructions file, the lessons block last.
 writeCodexInstructions
   :: FilePath -> Maybe FilePath -> FilePath -> FilePath -> FilePath -> FilePath -> FilePath -> FilePath -> FilePath
-  -> Maybe WorkflowSpec -> IO ()
-writeCodexInstructions path startup projectRoot leanRoot cwd skills plugin scripts refs workflow = do
+  -> Maybe WorkflowSpec -> Text -> IO ()
+writeCodexInstructions path startup projectRoot leanRoot cwd skills plugin scripts refs workflow lessons = do
   doc <- maybe (pure Nothing) (workflowDocPath plugin . wsKind) workflow
-  TIO.writeFile path . T.intercalate "\n" $
+  TIO.writeFile path . appendLessons lessons . T.intercalate "\n" $
     [ "# Fisher Managed Lean Workflow Instructions"
     , ""
     , "You are in a Fisher-managed Lean workflow session."
@@ -242,11 +282,12 @@ writeCodexInstructions path startup projectRoot leanRoot cwd skills plugin scrip
        , "- Keep changes reproducible and explain blockers clearly if the formalization cannot proceed."
        , "" ]
 
--- | @_write_startup_context@. Returns the file written.
+-- | @_write_startup_context@, the lessons block (if any) last. Returns
+-- the file written.
 writeStartupContext
   :: Machine -> FilePath -> Text -> FilePath -> FilePath -> FilePath -> Text -> WorkflowSpec
-  -> FilePath -> FilePath -> Maybe FilePath -> Maybe FilePath -> IO FilePath
-writeStartupContext m dir backend projectRoot leanRoot cwd instruction ws plugin mcp backendCfg skills = do
+  -> FilePath -> FilePath -> Maybe FilePath -> Maybe FilePath -> Text -> IO FilePath
+writeStartupContext m dir backend projectRoot leanRoot cwd instruction ws plugin mcp backendCfg skills lessons = do
   stamp <- mStamp m
   doc <- workflowDocPath plugin (wsKind ws)
   let path = dir </> (stamp <> "-" <> T.unpack (wsKind ws) <> ".md")
@@ -266,7 +307,7 @@ writeStartupContext m dir backend projectRoot leanRoot cwd instruction ws plugin
           , "python3 \"" <> t a <> "\" --id 2402.03300               # fetch by ID"
           , "```"
           , "" ]
-  TIO.writeFile path . T.intercalate "\n" $
+  TIO.writeFile path . appendLessons lessons . T.intercalate "\n" $
     [ "# Fisher Managed Lean Workflow Session"
     , ""
     , "- Managed backend: `" <> backend <> "`"

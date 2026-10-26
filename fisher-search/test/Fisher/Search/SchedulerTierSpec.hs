@@ -72,7 +72,7 @@ searchF failOf cfg ac f file script0 = withSystemTempDirectory "tiers" $ \root -
       env = SearchEnv
         { seRun = run, seLean = fakeLean, sePolicy = AxiomPolicy standardAxioms False, seRoot = root, seRel = "F.lean"
         , seNow = realToFrac <$> getPOSIXTime, seLog = \e -> modifyIORef events (e :), seBaseChanged = \_ -> pure ()
-        , seAuto = fmap (\c -> AutoEnv c (fakeLsp calls f)) ac, seRetrieval = Nothing, sePrice = \_ -> pure Nothing }
+        , seAuto = fmap (\c -> AutoEnv c (fakeLsp calls f) Nothing) ac, seRetrieval = Nothing, sePrice = \_ -> pure Nothing }
   r <- runSearch cfg env file
   es <- reverse <$> readIORef events
   ss <- readIORef specs

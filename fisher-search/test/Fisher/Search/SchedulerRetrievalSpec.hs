@@ -79,7 +79,7 @@ search cfg ac f lean file script0 mkRet check = withSystemTempDirectory "search"
         pure (plainResult (Just out) Nothing "")
       env = SearchEnv run lean (AxiomPolicy standardAxioms False) root "F.lean"
               (realToFrac <$> getPOSIXTime) (\e -> modifyIORef events (e :)) (\_ -> pure ())
-              (fmap (\c -> AutoEnv c (fakeLsp calls f)) ac) ret (\_ -> pure Nothing)
+              (fmap (\c -> AutoEnv c (fakeLsp calls f) Nothing) ac) ret (\_ -> pure Nothing)
   r <- runSearch cfg env file
   es <- reverse <$> readIORef events
   ss <- readIORef specs
@@ -294,7 +294,7 @@ spec = do
       realToFrac (t1 - t0) `shouldSatisfy` (< (5 :: Double))
     it "is asynchronous: the Auto pre-pass under way rethrows it and the harvest runs" $ do
       calls <- newIORef []
-      let ae = AutoEnv auto {acSeconds = 30} (fakeLsp calls fake0 {fDelay = \m -> if m == "attempts" then 5000 else 0})
+      let ae = AutoEnv auto {acSeconds = 30} (fakeLsp calls fake0 {fDelay = \m -> if m == "attempts" then 5000 else 0}) Nothing
       interruptedBy (toException Terminated) (Just ae) (Left 300) one (Map.fromList [(("t", "*"), [("ok", 0)])])
         (fmap Just . retrievalIn (Just ([bumpLemma], []))) $ \(r, es, _) -> do
           terminated r `shouldBe` True

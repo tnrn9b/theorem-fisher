@@ -8,19 +8,20 @@ import qualified Data.ByteString.Lazy as BL
 import qualified Data.IntMap.Strict as IM
 import Data.List (sort)
 import qualified Data.Map.Strict as Map
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, listToMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import Test.Hspec
 
 import Fisher.Search.Controller (Stop (..), StopReason (..))
+import Fisher.Search.Disprove (Disproof (..), DisproveSource (..))
 import Fisher.Search.Golden
 import Fisher.Search.Graph
 import Fisher.Search.GraphRun
 import Fisher.Search.Report
 import Fisher.Search.OldName (oldName)
-import Fisher.Search.Scheduler (AttemptRecord (..), GoalState (..), GoalStatus (..), SearchReport (..), plainRecord)
+import Fisher.Search.Scheduler (AttemptRecord (..), Event (..), GoalState (..), GoalStatus (..), SearchReport (..), plainRecord)
 
 -- | Roots t (1) and u (2). t splits into l1 (3, proved) and l2 (4, open,
 -- its own split rejected); u's split shares l2; u's first split failed.
@@ -84,7 +85,7 @@ flat control = SearchReport
     stop = Stop StallTurns 8 0.42
     goal ts by = GoalState
       { gsStatus = Closed, gsTried = ["x"], gsRunning = [], gsBy = by, gsAt = Just 10, gsClosedBy = Nothing
-      , gsPartial = Nothing, gsDisproof = Nothing, gsDisproveTried = False, gsStall = Nothing, gsTiers = ts }
+      , gsPartial = Nothing, gsDisproof = Nothing, gsDisproveTried = False, gsSmtTried = False, gsDisproofSource = Nothing, gsDisproofWitness = Nothing, gsStall = Nothing, gsTiers = ts }
     rec i g o k st d = (plainRecord i g "x" o 0 1 Nothing)
       { arModel = fmap (["example/model-a", "example/model-b"] !!) k, arTierOf = k, arStopped = st, arCost = d }
 
@@ -123,7 +124,22 @@ spec = do
     it "an uncontrolled report has none of these keys" $ do
       keys u `shouldBe` sort ["elapsed_s", "goals_total", "goals_closed", "closed_per_hour", "budget_spent", "goals", "backends", "attempts"]
       map keys (list (at "goals" u)) `shouldBe` replicate 2 (sort ["goal", "status", "attempts", "by_attempt", "by_backend", "closed_at_s"])
-      map keys (list (at "attempts" u)) `shouldBe` replicate 4 (sort ["attempt", "goal", "backend", "outcome", "started_s", "ended_s", "stats"])
+      map keys (list (at "attempts" u)) `shouldBe` replicate 4 (sort ["attempt", "goal", "backend", "outcome", "outcome_class", "started_s", "ended_s", "stats"])
+  describe "the run log's fields" $ do
+    it "each attempt's outcome_class, with or without the controller" $ do
+      let classes = map (at "outcome_class") . list . at "attempts"
+          want = map String ["stalled", "closed", "closed", "cancelled"]
+      classes (reportJson [] (flat True)) `shouldBe` want
+      classes (reportJson [] (flat False)) `shouldBe` want
+    it "the policy event: its name, its time and the six fields" $ do
+      let e = eventJson (PolicyApplied 3.04 "t" "backend" "claude-code,fisher" "fisher,claude-code" (object ["attempts" .= (7 :: Int)]) True)
+      at "event" e `shouldBe` String "policy"
+      keys e `shouldBe` sort ["event", "t", "goal", "knob", "default", "applied", "evidence", "exploration"]
+      map (`at` e) ["t", "goal", "knob", "default", "applied", "evidence", "exploration"]
+        `shouldBe` [ A.toJSON (3.0 :: Double), String "t", String "backend", String "claude-code,fisher", String "fisher,claude-code"
+                   , object ["attempts" .= (7 :: Int)], Bool True ]
+    it "the policy event's line" $
+      eventLine (PolicyApplied 61 "t" "tier" "0,1" "1,0" Null False) `shouldBe` "00:01:01  policy: t tier 1,0"
   describe "graphJson" $
     it "nodes, splits, roots and whiteboards" $ golden "graph.json" (encodeT (graphJson small boardsOf) <> "\n")
   describe "graphTree" $ do
@@ -159,6 +175,40 @@ spec = do
     it "AttemptEnded" $ ev (AttemptEnded 2 7 4 "closed") `shouldBe` encodeT (object ["event" .= ("finished" :: Text), "t" .= (2 :: Double), "attempt" .= (7 :: Int), "node" .= (4 :: Int), "outcome" .= ("closed" :: Text)])
     it "RoleCost" $ ev (RoleCost 2 Planner 0.0123) `shouldBe` encodeT (object ["event" .= ("cost" :: Text), "t" .= (2 :: Double), "role" .= ("planner" :: Text), "usd" .= (0.0123 :: Double)])
     it "GraphStopped" $ ev (GraphStopped 2 "time") `shouldBe` encodeT (object ["event" .= ("stopped" :: Text), "t" .= (2 :: Double), "reason" .= ("time" :: Text)])
+  describe "the disproof events" $ do
+    let w = "push_neg; refine \10216(1 : Int), ?_\10217; first | decide | norm_num | omega | simp_all"
+    it "disproved carries source and witness" $ do
+      encodeT (eventJson (GoalDisproved 2 "t" "false" w "smt" (Just "x := 1")))
+        `shouldBe` encodeT (object [ "event" .= ("disproved" :: Text), "t" .= (2 :: Double), "goal" .= ("t" :: Text), "result" .= ("false" :: Text)
+                                   , "tactic" .= w, "source" .= ("smt" :: Text), "witness" .= ("x := 1" :: Text) ])
+      -- a suspect, or a negation by a plain tactic, has a source and no witness
+      encodeT (eventJson (GoalDisproved 2 "t" "suspect" "x := 0" "plausible" Nothing))
+        `shouldBe` encodeT (object [ "event" .= ("disproved" :: Text), "t" .= (2 :: Double), "goal" .= ("t" :: Text), "result" .= ("suspect" :: Text)
+                                   , "counterexample" .= ("x := 0" :: Text), "source" .= ("plausible" :: Text) ])
+      encodeT (graphEventJson (NodeDisproved 2 4 "false" w "smt" (Just "x := 1")))
+        `shouldBe` encodeT (object [ "event" .= ("disproved" :: Text), "t" .= (2 :: Double), "node" .= (4 :: Int), "result" .= ("false" :: Text)
+                                   , "tactic" .= w, "source" .= ("smt" :: Text), "witness" .= ("x := 1" :: Text) ])
+    it "report.json's per-goal disproof carries source and witness" $ do
+      let base = flat False
+          g0 = maybe (error "no goal") snd (listToMaybe (srGoals base))
+          withD d src wt = g0 {gsStatus = Disproved, gsDisproof = Just d, gsDisproofSource = src, gsDisproofWitness = wt}
+          rep = base
+            { srAuto = True
+            , srGoals =
+                [ ("a", withD (DFalse w) (Just ViaSmt) (Just "x := 1"))
+                , ("b", withD (DSuspect "x := 0") (Just ViaPlausible) Nothing)
+                , ("c", withD (DFalse "decide") Nothing Nothing) ] }
+          disproofs = map (at "disproof") (list (at "goals" (reportJson [] rep)))
+      disproofs `shouldBe`
+        [ object ["verdict" .= ("false" :: Text), "tactic" .= w, "source" .= ("smt" :: Text), "witness" .= ("x := 1" :: Text)]
+        , object ["verdict" .= ("suspect" :: Text), "counterexample" .= ("x := 0" :: Text), "source" .= ("plausible" :: Text)]
+        , object ["verdict" .= ("false" :: Text), "tactic" .= ("decide" :: Text)] ]
+    it "the disprove event per source" $ do
+      encodeT (graphEventJson (NodeDisproveRan 2 4 "smt" "sat"))
+        `shouldBe` encodeT (object ["event" .= ("disprove" :: Text), "t" .= (2 :: Double), "node" .= (4 :: Int), "source" .= ("smt" :: Text), "result" .= ("sat" :: Text)])
+      encodeT (eventJson (DisproveRan 2 "t" "plausible" "none"))
+        `shouldBe` encodeT (object ["event" .= ("disprove" :: Text), "t" .= (2 :: Double), "goal" .= ("t" :: Text), "source" .= ("plausible" :: Text), "result" .= ("none" :: Text)])
+      graphEventLine (NodeDisproveRan 5 4 "smt" "unsat") `shouldBe` "00:00:05  disprove node 4: smt unsat"
   describe "graphEventLine" $ do
     it "added" $ graphEventLine (NodeAdded 3661 3 "l1" 1) `shouldBe` "01:01:01  added l1 (node 3, depth 1)"
     it "a root" $ graphEventLine (NodeAdded 0 1 "Foo.t" 0) `shouldBe` "00:00:00  added Foo.t (node 1, depth 0)"

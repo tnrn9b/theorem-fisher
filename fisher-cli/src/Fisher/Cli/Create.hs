@@ -23,24 +23,22 @@ module Fisher.Cli.Create
   , targetProblem
   , checkSample
   , checkSampleWith
+  , templateResolver
   , sampleTheorems
   , askOn
   , interruptible
   , interruptedMessage
   ) where
 
-import Control.Concurrent (forkIO, myThreadId, newEmptyMVar, putMVar, takeMVar, threadDelay, throwTo)
-import Control.Exception (AsyncException (..), SomeException, bracket, catchJust, finally, onException, try)
+import Control.Concurrent (myThreadId, threadDelay, throwTo)
+import Control.Exception (AsyncException (..), SomeException, bracket, catchJust, finally, try)
 import Control.Monad (forM_, unless, when)
 import Data.Aeson (Value (..), object, (.=))
 import qualified Data.Aeson.Key as K
 import qualified Data.Aeson.KeyMap as KM
 import qualified Data.ByteString as BS
-import Data.Char (isSpace, toLower)
 import Data.List (isPrefixOf, isSuffixOf)
 import Data.IORef (IORef, atomicWriteIORef, newIORef, readIORef)
-import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
@@ -52,21 +50,20 @@ import System.Directory
   ( createDirectoryIfMissing, doesDirectoryExist, doesFileExist, doesPathExist, getTemporaryDirectory
   , listDirectory, makeAbsolute, removeDirectoryRecursive, removeFile )
 import System.Environment (getEnvironment)
-import System.Exit (ExitCode (..))
 import System.FilePath (takeDirectory, (</>))
-import System.IO (Handle, hClose, hFlush, hGetLine, hIsEOF, stdin, stdout)
+import System.IO (hFlush, stdin, stdout)
 import System.Posix.Process (getProcessID)
-import System.Posix.Signals (Handler (..), installHandler, sigINT, sigKILL, sigTERM, signalProcessGroup)
-import System.Process (CreateProcess (..), StdStream (..), createPipe, createProcess, getPid, proc, waitForProcess)
-import System.Timeout (timeout)
+import System.Posix.Signals (Handler (..), installHandler, sigINT, sigTERM)
 
+import Fisher.Cli.AddSmt (addSmt)
+import Fisher.Cli.LakeRun (appendRun, askOn, interruptible, interruptibleWith, lakeErrorLines, probeProblems, removeStaleProbes, runIn)
 import Fisher.Config (loadConfigAt)
 import Fisher.Paths (ensureFisherHome, expandUser, fisherDirName)
 import Fisher.Project (InitOptions (..), Project (..), ProjectError, defaultInitOptions, initializeProject, projectErrorMessage, renderManifest)
 import Fisher.ProjectCommand (CreateRequest (..), TemplateOps (..), createFromSource, interruptedLead, templateListLines)
 import Fisher.Prover (ProverKind (..), binaryFix, proverByName)
 import Fisher.Sha256 (sha256Hex)
-import Fisher.Search.Check (LeanRun, Probe (..), lakeLeanRunWith, probe, standardAxioms)
+import Fisher.Smt.Reservoir (fetchBuilds, pickRevision)
 import Fisher.Template
 import Fisher.Template.Run
 import Fisher.Which (whichEnv)
@@ -81,8 +78,9 @@ data CreateDeps = CreateDeps
   , cdConfig :: Value
   , cdEnv :: [(String, String)]
   -- ^ where 'preflight' looks for the tools
-  , cdResolver :: Text -> IO (Either Text Text)
-  -- ^ the latest release of @lean@ or @mathlib@
+  , cdResolver :: Text -> [(Text, Text)] -> IO (Either Text Text)
+  -- ^ the latest release of @lean@ or @mathlib@, or the latest @smt@
+  -- revision, given the values resolved before it
   , cdCheck :: Template -> FilePath -> IO (Either [Text] ())
   -- ^ the sample check
   , cdTrustFile :: FilePath
@@ -91,7 +89,8 @@ data CreateDeps = CreateDeps
   }
 
 -- | The real ones: the configuration in the Fisher home, this process's
--- environment, stdin and stdout, @git ls-remote@ and 'checkSample'.
+-- environment, stdin and stdout, @git ls-remote@ and Reservoir
+-- ('templateResolver') and 'checkSample'.
 defaultDeps :: IO CreateDeps
 defaultDeps = do
   home <- ensureFisherHome
@@ -102,15 +101,40 @@ defaultDeps = do
 depsFor :: Value -> [(String, String)] -> IO CreateDeps
 depsFor cfg env = do
   tf <- trustFile
+  let say l = TIO.putStrLn l >> hFlush stdout
   pure CreateDeps
-    { cdSay = \l -> TIO.putStrLn l >> hFlush stdout
+    { cdSay = say
     , cdAsk = askOn stdin
     , cdConfig = cfg
     , cdEnv = env
-    , cdResolver = latestRelease
+    , cdResolver = templateResolver say fetchBuilds
     , cdCheck = checkSample
     , cdTrustFile = tf
     , cdScale = 60 }
+
+-- | What a template's @latest@ resolves to: @lean@ and @mathlib@, the
+-- highest release tag ('latestRelease'); @smt@, the newest commit Reservoir
+-- built on @leanprover/lean4:@ and the resolved @mathlib@, else @none@ (no
+-- lean-smt in the project, whose main may not match that Mathlib) with a
+-- warning that names @fisher project add smt@.
+templateResolver :: (Text -> IO ()) -> IO (Either Text [(Text, Text)]) -> Text -> [(Text, Text)] -> IO (Either Text Text)
+templateResolver say fetch what done
+  | what == "smt" = do
+      let tc = ("leanprover/lean4:" <>) <$> lookup "mathlib" done
+      builds <- fetch
+      case pickRevision tc (either (const []) id builds) True of
+        Right c -> pure (Right c)
+        Left _ -> say (smtNoneWarning builds tc) >> pure (Right "none")
+  | otherwise = latestRelease what
+
+-- | The warning when the template's @smt@ resolves to @none@.
+smtNoneWarning :: Either Text [(Text, Text)] -> Maybe Text -> Text
+smtNoneWarning builds tc = "Warning: " <> why <> "; add it later with fisher project add smt"
+  where
+    why = case (builds, tc) of
+      (Left e, _) -> "could not read Reservoir's builds of lean-smt (" <> e <> ")"
+      (_, Just t) -> "lean-smt has no build for " <> t
+      (_, Nothing) -> "lean-smt has no build for this toolchain"
 
 -- | The functions the project command calls, over the session's config and
 -- environment. A template's progress lines are printed as they happen and
@@ -121,7 +145,8 @@ templateOps :: Value -> [(String, String)] -> TemplateOps
 templateOps cfg env = TemplateOps
   { toCreate = \r -> depsFor cfg env >>= \d -> createLines d r >>= \(x, ls) -> pure (ls <> failure x)
   , toBuild = \yes p -> depsFor cfg env >>= \d -> failure <$> buildProjectWith d yes p
-  , toList = templateListLines cfg }
+  , toList = templateListLines cfg
+  , toAddSmt = addSmt }
   where
     failure :: Either Text a -> [Text]
     failure = either (\e -> ["(>_<) " <> e]) (const [])
@@ -240,18 +265,6 @@ askTrust d t target steps = do
   forM_ steps $ \s -> cdSay d ("  " <> stepName s <> ": " <> T.unwords (stepRun s))
   cdAsk d "Run these steps? [y/N] "
 
--- | Ask on a handle; yes only for @y@ or @yes@. A closed input is no.
-askOn :: Handle -> Text -> IO Bool
-askOn h question = do
-  TIO.putStr question
-  hFlush stdout
-  r <- try (hIsEOF h >>= \eof -> if eof then pure "" else hGetLine h) :: IO (Either SomeException String)
-  pure $ case r of
-    Right a -> map toLower (trim a) `elem` ["y", "yes"]
-    Left _ -> False
-  where
-    trim = reverse . dropWhile isSpace . reverse . dropWhile isSpace
-
 -- | Write the files and the manifest. Directories are made as needed.
 writeProject :: FilePath -> Template -> Text -> Text -> [(Text, Text)] -> [Step] -> FilePath -> [(FilePath, BS.ByteString)] -> Maybe Text -> IO (Either Text ())
 writeProject target t sourceText rev vals steps sample files name = do
@@ -319,25 +332,6 @@ preflight env = go ["elan", "lake"]
 -- | The message for a build stopped by Ctrl-C (or a stop from the UI).
 interruptedMessage :: FilePath -> Text
 interruptedMessage root = interruptedLead <> T.pack root
-
--- | Run the action with SIGINT and SIGTERM turned into 'UserInterrupt' in
--- this thread (the shell's line editor, or GHC's own handler, would send
--- them elsewhere), so a running step's group is killed; the old handlers
--- come back after.
-interruptible :: IO a -> IO a
-interruptible act = newIORef False >>= \p -> interruptibleWith p act
-
--- | 'interruptible', setting the flag as a signal comes in (before the
--- exception is thrown), so the action can tell a failure that the signal
--- caused from one of its own.
-interruptibleWith :: IORef Bool -> IO a -> IO a
-interruptibleWith pending act = do
-  tid <- myThreadId
-  let h = Catch (atomicWriteIORef pending True >> throwTo tid UserInterrupt)
-  bracket
-    ((,) <$> installHandler sigINT h Nothing <*> installHandler sigTERM h Nothing)
-    (\(i, t) -> installHandler sigINT i Nothing >> installHandler sigTERM t Nothing)
-    (const act)
 
 -- | Whether a failure is an interrupt's: one is pending, or the failure is
 -- a process killed by SIGINT or SIGTERM (the UI's stop signals the step
@@ -507,42 +501,17 @@ checkSampleWith :: FilePath -> Int -> Template -> FilePath -> IO (Either [Text] 
 checkSampleWith lake secs t root = do
   removeStaleProbes (takeDirectory (root </> tplSample t))
   (code, out) <- runIn lake secs root ["build"]
-  BS.appendFile (logFile root) (TE.encodeUtf8 ("== check: lake build\n" <> out <> "== check: exit " <> T.pack (show code) <> "\n"))
+  appendRun (logFile root) "check" "lake build" code out
   if code /= 0
-    then pure (Left (("lake build failed (exit " <> T.pack (show code) <> "); see .fisher/create.log") : take 5 (errorLines out)))
+    then pure (Left (("lake build failed (exit " <> T.pack (show code) <> "); see .fisher/create.log") : take 5 (lakeErrorLines out)))
     else do
       let rel = tplSample t
       text <- TE.decodeUtf8With TEE.lenientDecode <$> BS.readFile (root </> rel)
       case sampleTheorems text of
         [] -> pure (Left ["no theorem in " <> T.pack rel])
         names -> do
-          let run :: LeanRun
-              run = lakeLeanRunWith lake secs
-          p <- probe run root rel text names
-          BS.appendFile (logFile root) (TE.encodeUtf8 ("== check: probe of " <> T.pack rel <> "\n" <> prOutput p <> "== check: exit " <> T.pack (show (prExit p)) <> "\n"))
-          let axiomProblems =
-                concat
-                  [ case lookupAxioms n p of
-                      Nothing -> ["no axioms reported for " <> n]
-                      Just as -> ["`" <> n <> "` depends on " <> a | a <- as, not (Set.member a standardAxioms)]
-                  | n <- names ]
-              problems =
-                prErrors p
-                  <> ["`sorry` at line " <> T.pack (show l) | l <- prSorryLines p]
-                  <> axiomProblems
-                  <> ["lean exited with " <> T.pack (show (prExit p)) | prExit p /= 0, null (prErrors p)]
+          problems <- probeProblems lake secs (logFile root) "check" root rel text names
           pure (if null problems then Right () else Left problems)
-  where
-    lookupAxioms n p = Map.lookup n (prAxioms p)
-    errorLines out = [l | l <- T.lines out, ": error" `T.isInfixOf` l || "error:" `T.isPrefixOf` l]
-
--- | Remove the probe files (@_fisher_search_*.lean@) a check that was
--- killed outright (SIGKILL) left next to the sample.
-removeStaleProbes :: FilePath -> IO ()
-removeStaleProbes dir = do
-  names <- either (\(_ :: SomeException) -> []) id <$> try (listDirectory dir)
-  forM_ [n | n <- names, "_fisher_search_" `isPrefixOf` n, ".lean" `isSuffixOf` n] $ \n ->
-    try (removeFile (dir </> n)) :: IO (Either SomeException ())
 
 -- | The full names of a file's theorems and lemmas: @theorem NAME@ or
 -- @lemma NAME@, after any @\@[...]@ attributes and modifiers (@private@,
@@ -572,26 +541,3 @@ sampleTheorems = go [] . T.lines
     qualify stack n = case T.stripPrefix "_root_." n of
       Just bare -> bare
       Nothing -> T.intercalate "." (reverse [x | Just x <- stack] <> [n])
-
--- | A command in a directory: stdin closed, output merged, in a process
--- group of its own that is killed at the limit (seconds) or on an exception.
-runIn :: FilePath -> Int -> FilePath -> [String] -> IO (Int, Text)
-runIn cmd secs dir args = do
-  (readEnd, writeEnd) <- createPipe
-  started <- try (createProcess (proc cmd args)
-    { cwd = Just dir, std_in = NoStream, std_out = UseHandle writeEnd, std_err = UseHandle writeEnd, create_group = True })
-  case started of
-    Left (e :: SomeException) -> do
-      mapM_ (\h -> try (hClose h) :: IO (Either SomeException ())) [readEnd, writeEnd]
-      pure (127, T.pack (show e))
-    Right (_, _, _, ph) -> do
-      outVar <- newEmptyMVar
-      _ <- forkIO (BS.hGetContents readEnd >>= putMVar outVar)
-      let killGroup = getPid ph >>= mapM_ (\p -> try (signalProcessGroup sigKILL p) :: IO (Either SomeException ()))
-      r <- timeout (secs * 1000000) (waitForProcess ph) `onException` killGroup
-      code <- case r of
-        Just c -> pure (case c of ExitSuccess -> 0; ExitFailure k -> k)
-        Nothing -> killGroup >> waitForProcess ph >> pure (-1)
-      out <- takeMVar outVar
-      let txt = TE.decodeUtf8With TEE.lenientDecode out
-      pure (code, if code == -1 then "timed out after " <> T.pack (show secs) <> " s\n" <> txt else txt)

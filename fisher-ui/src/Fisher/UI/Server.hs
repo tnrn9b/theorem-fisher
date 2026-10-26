@@ -47,6 +47,7 @@ import Fisher.UI.Access
 import Fisher.UI.Api.ClaudeAuth (claudeAuthApi, newClaudeAuthEnv, stopClaudeLogins)
 import Fisher.UI.Api.Context (contextApi)
 import Fisher.UI.Api.Live (LiveEnv (..), liveApi, newLiveEnv, stopRuns)
+import Fisher.UI.Api.Runlog (runlogApi)
 import Fisher.UI.Api.Runs (runsApi, stopGates)
 import Fisher.UI.Api.Search (SearchEnv, newSearchEnv, searchApi, stopSearches)
 import Fisher.UI.Api.Settings (settingsApi)
@@ -182,7 +183,7 @@ findRepo home exe = do
 
 -- | The read routes.
 uiApis :: UiEnv -> [Api]
-uiApis env = [sessionsApi env, contextApi env, runsApi env]
+uiApis env = [sessionsApi env, contextApi env, runsApi env, runlogApi env]
 
 -- | The live routes (first: @POST /api/sessions@ is theirs), the proof
 -- canvas's, then the read routes.

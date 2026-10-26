@@ -1,0 +1,6 @@
+{"seq":1,"t":1.0,"kind":"tool_start","data":{"name":"mcp_lean_lsp_lean_run_code","args":{"code":"example : P := by simp"},"call_id":"c1"}}
+{"seq":2,"t":61.0,"kind":"tool_end","data":{"name":"mcp_lean_lsp_lean_run_code","call_id":"c1","ok":false,"ms":60000,"result":"Error executing tool lean_run_code: Lean timed out after 60s","preview":"Error executing tool"}}
+{"seq":3,"t":62.0,"kind":"tool_start","data":{"name":"mcp_lean_lsp_lean_multi_attempt","args":{"file_path":"Foo.lean","line":4,"snippets":["simp","omega"]},"call_id":"c2"}}
+{"seq":4,"t":122.0,"kind":"tool_end","data":{"name":"mcp_lean_lsp_lean_multi_attempt","call_id":"c2","ok":true,"ms":60000,"result":"{\"items\":[],\"timed_out\": true}","preview":"{\"items\""}}
+{"seq":5,"t":123.0,"kind":"tool_start","data":{"name":"mcp_lean_lsp_lean_run_code","args":{"code":"example : P := by decide"},"call_id":"c3"}}
+{"seq":6,"t":183.0,"kind":"tool_end","data":{"name":"mcp_lean_lsp_lean_run_code","call_id":"c3","ok":true,"ms":60000,"result":"{\"success\":false,\"timed_out\":false,\"diagnostics\":[{\"severity\":\"error\",\"message\":\"diagnostics_timed_out: the file did not finish elaborating\",\"line\":1,\"column\":0,\"category\":null,\"hint\":null}]}","preview":"{\"success\":false"}}

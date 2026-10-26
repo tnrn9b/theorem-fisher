@@ -1,6 +1,7 @@
 -- | The @/project@ command: @status@, @init@, @convert@, @use@, @clear@ and
 -- @create@, with upstream's output text (the CLI class's @_handle_project_command@
--- in @cli.py@), and Fisher's @templates@, @build@ and @create --template@.
+-- in @cli.py@), and Fisher's @templates@, @build@, @create --template@ and
+-- @add smt@.
 -- The session override lives in a 'ProjectSession' the caller keeps: the
 -- REPL for the length of a session, the @fisher@ CLI in a file.
 --
@@ -11,6 +12,7 @@ module Fisher.ProjectCommand
   ( ProjectSession (..)
   , ProjectState (..)
   , TemplateOps (..)
+  , AddSmtOpts (..)
   , CreateRequest (..)
   , createFromSource
   , templateListLines
@@ -38,6 +40,7 @@ import Fisher.Paths (expandUser, fisherDirName)
 import Fisher.Project
 import Fisher.Prover (Prover (..), ProverKind (..), findProverRoot, markerKinds, prover, proverByName, proverTitle, tieMessage)
 import Fisher.Shlex (shlexSplit)
+import Fisher.Smt.Reservoir (validRevision)
 import Fisher.Template (Origin (..), Template (..), listTemplatesWithNotes)
 
 -- | What creating from a template takes: @create@'s words, parsed.
@@ -74,7 +77,17 @@ data TemplateOps = TemplateOps
   , toBuild :: Bool -> FilePath -> IO [Text]
   -- ^ @--yes@, the project
   , toList :: IO [Text]
+  , toAddSmt :: AddSmtOpts -> FilePath -> IO (Int, [Text])
+  -- ^ @add smt@ in the Lean root: the exit status and the lines to print
   }
+
+-- | @add smt@'s options: @--rev REV@, @--no-build@, @--yes@.
+data AddSmtOpts = AddSmtOpts
+  { asRev :: Maybe Text
+  , asNoBuild :: Bool
+  , asYes :: Bool
+  }
+  deriving (Eq, Show)
 
 -- | What @/project@ needs from the session around it.
 data ProjectSession = ProjectSession
@@ -344,6 +357,26 @@ handleProjectTokensStatus s tokens = do
         ops <- needsCli "Building a template project needs the fisher command line."
         target <- resolveCliPath s firstPos
         toBuild ops ("--yes" `elem` pFlags parsed) target >>= fromOps
+      "add" -> do
+        path <- case positional of
+          ["smt"] -> pure Nothing
+          ["smt", p] -> pure (Just p)
+          _ -> usageError "`/project add` adds smt only: add smt [PATH] [--rev REV] [--no-build] [--yes]"
+        case opt "--rev" of
+          Just r | not (validRevision r) ->
+            usageError ("`--rev` takes main, no_mathlib or a commit of 7 to 40 hex digits, not " <> r)
+          _ -> pure ()
+        ops <- needsCli "Adding lean-smt needs the fisher command line."
+        target <- resolveCliPath s path
+        root <- maybe target id <$> findProverRoot Lean4 target
+        let o = AddSmtOpts
+              { asRev = opt "--rev"
+              , asNoBuild = "--no-build" `elem` pFlags parsed
+              , asYes = "--yes" `elem` pFlags parsed }
+        (code, ls) <- toAddSmt ops o root
+        if code /= 0 then writeIORef failedOps True else pure ()
+        if code == 130 then writeIORef interrupted True else pure ()
+        say ls
       "create" -> do
         rawTarget <- maybe (usageError "`/project create` requires a target directory path.") pure firstPos
         target <- resolveCliPath s (Just rawTarget)

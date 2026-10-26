@@ -109,7 +109,7 @@ spec = describe "the fisher backend" $ do
       root <- canonicalizePath d
       base <- setupCase root (object [])
       let cfg = object ["fisher" .= object ["autoformalize" .= object ["backend" .= ("fisher" :: T.Text)]]]
-          li = LaunchInputs (machineFor file (root </> "fisher-home")) cfg base False (const (pure Nothing)) (Just root)
+          li = LaunchInputs (machineFor file (root </> "fisher-home")) cfg base False (const (pure Nothing)) (Just root) Nothing
       r <- withProcessEnv base (resolveChatRequest li "hello")
       either (T.isInfixOf "for a chat, talk to Fisher itself" . errorMessage) (const False) r `shouldBe` True
 
@@ -125,7 +125,7 @@ planProve extra k = do
     base0 <- setupCase root (field "extras" c)
     let base = foldr (uncurry Map.insert) (Map.delete "OPENROUTER_API_KEY" base0) extra
         cfg = object ["fisher" .= object ["autoformalize" .= object ["backend" .= ("fisher" :: T.Text)]]]
-        li = LaunchInputs (machineFor file (root </> "fisher-home")) cfg base False (const (pure Nothing)) (Just (root </> "project"))
+        li = LaunchInputs (machineFor file (root </> "fisher-home")) cfg base False (const (pure Nothing)) (Just (root </> "project")) Nothing
     r <- withProcessEnv base (resolveWorkflowRequest li "/prove Main.lean")
     k root base r
 

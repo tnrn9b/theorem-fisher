@@ -292,7 +292,7 @@ create env r = do
                 InProject d -> d
                 InScratch -> "/Scratch"
           -- latest is left for the command line to resolve (no network here)
-          resolveVariables t target vars (\_ -> pure (Right "latest")) >>= \case
+          resolveVariables t target vars (\_ _ -> pure (Right "latest")) >>= \case
             Left e -> pure (bad badRequest400 e)
             Right vals -> do
               ok <- trusted' env t
@@ -588,7 +588,7 @@ reconfirm env run = do
           target = case crMode run of
             InProject d -> d
             InScratch -> "/Scratch"
-      vals <- either (const vars) id <$> resolveVariables t target vars (\_ -> pure (Right "latest"))
+      vals <- either (const vars) id <$> resolveVariables t target vars (\_ _ -> pure (Right "latest"))
       rev <- either (\(e :: SomeException) -> "unreadable: " <> T.pack (show e)) id <$> try (templateRevision t)
       let request = A.object $
             [ "template" A..= tplName t, "vars" A..= A.object [K.fromText k A..= v | (k, v) <- vars] ]

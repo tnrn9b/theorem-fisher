@@ -74,6 +74,11 @@ dangerousPatterns =
   , ("\\bxargs\\s+.*\\brm\\b", "xargs with rm")
   , ("\\bfind\\b.*-exec\\s+(/\\S*/)?rm\\b", "find -exec rm")
   , ("\\bfind\\b.*-delete\\b", "find -delete")
+    -- Fisher's own: what steers every later prompt (the lessons files, the
+    -- templates), the policy (config.yaml) and the lessons' table (runs.db)
+  , ( "(>|\\btee\\b|\\bsed\\b.*\\s-[^\\s]*i|\\bperl\\b.*\\s-[^\\s]*i|\\bcp\\b|\\bmv\\b|\\bln\\b|\\binstall\\b|\\brsync\\b|\\bdd\\b|\\btruncate\\b|\\bsqlite3\\b)"
+        <> ".*(fisher/lessons\\.md|lessons-templates\\.yaml|runs\\.db|(\\.fisher|fisher_home\\}?)/config\\.yaml)"
+    , "write Fisher's lessons, config or run log" )
   ]
 
 -- | @detect_dangerous_command@: the first pattern the lowered command

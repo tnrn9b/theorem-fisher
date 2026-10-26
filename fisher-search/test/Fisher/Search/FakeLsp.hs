@@ -32,27 +32,32 @@ data Fake = Fake
   -- ^ which method fails: attempts, goal, diagnostics
   , fDelay :: Text -> Int
   -- ^ ms each call of a method takes
+  , fQuery :: Text -> Maybe Text
+  -- ^ the SMT-LIB query smt_show prints at a goal, if any
   }
 
 fake0 :: Fake
-fake0 = Fake (\_ _ -> Nothing) [] (const False) (const 0)
+fake0 = Fake (\_ _ -> Nothing) [] (const False) (const 0) (const Nothing)
 
 declAt :: Text -> Hole -> Maybe Decl
 declAt src h = find (\d -> dStart d <= hLine h - 1 && hLine h - 1 < dEnd d) (declarations src)
 
 -- | The fake Lsp, logging each call: @attempts g@, @plausible g@,
--- @diagnostics@, @goal@, @close@.
+-- @smt_show g@, @diagnostics@, @goal@, @close@.
 fakeLsp :: IORef [Text] -> Fake -> Lsp
 fakeLsp calls f = Lsp
   { lspAttempts = \src h snips -> do
       let d = declAt src h
           g = maybe "?" dName d
           isPl = any ("plausible" `T.isInfixOf`) snips
-      logCall ((if isPl then "plausible " else "attempts ") <> g)
+          isSmt = any ("smt_show" `T.isInfixOf`) snips
+      logCall ((if isPl then "plausible " else if isSmt then "smt_show " else "attempts ") <> g)
       threadDelay (fDelay f "attempts" * 1000)
       if fDown f "attempts" then pure (Left "server died") else
         pure . Right $
-          [ if isPl
+          [ if isSmt
+              then Trial s ["P"] [Diag (hLine h) 2 SevInfo ("goal: P\n\nquery:\n" <> q) | Just q <- [fQuery f g]]
+            else if isPl
               then Trial s [] [Diag (hLine h) 2 SevError (if g `elem` fSuspects f then "Found a counter-example!\nx := 0" else "Unable to find a counter-example")]
               else case fClose f g (maybe "" dProof d) of
                 Nothing -> Trial s ["P"] []

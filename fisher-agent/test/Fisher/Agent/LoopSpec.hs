@@ -286,7 +286,7 @@ runCaseWith mkDb rec c = withSystemTempDirectory "fisher-loop" $ \tmp0 -> do
           , envCallbacks =
               Callbacks
                 { cbThinking = Just (\t -> modifyIORef events (<> [PList [PStr "thinking", PStr t]]))
-                , cbToolProgress = Just (\n p a -> modifyIORef events (<> [PList [PStr "progress", PStr n, fromMaybe PNull p, a]]))
+                , cbToolProgress = Just (\_ n p a -> modifyIORef events (<> [PList [PStr "progress", PStr n, fromMaybe PNull p, a]]))
                 , cbStep = Nothing, cbToolDone = Nothing }
           , envWarn = \_ -> pure ()
           , envPromptHook = maybe pure recordPromptHook rec

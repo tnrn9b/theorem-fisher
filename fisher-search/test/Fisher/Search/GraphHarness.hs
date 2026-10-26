@@ -307,7 +307,7 @@ tags o = mapMaybe tag (oEvents o)
       GraphStopped _ why -> Just ("stopped " <> why)
       NodeAutoClosed _ i _ -> Just ("auto closed " <> nm i)
       NodeRepaired _ _ i _ _ -> Just ("repaired " <> nm i)
-      NodeDisproved _ i kind _ -> Just ("disproved " <> nm i <> " " <> kind)
+      NodeDisproved _ i kind _ _ _ -> Just ("disproved " <> nm i <> " " <> kind)
       GraphAutoOff {} -> Just "auto off"
       _ -> Nothing
 

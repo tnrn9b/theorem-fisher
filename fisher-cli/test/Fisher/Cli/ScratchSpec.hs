@@ -123,7 +123,7 @@ spec = do
       rev <- templateRevision t
       cs <- readIORef calls
       map (takeFileName . crTarget) cs
-        `shouldBe` map T.unpack [baseKey t rev [("mathlib", "latest"), ("project", "Scratch")], baseKey t rev [("mathlib", "v4.24.0"), ("project", "Scratch")]]
+        `shouldBe` map T.unpack [baseKey t rev [("mathlib", "latest"), ("project", "Scratch"), ("smt", "latest")], baseKey t rev [("mathlib", "v4.24.0"), ("project", "Scratch"), ("smt", "latest")]]
 
     it "passes --yes through to the base's create" $ withHomes $ \_ -> do
       calls <- newIORef []

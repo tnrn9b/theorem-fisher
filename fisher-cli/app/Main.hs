@@ -14,8 +14,12 @@ import System.IO.Error (isEOFError)
 
 import Fisher.Cli.ConfigCmd
 import Fisher.Cli.Check (checkMain)
+import Fisher.Cli.Create (askOn)
 import Fisher.Cli.Scratch (scratchMain)
 import Fisher.Cli.Search (searchMain)
+import Fisher.Cli.Learn (LearnCmd (..), learnParser)
+import Fisher.Cli.Lessons (LessonsCmd (..), lessonsParser)
+import Fisher.Cli.Runs (RunsCmd (..), runsParser)
 import Fisher.Cli.Sessions (SessionsCmd (..), sessionsParser)
 import Fisher.Cli.Subcommands
 import Fisher.Shell (ShellOptions (..), runShell)
@@ -52,6 +56,7 @@ import Fisher.Paths (getFisherHome)
 import System.Directory (findExecutable, getHomeDirectory)
 import System.Environment (getArgs, getExecutablePath)
 import System.FilePath (takeDirectory)
+import System.Process (callProcess)
 
 data Command
   = Project [String]
@@ -71,6 +76,9 @@ data Command
   | Check [String]
   | Shell Bool (Maybe T.Text)
   | Sessions SessionsCmd
+  | Runs RunsCmd
+  | Learn LearnCmd
+  | Lessons LessonsCmd
   | ConfigShow
   | ConfigEdit
   | Version
@@ -98,6 +106,12 @@ subcommands :: Parser Command
 subcommands = hsubparser $
   command "sessions"
     (info (Sessions <$> sessionsParser) (progDesc "Manage session history (list, rename, export, prune, delete)"))
+  <> command "runs"
+    (info (Runs <$> runsParser) (progDesc "The run log: list, show, export and import runs (Fisher only)"))
+  <> command "learn"
+    (info (Learn <$> learnParser) (progDesc "The learned search policy: stats, show, diff, reset (Fisher only)"))
+  <> command "lessons"
+    (info (Lessons <$> lessonsParser) (progDesc "Lessons mined from the run log: list, show, pin, unpin, drop, mine, reset (Fisher only)"))
   <> command "version" (info (pure Version) (progDesc "Show version information"))
   <> sysCommand "setup" SysSetup "Interactive setup wizard"
   <> sysCommand "model" SysModel "Select default model and provider"
@@ -113,7 +127,7 @@ subcommands = hsubparser $
   <> sysCommand "cron" SysCron "Manage scheduled jobs (fisher cron serve runs them)"
   <> command "project"
     (info (Project <$> many (strArgument (metavar "ARGS...")))
-          (progDesc "status | init [PATH] [--name N] | convert [PATH] | use [PATH] | clear | templates | create PATH [--template NAME] [--var K=V]... [--no-build] [--yes] | create PATH --template-source S [--name N] | build [PATH]"
+          (progDesc "status | init [PATH] [--name N] | convert [PATH] | use [PATH] | clear | templates | create PATH [--template NAME] [--var K=V]... [--no-build] [--yes] | create PATH --template-source S [--name N] | build [PATH] | add smt [PATH] [--rev REV] [--no-build] [--yes]"
              <> forwardOptions <> noIntersperse))
   <> command "scratch"
     (info (Scratch <$> many (strArgument (metavar "ARGS...")))
@@ -189,6 +203,7 @@ run = \case
     -- --fix on a terminal offers the Claude Code login
     let de = DoctorEnv st cfg env Nothing (getEnvValueAt home) readKeychainClaudeCredentials "fisher"
                (if fix && interactive then Just (claudeLoginPrompt home) else Nothing)
+               (if fix && interactive then Just installZ3 else Nothing)
     runDoctorTo (\l -> TIO.putStrLn l >> hFlush stdout) fix allProvers de home
   ConfigPath -> ensureFisherHome >>= putStrLn . configPathIn
   ConfigEnvPath -> ensureFisherHome >>= putStrLn . envPathIn
@@ -210,6 +225,9 @@ run = \case
   Check args -> checkMain args >>= \code -> if code == ExitSuccess then pure () else exitWith code
   Shell compact ctx -> runShell (ShellOptions compact ctx)
   Sessions c -> sessionsCli c
+  Runs c -> runsCli c
+  Learn c -> learnCli c
+  Lessons c -> lessonsCli c
   ConfigShow -> configShowCli
   ConfigEdit -> configEditCli
   Version -> versionCli
@@ -241,6 +259,15 @@ run = \case
     home <- ensureFisherHome
     st <- detectStyle
     configMigrate st home prompter TIO.putStrLn
+
+-- | The @--fix@ offer when no SMT solver is found (macOS): ask, then
+-- @brew install z3@. True when it ran and succeeded.
+installZ3 :: IO Bool
+installZ3 = do
+  yes <- askOn stdin "    Install z3 with `brew install z3` now? [y/N] "
+  if yes
+    then (callProcess "brew" ["install", "z3"] >> pure True) `catch` \(_ :: IOException) -> pure False
+    else pure False
 
 main :: IO ()
 main = do

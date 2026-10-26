@@ -8,6 +8,7 @@ module Fisher.Tools.FileOps
   , newFileOps
   , WriteScope (..)
   , homeWriteScope
+  , homeWriteScopeWith
     -- * Results
   , ReadResult (..)
   , readResultDict
@@ -39,11 +40,17 @@ module Fisher.Tools.FileOps
   ) where
 
 import Control.Monad (forM)
+import Data.List (isSuffixOf)
 import Data.IORef
 import qualified Data.Map.Strict as M
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
+import Control.Exception (IOException, try)
+import Data.Char (toLower)
+import System.Environment (lookupEnv)
+import System.Info (os)
+import System.Posix.Files (deviceID, fileID, getFileStatus)
 
 import Fisher.Py.Difflib (splitLinesKeepEnds, unifiedDiff)
 import Fisher.Py.Re
@@ -57,24 +64,60 @@ import Fisher.Tools.Sandbox
 newtype WriteScope = WriteScope {wsDenied :: Text -> IO Bool}
 
 -- | The deny list built from a home directory, as upstream builds it from
--- @Path.home()@ at import time.
+-- @Path.home()@ at import time. Fisher adds what steers its own prompts
+-- and policy, under @~/.fisher@ and under @$FISHER_HOME@ when that is set:
+-- @config.yaml@, the global lessons file @fisher/lessons.md@, the
+-- templates @fisher/lessons-templates.yaml@ and the run log
+-- @fisher/runs.db@ (with its @-wal@ and @-shm@); and every project's
+-- @.fisher/lessons.md@, wherever it is. On macOS (a case-insensitive file
+-- system by default) the paths are compared case-folded
+-- ('homeWriteScopeWith').
 homeWriteScope :: Text -> IO WriteScope
-homeWriteScope home = do
+homeWriteScope = homeWriteScopeWith (os == "darwin")
+
+-- | The deny list, comparing paths case-folded when the file system is
+-- case-insensitive. Whatever the case rule, a target that exists is also
+-- denied when it is the same file (device and inode) as a protected file
+-- that exists, so a hard link or another spelling of the name is caught.
+homeWriteScopeWith :: Bool -> Text -> IO WriteScope
+homeWriteScopeWith caseInsensitive home = do
+  fisherHome <- lookupEnv "FISHER_HOME"
   let h = T.unpack home
+      fisherHomes = (h <> "/.fisher") : [fh | Just fh <- [fisherHome], not (null fh)]
+      fisherOwn =
+        [ fh <> f | fh <- fisherHomes
+        , f <- ["/config.yaml", "/fisher/lessons.md", "/fisher/lessons-templates.yaml", "/fisher/runs.db", "/fisher/runs.db-wal", "/fisher/runs.db-shm"] ]
       exact =
         [ h <> "/.ssh/authorized_keys", h <> "/.ssh/id_rsa", h <> "/.ssh/id_ed25519", h <> "/.ssh/config"
         , h <> "/.fisher/.env", h <> "/.bashrc", h <> "/.zshrc", h <> "/.profile", h <> "/.bash_profile"
         , h <> "/.zprofile", h <> "/.netrc", h <> "/.pgpass", h <> "/.npmrc", h <> "/.pypirc"
         , "/etc/sudoers", "/etc/passwd", "/etc/shadow"
-        ]
+        ] <> fisherOwn
       prefixes = [h <> "/.ssh", h <> "/.aws", h <> "/.gnupg", h <> "/.kube", "/etc/sudoers.d", "/etc/systemd"]
+      fold = if caseInsensitive then map toLower else id
   exactR <- mapM pyRealpath exact
   prefR <- map (<> "/") <$> mapM pyRealpath prefixes
+  let exactF = map fold exactR
+      prefF = map fold prefR
   pure . WriteScope $ \p -> do
     resolved <- pyRealpath (T.unpack (expandUserHost home p))
-    pure (resolved `elem` exactR || any (`isPrefixOfS` resolved) prefR)
+    let r = fold resolved
+    if r `elem` exactF || any (`isPrefixOfS` r) prefF || fold "/.fisher/lessons.md" `isSuffixOf` r
+      then pure True
+      else sameFileAsAny resolved exactR
   where
     isPrefixOfS a b = take (length a) b == a
+
+-- | Whether a path that exists is the same file (device and inode) as one
+-- of the paths that exist.
+sameFileAsAny :: FilePath -> [FilePath] -> IO Bool
+sameFileAsAny target protected = do
+  mine <- statOf target
+  case mine of
+    Nothing -> pure False
+    Just t -> any (== Just t) <$> mapM statOf protected
+  where
+    statOf f = either (\(_ :: IOException) -> Nothing) (\st -> Just (deviceID st, fileID st)) <$> try (getFileStatus f)
 
 -- | @os.path.expanduser@ on the host, for the deny-list check only.
 expandUserHost :: Text -> Text -> Text

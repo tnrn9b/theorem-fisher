@@ -93,7 +93,7 @@ spec = do
           n = 40 :: Int
           name i = tmp </> ("F" <> show i <> ".lean")
           body i = T.replicate 2000 (T.pack (show i)) <> "\n"
-      h <- newUiHooks Nothing log' (\_ p -> pure (T.unpack p))
+      h <- newUiHooks Nothing log' (\_ p -> pure (T.unpack p)) Nothing
       done <- maybe (fail "no cbToolDone") pure (cbToolDone (uiCallbacks h noCallbacks))
       forConcurrently_ [1 .. n] $ \i -> do
         BS.writeFile (name i) (TE.encodeUtf8 (body i))
@@ -108,7 +108,7 @@ spec = do
       let log' = tmp </> "steps.jsonl"
           file = tmp </> "A.lean"
       appendStep log' (Step 1 "call_0" file (fileHash "a") "a" "write_file" 1)
-      h <- newUiHooks Nothing log' (\_ p -> pure (T.unpack p))
+      h <- newUiHooks Nothing log' (\_ p -> pure (T.unpack p)) Nothing
       done <- maybe (fail "no cbToolDone") pure (cbToolDone (uiCallbacks h noCallbacks))
       let tool cid = done "task" cid "write_file" (PDict [("path", PStr (T.pack file))]) (Right "{\"bytes_written\": 1, \"dirs_created\": false}")
       BS.writeFile file "b"
@@ -124,7 +124,7 @@ spec = do
       let log' = tmp </> "steps.jsonl"
           n = 30 :: Int
           name i = tmp </> ("G" <> show i <> ".lean")
-      h <- newUiHooks Nothing log' (\_ p -> pure (T.unpack p))
+      h <- newUiHooks Nothing log' (\_ p -> pure (T.unpack p)) Nothing
       done <- maybe (fail "no cbToolDone") pure (cbToolDone (uiCallbacks h noCallbacks))
       forConcurrently_ [1 .. 2 * n] $ \i ->
         if even i

@@ -11,6 +11,7 @@ module Fisher.Search.Retrieval
   , Retrieved (..)
   , newRetriever
   , joinBrief
+  , smtFacts
   , GoalRetrieval (..)
   , RetrievalReport (..)
   , usedOf
@@ -59,6 +60,9 @@ data RetrievalEnv = RetrievalEnv
   -- ^ the run directory, kept with each harvested lemma and note
   , reCutoff :: Double
   -- ^ seconds one goal's retrieval may take ('retrievalCutoff')
+  , reExtra :: Text
+  -- ^ project-wide text every brief ends with (the smt facts,
+  -- 'smtFacts'); empty for none
   }
 
 -- | A goal's retrieval is cut off after this many seconds.
@@ -91,7 +95,8 @@ data Retrieved = Retrieved
   -- ^ those lemmas' names and statements
   , rtNotes :: Int
   , rtBrief :: Text
-  -- ^ the facts section, then the library section (either may be empty)
+  -- ^ the facts section, the library section, then 'reExtra' (any may be
+  -- empty)
   , rtCutOff :: Bool
   }
   deriving (Eq, Show)
@@ -145,8 +150,18 @@ retrieveOne env ix file factsOf offerOf q = do
     , rtOffered = map lmName shownL
     , rtLemmas = [(lmName l, lmStatement l) | l <- shownL]
     , rtNotes = length (snd o)
-    , rtBrief = joinBrief [fb, lb]
+    , rtBrief = joinBrief [fb, lb, reExtra env]
     , rtCutOff = cut }
+
+-- | The brief's paragraph on lean-smt, given whether the project has it
+-- and the standalone solver found on PATH (@z3@ or @cvc5@), if any; empty
+-- without lean-smt.
+smtFacts :: Bool -> Maybe Text -> Text
+smtFacts hasLeanSmt solver
+  | not hasLeanSmt = ""
+  | otherwise =
+      "`smt` (lean-smt, cvc5) is available: `import Smt`, `by smt`, `by smt [h\8321, h\8322]` to pass hypotheses, `smt +mono` for polymorphic goals; it covers linear integer and real arithmetic, bitvectors, uninterpreted functions and quantifier-free logic over them."
+        <> maybe "" (\n -> " `" <> n <> "` is on PATH for SMT-LIB queries.") solver
 
 -- | Brief parts in order, blank lines between, empty ones left out.
 joinBrief :: [Text] -> Text

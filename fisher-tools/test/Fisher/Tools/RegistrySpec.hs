@@ -33,13 +33,15 @@ spec = do
       es <- mapM (\n -> (,) n <$> emojiFor reg n) ["read_file", "write_file", "patch", "search_files", "nope"]
       PDict [(k, PStr v) | (k, v) <- es] `shouldBe` field "emoji" doc
   describe "toolsets" $ do
+    -- upstream's toolsets; Fisher's own smt (SmtSpec) is left out here
     it "TOOLSETS" $
-      PDict [(k, PDict [("description", PStr (tsDescription t)), ("tools", PList (map PStr (tsTools t))), ("includes", PList (map PStr (tsIncludes t)))]) | (k, t) <- builtinToolsets]
+      PDict [(k, PDict [("description", PStr (tsDescription t)), ("tools", PList (map PStr (tsTools t))), ("includes", PList (map PStr (tsIncludes t)))]) | (k, t) <- builtinToolsets, k /= "smt"]
         `shouldBe` field "toolsets" doc
     forM_ (case field "resolved" doc of PDict kvs -> kvs; _ -> []) $ \(k, v) -> it ("resolve " <> T.unpack k) $ do
       reg <- fresh
       r <- resolveToolset reg k
-      PList (map PStr r) `shouldBe` v
+      -- only all and * reach Fisher's smt toolset
+      PList (map PStr (if k `elem` ["all", "*"] then filter (/= "smt_check") r else r)) `shouldBe` v
     forM_ (case field "info" doc of PDict kvs -> kvs; _ -> []) $ \(k, v) -> it ("info " <> T.unpack k) $ do
       reg <- fresh
       i <- toolsetInfo reg k
@@ -50,7 +52,9 @@ spec = do
       let names = \case PList xs -> Just [s | PStr s <- xs]; _ -> Nothing
       (defs, printed) <- getToolDefinitions reg (names (field "enabled" c)) (names (field "disabled" c))
       [n | PDict kvs <- defs, Just (PDict f) <- [lookup "function" kvs], Just (PStr n) <- [lookup "name" f]] `shouldBe` strList (field "names" c)
-      map normalize printed `shouldBe` map normalize (T.lines (txt "printed" c))
+      -- the smt toolset is Fisher's: its name is left out of the all listing
+      let dropSmt l = if "Enabled toolset 'all'" `T.isInfixOf` l then T.replace ", smt_check" "" l else l
+      map (normalize . dropSmt) printed `shouldBe` map normalize (T.lines (txt "printed" c))
   describe "dispatch" $ do
     it "unknown tool" $ do
       reg <- fresh

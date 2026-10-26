@@ -10,6 +10,7 @@ module Fisher.Doctor
   ( DoctorEnv (..)
   , checkManagedWorkflows
   , checkProvers
+  , checkSmt
   , runDoctor
   , runDoctorTo
   ) where
@@ -25,6 +26,7 @@ import Data.Maybe (fromMaybe, isJust, mapMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
+import System.Info (os)
 import System.Directory (canonicalizePath, createDirectoryIfMissing, doesDirectoryExist, doesPathExist, getCurrentDirectory)
 import System.FilePath (takeDirectory, takeFileName, (</>))
 import System.Process (CreateProcess (..), proc, readCreateProcessWithExitCode)
@@ -36,6 +38,8 @@ import Fisher.Config (saveConfigAt, defaultConfig)
 import Fisher.Paths (configPathIn, envPathIn, expandUser, fisherHomeLabelWith, homeLabel)
 import Fisher.Project
 import Fisher.Prover
+import Fisher.Smt (findSolver, smtConfig, solverName, solverVersion)
+import Fisher.Smt.Lake (hasSmt)
 import Fisher.Term
 import Fisher.Which (whichIn)
 import Fisher.Workflow.LocalAuth
@@ -57,6 +61,10 @@ data DoctorEnv = DoctorEnv
   -- about) whether to log in to Claude Code now and, on yes, run @fisher
   -- login --provider claude-code@ with the @claude@ given. True when it ran
   -- the login. Nothing: only report.
+  , deInstallZ3 :: Maybe (IO Bool)
+  -- ^ With @--fix@ on a terminal and no SMT solver, on macOS: ask whether to
+  -- run @brew install z3@ and, on yes, run it. True when it ran. Nothing:
+  -- only report.
   }
 
 newtype Out = Out { outLine :: Text -> IO () }
@@ -284,6 +292,43 @@ proverInReach de =
   try @SomeException (activeDirOf de >>= detectProver) >>= \case
     Right (Right (Just (k, _))) | k /= Lean4 -> pure (Just k)
     _ -> pure Nothing
+
+-- | The SMT lines: the solver the smt tactic would find, and for the Lean
+-- project in reach whether its manifest already requires lean-smt. A missing
+-- solver is not an issue (the tactic is optional); with @--fix@ it offers
+-- @brew install z3@ on macOS and hints @apt install z3@ elsewhere.
+checkSmt :: DoctorEnv -> (Text -> IO ()) -> (Text -> IO ()) -> IO ()
+checkSmt de line _issue = do
+  section st o "SMT"
+  findSolver (smtConfig (deConfig de)) >>= \case
+    Just s -> do
+      v <- solverVersion s
+      ok st o ("SMT solver: " <> T.unwords (solverName s : maybe [] pure (v >>= versionToken))) ""
+    Nothing -> do
+      warn st o "SMT solver: none (fisher project add smt still works; the smt tactic needs no solver on PATH)" ""
+      if os == "darwin"
+        then forM_ (deInstallZ3 de) $ \install -> do
+          ran <- install
+          when ran $ info st o "Ran brew install z3"
+        else info st o "Install one with: apt install z3"
+  root <- leanRoot
+  forM_ root $ \r ->
+    hasSmt r >>= \yes ->
+      if yes
+        then ok st o "lean-smt: in lake-manifest.json" ""
+        else ok st o "lean-smt: not required (fisher project add smt)" ""
+  where
+    st = deStyle de
+    o = Out line
+    -- the first word that opens with a digit: "Z3 version 4.13.4 - 64 bit"
+    versionToken = find (maybe False (isDigit . fst) . T.uncons) . T.words
+    leanRoot = do
+      dir <- activeDirOf de
+      try @SomeException (detectProver dir) >>= \case
+        Right (Right (Just (Lean4, d))) -> pure (Just d)
+        _ -> do
+          manifest <- doesPathExist (dir </> "lake-manifest.json")
+          pure (if manifest then Just dir else Nothing)
 
 -- | The Rocq and Isabelle sections: for the project in reach, or for both
 -- with @allProvers@ (@--all@). Each failing line ends with its fix, which
@@ -570,6 +615,7 @@ runDoctorTo say fix allProvers de home = do
 
   checkManagedWorkflowsWith de say issue fixed
   checkProvers allProvers de say issue
+  checkSmt de say issue
 
   say ""
   remaining <- readIORef issuesRef

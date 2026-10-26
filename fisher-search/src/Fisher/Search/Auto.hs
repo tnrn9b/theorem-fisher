@@ -14,6 +14,7 @@ module Fisher.Search.Auto
   , AutoConfig (..)
   , defaultAutoConfig
   , defaultTactics
+  , gateTactics
   , holesIn
   , wrapSnippet
   , suggestion
@@ -101,7 +102,13 @@ defaultAutoConfig :: AutoConfig
 defaultAutoConfig = AutoConfig defaultTactics 60 200000 True True 120
 
 defaultTactics :: [Text]
-defaultTactics = ["rfl", "decide", "omega", "simp_all", "aesop", "grind", "exact?"]
+defaultTactics = ["rfl", "decide", "omega", "simp_all", "aesop", "grind", "smt", "exact?"]
+
+-- | The portfolio a run can use: without @smt@ when the arm is not
+-- available (the project has no lean-smt, or @fisher.smt.enabled@ is
+-- false); the rest in order.
+gateTactics :: Bool -> [Text] -> [Text]
+gateTactics available = if available then id else filter (/= "smt")
 
 -- | The holes of a declaration's proof, in order: each token @sorry@
 -- outside comments, strings and char literals.

@@ -7,6 +7,7 @@ module Fisher.Search.GraphJobs
   , AskError (..)
   , Ask
   , Asked (..)
+  , askTwice
   , Checker (..)
   , locked
   , Plan (..)
@@ -16,7 +17,7 @@ module Fisher.Search.GraphJobs
   ) where
 
 import Control.Concurrent.MVar (MVar, withMVar)
-import Control.Exception (SomeException, displayException, try)
+import Control.Exception (SomeAsyncException, SomeException, displayException, fromException, throwIO, try)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -26,7 +27,7 @@ import Fisher.Search.Review
 import Fisher.Search.Sketch
 import Fisher.Search.Split
 
-data Role = Worker | Planner | Verifier deriving (Eq, Ord, Show)
+data Role = Worker | Planner | Verifier | Judge deriving (Eq, Ord, Show)
 
 data AskError = AskFailed Text | AskNoCredit deriving (Eq, Show)
 
@@ -60,7 +61,7 @@ data Plan = Plan
   }
 
 -- | Two calls at most: a failed call, or a reply the reader refuses, gets one
--- more. A refused reply goes to the second call's messages with what was
+-- more. An asynchronous exception in a call is rethrown. A refused reply goes to the second call's messages with what was
 -- wrong with it; the last problem, as text, is the job's error.
 askTwice :: Ask -> Role -> (Maybe (Text, e) -> [Message]) -> (e -> Text) -> (Text -> IO (Either e a)) -> IO (Asked a)
 askTwice ask role msgsFor errText readReply = go (0 :: Int) Nothing 0
@@ -80,8 +81,11 @@ askTwice ask role msgsFor errText readReply = go (0 :: Int) Nothing 0
     again n cost e next
       | n == 0 = go 1 next cost
       | otherwise = pure (Asked cost (Left e))
-    -- an exception ends the job as a failure, keeping the dollars already spent
-    broke cost e = pure (Asked cost (Left ("the call broke: " <> T.take 300 (T.pack (displayException (e :: SomeException))))))
+    -- an exception ends the job as a failure, keeping the dollars already
+    -- spent; an asynchronous one (an interrupt, a cancel) goes on up
+    broke cost e
+      | Just (_ :: SomeAsyncException) <- fromException e = throwIO e
+      | otherwise = pure (Asked cost (Left ("the call broke: " <> T.take 300 (T.pack (displayException (e :: SomeException))))))
 
 -- | The planner's split of a node: base, node name, its printed type, the
 -- lemmas of the current plan it may use, whiteboard, notes of its failed

@@ -7,6 +7,7 @@ author:      Tom Reynolds
 extra-source-files:
 - data/*
 - data/templates/**/*
+- data/lessons/*
 
 language: GHC2021
 
@@ -28,6 +29,7 @@ dependencies:
 - directory
 - file-embed
 - filepath
+- temporary
 - text
 - time
 - typed-process
@@ -50,8 +52,9 @@ tests:
     source-dirs: test
     build-tools: hspec-discover
     # ClaudeAuthSpec times out a child: the timer needs the threaded RTS,
-    # as the fisher executable has
-    ghc-options: -threaded
+    # as the fisher executable has; RunlogSpec needs two capabilities so its
+    # two writers really contend for the database
+    ghc-options: -threaded -with-rtsopts=-N2
     dependencies:
     - fisher-core
     - hspec
@@ -60,3 +63,4 @@ tests:
     - vector
     - aeson
     - scientific
+    - async

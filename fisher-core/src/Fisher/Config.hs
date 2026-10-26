@@ -21,6 +21,11 @@ module Fisher.Config
   , renderConfigWith
   , defaultKeyOrder
   , getPath
+  , lessonsAutoJudged
+  , smtEnabled
+  , smtSolver
+  , smtTimeoutSecs
+  , smtQueryTactic
   ) where
 
 import Data.Aeson (Value (..))
@@ -68,6 +73,38 @@ latestConfigVersion =
 getPath :: [Text] -> Value -> Maybe Value
 getPath [] v = Just v
 getPath (k : ks) v = lookupKey k v >>= getPath ks
+
+-- | @fisher.lessons.auto_judged@: judged and self lessons promoted on
+-- their counts instead of waiting for a pin. Only @true@ turns it on. One
+-- reader for the mining pass, @fisher lessons@ and the web app's panel.
+lessonsAutoJudged :: Value -> Bool
+lessonsAutoJudged cfg = getPath ["fisher", "lessons", "auto_judged"] cfg == Just (Bool True)
+
+-- | @fisher.smt.enabled@: the SMT tools are on unless the key is @false@.
+smtEnabled :: Value -> Bool
+smtEnabled cfg = getPath ["fisher", "smt", "enabled"] cfg /= Just (Bool False)
+
+-- | @fisher.smt.solver@: @auto@ (z3, then cvc5), @z3@ or @cvc5@.
+smtSolver :: Value -> Text
+smtSolver cfg = case getPath ["fisher", "smt", "solver"] cfg of
+  Just (String t) | not (T.null t) -> t
+  _ -> "auto"
+
+-- | @fisher.smt.timeout_secs@: the solver's time limit, 10 by default,
+-- clamped to 1..60.
+smtTimeoutSecs :: Value -> Int
+smtTimeoutSecs cfg = case getPath ["fisher", "smt", "timeout_secs"] cfg of
+  Just (Number n)
+    | n >= 60 -> 60
+    | n <= 1 -> 1
+    | otherwise -> floor n
+  _ -> 10
+
+-- | @fisher.smt.query_tactic@: the name of the query tool, @smt_show@ by default.
+smtQueryTactic :: Value -> Text
+smtQueryTactic cfg = case getPath ["fisher", "smt", "query_tactic"] cfg of
+  Just (String t) | not (T.null t) -> t
+  _ -> "smt_show"
 
 -- | @_deep_merge@: keys of the override win, and where both sides hold a
 -- mapping the merge recurses, so a partial user section keeps the rest of

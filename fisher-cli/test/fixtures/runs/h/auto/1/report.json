@@ -1,0 +1,68 @@
+{
+ "file": "N.lean",
+ "project": "/work/h",
+ "mode": "swarm",
+ "backends": {
+  "claude-code": [
+   1,
+   1
+  ],
+  "fisher": [
+   1,
+   0
+  ]
+ },
+ "elapsed_s": 100.0,
+ "goals_total": 1,
+ "goals_closed": 1,
+ "budget_spent": false,
+ "goals": [
+  {
+   "goal": "N.big",
+   "status": "closed",
+   "attempts": 2,
+   "by_attempt": 2,
+   "by_backend": "claude-code",
+   "closed_at_s": 90.0
+  }
+ ],
+ "attempts": [
+  {
+   "attempt": 1,
+   "goal": "N.big",
+   "backend": "fisher",
+   "outcome": "rejected: type mismatch",
+   "started_s": 0.5,
+   "ended_s": 40.0,
+   "stats": {
+    "exit": 0,
+    "wall_s": 39.5,
+    "turns": 12,
+    "input_tokens": 1000,
+    "output_tokens": 200,
+    "cost_usd": 1.0,
+    "tools": 5
+   },
+   "tier": 0,
+   "model": "m1",
+   "dollars": 1.0
+  },
+  {
+   "attempt": 2,
+   "goal": "N.big",
+   "backend": "claude-code",
+   "outcome": "closed",
+   "started_s": 41.0,
+   "ended_s": 90.0,
+   "stats": {
+    "exit": 0,
+    "wall_s": 49.0,
+    "turns": 20,
+    "input_tokens": 3000,
+    "output_tokens": 500,
+    "cost_usd": 2.0,
+    "tools": 9
+   }
+  }
+ ]
+}

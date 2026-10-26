@@ -1,0 +1,6 @@
+{"type":"thread.started","thread_id":"th-1"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"reasoning","text":"Look at the goal."}}
+{"type":"item.completed","item":{"id":"item_1","type":"command_execution","command":"lake build","aggregated_output":"Build completed successfully.","exit_code":0,"status":"completed"}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"The build passes."}}
+{"type":"turn.completed","usage":{"input_tokens":900,"cached_input_tokens":100,"output_tokens":60}}

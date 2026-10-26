@@ -1,0 +1,2 @@
+{"seq":1,"t":1.0,"kind":"tool_start","data":{"name":"mcp_lean_lsp_lean_run_code","args":{"code":"example : ∀ n : Nat, n = n := λ n, rfl"},"call_id":"c1"}}
+{"seq":2,"t":2.0,"kind":"tool_end","data":{"name":"mcp_lean_lsp_lean_run_code","call_id":"c1","ok":true,"ms":800,"result":"{\"success\":false,\"timed_out\":false,\"diagnostics\":[{\"severity\":\"error\",\"message\":\"unexpected token ','; expected '↦', '=>'\",\"line\":1,\"column\":40,\"category\":null,\"hint\":null}]}","preview":"{\"success\":false"}}

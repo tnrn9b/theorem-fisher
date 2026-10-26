@@ -58,6 +58,7 @@ import System.FilePath
 import System.IO (Handle, IOMode (ReadWriteMode), hClose, openFile)
 
 import Fisher.LLM.Auth.Sha256 (sha256Hex)
+import Fisher.Runlog (projectKeyOf)
 import Fisher.Search.Bm25 (Corpus, corpus, rank, tokens)
 import Fisher.Search.Facts (goalModule)
 import Fisher.Search.Index
@@ -153,12 +154,9 @@ instance FromJSON Note where
 -- | The first 16 hex characters of the sha256 of the project root's
 -- absolute path (UTF-8, normalised, no trailing separator). The caller
 -- gives the absolute path of the original project (never an attempt
--- workspace).
+-- workspace). The same key as the run log's ('Fisher.Runlog.projectKeyOf').
 libraryKey :: FilePath -> Text
-libraryKey root = T.take 16 (sha256Hex (TE.encodeUtf8 (T.pack (canon root))))
-
-canon :: FilePath -> FilePath
-canon = dropTrailingPathSeparator . normalise
+libraryKey = projectKeyOf
 
 -- | The project's library directory under a home (the Fisher home, @$FISHER_HOME@):
 -- @home/fisher/library/<key>@. (@--library-dir DIR@ names the library

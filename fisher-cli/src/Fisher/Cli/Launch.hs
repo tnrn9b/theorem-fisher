@@ -17,7 +17,7 @@ module Fisher.Cli.Launch
   ) where
 
 import Control.Exception (SomeException, try)
-import Control.Monad (void)
+import Control.Monad (forM_, void, when)
 import Data.Aeson (Value (..), object, (.=))
 import qualified Data.Aeson.Key as K
 import qualified Data.Aeson.KeyMap as KM
@@ -38,8 +38,11 @@ import Fisher.EnvVars (getEnvValueAt)
 import Fisher.Project (projectLabel, projectProver, projectRoot)
 import Fisher.Prover (ProverKind (..))
 import Fisher.ProjectCommand (ProjectSession (..), ProjectState (..), projectState)
+import Fisher.Runlog (runlogPath)
 import Fisher.Swarm
 import Fisher.Swarm.Event (Progress (..))
+import Fisher.Swarm.Import (importFinished, importRunId, sessionHomeOf)
+import Fisher.Cli.Mine (lessonsWarn, mineImported)
 import Fisher.Swarm.Types
 import Fisher.Workflow.Arxiv (installArxivScript)
 import Fisher.Workflow.Command (WorkflowSpec (..), rewriteForgivingCommand)
@@ -62,7 +65,7 @@ liveInputs = do
   env <- Map.fromList <$> getEnvironment
   st <- projectState session
   let cwd = maybe (sessionCwd session) projectRoot (stateProject st)
-  pure (LaunchInputs m cfg env True (getEnvValueAt home) (Just cwd))
+  pure (LaunchInputs m cfg env True (getEnvValueAt home) (Just cwd) Nothing)
 
 -- | Accept @prove x@ as well as @/prove x@.
 normalizeWorkflowCommand :: [String] -> Text
@@ -187,8 +190,11 @@ planCommand args = do
           , "workflow_kind" .= wsKind (wpSpec p), "backend_command" .= wsBackend (wpSpec p)
           , "project" .= projectLabel (wpProject p) ]
 
-runAttached :: LaunchInputs -> SpawnSpec -> Text -> IO ()
-runAttached li spec announce = do
+-- | Run the session attached to this terminal until it exits. A workflow
+-- session's (backend, session home, cwd) is given so that its session
+-- file is imported into the run log when it ends.
+runAttached :: LaunchInputs -> Maybe (Text, FilePath, FilePath) -> SpawnSpec -> Text -> IO ()
+runAttached li target spec announce = do
   realHome <- getHomeDirectory
   sw <- newSwarm (mIsRoot (liMachine li)) realHome
   t <- spawnInteractive sw spec
@@ -202,6 +208,13 @@ runAttached li spec announce = do
     Right (Right n) | n >= 0 -> pure ()
     _ -> void (cancelTask sw (tiTaskId (taskInfo t)))
   v <- waitTask t
+  forM_ target $ \(backend, sessionHome, cwd) ->
+    (try (fst <$> cliSession) :: IO (Either SomeException FilePath)) >>= \case
+      Left e -> TIO.hPutStrLn stderr ("fisher: run log: " <> T.pack (show e))
+      Right home -> do
+        importFinished (runlogPath home) backend sessionHome cwd v
+        -- the lessons' rules over the imported run
+        when (backend /= "fisher") $ mineImported lessonsWarn home (liConfig li) (tiProjectRoot (tvInfo v)) (importRunId v)
   TIO.putStrLn ""
   TIO.putStrLn ("Session " <> tiTaskId (tvInfo v) <> " " <> statusName (tvStatus v) <> ": " <> pProgress (tvProgress v)
                   <> maybe "" (" - " <>) (pError (tvProgress v)))
@@ -255,7 +268,7 @@ launchCommand args = do
             desc = let h = T.strip (T.take 60 (wpInstruction p)) in if T.null h then T.dropWhile (== '/') (wsCanonical ws) else h
             spec = SpawnSpec (if T.null (wpInstruction p) then wsBackend ws else wpInstruction p) desc (hrArgv r) (hrCwd r) (hrEnv r)
                      (wsKind ws) (wsBackend ws) (projectLabel (wpProject p)) (projectRoot (wpProject p)) (mcBackend (wpContext p)) (projectProver (wpProject p))
-        runAttached li spec ("Spawned " <> wsKind ws <> " agent for " <> projectLabel (wpProject p) <> ": " <> desc)
+        runAttached li (Just (mcBackend (wpContext p), sessionHomeOf (mcBackend (wpContext p)) (mcBackendHome (wpContext p)) (hrEnv r), hrCwd r)) spec ("Spawned " <> wsKind ws <> " agent for " <> projectLabel (wpProject p) <> ": " <> desc)
 
 -- | @/chat@: a managed backend session for onboarding and planning.
 chatCommand :: [String] -> IO ()
@@ -268,7 +281,7 @@ chatCommand args = do
       let r = cpRequest p
           desc = if T.null (T.strip text) then "managed chat" else T.strip text
           spec = SpawnSpec desc desc (hrArgv r) (hrCwd r) (hrEnv r) "chat" "/chat" "" "" (cpBackend p) Lean4
-      runAttached li spec ("Spawned managed chat session (" <> cpBackend p <> "): " <> desc)
+      runAttached li Nothing spec ("Spawned managed chat session (" <> cpBackend p <> "): " <> desc)
 
 -- | Fetch the lean4-skills checkout, warm the Lean MCP runtime, and set up
 -- the Claude plugin in your own profile.

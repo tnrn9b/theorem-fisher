@@ -6,6 +6,10 @@ variables:
     default: latest
     pattern: 'latest|v4\.[0-9]+\.[0-9]+(-rc[0-9]+)?'
     description: The Mathlib release (a tag such as v4.24.0, or latest); the Lean toolchain follows it
+  - name: smt
+    default: latest
+    pattern: 'latest|none|main|no_mathlib|[0-9a-f]{7,40}'
+    description: 'The lean-smt revision (a commit, main, none for no lean-smt, or latest: the newest build for the Mathlib release, else none)'
 files:
   - lakefile.toml
   - lean-toolchain

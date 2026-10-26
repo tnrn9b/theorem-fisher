@@ -35,12 +35,14 @@ import Fisher.LLM.Http (Transport)
 import Fisher.LLM.Sys
 import Fisher.LLM.Types
 import Fisher.Py.Value
+import Fisher.Smt (smtConfig)
 import Fisher.Tools.Agent (AgentTools (..), newAgentToolsWith)
 import Fisher.Tools.File (readFilesSummary)
 import Fisher.Tools.Registry
 import qualified Fisher.Tools.Sandbox as Sb
 import Fisher.Tools.Sandbox.Config (cleanupTask)
 import Fisher.Tools.Sandbox.Local (SandboxEnv (..))
+import Fisher.Tools.Smt (registerSmtTool)
 
 -- | An error whose text is what upstream's exception says (and its class).
 data NativeFailure = NativeFailure Text Text
@@ -133,6 +135,9 @@ buildNative sys0 deps sh spec = do
           , cfgEnabledToolsets = nsEnabled spec, cfgDisabledToolsets = nsDisabled spec, cfgQuiet = True
           , cfgReasoning = nsReasoning spec, cfgPrefill = nsPrefill spec, cfgRouting = nsRouting spec
           , cfgSessionId = Just sid, cfgPlatform = Just (nsPlatform spec) }
+  -- Fisher only: smt_check, when fisher.smt is on and a solver is found;
+  -- before the definitions, so this agent has it (unlike todo below)
+  registerSmtTool (fmap (fmap T.unpack) . cdWhich deps) reg (smtConfig (toAeson cfg0))
   (defs0, printed) <- getToolDefinitions reg (nsEnabled spec) (nsDisabled spec)
   let defs = maybe defs0 fst (cdTools deps)
   emojis <- mapM (\n -> (,) n <$> emojiFor reg n) [maybe "" pyStrOf (get "function" d >>= get "name") | d <- defs]

@@ -177,7 +177,8 @@ coreTools =
   ]
 
 -- | @TOOLSETS@ at the pinned commit, in its order, with upstream's
--- platform toolsets under Fisher's @fisher-*@ names.
+-- platform toolsets under Fisher's @fisher-*@ names, then Fisher's own
+-- @smt@.
 builtinToolsets :: [(Text, Toolset)]
 builtinToolsets =
   [ ("web", Toolset "Web research tools" ["web_search"] [])
@@ -207,6 +208,8 @@ builtinToolsets =
         []
         ["fisher-telegram", "fisher-discord", "fisher-whatsapp", "fisher-slack", "fisher-signal", "fisher-homeassistant", "fisher-email"]
     )
+    -- Fisher only (Fisher.Tools.Smt): registered when a solver is found
+  , ("smt", Toolset "Run an SMT solver on SMT-LIB text" ["smt_check"] [])
   ]
 
 -- | @_LEGACY_TOOLSET_MAP@.

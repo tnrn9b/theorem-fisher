@@ -7,6 +7,15 @@ pp.unicode.fun = true
 autoImplicit = false
 relaxedAutoImplicit = false
 
+{{#if smt}}
+# lean-smt before Mathlib: with Mathlib last, its versions of the packages
+# both depend on take precedence
+[[require]]
+name = "smt"
+scope = "ufmg-smite"
+rev = "{{smt}}"
+
+{{/if}}
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"

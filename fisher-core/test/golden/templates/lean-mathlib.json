@@ -3,12 +3,13 @@
   "variables": {
     "project": "Demo",
     "lean": "v4.24.0",
-    "mathlib": "v4.24.0"
+    "mathlib": "v4.24.0",
+    "smt": "main"
   },
   "files": [
     {
       "path": "lakefile.toml",
-      "contents": "name = \"Demo\"\nversion = \"0.1.0\"\ndefaultTargets = [\"Demo\"]\n\n[leanOptions]\npp.unicode.fun = true\nautoImplicit = false\nrelaxedAutoImplicit = false\n\n[[require]]\nname = \"mathlib\"\nscope = \"leanprover-community\"\nrev = \"v4.24.0\"\n\n[[lean_lib]]\nname = \"Demo\"\n"
+      "contents": "name = \"Demo\"\nversion = \"0.1.0\"\ndefaultTargets = [\"Demo\"]\n\n[leanOptions]\npp.unicode.fun = true\nautoImplicit = false\nrelaxedAutoImplicit = false\n\n# lean-smt before Mathlib: with Mathlib last, its versions of the packages\n# both depend on take precedence\n[[require]]\nname = \"smt\"\nscope = \"ufmg-smite\"\nrev = \"main\"\n\n[[require]]\nname = \"mathlib\"\nscope = \"leanprover-community\"\nrev = \"v4.24.0\"\n\n[[lean_lib]]\nname = \"Demo\"\n"
     },
     {
       "path": "lean-toolchain",
@@ -20,7 +21,7 @@
     },
     {
       "path": "Demo/Sample.lean",
-      "contents": "import Mathlib\n\n-- A sample theorem: the project is ready when this builds without `sorry`.\ntheorem fisher_sample (a b : ℕ) : a + b = b + a := by ring\n"
+      "contents": "import Mathlib\nimport Smt\n\n-- A sample theorem: the project is ready when this builds without `sorry`.\ntheorem fisher_sample (a b : ℕ) : a + b = b + a := by ring\n\nexample : ∀ x : Int, x + 0 = x := by smt\n"
     }
   ]
 }

@@ -1,0 +1,9 @@
+{"seq":1,"t":0.0,"kind":"attempt","data":{"goal":"foo","shape":"arith","backend":"claude-code"}}
+{"seq":2,"t":1.0,"kind":"message","data":{"role":"assistant","text":"I will write the proof and check it."}}
+{"seq":3,"t":2.0,"kind":"tool_start","data":{"name":"Edit","args":{"file_path":"Foo.lean","old_string":"theorem foo : 1 + 1 = 2 := by\n  sorry","new_string":"theorem foo : 1 + 1 = 2 := by\n  norm_num"},"call_id":"c1"}}
+{"seq":4,"t":2.5,"kind":"tool_end","data":{"name":"Edit","call_id":"c1","ok":true,"ms":5,"result":"The file Foo.lean has been updated.","preview":"The file"}}
+{"seq":5,"t":3.0,"kind":"tool_start","data":{"name":"mcp__lean-lsp__lean_diagnostic_messages","args":{"file_path":"Foo.lean"},"call_id":"c2"}}
+{"seq":6,"t":4.0,"kind":"tool_end","data":{"name":"mcp__lean-lsp__lean_diagnostic_messages","call_id":"c2","ok":true,"ms":700,"result":"{\"success\":true,\"timed_out\":false,\"items\":[]}","preview":"{\"success\":true"}}
+{"seq":7,"t":5.0,"kind":"step","data":{"n":1}}
+{"seq":8,"t":5.0,"kind":"cost","data":{"usd":0.02}}
+{"seq":9,"t":6.0,"kind":"outcome","data":{"outcome":"completed"}}

@@ -18,6 +18,7 @@ library
       Fisher.UI.Api.ClaudeAuth
       Fisher.UI.Api.Context
       Fisher.UI.Api.Live
+      Fisher.UI.Api.Runlog
       Fisher.UI.Api.Runs
       Fisher.UI.Api.Search
       Fisher.UI.Api.Sessions
@@ -133,6 +134,7 @@ test-suite fisher-ui-test
       Fisher.UI.LedgerReadSpec
       Fisher.UI.LiveSpec
       Fisher.UI.PruneSpec
+      Fisher.UI.RunlogSpec
       Fisher.UI.RunsSpec
       Fisher.UI.SearchSpec
       Fisher.UI.SessionsSpec

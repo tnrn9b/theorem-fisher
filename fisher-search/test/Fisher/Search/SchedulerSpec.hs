@@ -106,4 +106,4 @@ spec = describe "the swarm's scheduler" $ do
     [() | BudgetSpent _ <- es] `shouldBe` [()]
     srElapsed rep `shouldSatisfy` (< 3)
   it "picks nothing when every goal is decided" $
-    pickLaunch cfg0 ["a"] (Map.fromList [("a", GoalState Closed [] [] Nothing Nothing Nothing Nothing Nothing False Nothing [])]) Map.empty `shouldBe` Nothing
+    pickLaunch cfg0 ["a"] (Map.fromList [("a", GoalState Closed [] [] Nothing Nothing Nothing Nothing Nothing False False Nothing Nothing Nothing [])]) Map.empty `shouldBe` Nothing

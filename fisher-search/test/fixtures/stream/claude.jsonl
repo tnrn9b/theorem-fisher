@@ -1,0 +1,6 @@
+{"type":"system","subtype":"init","session_id":"sess-1","cwd":"/work/p","tools":["Read","Bash"],"model":"claude-sonnet"}
+{"type":"assistant","message":{"id":"msg_1","role":"assistant","content":[{"type":"text","text":"I will read the file first."}]},"session_id":"sess-1"}
+{"type":"assistant","message":{"id":"msg_1","role":"assistant","content":[{"type":"tool_use","id":"toolu_01","name":"Read","input":{"file_path":"/work/p/Main.lean"}}]},"session_id":"sess-1"}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01","content":[{"type":"text","text":"theorem main : 1 = 1 := by sorry"}],"is_error":false}]},"session_id":"sess-1"}
+{"type":"assistant","message":{"id":"msg_2","role":"assistant","content":[{"type":"text","text":"The proof is rfl."}]},"session_id":"sess-1"}
+{"type":"result","subtype":"success","is_error":false,"num_turns":2,"total_cost_usd":0.0123,"usage":{"input_tokens":1500,"output_tokens":200},"session_id":"sess-1","result":"The proof is rfl."}

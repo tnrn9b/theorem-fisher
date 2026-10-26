@@ -16,8 +16,11 @@
 -- launched it gets Auto's tactic portfolio (so the slots fill as each
 -- goal's pre-pass ends); a fill the kernel accepts closes the goal with no
 -- model. A failed attempt goes to Repair, and a partial proof it keeps
--- becomes the goal's next start. After a goal's second failure Disprove
--- runs once: a certified negation stops the goal, a counterexample goes
+-- becomes the goal's next start. With an 'SmtEnv' ('aeSmt'), Disprove's
+-- SMT source runs once after the pre-pass, before the goal's first
+-- attempt (one solver process); after a goal's second failure Disprove
+-- runs once with plausible (and the SMT source when it did not run
+-- before): a certified negation stops the goal, a counterexample goes
 -- into its next brief. If the language server fails, the automation is
 -- off for the rest of the run.
 --
@@ -26,6 +29,15 @@
 -- off at the env's limit, and every attempt on the goal carries them
 -- ahead of any repair or counterexample text. With the library on, the
 -- run's new sorry-free lemmas are saved to it at the end.
+--
+-- With a learned policy ('scGoalPolicy'), a goal with an entry orders its
+-- backends, its tiers and its pre-pass tactics by the entry, within the
+-- configured arms. Where the backends' order differs from the configured
+-- one it is preferred over the spread by usage; a goal marked to explore
+-- runs its first attempt on its second backend. Each knob whose order
+-- differs is logged once per goal at its first use ('PolicyApplied'), and
+-- so is a learned attempt budget below the configured one
+-- ('scAttemptSecs'); the tiers' and the budget's are never exploration.
 module Fisher.Search.Scheduler
   ( SearchConfig (..)
   , defaultSearchConfig
@@ -52,6 +64,9 @@ module Fisher.Search.Scheduler
   , partialStart
   , keptPartial
   , pickLaunch
+  , goalBackends
+  , goalTiers
+  , goalTactics
   , runSearch
   , runSingle
   ) where
@@ -59,24 +74,28 @@ module Fisher.Search.Scheduler
 import Control.Concurrent.Async (Async, async, cancel, waitAnyCatch)
 import Control.Exception (SomeAsyncException, SomeException, displayException, fromException, throwIO, try)
 import Control.Monad (forM_, join, void, when)
+import Data.Aeson (Value (..))
+import qualified Data.Aeson.Key as K
+import qualified Data.Aeson.KeyMap as KM
 import Data.IORef
 import Data.Char (isDigit)
-import Data.List (sortOn)
+import Data.List (elemIndex, nub, sortOn)
 import qualified Data.Map.Strict as Map
 import Control.Applicative ((<|>))
-import Data.Maybe (fromMaybe, isJust, maybeToList)
+import Data.Maybe (fromMaybe, isJust, listToMaybe, maybeToList)
 import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as T
 import Numeric (showFFloat)
 import System.Timeout (timeout)
 
+import Fisher.Learn.Policy (GoalPolicy (..))
 import Fisher.Search.Auto (AutoConfig (..), AutoFail (..), Hole (..), Lsp (..), autoGoal, holesIn)
 import Fisher.Search.Check (AxiomPolicy, LeanRun)
 import qualified Fisher.Search.Check as C
 import Fisher.Search.Child (ChildStats (..))
-import Fisher.Search.Controller (Health, ModelFailure, Stop (..), cap2000, emptyHealth, modelFailureText, noteResult, skipped, stopReasonText, tierFor)
-import Fisher.Search.Disprove (Disproof (..), disprove)
+import Fisher.Search.Controller (Health, ModelFailure, Stop (..), cap2000, emptyHealth, modelFailureText, noteResult, skipped, stopReasonText)
+import Fisher.Search.Disprove (Disproof (..), DisproveInfo (..), DisproveSource (..), SmtEnv, disprove, disproveAfterSuspect, disproveWitnessOnly, sourceName)
 import Fisher.Search.Headless (nativeBackend)
 import Fisher.Search.Lean
 import qualified Fisher.Search.Repair as R
@@ -99,13 +118,63 @@ data SearchConfig = SearchConfig
   -- ^ backends outside the tiers (fisher search: the stream backends,
   -- claude-code and codex): their attempts run on the backend's own model,
   -- with no tier, and say nothing of the tiers' health
+  , scGoalPolicy :: Map.Map Text GoalPolicy
+  -- ^ the learned policy by goal: its order of the backends, the tiers and
+  -- the pre-pass's tactics, each within the configured arms (an arm that
+  -- is not configured is ignored); a goal with no entry, or a knob with no
+  -- configured arm, runs on the configured order
+  , scPolicyLogged :: Bool
+  -- ^ log a 'PolicyApplied' event, once per goal and knob, where the
+  -- policy's order differs from the configured one
+  , scAttemptSecs :: Maybe Int
+  -- ^ the configured attempt budget in seconds, when the caller applies
+  -- the policy's lower one ('gpAttemptSecs'): a goal whose budget is
+  -- below it logs a 'PolicyApplied' of knob @attempt_secs@ at its first
+  -- launch. The scheduler itself times no attempt.
   }
   deriving (Eq, Show)
 
 defaultSearchConfig :: SearchConfig
 defaultSearchConfig = SearchConfig
   { scBackends = ["claude-code", nativeBackend], scSlots = 4, scMaxAttempts = 3, scBudget = 7200, scParallelPerGoal = True
-  , scTiers = [], scControl = False, scUntiered = [] }
+  , scTiers = [], scControl = False, scUntiered = [], scGoalPolicy = Map.empty, scPolicyLogged = True
+  , scAttemptSecs = Nothing }
+
+-- | The arms of a knob for a goal: the policy's that are configured, in
+-- its order, once each; the configured arms when none is.
+policyOrder :: [Text] -> [Text] -> [Text]
+policyOrder configured pol = case nub [x | x <- pol, x `elem` configured] of
+  [] -> configured
+  xs -> xs
+
+-- | A goal's backends, in the order its attempts prefer them.
+goalBackends :: SearchConfig -> Text -> [Text]
+goalBackends cfg g = maybe (scBackends cfg) (policyOrder (scBackends cfg) . gpBackends) (Map.lookup g (scGoalPolicy cfg))
+
+-- | A goal's tiers, as indices into 'scTiers': the policy's order, then
+-- any configured tier it leaves out (so the cascade keeps every tier).
+goalTiers :: SearchConfig -> Text -> [Int]
+goalTiers cfg g =
+  let ts = scTiers cfg
+      ord = maybe ts (policyOrder ts . gpTiers) (Map.lookup g (scGoalPolicy cfg))
+      is = [i | t <- ord, Just i <- [elemIndex t ts]]
+   in is <> [i | i <- [0 .. length ts - 1], i `notElem` is]
+
+-- | A goal's pre-pass tactics within the run's.
+goalTactics :: SearchConfig -> Text -> [Text] -> [Text]
+goalTactics cfg g tacs = maybe tacs (policyOrder tacs . gpTactics) (Map.lookup g (scGoalPolicy cfg))
+
+-- | The tier for a goal's step over its tier order, as
+-- "Fisher.Search.Controller"'s @tierFor@ does over the configured one: start at position @min k (n-1)@, else the next
+-- unskipped position above, else the highest unskipped one below.
+tierIn :: [Int] -> Health -> Int -> Maybe Int
+tierIn ord h k = (ord !!) <$> case [p | p <- [start .. n - 1], ok p] of
+  (p : _) -> Just p
+  [] -> listToMaybe [p | p <- [start - 1, start - 2 .. 0], ok p]
+  where
+    n = length ord
+    start = max 0 (min k (n - 1))
+    ok p = not (skipped h (ord !! p))
 
 data AttemptSpec = AttemptSpec
   { asId :: Int
@@ -164,10 +233,12 @@ data SearchEnv = SearchEnv
   -- only with the controller on, once the attempt is cancelled
   }
 
--- | What the automation needs: its settings and Lean's language server.
+-- | What the automation needs: its settings, Lean's language server and,
+-- for Disprove's SMT source, the solver (Nothing turns that source off).
 data AutoEnv = AutoEnv
   { aeConfig :: AutoConfig
   , aeLsp :: Lsp
+  , aeSmt :: Maybe SmtEnv
   }
 
 data GoalStatus = Open | Closed | Waiting | GaveUp | Disproved
@@ -189,6 +260,13 @@ data GoalState = GoalState
   -- brief listing its holes (lines as in the repaired file)
   , gsDisproof :: Maybe Disproof
   , gsDisproveTried :: Bool
+  , gsSmtTried :: Bool
+  -- ^ Disprove's SMT source ran before the first attempt
+  , gsDisproofSource :: Maybe DisproveSource
+  -- ^ where the disproof's counterexample came from
+  , gsDisproofWitness :: Maybe Text
+  -- ^ for a certified negation, the solver's model whose witness tactic
+  -- certified it
   , gsStall :: Maybe Text
   -- ^ the note on a stopped attempt for the goal's next brief
   , gsTiers :: [Int]
@@ -214,8 +292,13 @@ data Event
   -- ^ time, goal, seconds
   | Repaired Double Int Text Int Int Int
   -- ^ time, attempt, goal, holes before Auto, holes after, holes Auto closed
-  | GoalDisproved Double Text Text Text
-  -- ^ time, goal, @false@ or @suspect@, the negation's tactic or the counterexample
+  | GoalDisproved Double Text Text Text Text (Maybe Text)
+  -- ^ time, goal, @false@ or @suspect@, the negation's tactic or the
+  -- counterexample, the source (@plausible@ or @smt@), and for a negation
+  -- proved by a model's witness tactic the model
+  | DisproveRan Double Text Text Text
+  -- ^ time, goal, the source (@plausible@ or @smt@), its result:
+  -- @counterexample@, @none@, @unsat@, @sat@, @unknown@ or @error@
   | AutoOff Double Text
   -- ^ time, why
   | AutoTimeout Double Text Text
@@ -245,6 +328,9 @@ data Event
   -- ^ time, model, reason
   | LedgerUnread Double Int Text
   -- ^ time, attempt, reason
+  | PolicyApplied Double Text Text Text Text Value Bool
+  -- ^ time, goal, knob, the configured default, the value applied, the
+  -- evidence, whether the attempt is exploration (the learned policy)
   deriving (Eq, Show)
 
 data AttemptRecord = AttemptRecord
@@ -304,18 +390,26 @@ pickLaunch cfg order goals usage =
       idle = [g | g <- open, null (gsRunning (st g))]
       busy =
         [ g | scParallelPerGoal cfg, g <- open, not (null (gsRunning (st g)))
-        , length (gsRunning (st g)) < length (scBackends cfg) ]
+        , length (gsRunning (st g)) < length (goalBackends cfg g) ]
       byAttempts gs = sortOn (\(i, g) -> (length (gsTried (st g)) + length (gsRunning (st g)), i)) (zip [0 :: Int ..] gs)
       choose gs = case byAttempts gs of
         [] -> Nothing
         ((_, g) : _) -> fmap (\b -> (g, b)) (backendFor g)
+      -- a goal's backends in its policy's order; where that differs from
+      -- the configured order it is preferred over the spread by usage, and
+      -- an exploring goal's first attempt runs on its second backend
       backendFor g =
         let s = st g
-            free = [b | b <- scBackends cfg, b `notElem` map snd (gsRunning s)]
-            score b = (b `elem` gsTried s, length (filter (== b) (gsTried s)), Map.findWithDefault 0 b usage)
-         in case sortOn (\(i, b) -> (score b, i)) (zip [0 :: Int ..] free) of
-              [] -> Nothing
-              ((_, b) : _) -> Just b
+            cands = goalBackends cfg g
+            applied = cands /= scBackends cfg
+            explore = maybe False gpExplore (Map.lookup g (scGoalPolicy cfg))
+            free = [b | b <- cands, b `notElem` map snd (gsRunning s)]
+            score b = (b `elem` gsTried s, length (filter (== b) (gsTried s)), if applied then 0 else Map.findWithDefault 0 b usage)
+         in case cands of
+              _ : second : _ | explore, null (gsTried s), null (gsRunning s) -> Just second
+              _ -> case sortOn (\(i, b) -> (score b, i)) (zip [0 :: Int ..] free) of
+                [] -> Nothing
+                ((_, b) : _) -> Just b
    in case choose idle of
         Just x -> Just x
         Nothing -> choose busy
@@ -348,6 +442,8 @@ data St = St
   -- ^ 'Escalated' events logged
   , stStallUsed :: Map.Map Int Text
   -- ^ the stall note each running attempt took into its brief
+  , stPolicyLogged :: Set.Set (Text, Text)
+  -- ^ the goals and knobs whose 'PolicyApplied' is logged
   }
 
 -- | The brief for an attempt that starts from a repaired proof: each hole
@@ -374,8 +470,9 @@ shiftBrief d b = T.intercalate "\n" (map shift (T.splitOn "\n" b))
 attemptBrief :: Text -> Text -> [Text] -> Text
 attemptBrief retrieved brief hint = T.intercalate "\n\n" (filter (not . T.null) (retrieved : brief : hint))
 
-suspectBrief :: Text -> Text
-suspectBrief c = "A counterexample search (plausible) suggests this goal may be false:\n" <> c
+suspectBrief :: DisproveSource -> Text -> Text
+suspectBrief ViaPlausible c = "A counterexample search (plausible) suggests this goal may be false:\n" <> c
+suspectBrief ViaSmt c = "An SMT solver's countermodel suggests this goal may be false:\n" <> c
 
 -- | The note on a stopped attempt for the goal's next brief: the stop,
 -- then the prover's last errors on the file and the attempt's last
@@ -473,13 +570,13 @@ runSearch cfg env base0 = do
       t0 <- seNow env
       let fresh = GoalState
             { gsStatus = Open, gsTried = [], gsRunning = [], gsBy = Nothing, gsAt = Nothing, gsClosedBy = Nothing
-            , gsPartial = Nothing, gsDisproof = Nothing, gsDisproveTried = False, gsStall = Nothing, gsTiers = [] }
+            , gsPartial = Nothing, gsDisproof = Nothing, gsDisproveTried = False, gsSmtTried = False, gsDisproofSource = Nothing, gsDisproofWitness = Nothing, gsStall = Nothing, gsTiers = [] }
       ref <- newIORef St
         { stGoals = Map.fromList [(g, fresh) | g <- order], stBase = base0, stNext = 1, stUsage = Map.empty
         , stRunning = [], stRecords = [], stFromPartial = [], stRepairs = 0, stPrePassed = Set.empty
         , stRetrieved = Map.empty, stHelpers = Map.empty, stRetried = Set.empty
         , stHealth = emptyHealth, stLastTier = Map.empty, stModelErrors = Map.empty, stEscalations = 0
-        , stStallUsed = Map.empty }
+        , stStallUsed = Map.empty, stPolicyLogged = Set.empty }
       autoRef <- newIORef (seAuto env)
       track <- newIORef noAutoTrack
       -- one retriever for the run: its corpora are shared by every goal
@@ -518,7 +615,7 @@ runSearch cfg env base0 = do
           startFor g gs base retrieved =
             let fromPartial = gsPartial gs >>= \p -> partialStart g p base
                 hint = (case gsDisproof gs of
-                  Just (DSuspect c) -> [suspectBrief c]
+                  Just (DSuspect c) -> [suspectBrief (fromMaybe ViaPlausible (gsDisproofSource gs)) c]
                   _ -> []) <> maybeToList (gsStall gs)
                 (start, brief) = fromMaybe (base, "") fromPartial
              in (start, attemptBrief retrieved brief hint, isJust fromPartial)
@@ -554,6 +651,7 @@ runSearch cfg env base0 = do
                 Just (g, _) | not (Set.member g (stPrePassed s)) -> do
                   modifyIORef' ref (\x -> x {stPrePassed = Set.insert g (stPrePassed x)})
                   prePass g
+                  earlySmt g
                   launchAll
                 Just (g, b) -> do
                   s0 <- readIORef ref
@@ -582,8 +680,13 @@ runSearch cfg env base0 = do
                         , stLastTier = maybe id (Map.insert g) i (stLastTier s1)
                         , stStallUsed = maybe id (Map.insert (asId spec)) (gsStall (stGoals s1 Map.! g)) (stStallUsed s1) }
                       seLog env (Launched t (asId spec) g b)
+                      logPolicy g "backends" (scBackends cfg) (goalBackends cfg g) explores
+                      forM_ (learnedBudget g) $ \(dflt, secs) ->
+                        logPolicy g "attempt_secs" [T.pack (show dflt)] [T.pack (show secs)] (const False)
                       forM_ ((,) <$> i <*> asModel spec) $ \(k, m) -> do
                         seLog env (TierChosen t (asId spec) g k m)
+                        -- exploration is a choice of backend, never of tier
+                        logPolicy g "tiers" (scTiers cfg) (map (scTiers cfg !!) (goalTiers cfg g)) (const False)
                         -- any change of a goal's tier is an escalation,
                         -- also one made because a tier was skipped; the
                         -- report's @escalations@ counts these events
@@ -592,10 +695,32 @@ runSearch cfg env base0 = do
                             modifyIORef' ref (\x -> x {stEscalations = stEscalations x + 1})
                             seLog env (Escalated t g k0 k)
                       launchAll
-          -- Nothing with no tiers; Just Nothing with every tier skipped
+          -- Nothing with no tiers; Just Nothing with every tier skipped.
+          -- A goal with a tier policy climbs its own order.
           tierOf s g
             | null (scTiers cfg) = Nothing
-            | otherwise = Just (tierFor (length (scTiers cfg)) (stHealth s) (length (gsTried (stGoals s Map.! g))))
+            | otherwise = Just (tierIn (goalTiers cfg g) (stHealth s) (length (gsTried (stGoals s Map.! g))))
+          -- whether a goal's attempts are exploration (the policy's flag)
+          explores = maybe False gpExplore . flip Map.lookup (scGoalPolicy cfg)
+          -- the configured budget and the goal's learned one, when that is lower
+          learnedBudget g = do
+            dflt <- scAttemptSecs cfg
+            secs <- Map.lookup g (scGoalPolicy cfg) >>= gpAttemptSecs
+            if secs < dflt then Just (dflt, secs) else Nothing
+          -- the policy's order of a knob at its first use for a goal,
+          -- logged once and only where it differs from the configured one
+          logPolicy g knob dflt applied explore = do
+            s <- readIORef ref
+            when (scPolicyLogged cfg && applied /= dflt && not (Set.member (g, knob) (stPolicyLogged s))) $ do
+              modifyIORef' ref (\x -> x {stPolicyLogged = Set.insert (g, knob) (stPolicyLogged x)})
+              t <- elapsed
+              seLog env (PolicyApplied t g knob (T.intercalate "," dflt) (T.intercalate "," applied) (evidenceOf g knob) (explore g))
+          -- the policy's evidence for a knob: its part of the goal's
+          -- evidence, else all of it
+          evidenceOf g knob = case gpEvidence <$> Map.lookup g (scGoalPolicy cfg) of
+            Just (Object o) | Just v <- KM.lookup (K.fromText knob) o -> v
+            Just v -> v
+            Nothing -> Null
           tiered b = b `notElem` scUntiered cfg
           tiersOut s = not (null (scTiers cfg)) && all (skipped (stHealth s)) [0 .. length (scTiers cfg) - 1]
           -- every tier skipped and no backend outside the tiers: nothing can run
@@ -711,28 +836,57 @@ runSearch cfg env base0 = do
           isKept = \case
             C.Rejected _ -> False
             _ -> True
-          -- Disprove, once, after a goal's second failure
+          -- Disprove, once, after a goal's second failure: plausible, and
+          -- the SMT source unless it ran before the first attempt. A model
+          -- the early step left uncertified (it probes the witness tactic
+          -- only) gets 'certifyTactics' here once, whatever plausible says
           tryDisprove g = do
             gs <- goalNow g
             on <- readIORef autoRef
             when (isJust on && gsStatus gs == Open && length (gsTried gs) >= 2 && not (gsDisproveTried gs)) $ do
               modifyGoal g (\x -> x {gsDisproveTried = True})
-              base <- stBase <$> readIORef ref
-              r <- withAuto "disprove" g $ \ae ->
-                if acDisprove (aeConfig ae)
-                  then disprove (aeConfig ae) (aeLsp ae) (seLean env) (sePolicy env) (seRoot env) (seRel env) base g
-                  else pure (Left Missed)
-              t <- elapsed
-              case r of
-                Just (Right d@(DFalse tac)) -> do
-                  modifyGoal g (\x -> x {gsStatus = Disproved, gsDisproof = Just d})
-                  seLog env (GoalDisproved t g "false" tac)
-                  cancelOthers "the goal was disproved" g
-                Just (Right d@(DSuspect c)) -> do
-                  modifyGoal g (\x -> x {gsDisproof = Just d})
-                  seLog env (GoalDisproved t g "suspect" c)
-                Just (Right DUnknown) -> modifyGoal g (\x -> x {gsDisproof = Just DUnknown})
-                _ -> pure ()
+              let smtSuspect = case (gsDisproof gs, gsDisproofSource gs) of
+                    (Just (DSuspect _), Just ViaSmt) -> True
+                    _ -> False
+              disproveWith (if smtSuspect then disproveAfterSuspect else disprove) g
+                ([ViaPlausible] <> [ViaSmt | not (gsSmtTried gs)])
+          -- Disprove's SMT source, once, before a goal's first attempt,
+          -- when the run has a solver ('aeSmt'); a model is certified by
+          -- its witness tactic only, so a goal pays one probe at most here
+          earlySmt g = do
+            gs <- goalNow g
+            on <- readIORef autoRef
+            when (gsStatus gs == Open && maybe False (\ae -> isJust (aeSmt ae) && acDisprove (aeConfig ae)) on) $ do
+              modifyGoal g (\x -> x {gsSmtTried = True})
+              disproveWith disproveWitnessOnly g [ViaSmt]
+          -- Disprove ('disprove' or 'disproveWitnessOnly') with these
+          -- sources on the current base: an event per source that ran,
+          -- then the verdict. A certified negation stops the goal; a
+          -- counterexample is kept for its next brief; an unknown keeps a
+          -- counterexample found before.
+          disproveWith how g sources = do
+            base <- stBase <$> readIORef ref
+            r <- withAuto "disprove" g $ \ae ->
+              if acDisprove (aeConfig ae)
+                then how (aeSmt ae) sources (aeConfig ae) (aeLsp ae) (seLean env) (sePolicy env) (seRoot env) (seRel env) base g
+                else pure (Left Missed)
+            t <- elapsed
+            case r of
+              Just (Right (d, src, info)) -> do
+                forM_ (diSteps info) $ \(s, res) -> seLog env (DisproveRan t g (sourceName s) res)
+                let srcName = maybe "" sourceName src
+                case d of
+                  DFalse tac -> do
+                    modifyGoal g (\x -> x {gsStatus = Disproved, gsDisproof = Just d, gsDisproofSource = src, gsDisproofWitness = diWitness info})
+                    seLog env (GoalDisproved t g "false" tac srcName (diWitness info))
+                    cancelOthers "the goal was disproved" g
+                  DSuspect c -> do
+                    modifyGoal g (\x -> x {gsDisproof = Just d, gsDisproofSource = src, gsDisproofWitness = Nothing})
+                    seLog env (GoalDisproved t g "suspect" c srcName Nothing)
+                  DUnknown -> modifyGoal g $ \x -> case gsDisproof x of
+                    Just (DSuspect _) -> x
+                    _ -> x {gsDisproof = Just DUnknown}
+              _ -> pure ()
           failed spec = do
             modifyGoal (asGoal spec) (\gs -> gs {gsTried = gsTried gs <> [asBackend spec]})
             tryDisprove (asGoal spec)
@@ -749,7 +903,11 @@ runSearch cfg env base0 = do
           prePass g = do
             s <- readIORef ref
             t1 <- elapsed
-            r <- withAuto "auto" g $ \ae -> autoGoal (aeConfig ae) (aeLsp ae) elapsed (stBase s) g
+            r <- withAuto "auto" g $ \ae -> do
+              let ac = aeConfig ae
+                  tacs = goalTactics cfg g (acTactics ac)
+              logPolicy g "tactics" (acTactics ac) tacs (const False)
+              autoGoal ac {acTactics = tacs} (aeLsp ae) elapsed (stBase s) g
             t2 <- elapsed
             case r of
               Just (Right (filled, snips)) -> do
@@ -924,7 +1082,7 @@ runSingle env backend base0 = do
       seLog env (Finished t1 1 "*" backend (arNote ar) (arStats ar) Nothing)
       let fresh = GoalState
             { gsStatus = Open, gsTried = [backend], gsRunning = [], gsBy = Nothing, gsAt = Nothing, gsClosedBy = Nothing
-            , gsPartial = Nothing, gsDisproof = Nothing, gsDisproveTried = False, gsStall = Nothing, gsTiers = [] }
+            , gsPartial = Nothing, gsDisproof = Nothing, gsDisproveTried = False, gsSmtTried = False, gsDisproofSource = Nothing, gsDisproofWitness = Nothing, gsStall = Nothing, gsTiers = [] }
           go base acc [] = pure (base, acc)
           go base acc (g : gs) = case arText ar of
             Nothing -> go base ((g, fresh {gsStatus = GaveUp}) : acc) gs

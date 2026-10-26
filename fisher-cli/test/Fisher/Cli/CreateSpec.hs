@@ -71,7 +71,7 @@ fakeDeps tmp cfg answer = do
         , cdAsk = \q -> modifyIORef' asked (<> [q]) >> pure answer
         , cdConfig = cfg
         , cdEnv = [("PATH", bin <> ":" <> path)]
-        , cdResolver = \_ -> pure (Right "v4.24.0")
+        , cdResolver = \w _ -> pure (Right (if w == "smt" then "abc1234" else "v4.24.0"))
         , cdCheck = \_ _ -> pure (Right ())
         , cdTrustFile = tmp </> "trusted.json"
         , cdScale = 60 }
@@ -167,15 +167,66 @@ spec = do
       doesDirectoryExist target `shouldReturn` False
       preflight [("PATH", tmp </> "nowhere")] `shouldReturn` Left "elan is not on PATH: install elan"
       -- offline and without the tools: the tools are named, not the release
-      createProjectWith d {cdEnv = [("PATH", "")], cdResolver = \_ -> pure (Left "offline")} (request target) {crTemplate = Just "lean"}
+      createProjectWith d {cdEnv = [("PATH", "")], cdResolver = \_ _ -> pure (Left "offline")} (request target) {crTemplate = Just "lean"}
         `shouldReturn` Left "elan is not on PATH: install elan"
 
     it "writes nothing when the latest release cannot be resolved" $ withHomes $ \tmp -> do
       (d, _) <- fakeDeps tmp (object []) False
       let target = tmp </> "Offline"
-      createProjectWith d {cdResolver = \_ -> pure (Left "no network")} (request target) {crTemplate = Just "lean"}
+      createProjectWith d {cdResolver = \_ _ -> pure (Left "no network")} (request target) {crTemplate = Just "lean"}
         `shouldReturn` Left "could not resolve the latest release; pass --var lean=v4.x"
       doesDirectoryExist target `shouldReturn` False
+
+    it "renders the smt revision the resolver gives into lean-mathlib's lakefile" $ withHomes $ \tmp -> do
+      (d, _) <- fakeDeps tmp (object []) False
+      calls <- newIORef []
+      let target = tmp </> "Smt"
+          resolver w done = do
+            modifyIORef' calls (<> [(w, done)])
+            pure (Right (if w == "smt" then "abc1234" else "v4.34.0"))
+      createProjectWith d {cdResolver = resolver} (request target) {crTemplate = Just "lean-mathlib", crBuild = False}
+        `shouldReturn` Right target
+      lakefile <- readFile' (target </> "lakefile.toml")
+      -- the smt block comes before Mathlib's, so Mathlib's pins take precedence
+      lakefile `shouldSatisfy` isInfixOf "name = \"smt\"\nscope = \"ufmg-smite\"\nrev = \"abc1234\"\n\n[[require]]\nname = \"mathlib\"\nscope = \"leanprover-community\"\nrev = \"v4.34.0\"\n"
+      readFile' (target </> "Smt" </> "Sample.lean") >>= (`shouldSatisfy` isInfixOf "import Smt\n")
+      readIORef calls `shouldReturn` [("mathlib", [("project", "Smt")]), ("smt", [("project", "Smt"), ("mathlib", "v4.34.0")])]
+
+    it "a resolver giving none renders no smt block and no import Smt" $ withHomes $ \tmp -> do
+      (d, _) <- fakeDeps tmp (object []) False
+      let target = tmp </> "NoSmt"
+          resolver w _ = pure (Right (if w == "smt" then "none" else "v4.35.0"))
+      createProjectWith d {cdResolver = resolver} (request target) {crTemplate = Just "lean-mathlib", crBuild = False}
+        `shouldReturn` Right target
+      lakefile <- readFile' (target </> "lakefile.toml")
+      lakefile `shouldNotSatisfy` isInfixOf "smt"
+      lakefile `shouldNotSatisfy` isInfixOf "{{"
+      lakefile `shouldSatisfy` isInfixOf "name = \"mathlib\"\nscope = \"leanprover-community\"\nrev = \"v4.35.0\"\n"
+      sample <- readFile' (target </> "NoSmt" </> "Sample.lean")
+      sample `shouldNotSatisfy` isInfixOf "Smt"
+      sample `shouldNotSatisfy` isInfixOf "by smt"
+
+    it "--var smt=main renders main without a fetch" $ withHomes $ \tmp -> do
+      (d, _) <- fakeDeps tmp (object []) False
+      calls <- newIORef []
+      let target = tmp </> "Main"
+          resolver w _ = modifyIORef' calls (<> [w]) >> pure (Right "v4.34.0")
+      createProjectWith d {cdResolver = resolver} (request target)
+        { crTemplate = Just "lean-mathlib", crVars = [("smt", "main")], crBuild = False }
+        `shouldReturn` Right target
+      readFile' (target </> "lakefile.toml") >>= (`shouldSatisfy` isInfixOf "name = \"smt\"\nscope = \"ufmg-smite\"\nrev = \"main\"\n")
+      readIORef calls `shouldReturn` ["mathlib"]
+
+    it "resolves smt from Reservoir on the resolved mathlib, else none with a warning" $ do
+      said <- newIORef []
+      let say l = modifyIORef' said (<> [l])
+          builds = Right [("c35", "leanprover/lean4:v4.35.0"), ("c34", "leanprover/lean4:v4.34.0")]
+      templateResolver say (pure builds) "smt" [("project", "D"), ("mathlib", "v4.34.0")] `shouldReturn` Right "c34"
+      readIORef said `shouldReturn` []
+      templateResolver say (pure (Left "curl exited with 6")) "smt" [("mathlib", "v4.34.0")] `shouldReturn` Right "none"
+      readIORef said `shouldReturn` ["Warning: could not read Reservoir's builds of lean-smt (curl exited with 6); add it later with fisher project add smt"]
+      templateResolver say (pure builds) "smt" [("mathlib", "v4.20.0")] `shouldReturn` Right "none"
+      readIORef said >>= (`shouldEndWith` ["Warning: lean-smt has no build for leanprover/lean4:v4.20.0; add it later with fisher project add smt"])
 
     it "runs the steps, checks, and ends Ready with the events ending ready" $ withHomes $ \tmp -> do
       let tdir = tmp </> "tpl"

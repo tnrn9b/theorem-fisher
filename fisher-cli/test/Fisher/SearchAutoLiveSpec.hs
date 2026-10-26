@@ -122,7 +122,7 @@ searchIn d file ac run = do
   let env = SearchEnv run (lakeLeanRun 600) (AxiomPolicy standardAxioms False) d "A.lean"
               (realToFrac <$> getPOSIXTime)
               (\e -> TIO.putStrLn ("      " <> eventLine e) >> modifyIORef events (e :))
-              (\_ -> pure ()) (Just (AutoEnv ac lsp)) Nothing (\_ -> pure Nothing)
+              (\_ -> pure ()) (Just (AutoEnv ac lsp Nothing)) Nothing (\_ -> pure Nothing)
       cfg = defaultSearchConfig {scBackends = ["scripted", "scripted2"], scSlots = 1, scMaxAttempts = 2, scBudget = 1500, scParallelPerGoal = False}
   r <- timeout 1700000000 (runSearch cfg env file) `finally` lspClose lsp
   es <- reverse <$> readIORef events

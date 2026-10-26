@@ -43,8 +43,10 @@ import Fisher.Search.Lean
 -- it) in, the exit code and the merged output out.
 newtype LeanRun = LeanRun {runLean :: FilePath -> FilePath -> IO (Int, Text)}
 
--- | @lake env lean FILE@ in the project, with a time limit in seconds
--- (the whole process group is killed at the limit). Output is read as
+-- | @lake lean FILE@ in the project, with a time limit in seconds (the
+-- whole process group is killed at the limit). @lake lean@ loads the
+-- workspace's native libraries (lean-smt's cvc5, say), which @lake env
+-- lean@ does not. Output is read as
 -- UTF-8 whatever the locale, stdout and stderr together.
 lakeLeanRun :: Int -> LeanRun
 lakeLeanRun = lakeLeanRunWith "lake"
@@ -54,7 +56,7 @@ lakeLeanRun = lakeLeanRunWith "lake"
 lakeLeanRunWith :: FilePath -> Int -> LeanRun
 lakeLeanRunWith lake secs = LeanRun $ \root rel -> do
   (readEnd, writeEnd) <- createPipe
-  (_, _, _, ph) <- createProcess (proc lake ["env", "lean", rel])
+  (_, _, _, ph) <- createProcess (proc lake ["lean", rel])
     { cwd = Just root, std_in = NoStream, std_out = UseHandle writeEnd, std_err = UseHandle writeEnd, create_group = True }
   outVar <- newEmptyMVar
   _ <- forkIO (BS.hGetContents readEnd >>= putMVar outVar)
