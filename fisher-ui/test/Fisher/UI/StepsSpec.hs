@@ -132,8 +132,9 @@ withSteps k = withSystemTempDirectory "fisher-ui-steps" $ \tmp0 -> do
     T.unlines
       [ "#!/bin/sh"
       , "pwd >> '" <> T.pack count <> "'"
-      , "if grep -q SLOW \"$3\"; then sleep 2; fi"
-      , "if grep -q BAD \"$3\"; then echo \"$PWD/$3:2:2: error: unknown tactic\"; exit 1; fi"
+      , "for f in \"$@\"; do :; done"
+      , "if grep -q SLOW \"$f\"; then sleep 2; fi"
+      , "if grep -q BAD \"$f\"; then echo \"$PWD/$f:2:2: error: unknown tactic\"; exit 1; fi"
       , "exit 0" ]
   TIO.writeFile fake $
     T.unlines
