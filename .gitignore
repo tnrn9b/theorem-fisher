@@ -14,6 +14,7 @@ _docs/
 .DS_Store
 
 dist
+!ui/dist/
 dist-*
 cabal-dev
 *.o
@@ -50,6 +51,7 @@ bin/
 build/
 develop-eggs/
 dist/
+!ui/dist/
 downloads/
 eggs/
 .eggs/

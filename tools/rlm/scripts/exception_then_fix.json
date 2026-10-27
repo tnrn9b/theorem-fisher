@@ -1,0 +1,15 @@
+{
+ "name": "exception_then_fix",
+ "context": [
+  "alpha beta",
+  "gamma delta"
+ ],
+ "query": "How many words are in the context?",
+ "max_iterations": 5,
+ "replies": [
+  "Count them.\n```repl\nwords = sum(len(c.split()) for c in context)\nprint(wrods)\n```",
+  "A typo; was words kept?\n```repl\nprint(words)\n```",
+  "Not kept; count again.\n```repl\nwords = sum(len(c.split()) for c in context)\nprint(words)\nanswer['content'] = str(words)\nanswer['ready'] = True\n```"
+ ],
+ "sub": "SUB:"
+}

@@ -1,0 +1,10 @@
+{
+ "name": "two_blocks",
+ "context": "one two three",
+ "query": "Count the words.",
+ "max_iterations": 4,
+ "replies": [
+  "First store, then print.\n```repl\nn = len(context.split())\n```\nand then\n```repl\nprint(n)\nanswer['content'] = str(n)\nanswer['ready'] = True\n```"
+ ],
+ "sub": "SUB:"
+}

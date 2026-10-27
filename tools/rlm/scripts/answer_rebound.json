@@ -1,0 +1,11 @@
+{
+ "name": "answer_rebound",
+ "context": "The sky is blue.",
+ "query": "What colour is the sky?",
+ "max_iterations": 4,
+ "replies": [
+  "```repl\nprint(context)\n```",
+  "```repl\nanswer = {'content': 'blue', 'ready': True}\n```"
+ ],
+ "sub": "SUB:"
+}

@@ -1,0 +1,11 @@
+{
+ "name": "show_vars",
+ "context": "x",
+ "query": "List the variables.",
+ "max_iterations": 4,
+ "replies": [
+  "```repl\na = 1\nb = [1, 2]\nprint(SHOW_VARS())\n```",
+  "```repl\nprint(SHOW_VARS())\nanswer['content'] = 'listed'\nanswer['ready'] = True\n```"
+ ],
+ "sub": "SUB:"
+}
