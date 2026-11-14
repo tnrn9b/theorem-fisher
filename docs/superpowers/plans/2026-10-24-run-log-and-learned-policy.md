@@ -1,0 +1,3 @@
+# Run Log and Learned Policy Implementation Plan (record only)
+
+The plan that drove this work (24 and 25 Oct 2026, 33 commits, master 9ba3162..15beac9) was committed only in a cloud mirror that no longer exists, and its text could not be recovered on 14 Nov 2026. What remains: the reconstructed spec `docs/superpowers/specs/2026-10-24-run-log-and-learned-policy-design.md`, the user documentation `docs/learn.md`, and the project note on the run log. The task sequence, from the commit history: the store and redaction; the shape key; the writers (native, cron, search, swarm import); the statistics; the policy and its application in `fisher search`; the `fisher runs` and `fisher learn` commands; the web pages; docs and the bench switch.
