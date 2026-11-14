@@ -94,14 +94,17 @@ parts = PromptPart . T.intercalate "\n\n" . map T.stripEnd . filter (not . T.nul
 -- @"assistant"@) and its text.
 type Prompt = [(Text, PromptPart)]
 
--- | The roles whose replies may be put into a prompt.
+-- | The roles whose replies may be put into a prompt. There is no default
+-- method, so every instance has to say how it puts a reply into a prompt.
+-- The 'Judge instance is deliberately absent: a judge's text reaches a
+-- prompt only as a 'Candidate', through the lessons gate ('candidate',
+-- which redacts and sanitises it), never directly.
 class Promptable (r :: Role) where
   toPrompt :: Said r -> PromptPart
-  toPrompt = PromptPart . saidText
 
-instance Promptable 'Worker
-instance Promptable 'Planner
-instance Promptable 'Verifier
+instance Promptable 'Worker where toPrompt = PromptPart . saidText
+instance Promptable 'Planner where toPrompt = PromptPart . saidText
+instance Promptable 'Verifier where toPrompt = PromptPart . saidText
 
 -- | Text that may become a lesson.
 newtype Candidate = Candidate Text deriving (Eq, Show)
