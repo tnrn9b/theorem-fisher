@@ -22,12 +22,11 @@ import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as T
 
+import Fisher.Role (Role (..))
 import Fisher.Search.Check (AxiomPolicy, LeanRun, Verdict)
 import Fisher.Search.Review
 import Fisher.Search.Sketch
 import Fisher.Search.Split
-
-data Role = Worker | Planner | Verifier | Judge deriving (Eq, Ord, Show)
 
 data AskError = AskFailed Text | AskNoCredit deriving (Eq, Show)
 

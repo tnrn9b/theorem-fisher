@@ -66,6 +66,8 @@ library
       Fisher.Rich.Render
       Fisher.Rich.Style
       Fisher.Rich.Text
+      Fisher.Role
+      Fisher.Role.Internal
       Fisher.Runlog
       Fisher.Runlog.Stream
       Fisher.Sha256
@@ -139,6 +141,7 @@ test-suite fisher-core-test
       Fisher.PyValueSpec
       Fisher.RedactSpec
       Fisher.RichSpec
+      Fisher.RoleSpec
       Fisher.RunlogSpec
       Fisher.ShlexTermSpec
       Fisher.Smt.LakeSpec
