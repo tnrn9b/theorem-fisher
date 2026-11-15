@@ -11,7 +11,7 @@ import Test.QuickCheck
 import Fisher.Lessons.File (sanitiseLesson)
 import Fisher.Redact (redactSensitiveText)
 import Fisher.Role
-import Fisher.Role.Internal (said')
+import Fisher.Role.Internal (said', untilStable)
 
 -- | joinBrief's rule, copied here so the property does not depend on
 -- fisher-search: stripEnd each, drop the blank ones, two newlines between.
@@ -58,6 +58,18 @@ spec = do
         `shouldBe` Just "Set TOKEN=*** before building."
       fmap candidateText (candidate (worker "Set GITHUB_TOKEN=abcdefghijklmnopqr before building."))
         `shouldBe` Just "Set GITHUB_TOKEN=*** before building."
+    it "the redaction fails closed: a text still changing after three passes gives Nothing" $ do
+      -- a stub redactor that changes the text on every pass while any is
+      -- left (no input to redactSensitiveText is known to need a fourth
+      -- pass; the gate's own redactor is untilStable 3 redactSensitiveText)
+      let shrink = T.drop 1
+      untilStable 3 shrink "" `shouldBe` Just ""
+      untilStable 3 shrink "ab" `shouldBe` Just ""
+      untilStable 3 shrink "abc" `shouldBe` Just ""
+      untilStable 3 shrink "abcd" `shouldBe` Nothing
+      untilStable 3 shrink "abcdefgh" `shouldBe` Nothing
+      untilStable 3 id "unchanged" `shouldBe` Just "unchanged"
+      untilStable 3 redactSensitiveText "Set TOKEN=abcdefghijklmnopqrstuvwxyz0123 first." `shouldBe` Just "Set TOKEN=*** first."
     it "template keeps a clean text" $
       fmap candidateText (template "use omega for linear goals over Nat") `shouldBe` Just "use omega for linear goals over Nat"
     it "template is checked as candidate is" $ do

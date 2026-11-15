@@ -38,7 +38,7 @@ import qualified Data.Text as T
 
 import Fisher.Lessons.File (sanitiseLesson)
 import Fisher.Redact (redactSensitiveText)
-import Fisher.Role.Internal (PromptPart (..), Role (..), Said (..), said')
+import Fisher.Role.Internal (PromptPart (..), Role (..), Said (..), said', untilStable)
 import Fisher.Role.Part (oneLinePart, partText, parts, source, static, tool, user)
 
 -- | The run log's spelling of a role.
@@ -71,9 +71,18 @@ type Prompt = [(Text, PromptPart)]
 -- method, so every instance has to say how it puts a reply into a prompt.
 -- The 'Judge instance is deliberately absent: a judge's text reaches a
 -- prompt only as a 'Candidate', through the lessons gate ('candidate',
--- which redacts and sanitises it), never directly.
-class Promptable (r :: Role) where
+-- which redacts and sanitises it), never directly. The class is sealed:
+-- its superclass 'Sealed' is not exported, so an instance written outside
+-- this module (an orphan @Promptable 'Judge@) does not compile.
+class Sealed r => Promptable (r :: Role) where
   toPrompt :: Said r -> PromptPart
+
+-- | The roles that may have a 'Promptable' instance; not exported.
+class Sealed (r :: Role)
+
+instance Sealed 'Worker
+instance Sealed 'Planner
+instance Sealed 'Verifier
 
 instance Promptable 'Worker where toPrompt = PromptPart . saidText
 instance Promptable 'Planner where toPrompt = PromptPart . saidText
@@ -93,25 +102,21 @@ template :: Text -> Maybe Candidate
 template = checked
 
 -- The gate: redacted to a fixpoint, then sanitised; 'Nothing' when the
--- sanitiser refuses it or nothing is left.
+-- redaction does not settle, the sanitiser refuses it or nothing is left.
 checked :: Text -> Maybe Candidate
-checked raw
-  | T.null (T.strip redacted) = Nothing
-  | otherwise = Candidate <$> sanitiseLesson redacted
-  where
-    redacted = redactFixpoint raw
+checked raw = do
+  redacted <- redactFixpoint raw
+  if T.null (T.strip redacted) then Nothing else Candidate <$> sanitiseLesson redacted
 
 -- 'redactSensitiveText' is not idempotent: its env-assignment and JSON
 -- field patterns match their own masks again (@TOKEN=abcdef...0123@, a
 -- long token's mask, is itself a short token and becomes @TOKEN=***@), so
 -- one pass can leave a token's first 6 and last 4 characters in a lesson.
--- Redact until the text stops changing, at most 3 passes.
-redactFixpoint :: Text -> Text
-redactFixpoint = go (3 :: Int)
-  where
-    go n t
-      | n <= 0 = t
-      | otherwise = let t' = redactSensitiveText t in if t' == t then t else go (n - 1) t'
+-- Redact until the text stops changing, at most 3 passes; a text a fourth
+-- pass would still change gives 'Nothing' (fail closed), so no partly
+-- redacted text becomes a lesson.
+redactFixpoint :: Text -> Maybe Text
+redactFixpoint = untilStable 3 redactSensitiveText
 
 candidateText :: Candidate -> Text
 candidateText (Candidate t) = t

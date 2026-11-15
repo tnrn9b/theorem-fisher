@@ -69,8 +69,16 @@ runRole c (AgentM m) = m c
 withCtx :: (RoleCtx r -> IO a) -> AgentM r a
 withCtx = AgentM
 
--- | The roles that may check a sketch with the kernel.
-class CanCheck (r :: Role)
+-- | The roles that may check a sketch with the kernel. Sealed: its
+-- superclass 'Sealed' is not exported, so an instance written outside this
+-- module (an orphan @CanCheck 'Judge@) does not compile.
+class Sealed r => CanCheck (r :: Role)
+
+-- | The roles that may have a 'CanCheck' instance; not exported.
+class Sealed (r :: Role)
+
+instance Sealed 'Planner
+instance Sealed 'Verifier
 
 instance CanCheck 'Planner
 instance CanCheck 'Verifier

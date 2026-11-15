@@ -263,26 +263,23 @@ data Ctx = Ctx
   , cHarvest :: IO (Int, Int)
   -- ^ the library's harvest, run once ('harvestRun')
   , cRoles :: RoleCtxs
-  , cRoleSpent :: IORef (Map.Map Role Double)
-  -- ^ what the role contexts were charged ('roleCtx'); the run's dollars
-  -- are the jobs' 'Asked' dollars ('addCost'), and nothing reads this yet
   }
 
 -- | The role contexts of the model-call jobs, built once from 'geAsk' and
--- the run's checker. Their spend writer adds to 'cRoleSpent'; their event
--- writer logs nothing (the run's events are the loop's).
+-- the run's checker. Their spend writer does nothing: the run's dollars
+-- are the jobs' 'Asked' dollars, charged by role where a job's result is
+-- applied ('addCost'). Their event writer logs nothing (the run's events
+-- are the loop's).
 data RoleCtxs = RoleCtxs
   { rcPlanner :: RoleCtx 'Planner
   , rcVerifier :: RoleCtx 'Verifier
   }
 
--- | The role contexts over the run's 'geAsk' and checker, charging
--- @counter@. Lazily, so a call's dollars are first evaluated where its
--- 'Asked' dollars are charged ('addCost'), as before.
-roleCtxs :: GraphEnv -> Checker -> IORef (Map.Map Role Double) -> RoleCtxs
-roleCtxs env ck counter = RoleCtxs (roleCtx (geAsk env) (Just ck) spend noEvent) (roleCtx (geAsk env) (Just ck) spend noEvent)
+-- | The role contexts over the run's 'geAsk' and checker.
+roleCtxs :: GraphEnv -> Checker -> RoleCtxs
+roleCtxs env ck = RoleCtxs (roleCtx (geAsk env) (Just ck) noSpend noEvent) (roleCtx (geAsk env) (Just ck) noSpend noEvent)
   where
-    spend r d = modifyIORef counter (Map.insertWith (+) r d)
+    noSpend _ _ = pure ()
     noEvent _ _ _ = pure ()
 
 -- | Search the open goals of @base0@ as a lemma graph.
@@ -308,10 +305,8 @@ runGraph cfg env base0 = do
       -- one retriever for the run: its corpora are shared by every node
       retrieve <- traverse (\re -> newRetriever re (seRel se)) (seRetrieval se)
       harvestRef <- newIORef (pure (0, 0))
-      roleSpent <- newIORef Map.empty
       let ck = Checker (seLean se) (sePolicy se) (seRoot se) (seRel se) lock
-          -- the role contexts charge the context's own counter
-          c = Ctx cfg env ck ref t0 autoRef track retrieve base0 (join (readIORef harvestRef)) (roleCtxs env ck (cRoleSpent c)) roleSpent
+          c = Ctx cfg env ck ref t0 autoRef track retrieve base0 (join (readIORef harvestRef)) (roleCtxs env ck)
       writeIORef harvestRef =<< once (harvestRun c)
       forM_ (IM.elems (gNodes g0)) $ \n -> logG c (\t -> NodeAdded t (nId n) (nName n) 0)
       -- on an exception (Ctrl-C, SIGTERM): the harvest with the base as it

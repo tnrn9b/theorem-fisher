@@ -2,9 +2,12 @@
 
 Fisher's prompts are assembled from text with different origins: Fisher's
 own templates, the user's words, project source, prover output and what a
-model said. This page describes the types that keep those apart, so that a
-mistake such as putting a judge's reply into a worker's prompt does not
-compile.
+model said. This page describes the types that keep those apart. They make
+some mistakes fail to compile: `toPrompt` cannot be applied to a judge's
+text, so a judge's reply cannot be put into a worker's prompt that way.
+They do not make every mistake impossible: a deliberate relabelling, such
+as `static . saidText` on what a model said, or a fake `RoleCtx` whose
+`rcAsk` returns text no model said, compiles, and is a review error.
 
 Two layers. `Fisher.Role` (fisher-core) says who spoke and where a piece of
 prompt text came from. `Fisher.Role.Agent` (fisher-search) is the monad a
@@ -26,8 +29,14 @@ worker   :: Text -> Said 'Worker    -- a backend's attempt result
 `Said` has no exported constructor. A `Said r` is made by `Fisher.Role.Agent.ask`
 (and so by `askTwice`), by `worker`, by `excerpt` and `oneLineOf` (which cut a
 piece out of a reply and keep its role), and by `Fisher.Learn.Judge.parseVerdict`
-(which cuts a judge's reply into the parts of a `Verdict`). Anywhere else a
-`Said r` can be received and passed on, never made.
+(which cuts a judge's reply into the parts of a `Verdict`); the importers of
+`Fisher.Role.Internal` are listed in its header. The compiler holds two
+things: `toPrompt` cannot be applied to a `Said 'Judge`, and no instance of
+`Promptable` or `CanCheck` can be written outside its module (both classes
+are sealed by a superclass that is not exported). The rest is review: a
+deliberate relabelling (`static . saidText`, a fake `RoleCtx`, a reader
+passed to `excerpt` whose closure supplies its own text) compiles and is a
+review error.
 
 ```haskell
 data PromptPart                     -- constructor not exported; Semigroup, Monoid
@@ -40,8 +49,8 @@ parts    :: [PromptPart] -> PromptPart   -- strip each, drop blanks, two newline
 oneLinePart :: Int -> PromptPart -> PromptPart  -- on one line, cut at n: only takes text away
 type Prompt = [(Text, PromptPart)]  -- message role ("system", "user", "assistant") and its text
 
-class Promptable (r :: Role) where toPrompt :: Said r -> PromptPart
--- instances: 'Worker, 'Planner, 'Verifier. None for 'Judge.
+class Sealed r => Promptable (r :: Role) where toPrompt :: Said r -> PromptPart
+-- instances: 'Worker, 'Planner, 'Verifier. None for 'Judge. Sealed is not exported.
 ```
 
 `PromptPart` has a `Semigroup` and `Monoid` instance (plain concatenation),
@@ -58,8 +67,10 @@ candidateText :: Candidate -> Text
 Both `candidate` and `template` run the same gate: the text is redacted
 (`redactSensitiveText`, repeated until it stops changing, at most three
 passes, because one pass can leave the edges of a long token behind), then
-sanitised (`sanitiseLesson`). They give `Nothing` when the sanitiser refuses
-the text or nothing is left, so every `Candidate` has passed the gate.
+sanitised (`sanitiseLesson`). They give `Nothing` when a fourth pass would
+still change the text (the redaction fails closed), when the sanitiser
+refuses the text, or when nothing is left, so every `Candidate` has passed
+the gate.
 
 ### The role monad
 
@@ -84,7 +95,7 @@ event     :: Text -> Value -> AgentM r ()
 excerpt   :: (Text -> Either e (Text, a)) -> Said r -> Either e (Said r, a)
 oneLineOf :: Int -> Said r -> Said r
 
-class CanCheck (r :: Role)          -- instances: 'Planner, 'Verifier
+class Sealed r => CanCheck (r :: Role)   -- instances: 'Planner, 'Verifier; Sealed is not exported
 ```
 
 `AgentM` exports no way to run IO except these operations. A job that needs
@@ -160,12 +171,14 @@ by parity goldens).
 
 ## What the compiler refuses
 
-`tools/test/typecheck-negative.sh` compiles two snippets in
+`tools/test/typecheck-negative.sh` compiles four snippets in
 `tools/test/negative/` with `ghc -fno-code` and passes only when each fails
 with the expected error. `toPrompt` on a `Said 'Judge` fails with
 `No instance for 'Promptable Judge'`; `check` in `AgentM 'Judge` fails with
-`No instance for 'CanCheck Judge'`. `tools/test.sh` runs the script after the
-suites.
+`No instance for 'CanCheck Judge'`; an orphan `instance Promptable 'Judge`
+or `instance CanCheck 'Judge` fails with `No instance for 'Sealed Judge'`
+in the instance declaration for that class. `tools/test.sh` runs the
+script after the suites.
 
 ## Adding a job
 
@@ -186,4 +199,5 @@ suites.
    prover output, `toPrompt` for a role's reply that may be reused. If the new
    role's reply must not be reused directly (as the judge's), give it no
    `Promptable` instance and let it reach the lessons only through
-   `candidate`.
+   `candidate`. A role that may have one gets its `Sealed` instance in
+   `Fisher.Role` beside it (and in `Fisher.Role.Agent` for `CanCheck`).

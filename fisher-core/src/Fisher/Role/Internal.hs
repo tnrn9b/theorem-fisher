@@ -1,29 +1,37 @@
 {-# LANGUAGE DataKinds #-}
 
--- Only Fisher.Role, Fisher.Role.Agent and Fisher.Learn.Judge may import said'.
--- Only Fisher.Role.Part, Fisher.Role (for toPrompt) and Fisher.Role.Agent (askTwice's previous reply) may import the PromptPart constructor.
-
--- | The constructor of 'Said'. Only "Fisher.Role.Agent" (its @ask@, and
--- its @excerpt@ and @oneLineOf@ of a reply), "Fisher.Learn.Judge" (its
--- @parseVerdict@) and "Fisher.Role" (its @worker@) import 'said'';
--- nothing re-exports 'Said' with its constructor or 'said'', so elsewhere
--- a @Said r@ can only be received, never made.
+-- | The constructors of 'Said' and 'PromptPart'. Every module that imports
+-- this one, and what it takes:
+--
+-- * "Fisher.Role": 'said'' (its @worker@), the 'PromptPart' constructor
+--   (its 'Fisher.Role.toPrompt' instances), 'untilStable' (the lessons
+--   gate's redaction).
+-- * "Fisher.Role.Part": the 'PromptPart' constructor (the constructors of
+--   each provenance; its own module because "Fisher.Lessons.File" imports
+--   it and "Fisher.Role" imports "Fisher.Lessons.File").
+-- * "Fisher.Role.Agent": 'said'' (its @ask@, and its @excerpt@ and
+--   @oneLineOf@ of a reply) and the 'PromptPart' constructor (@askTwice@
+--   puts a role's refused reply into the same role's second call).
+-- * "Fisher.Learn.Judge": 'said'' (its @parseVerdict@).
+-- * Tests: "Fisher.RoleSpec" ('said'', 'untilStable'),
+--   "Fisher.Learn.JudgeSpec", "Fisher.Search.GraphRunSpec",
+--   "Fisher.Search.ReviewSpec" and "Fisher.Search.SplitSpec" ('said'', to
+--   make a reply without a model call).
+--
+-- Nothing re-exports 'Said' with its constructor, 'said'' or the
+-- 'PromptPart' constructor, and none of the modules above exports a way
+-- to make either from arbitrary text, so elsewhere a @Said r@ can only be
+-- received and a 'PromptPart' only made by a constructor that names its
+-- provenance. A new importer is a review item and goes in this list.
 --
 -- 'Role' is defined here because 'Said' is indexed by it; "Fisher.Role"
--- re-exports it, and it is the one thing from here that leaves.
---
--- The constructor of 'PromptPart' is here too, so that "Fisher.Role.Part"
--- (which "Fisher.Lessons.File" imports, and which "Fisher.Role" cannot be,
--- since it imports "Fisher.Lessons.File") and "Fisher.Role" (its
--- 'Fisher.Role.toPrompt' instances) can both make one; neither exports it.
--- "Fisher.Role.Agent" makes one too: @askTwice@ puts a role's refused
--- reply into the same role's second call, and exports no way to do it
--- elsewhere.
+-- re-exports it.
 module Fisher.Role.Internal
   ( Role (..)
   , Said (..)
   , said'
   , PromptPart (..)
+  , untilStable
   ) where
 
 import Data.Text (Text)
@@ -50,3 +58,14 @@ instance Semigroup PromptPart where
 
 instance Monoid PromptPart where
   mempty = PromptPart mempty
+
+-- | @f@ applied until the text stops changing, at most @n@ times: the
+-- stable text, or 'Nothing' when one more application would still change
+-- it (fail closed: a text that is still changing is not trusted).
+untilStable :: Int -> (Text -> Text) -> Text -> Maybe Text
+untilStable n f t
+  | t' == t = Just t
+  | n <= 0 = Nothing
+  | otherwise = untilStable (n - 1) f t'
+  where
+    t' = f t
