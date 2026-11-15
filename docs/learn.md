@@ -275,7 +275,7 @@ the rules and drops the calls.
 A judge's text is a `Candidate` by type, not by convention. The judge's reply
 is a `Said 'Judge`, which has no `Promptable` instance and so cannot be put
 into any prompt directly; the only way it becomes lesson evidence is
-`candidate`, which redacts it (repeatedly, until it stops changing) and then
+`candidate`, which redacts it (at most three passes, until the text stops changing) and then
 sanitises it. A reply the gate refuses makes no lesson. The rule lessons
 rendered from the templates pass the same gate (`template`). See
 [roles.md](roles.md).

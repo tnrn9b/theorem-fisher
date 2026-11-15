@@ -16,6 +16,8 @@ model-call job runs in, so that a job can do only what its role may do.
 data Role = Worker | Planner | Verifier | Judge
 roleName :: Role -> Text            -- "worker", "planner", "verifier", "judge"
 
+class KnownRole (r :: Role)         -- roleVal: the Role value of a promoted role
+
 newtype Said (r :: Role)            -- what a model in role r replied
 saidText :: Said r -> Text
 worker   :: Text -> Said 'Worker    -- a backend's attempt result
@@ -43,7 +45,7 @@ class Promptable (r :: Role) where toPrompt :: Said r -> PromptPart
 
 `PromptPart` has a `Semigroup` and `Monoid` instance (plain concatenation),
 so a part built from parts each made by a constructor keeps its provenance
-story. `parts` is the brief's joining rule; `<>` joins with nothing between.
+story. `parts` is the brief's joining rule (it strips trailing whitespace only, with `stripEnd`, and drops parts that are blank after a full strip); `<>` joins with nothing between.
 
 ```haskell
 data Candidate                      -- constructor not exported
@@ -89,9 +91,10 @@ another effect has to add it to `RoleCtx`, which is where a reviewer sees it.
 
 - `ask` makes one model call as `r`, turns the prompt into text at the hand-off
   to the model, and charges the dollars to `r`.
-- `askTwice` makes at most two calls. A failed call, or a reply the reader
-  refuses, gets one more. The builder gets `Nothing` the first time and
-  `Just (previousReply, problem)` the second; the previous reply arrives as a
+- `askTwice` makes at most two calls. A failed call (`AskFailed`) is retried
+  once with the builder given `Nothing` again; `AskNoCredit` ends the job at
+  once. A reply the reader refuses gets one more call, and only then is the
+  builder given `Just (previousReplyPart, problem)`; the previous reply arrives as a
   `PromptPart` made inside the module, so a role sees its own refused reply
   again (the judge too, which has no `toPrompt`) and the builder never holds
   the `Said`. The reader runs in `AgentM r` and gets what `r` said. Asynchronous
@@ -128,22 +131,22 @@ Every place text enters a prompt takes a `PromptPart`. What shipped:
 | --- | --- | --- |
 | `Fisher.Lessons.Prompt.PromptLessons.plBlock` | `PromptPart` | rows pass `sanitiseLesson`, then `static`; `## Yours` lines are `user`; the guard sentence is `static` |
 | `Fisher.Lessons.File.renderLessonsBlock` | `PromptPart` | as above |
-| `Fisher.Workflow.Plan` (lessons block, startup context, Codex instructions) | appends `partText` of a `PromptPart` | the fetched skill and the templates are wrapped with `static` where the prompt is assembled |
+| `Fisher.Workflow.Stage.appendLessons` (lessons block, startup context, Codex instructions) | takes a `PromptPart` and applies `partText` | the fetched skill and the template text are appended as `Text` by the workflow stage and are not `PromptPart`s yet |
 | `Fisher.Search.Retrieval.rtBrief`, `reExtra`, `smtFacts`; `Fisher.Search.Facts.factsBrief`; `Fisher.Search.Library.libraryBrief` | `PromptPart` | facts and lemmas are `source`, the SMT paragraph is `static` |
 | `Fisher.Search.Scheduler.asBrief` and the disproof hint | `PromptPart` | the counterexample and model text are `tool` |
 | `Fisher.Search.GraphRun`: a planner's blueprint and sketch in worker briefs and on the board | `PromptPart` | `Said 'Planner` through `toPrompt`; a worker's note is `toPrompt . worker` |
 | `askTwice`: the previous reply on a retry | `PromptPart` | the same role's own reply, made inside `Fisher.Role.Agent` |
 | `Fisher.Learn.Judge.Verdict` | `Said 'Judge` fields | no `toPrompt`, so it cannot reach a prompt |
 | `Fisher.Learn.Lessons.Evidence.evText` | `Candidate` | `recordEvidence` does not sanitise: the gate already ran |
-| `Fisher.Learn.Mine` | builds `Evidence` | `candidate (vLesson v)`, `candidate (vTellYourself v)`, `template t`; a refused text makes no lesson and is counted |
+| `Fisher.Learn.Mine` | builds `Evidence` | `candidate` applied to the unwrapped `Said` inside `vLesson`'s `Maybe`, `candidate (vTellYourself v)`, and `template rendered`; a refused text makes no lesson and is counted |
 
 Where a brief is logged or shown (events, `report.json`, the UI), `partText`
 is applied at the edge. `Message` in `Fisher.Search.Split` stays
 `(Text, Text)`; `ask` takes a `Prompt` and converts in one place.
 
 Not covered: the fetched Lean skill and the workflow templates are read as
-`Text` and wrapped with `static` at assembly (they are Fisher's inputs, not a
-model's); the native agent loop's own messages are untouched (they are pinned
+`Text` and appended as `Text` by the workflow stage (they are Fisher's inputs,
+not a model's, and are not `PromptPart`s yet); the native agent loop's own messages are untouched (they are pinned
 by parity goldens).
 
 ## What the compiler refuses
@@ -161,7 +164,7 @@ suites.
    effect, adds it to `RoleCtx` first (and a class like `CanCheck` when only
    some roles may use it).
 2. Build the context where the job is run, with `roleCtx` from the run's `Ask`,
-   the checker (`Nothing` for a role that does not check; the judge's always is)
+   the checker (`Nothing` for a role that does not check; the judge's checker is always `Nothing`)
    and the run's spend and event writers:
    `roleCtx @'Planner (geAsk env) (Just ck) spend logEv`. Run the job with
    `runRole`.
