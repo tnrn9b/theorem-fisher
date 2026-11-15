@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+
 -- | The judge: one model call per failed attempt the rules did not explain
 -- ("Fisher.Learn.Mistakes"), asking what went wrong, the lesson, how sure
 -- it is, and two sentences to read before starting the goal again.
@@ -34,14 +36,17 @@ import qualified Data.Text.Encoding.Error as TEE
 import Fisher.Learn.Mistakes (AttemptView (..), ToolCall (..), resultText, toolCalls)
 import Fisher.Lessons.File (levenshtein, normaliseLesson)
 import Fisher.Redact (redactSensitiveText)
+import Fisher.Role (Said)
+import Fisher.Role.Internal (said')
 import Fisher.Search.GraphJobs (Ask, Asked, Role (..), askTwice)
 import Fisher.Search.Review (jsonObject, retryMessages, textOr)
 import Fisher.Search.Split (Message)
 
 -- | The judge's reply: the mistake in one line, the lesson (Nothing when
 -- the judge was not sure enough), its confidence from 0 to 1, and what to
--- tell yourself before the next try.
-data Verdict = Verdict { vMistake :: Text, vLesson :: Maybe Text, vConfidence :: Double, vTellYourself :: Text }
+-- tell yourself before the next try. Its texts are what the judge said:
+-- they reach a prompt only as lesson candidates ('Fisher.Role.candidate').
+data Verdict = Verdict { vMistake :: Said 'Judge, vLesson :: Maybe (Said 'Judge), vConfidence :: Double, vTellYourself :: Said 'Judge }
   deriving (Eq, Show)
 
 judgeSystem :: Text
@@ -103,6 +108,8 @@ lastN n xs = drop (length xs - n) xs
 -- | The judge's JSON: mistake, confidence (a number) and tell_yourself are
 -- required; lesson may be missing. Texts are put on one line and cut to 300
 -- characters; under confidence 0.6 the lesson is dropped. Never throws.
+-- The texts are what the judge said: here, and only here, its reply
+-- becomes a @Said 'Judge@ (by @said'@).
 parseVerdict :: Text -> Either Text Verdict
 parseVerdict t = case jsonObject t of
   Nothing -> Left "the reply is not the JSON object asked for"
@@ -118,10 +125,10 @@ parseVerdict t = case jsonObject t of
       else
         Right
           Verdict
-            { vMistake = cut mistake
-            , vLesson = if conf < 0.6 || T.null (cut lesson) then Nothing else Just (cut lesson)
+            { vMistake = said' (cut mistake)
+            , vLesson = if conf < 0.6 || T.null (cut lesson) then Nothing else Just (said' (cut lesson))
             , vConfidence = conf
-            , vTellYourself = tell
+            , vTellYourself = said' tell
             }
   where
     required k o = case KM.lookup (K.fromText k) o of

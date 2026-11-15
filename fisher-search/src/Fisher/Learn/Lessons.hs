@@ -4,9 +4,10 @@
 --
 -- The rules:
 --
--- * Evidence ('recordEvidence'): the text first passes the redactor
---   ('redactSensitiveText') and then 'sanitiseLesson'; a text the
---   sanitiser refuses is not recorded at all. A rule kind keys on the
+-- * Evidence ('recordEvidence'): the text is a 'Candidate', already
+--   redacted and sanitised ('Fisher.Role.candidate' for a judge's text,
+--   which the caller drops when it is refused; 'Fisher.Role.template' for
+--   a rule's rendered template). A rule kind keys on the
 --   caller's 'evKey' (@kind:name@); a @judged@ or @self@ lesson first looks
 --   for a @judged@ or @self@ row of the project (any status, never a rule
 --   row) whose text is 'sameLesson', and else keys on 'judgeKey' of its
@@ -102,12 +103,13 @@ import System.Directory (doesFileExist)
 import Fisher.Learn.Judge (judgeKey, sameLesson)
 import Fisher.Lessons.Prompt (globalKey, shownRows)
 import Fisher.Lessons.File (Template (..), globalLessonsPath, loadTemplates, projectLessonsPath, renderTemplate, sanitiseLesson, writeLessonsFile)
-import Fisher.Redact (redactSensitiveText)
+import Fisher.Role (Candidate, candidateText)
 import Fisher.Runlog
 
 -- | One sighting of a lesson in a run: the run, the attempt, its project
 -- key, the mistake kind (or @judged@, @self@), the key (@kind:name@ for a
--- rule kind; unused for @judged@ and @self@), the rendered lesson text,
+-- rule kind; unused for @judged@ and @self@), the lesson text (a
+-- 'Candidate': a rule's rendered template or a judge's text let through),
 -- and whether a judge call produced it (an agreement, once per attempt).
 data Evidence = Evidence
   { evRun :: Text
@@ -115,7 +117,7 @@ data Evidence = Evidence
   , evProjectKey :: Text
   , evKind :: Text
   , evKey :: Text
-  , evText :: Text
+  , evText :: Candidate
   , evJudged :: Bool
   }
   deriving (Eq, Show)
@@ -183,31 +185,29 @@ closedOff s = s == Retired || s == Dropped
 
 -- Evidence ---------------------------------------------------------------
 
--- | Record a sighting at a time and answer the row as stored; 'Nothing'
--- (nothing written) when its text, redacted, does not pass
--- 'sanitiseLesson'. A judge result's texts agree once per attempt.
-recordEvidence :: Runlog -> Double -> Evidence -> IO (Maybe LessonRow)
-recordEvidence rl now ev0 = case sanitiseLesson (redactSensitiveText (evText ev0)) of
-  Nothing -> pure Nothing
-  Just txt -> Just <$> record ev0 {evText = txt}
+-- | Record a sighting at a time and answer the row as stored. The text is
+-- a 'Candidate', so the refusing happened before (at
+-- 'Fisher.Role.candidate'). A judge result's texts agree once per attempt.
+recordEvidence :: Runlog -> Double -> Evidence -> IO LessonRow
+recordEvidence rl now ev = do
+  key <-
+    if isJudgeKind (evKind ev)
+      then do
+        rows <- filter (isJudgeKind . lrKind) <$> listLessons rl (Just (evProjectKey ev)) []
+        let own = judgeKey (evKind ev) txt
+        pure (maybe own lrKey (find (\r -> lrKey r == own || sameLesson (lrText r) txt) rows))
+      else pure (evKey ev)
+  mergeLesson rl (evProjectKey ev) key (fresh key) merge
   where
-    record ev = do
-      key <-
-        if isJudgeKind (evKind ev)
-          then do
-            rows <- filter (isJudgeKind . lrKind) <$> listLessons rl (Just (evProjectKey ev)) []
-            let own = judgeKey (evKind ev) (evText ev)
-            pure (maybe own lrKey (find (\r -> lrKey r == own || sameLesson (lrText r) (evText ev)) rows))
-          else pure (evKey ev)
-      mergeLesson rl (evProjectKey ev) key (fresh ev key) (merge ev)
-    agreed ev = [evAttempt ev | evJudged ev]
-    fresh ev key =
-      (blank (evProjectKey ev) (evKind ev) key (evText ev) now)
-        { lrEvidenceRuns = [evRun ev], lrAgreements = length (agreed ev), lrAgreedAttempts = agreed ev }
-    merge ev r
+    txt = candidateText (evText ev)
+    agreed = [evAttempt ev | evJudged ev]
+    fresh key =
+      (blank (evProjectKey ev) (evKind ev) key txt now)
+        { lrEvidenceRuns = [evRun ev], lrAgreements = length agreed, lrAgreedAttempts = agreed }
+    merge r
       | closedOff (lrStatus r) = r
       | otherwise =
-          let new = [a | a <- agreed ev, a `notElem` lrAgreedAttempts r]
+          let new = [a | a <- agreed, a `notElem` lrAgreedAttempts r]
            in r { lrEvidenceRuns = addRun (evRun ev) (lrEvidenceRuns r)
                 , lrAgreements = lrAgreements r + length new
                 , lrAgreedAttempts = lrAgreedAttempts r <> new }

@@ -40,10 +40,12 @@
 --   under 'meJudgeTimeout' seconds; every call's dollars go to 'addSpend'
 --   (a call that timed out is charged 'judgeCostEstimate'). The judge phase
 --   of a pass stops 'meJudgeBudget' seconds after its first call.
---   A verdict, its texts redacted, is evidence for its lesson (@judged@,
---   when the judge was sure enough) and its tell-yourself (@self@), at most
---   one agreement per row for the call, then a @mistake@ event of each
---   kind. A reply that still cannot be read is a @judged@ event with
+--   A verdict's texts are what the judge said ('Fisher.Role.Said'): its
+--   lesson (@judged@, when the judge was sure enough) and its tell-yourself
+--   (@self@) are evidence as candidates ('Fisher.Role.candidate': redacted,
+--   then sanitised; a refused one makes no row), at most one agreement per
+--   row for the call, then a @mistake@ event of each kind, its texts
+--   redacted. A reply that still cannot be read is a @judged@ event with
 --   @parsed: false@, so the attempt is not paid for again. No credit, a
 --   call that failed (twice) or broke, and a call past its timeout stop the
 --   judging for the pass (for 'mineSince', its every run; the time budget
@@ -80,7 +82,7 @@ module Fisher.Learn.Mine
 
 import Control.Concurrent (threadDelay)
 import Control.Exception (SomeAsyncException, SomeException, displayException, fromException, mask, onException, throwIO, try)
-import Control.Monad (forM, forM_, unless, when)
+import Control.Monad (forM, forM_, unless, void, when)
 import Data.Aeson (Value (..), object, (.=))
 import qualified Data.Aeson.Key as K
 import qualified Data.Aeson.KeyMap as KM
@@ -104,9 +106,10 @@ import Text.Read (readMaybe)
 import Fisher.Learn.Judge (Verdict (..), judgeAttempt, judgeKey)
 import Fisher.Learn.Lessons (Evidence (..), Limits, noteInForce, promote, recordEvidence, regenerate, retire)
 import Fisher.Learn.Mistakes (AttemptView (..), Mistake (..), classify, mistakeJson, renderMistakeKind)
-import Fisher.Lessons.File (Template (..), renderTemplate)
+import Fisher.Lessons.File (Template (..), renderTemplate, sanitiseLesson)
 import Fisher.Lessons.Prompt (PromptLessons (..), promptLessons)
 import Fisher.Redact (redactSensitiveText)
+import Fisher.Role (candidate, candidateText, saidText, template)
 import Fisher.Runlog
 import Fisher.Search.GraphJobs (Ask, Asked (..))
 
@@ -245,7 +248,8 @@ data Pass = Pass
   , pStarted :: IORef (Maybe Double)
   , pNoTemplate :: IORef (Set.Set Text)
   , pRefused :: IORef Int
-  -- ^ the lesson texts 'recordEvidence' refused (the sanitiser)
+  -- ^ the lesson texts the sanitiser refused ('candidate' for a judge's
+  -- text, 'ruleEvidence' for a rendered template)
   }
 
 newPass :: IO Pass
@@ -380,11 +384,17 @@ ruleKeyOf kind name
 ruleEvidence :: MineEnv -> Judging -> Text -> Text -> Text -> Maybe Text -> Maybe Text -> Text -> IO ()
 ruleEvidence env st rid aid kind name new key = case find ((== kind) . tKind) (meTemplates env) of
   Just t ->
-    forM_ (renderTemplate t (Map.fromList ([("name", n) | Just n <- [name]] <> [("new", n) | Just n <- [new]]))) $ \txt ->
-      refusedIf st . recordEvidence (meRunlog env) (meNow env) $
-        Evidence
-          { evRun = rid, evAttempt = aid, evProjectKey = meProjectKey env, evKind = kind, evKey = key
-          , evText = txt, evJudged = False }
+    forM_ (renderTemplate t (Map.fromList ([("name", n) | Just n <- [name]] <> [("new", n) | Just n <- [new]]))) $ \rendered ->
+      -- the rendered text passes the gate a judge's text passes (redacted,
+      -- then sanitised; a refused one is counted), as it did before
+      -- 'recordEvidence' took a 'Fisher.Role.Candidate'
+      case sanitiseLesson (redactSensitiveText rendered) of
+        Nothing -> refused st
+        Just txt ->
+          void . recordEvidence (meRunlog env) (meNow env) $
+            Evidence
+              { evRun = rid, evAttempt = aid, evProjectKey = meProjectKey env, evKind = kind, evKey = key
+              , evText = template txt, evJudged = False }
   Nothing -> do
     first <- atomicModifyIORef' (jNoTemplate st) (\s -> (Set.insert kind s, not (Set.member kind s)))
     when first $ meWarn env ("no lesson template for " <> kind <> "; its hits make no lesson")
@@ -434,7 +444,7 @@ judgeOne env st rid aid av = case meJudge env of
                     pure (Just [])
               Just (Asked c (Right v)) -> do
                 charge c
-                Just <$> verdictEvents (redacted v)
+                Just <$> verdictEvents v
   where
     rl = meRunlog env
     day = T.pack (formatTime defaultTimeLocale "%Y-%m-%d" (posixSecondsToUTCTime (realToFrac (meNow env))))
@@ -450,14 +460,17 @@ judgeOne env st rid aid av = case meJudge env of
     charge c = when (c > 0) $ do
       modifyIORef' (jSpent st) (+ c)
       addSpend rl day c
-    redacted v =
-      v { vMistake = redactSensitiveText (vMistake v), vLesson = redactSensitiveText <$> vLesson v
-        , vTellYourself = redactSensitiveText (vTellYourself v) }
-    evidence kind txt = do
-      r <- recordEvidence rl (meNow env) Evidence
-        { evRun = rid, evAttempt = aid, evProjectKey = meProjectKey env, evKind = kind, evKey = judgeKey kind txt
-        , evText = txt, evJudged = True }
-      r <$ when (isNothing r) (modifyIORef' (jRefused st) (+ 1))
+    -- a judge's text is evidence only as a candidate (redacted, then
+    -- sanitised); one refused is counted and makes no row
+    evidence kind said = case candidate said of
+      Nothing -> Nothing <$ refused st
+      Just c ->
+        Just <$> recordEvidence rl (meNow env) Evidence
+          { evRun = rid, evAttempt = aid, evProjectKey = meProjectKey env, evKind = kind, evKey = judgeKey kind (candidateText c)
+          , evText = c, evJudged = True }
+    -- the events are a log, not a prompt: the texts as the judge said
+    -- them, redacted
+    logged = redactSensitiveText . saidText
     lastSeq = maybe 0 (\(s, _, _, _) -> s) (listToMaybe (reverse (avEvents av)))
     lastT = maybe 0 (\(_, t, _, _) -> t) (listToMaybe (reverse (avEvents av)))
     base kind = ["kind" .= (kind :: Text), "seq" .= lastSeq, "goal" .= avGoal av, "shape" .= avShape av]
@@ -467,13 +480,13 @@ judgeOne env st rid aid av = case meJudge env of
       lesson <- maybe (pure Nothing) (evidence "judged") (vLesson v)
       self <- evidence "self" (vTellYourself v)
       event rl aid lastT "mistake" . withKey (lrKey <$> lesson) . object $
-        base "judged" <> ["text" .= vMistake v, "lesson" .= vLesson v, "confidence" .= vConfidence v]
-      event rl aid lastT "mistake" . withKey (lrKey <$> self) . object $ base "self" <> ["text" .= vTellYourself v]
+        base "judged" <> ["text" .= logged (vMistake v), "lesson" .= (logged <$> vLesson v), "confidence" .= vConfidence v]
+      event rl aid lastT "mistake" . withKey (lrKey <$> self) . object $ base "self" <> ["text" .= logged (vTellYourself v)]
       pure (nub [lrKey l | Just l <- [lesson, self]])
 
 -- Count a sighting the sanitiser refused.
-refusedIf :: Judging -> IO (Maybe LessonRow) -> IO ()
-refusedIf st act = act >>= \r -> when (isNothing r) (modifyIORef' (jRefused st) (+ 1))
+refused :: Judging -> IO ()
+refused st = modifyIORef' (jRefused st) (+ 1)
 
 withKey :: Maybe Text -> Value -> Value
 withKey k = \case

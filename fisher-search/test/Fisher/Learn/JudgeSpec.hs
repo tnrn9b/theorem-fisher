@@ -9,6 +9,7 @@ import Test.Hspec
 import Fisher.Learn.Judge
 import Fisher.Learn.Mistakes (AttemptView (..))
 import Fisher.Lessons.File (normaliseLesson)
+import Fisher.Role (saidText)
 import Fisher.Search.GraphJobs (AskError (..), Asked (..), Role (..))
 
 good :: Text
@@ -20,6 +21,10 @@ view es = AttemptView {avEvents = es, avOutcomeText = "rejected: still sorry", a
 msg :: Int -> Text -> (Int, Double, Text, Value)
 msg s t = (s, fromIntegral s, "message", object ["role" .= ("assistant" :: Text), "text" .= t])
 
+-- | A verdict's texts and confidence, as the judge said them.
+texts :: Verdict -> (Text, Maybe Text, Double, Text)
+texts v = (saidText (vMistake v), saidText <$> vLesson v, vConfidence v, saidText (vTellYourself v))
+
 userText :: AttemptView -> Text
 userText av = T.concat [c | ("user", c) <- judgeMessages av]
 
@@ -27,8 +32,8 @@ spec :: Spec
 spec = do
   describe "parseVerdict" $ do
     it "reads a good object" $
-      parseVerdict good
-        `shouldBe` Right (Verdict "named a lemma that does not exist" (Just "Search with lean_loogle before naming a lemma.") 0.8 "Look the lemma up first. Then write the proof.")
+      fmap texts (parseVerdict good)
+        `shouldBe` Right ("named a lemma that does not exist", Just "Search with lean_loogle before naming a lemma.", 0.8, "Look the lemma up first. Then write the proof.")
     it "reads a fenced JSON block" $
       parseVerdict ("Here is my verdict.\n```json\n" <> good <> "\n```\n") `shouldBe` parseVerdict good
     it "refuses a confidence that is not a number" $ do
@@ -39,12 +44,12 @@ spec = do
       parseVerdict "{\"mistake\": \"m\", \"confidence\": 0.9}" `shouldSatisfy` isLeft
       parseVerdict "{\"lesson\": \"l\", \"confidence\": 0.9, \"tell_yourself\": \"t\"}" `shouldSatisfy` isLeft
     it "drops the lesson under confidence 0.6" $
-      fmap vLesson (parseVerdict "{\"mistake\": \"m\", \"lesson\": \"l\", \"confidence\": 0.4, \"tell_yourself\": \"t\"}") `shouldBe` Right Nothing
+      fmap (fmap saidText . vLesson) (parseVerdict "{\"mistake\": \"m\", \"lesson\": \"l\", \"confidence\": 0.4, \"tell_yourself\": \"t\"}") `shouldBe` Right Nothing
     it "cuts the lesson and tell_yourself to 300 characters" $ do
       let long = T.replicate 3000 "a"
           r = parseVerdict ("{\"mistake\": \"m\", \"lesson\": \"" <> long <> "\", \"confidence\": 0.9, \"tell_yourself\": \"" <> long <> "\"}")
-      fmap (fmap T.length . vLesson) r `shouldBe` Right (Just 300)
-      fmap (T.length . vTellYourself) r `shouldBe` Right 300
+      fmap (fmap (T.length . saidText) . vLesson) r `shouldBe` Right (Just 300)
+      fmap (T.length . saidText . vTellYourself) r `shouldBe` Right 300
 
   describe "judgeMessages" $ do
     it "is a system and a user message with the outcome and the contract" $ do

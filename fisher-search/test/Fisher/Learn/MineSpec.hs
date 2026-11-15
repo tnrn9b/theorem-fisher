@@ -286,6 +286,21 @@ spec = do
         mrJudged r `shouldBe` 1
         listLessons (meRunlog env) (Just (meProjectKey env)) [] `shouldReturn` []
         length <$> mistakes env "s1-1" >>= (`shouldBe` 2)
+    it "a judge text with a URL yields no evidence row" $
+      withEnv $ \env0 _ -> do
+        calls <- newIORef 0
+        let lesson = "Read https://example.com/lemmas before naming `Nat.foo_bar`."
+            env = env0 {meJudge = Just (fakeJudge calls (verdictWith lesson "Look the lemma up first. Then use it."))}
+        searchRun env "s1" 10 [residue]
+        r <- mineRun env "s1" False
+        mrJudged r `shouldBe` 1
+        rows <- listLessons (meRunlog env) (Just (meProjectKey env)) []
+        map lrKind rows `shouldBe` ["self"]
+        rows `shouldSatisfy` all (not . T.isInfixOf "example.com" . lrText)
+        -- the judged event still logs the lesson as the judge said it, with no row's key
+        ms <- mistakes env "s1-1"
+        [(field "lesson" m, field "key" m) | m <- ms, field "kind" m == Just (String "judged")]
+          `shouldBe` [(Just (String lesson), Just Null)]
     it "stops at the call cap (fisher.lessons.judge_calls) even when the calls cost nothing" $
       withEnv $ \env0 _ -> do
         calls <- newIORef (0 :: Int)
