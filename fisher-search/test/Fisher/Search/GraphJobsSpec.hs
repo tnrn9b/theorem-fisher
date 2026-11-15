@@ -7,7 +7,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Test.Hspec
 
-import Fisher.Role (KnownRole, Role (..), partText, saidText, static, toPrompt)
+import Fisher.Role (KnownRole, partText, saidText, static, toPrompt)
 import Fisher.Role.Agent (RoleCtx, ask, roleCtx, runRole)
 import Fisher.Search.GraphJobs
 import Fisher.Search.Sketch (SketchError (..), sketchErrorText)
