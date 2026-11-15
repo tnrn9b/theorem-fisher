@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 
--- Only Fisher.Role.Agent and Fisher.Learn.Judge.parseVerdict may import said' (besides Fisher.Role itself, for worker).
+-- Only Fisher.Role.Agent and Fisher.Learn.Judge.parseVerdict may import said' (besides Fisher.Role itself, for worker),
+-- and, until the graph jobs run in AgentM, Fisher.Search.GraphJobs.planJob for the planner's blueprint.
 -- Only Fisher.Role.Part and Fisher.Role (for toPrompt) may import the PromptPart constructor.
 
 -- | The constructor of 'Said'. Only "Fisher.Role.Agent" (its @ask@),

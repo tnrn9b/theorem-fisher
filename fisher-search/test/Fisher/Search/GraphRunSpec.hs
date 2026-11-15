@@ -15,6 +15,7 @@ import System.FilePath ((</>))
 import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
 
+import Fisher.Role (partText)
 import Fisher.Search.Auto (AutoConfig (..), defaultAutoConfig)
 import Fisher.Search.Check (AxiomPolicy (..), LeanRun (..), standardAxioms)
 import qualified Fisher.Search.Check as C
@@ -417,7 +418,7 @@ controllerSpec = describe "the controller in graph mode" $ do
     let firstStop = [i | (i, NodeStopped {}) <- zip [0 :: Int ..] (oEvents o)]
         firstEnd = [i | (i, AttemptEnded _ 1 _ _) <- zip [0 :: Int ..] (oEvents o)]
     (take 1 firstStop < take 1 firstEnd) `shouldBe` True
-    case map asBrief (oSpecs o) of
+    case map (partText . asBrief) (oSpecs o) of
       [b1, b2, b3] -> do
         b1 `shouldNotSatisfy` T.isInfixOf "stopped after"
         b2 `shouldSatisfy` T.isInfixOf "A previous attempt on this goal was stopped after 8 turns and $0.42 without progress on the file (turns)."

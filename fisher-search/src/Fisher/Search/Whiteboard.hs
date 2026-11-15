@@ -8,10 +8,12 @@ module Fisher.Search.Whiteboard
   ) where
 
 import qualified Data.IntMap.Strict as IM
+import Data.List (intersperse)
 import Data.Maybe (listToMaybe, mapMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
 
+import Fisher.Role (PromptPart, partText, parts, source, static)
 import Fisher.Search.Graph
 
 data WorkerEnd = Note Text | FalseClaim Text deriving (Eq, Show)
@@ -34,27 +36,36 @@ workerEnd (Just t) fallback = case mapMaybe tagged (reverse (T.lines t)) of
 capChars :: Int
 capChars = 2000
 
--- | Graph, root, failure lines (oldest first).
-whiteboard :: Graph -> NodeId -> [Text] -> Text
+-- | Graph, root, failure lines (oldest first). The heading and the tree's
+-- marks are Fisher's, the node names the checked sketch's declarations
+-- (source); each failure line carries its own provenance.
+whiteboard :: Graph -> NodeId -> [PromptPart] -> PromptPart
 whiteboard g root failures = fit (length failures)
   where
     name = maybe "" nName (IM.lookup root (gNodes g))
     tree = treeLines g root
-    render ts fs = T.intercalate "\n" $
-      ["# Plan for " <> name] ++ ts ++ (if null fs then [] else "" : "## Failed" : fs)
-    -- drop the oldest failures first
+    heading = static "# Plan for " <> source name
+    render ts fs = linesOf $
+      [heading] ++ ts ++ (if null fs then [] else static "" : static "## Failed" : fs)
+    -- drop the oldest failures first (the length is measured on the text)
     fit k
-      | T.length full <= capChars = full
+      | len full <= capChars = full
       | k > 0 = fit (k - 1)
       | otherwise = cutTree (length tree)
       where full = render tree (drop (length failures - k) failures)
+    -- the heading alone cut to the cap: its name cut, then "..."
     cutTree n
-      | n <= 0 = T.take (capChars - 3) (render [] []) <> "..."
-      | T.length r <= capChars = r
+      | n <= 0 = static "# Plan for " <> source (T.take (capChars - 3 - T.length "# Plan for ") name) <> static "..."
+      | len r <= capChars = r
       | otherwise = cutTree (n - 1)
-      where r = render (take n tree ++ ["..."]) []
+      where r = render (take n tree ++ [static "..."]) []
+    len = T.length . partText
 
-treeLines :: Graph -> NodeId -> [Text]
+-- | Parts with a newline between each two.
+linesOf :: [PromptPart] -> PromptPart
+linesOf = mconcat . intersperse (static "\n")
+
+treeLines :: Graph -> NodeId -> [PromptPart]
 treeLines g root = go [] 0 root
   where
     go seen d i
@@ -62,7 +73,7 @@ treeLines g root = go [] 0 root
       | otherwise = case IM.lookup i (gNodes g) of
           Nothing -> []
           Just n ->
-            (T.replicate (2 * d) " " <> "- " <> nName n <> " (" <> status (nStatus n) <> ")")
+            (static (T.replicate (2 * d) " " <> "- ") <> source (nName n) <> static (" (" <> status (nStatus n) <> ")"))
               : concat [ go (i : seen) (d + 1) c
                        | sid <- nSplits n
                        , Just s <- [IM.lookup sid (gSplits g)]
@@ -73,31 +84,34 @@ treeLines g root = go [] 0 root
       NProved -> "proved"
       NFailed _ -> "failed"
 
--- | Node name, its statement, the lemmas of the current plan it may use, the whiteboard.
-workerBrief :: Text -> Text -> [Text] -> Text -> Text
-workerBrief name stmt usable board = T.unlines
-  [ "This is an unattended run: never stop to ask a question."
-  , "Prove exactly one declaration in the file: `" <> name <> "`."
-  , "Its statement is:"
-  , "```lean"
-  , T.stripEnd stmt
-  , "```"
+-- | Node name, its statement, the lemmas of the current plan it may use, the
+-- whiteboard. The name, the statement and the lemma names are the file's
+-- (source); the rest is Fisher's.
+workerBrief :: Text -> Text -> [Text] -> PromptPart -> PromptPart
+workerBrief name stmt usable board = mconcat $ map (<> static "\n")
+  [ static "This is an unattended run: never stop to ask a question."
+  , static "Prove exactly one declaration in the file: `" <> source name <> static "`."
+  , static "Its statement is:"
+  , static "```lean"
+  , source (T.stripEnd stmt)
+  , static "```"
   , usableLine usable
-  , "Do not edit any other declaration."
-  , ""
-  , "The plan so far:"
-  , T.stripEnd board
-  , ""
-  , "When you finish, make the last line of your reply one of these:"
-  , "NOTE: <what you tried and why you stopped>"
-  , "FALSE: <a counterexample>"
-  , "Use the FALSE line only if the statement is false."
+  , static "Do not edit any other declaration."
+  , static ""
+  , static "The plan so far:"
+  -- the board with its trailing whitespace stripped ('parts' of one part)
+  , parts [board]
+  , static ""
+  , static "When you finish, make the last line of your reply one of these:"
+  , static "NOTE: <what you tried and why you stopped>"
+  , static "FALSE: <a counterexample>"
+  , static "Use the FALSE line only if the statement is false."
   ]
 
 -- | Which lemmas still ending in @sorry@ a proof may use: only those of the current plan.
-usableLine :: [Text] -> Text
-usableLine [] = "Use no declaration that still ends in `sorry`."
+usableLine :: [Text] -> PromptPart
+usableLine [] = static "Use no declaration that still ends in `sorry`."
 usableLine ns =
-  "Besides what the file already proves, you may use only these lemmas of the current plan, even where they still end in `sorry`: "
-    <> T.intercalate ", " ["`" <> n <> "`" | n <- ns] <> ". Use no other declaration that still ends in `sorry`."
+  static "Besides what the file already proves, you may use only these lemmas of the current plan, even where they still end in `sorry`: "
+    <> mconcat (intersperse (static ", ") [static "`" <> source n <> static "`" | n <- ns]) <> static ". Use no other declaration that still ends in `sorry`."
 

@@ -10,7 +10,6 @@ module Fisher.Search.Retrieval
   , Query (..)
   , Retrieved (..)
   , newRetriever
-  , joinBrief
   , smtFacts
   , GoalRetrieval (..)
   , RetrievalReport (..)
@@ -36,6 +35,7 @@ import qualified Data.Text as T
 import System.FilePath (normalise)
 import System.Timeout (timeout)
 
+import Fisher.Role (PromptPart, partText, parts, static)
 import Fisher.Search.Facts
 import Fisher.Search.Index
 import Fisher.Search.Lean (Decl (..))
@@ -60,7 +60,7 @@ data RetrievalEnv = RetrievalEnv
   -- ^ the run directory, kept with each harvested lemma and note
   , reCutoff :: Double
   -- ^ seconds one goal's retrieval may take ('retrievalCutoff')
-  , reExtra :: Text
+  , reExtra :: PromptPart
   -- ^ project-wide text every brief ends with (the smt facts,
   -- 'smtFacts'); empty for none
   }
@@ -94,7 +94,7 @@ data Retrieved = Retrieved
   , rtLemmas :: [(Text, Text)]
   -- ^ those lemmas' names and statements
   , rtNotes :: Int
-  , rtBrief :: Text
+  , rtBrief :: PromptPart
   -- ^ the facts section, the library section, then 'reExtra' (any may be
   -- empty)
   , rtCutOff :: Bool
@@ -125,12 +125,12 @@ retrieveOne env ix file factsOf offerOf q = do
         let line = goalLine ix file (qAnchor q) (qLine q)
         forM_ factsOf $ \f -> do
           let fs = f Nothing file line (qStatement q) (qType q)
-          _ <- evaluate (T.length (factsBrief fs))
+          _ <- evaluate (T.length (partText (factsBrief fs)))
           writeIORef factsRef fs
         forM_ offerOf $ \pick -> do
           let consts = maybe [] ppConstants (qType q) <> ownUses ix file (qGoal q)
               o = pick file consts (qStatement q) (qOpen q)
-          _ <- evaluate (T.length (libraryBrief o) + sum (map (T.length . lmName) (fst o)) + length (snd o))
+          _ <- evaluate (T.length (partText (libraryBrief o)) + sum (map (T.length . lmName) (fst o)) + length (snd o))
           writeIORef libRef o
   r <- try (timeout (max 1 (round (reCutoff env * 1000000))) body)
   cut <- case r of
@@ -143,29 +143,27 @@ retrieveOne env ix file factsOf offerOf q = do
   o <- readIORef libRef
   let fb = factsBrief fs
       lb = libraryBrief o
-      shownL = [l | l <- fst o, ("-- " <> lmName l <> " (") `T.isInfixOf` lb]
+      -- which lemmas the section shows, read off its text
+      shownL = [l | l <- fst o, ("-- " <> lmName l <> " (") `T.isInfixOf` partText lb]
   pure Retrieved
     { rtFacts = length fs
-    , rtFactsChars = T.length fb
+    , rtFactsChars = T.length (partText fb)
     , rtOffered = map lmName shownL
     , rtLemmas = [(lmName l, lmStatement l) | l <- shownL]
     , rtNotes = length (snd o)
-    , rtBrief = joinBrief [fb, lb, reExtra env]
+    , rtBrief = parts [fb, lb, reExtra env]
     , rtCutOff = cut }
 
 -- | The brief's paragraph on lean-smt, given whether the project has it
 -- and the standalone solver found on PATH (@z3@ or @cvc5@), if any; empty
--- without lean-smt.
-smtFacts :: Bool -> Maybe Text -> Text
+-- without lean-smt. Fisher's own text (the solver's name is one Fisher
+-- found on PATH).
+smtFacts :: Bool -> Maybe Text -> PromptPart
 smtFacts hasLeanSmt solver
-  | not hasLeanSmt = ""
-  | otherwise =
+  | not hasLeanSmt = mempty
+  | otherwise = static $
       "`smt` (lean-smt, cvc5) is available: `import Smt`, `by smt`, `by smt [h\8321, h\8322]` to pass hypotheses, `smt +mono` for polymorphic goals; it covers linear integer and real arithmetic, bitvectors, uninterpreted functions and quantifier-free logic over them."
         <> maybe "" (\n -> " `" <> n <> "` is on PATH for SMT-LIB queries.") solver
-
--- | Brief parts in order, blank lines between, empty ones left out.
-joinBrief :: [Text] -> Text
-joinBrief = T.intercalate "\n\n" . map T.stripEnd . filter (not . T.null . T.strip)
 
 -- | The 1-based keyword line of a declaration of the target file as the
 -- index has it (the file on disk), else the fallback.

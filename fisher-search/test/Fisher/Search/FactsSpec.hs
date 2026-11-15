@@ -8,6 +8,7 @@ import System.FilePath ((</>))
 import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
 
+import Fisher.Role (partText)
 import Fisher.Search.Facts
 import Fisher.Search.Index
 
@@ -138,12 +139,12 @@ spec = do
       let long i = "theorem t" <> T.pack (show i) <> " : foo = " <> T.replicate 480 "x" <> " :="
           ix = synthetic [("t" <> T.pack (show i), long i, i) | i <- [1 .. 30 :: Int]]
           fs = factsFor defaultFacts ix Nothing "A.lean" 100 "theorem goal : foo :=" Nothing
-          body = factsBrief fs
+          body = partText (factsBrief fs)
           entryChars = T.length body - T.length "Relevant project facts:\n"
           oneMore = factsFor defaultFacts {fcChars = 1000000} ix Nothing "A.lean" 100 "theorem goal : foo :=" Nothing
       length fs `shouldSatisfy` (\n -> n > 0 && n < 20)
       entryChars `shouldSatisfy` (<= 8000)
-      T.length (factsBrief (take (length fs + 1) oneMore)) - T.length "Relevant project facts:\n" `shouldSatisfy` (> 8000)
+      T.length (partText (factsBrief (take (length fs + 1) oneMore))) - T.length "Relevant project facts:\n" `shouldSatisfy` (> 8000)
       fs `shouldBe` take (length fs) oneMore
       [l | l <- drop 1 (T.lines body), not (" (A.lean:" `T.isInfixOf` l && ")" `T.isSuffixOf` l)] `shouldBe` []
 
@@ -170,8 +171,8 @@ spec = do
       length fs `shouldBe` 5
 
   describe "factsBrief" $ do
-    it "is empty when nothing was found" $ factsBrief [] `shouldBe` ""
+    it "is empty when nothing was found" $ partText (factsBrief []) `shouldBe` ""
     it "renders a header and one line per fact" $ do
       let e = Entry "Proj.Inner.bump_pos" KLemma "lemma bump_pos (c : Counter) :\n    0 < (bump c).value :=" "Proj/Basic.lean" 48 "Proj.Basic" [] False
-      factsBrief [Fact e "uses"]
+      partText (factsBrief [Fact e "uses"])
         `shouldBe` "Relevant project facts:\n- Proj.Inner.bump_pos : lemma bump_pos (c : Counter) : 0 < (bump c).value (Proj/Basic.lean:48)\n"

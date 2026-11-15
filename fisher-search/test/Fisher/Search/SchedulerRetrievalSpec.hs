@@ -21,6 +21,7 @@ import System.FilePath ((</>))
 import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
 
+import Fisher.Role (partText, static)
 import Fisher.Search.Auto
 import Fisher.Search.Check (AxiomPolicy (..), LeanRun, standardAxioms)
 import Fisher.Search.FakeLean (fakeLean)
@@ -171,7 +172,7 @@ spec = do
         (fmap Just . retrievalIn (Just ([bumpLemma], []))) $ \r -> do
           case specsFor "a" r of
             [sp] -> do
-              let br = asBrief sp
+              let br = briefText sp
               br `shouldSatisfy` T.isPrefixOf "Relevant project facts:\n- P.bump : def bump (n : Nat) : Nat (P/Defs.lean:3)\n"
               br `shouldSatisfy` T.isInfixOf "Lemmas proved in earlier runs"
               br `shouldSatisfy` T.isInfixOf "-- P.bump_eq (Other.lean)\ntheorem P.bump_eq (n : Nat) : P.bump n = n + 1 :=\n by rfl\n"
@@ -189,7 +190,7 @@ spec = do
         (fmap Just . retrievalIn (Just ([bumpLemma], []))) $ \r ->
           case specsFor "t" r of
             [_, _, third] -> do
-              let br = asBrief third
+              let br = briefText third
               br `shouldSatisfy` T.isPrefixOf "Relevant project facts:"
               br `shouldSatisfy` T.isInfixOf "x := 0"
               at "Lemmas proved in earlier runs" br `shouldSatisfy` (< at "A counterexample search" br)
@@ -201,7 +202,7 @@ spec = do
         (fmap Just . retrievalIn (Just ([bumpLemma], []))) $ \r ->
           case specsFor "t" r of
             [_, second] -> do
-              let br = asBrief second
+              let br = briefText second
               br `shouldSatisfy` T.isPrefixOf "Relevant project facts:"
               at "Lemmas proved in earlier runs" br `shouldSatisfy` (< at "Start from this partial proof" br)
               br `shouldSatisfy` T.isInfixOf "Start from this partial proof"
@@ -216,7 +217,7 @@ spec = do
             pure (Just env {reIndex = (reIndex env) {ixEntries = cycle [e]}, reCutoff = 0.3})
       t0 <- getPOSIXTime
       search cfg0 Nothing fake0 fakeLean one (Map.fromList [(("t", "*"), [("ok", 0)])]) slow $ \r -> do
-        map asBrief (specsFor "t" r) `shouldBe` [""]
+        map briefText (specsFor "t" r) `shouldBe` [""]
         gsStatus (fromMaybe (error "t") (lookup "t" (srGoals (rReport r)))) `shouldBe` Closed
         [(g, n, c) | Facts _ g n _ c <- rEvents r] `shouldBe` [("t", 0, True)]
         [c | LibraryOffered _ _ _ _ c <- rEvents r] `shouldBe` [True]
@@ -339,18 +340,22 @@ spec = do
 
   describe "attemptBrief" $
     it "with no retrieval, today's brief byte for byte" $ do
-      attemptBrief "" "Start from this partial proof; fill these holes:\n- line 4:\n    goal  \n" ["A counterexample\nx := 0\n"]
+      partText (attemptBrief mempty (static "Start from this partial proof; fill these holes:\n- line 4:\n    goal  \n") [static "A counterexample\nx := 0\n"])
         `shouldBe` "Start from this partial proof; fill these holes:\n- line 4:\n    goal  \n\n\nA counterexample\nx := 0\n"
-      attemptBrief "" "" [] `shouldBe` ""
-      attemptBrief "" "" ["hint "] `shouldBe` "hint "
-      attemptBrief "Relevant project facts:\n- a" "holes" [] `shouldBe` "Relevant project facts:\n- a\n\nholes"
+      partText (attemptBrief mempty mempty []) `shouldBe` ""
+      partText (attemptBrief mempty mempty [static "hint "]) `shouldBe` "hint "
+      partText (attemptBrief (static "Relevant project facts:\n- a") (static "holes") []) `shouldBe` "Relevant project facts:\n- a\n\nholes"
 
   describe "with retrieval and the library off" $
     it "the events and report.json are today's" $
       search cfg0 Nothing fake0 fakeLean goals (Map.fromList [(("a", "*"), [("ok", 0)]), (("b", "*"), [("BAD", 0), ("ok", 0)])])
         (const (pure Nothing)) $ \r -> do
           filter isRetrievalEvent (rEvents r) `shouldBe` []
-          map asBrief (rSpecs r) `shouldBe` ["", "", ""]
+          map briefText (rSpecs r) `shouldBe` ["", "", ""]
           let j = reportJson [] (rReport r)
           keysOf j `shouldBe` sort ["elapsed_s", "goals_total", "goals_closed", "closed_per_hour", "budget_spent", "goals", "backends", "attempts"]
           map keysOf (goalsJson j) `shouldBe` replicate 2 (sort ["goal", "status", "attempts", "by_attempt", "by_backend", "closed_at_s"])
+
+-- | An attempt's brief as the text the backend is handed.
+briefText :: AttemptSpec -> Text
+briefText = partText . asBrief

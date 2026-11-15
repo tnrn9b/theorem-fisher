@@ -50,6 +50,7 @@ import System.FilePath ((</>))
 import System.IO.Temp (withSystemTempDirectory)
 import System.Timeout (timeout)
 
+import Fisher.Role (partText)
 import Fisher.Search.Auto (Lsp (..))
 import Fisher.Search.Check (AxiomPolicy (..), LeanRun (..), standardAxioms)
 import Fisher.Search.Child (ChildStats (..))
@@ -187,7 +188,7 @@ runGPriced price mkRet leanRun mkAuto gcfg file runs0 replies0 = withSystemTempD
   let seRunF sp = do
         traced ("worker " <> asGoal sp)
         modifyIORef' launched (asGoal sp :)
-        modifyIORef' briefs ((asGoal sp, asBrief sp) :)
+        modifyIORef' briefs ((asGoal sp, partText (asBrief sp)) :)
         modifyIORef' starts ((asGoal sp, asStart sp) :)
         modifyIORef' specs (sp :)
         r <- atomicModifyIORef' runsRef $ \m -> case Map.findWithDefault [] (asGoal sp) m of

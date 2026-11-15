@@ -15,6 +15,7 @@ import System.FilePath ((</>))
 import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
 
+import Fisher.Role (partText)
 import Fisher.Search.Auto
 import Fisher.Search.Check (AxiomPolicy (..), standardAxioms)
 import Fisher.Search.Child (ChildStats (..))
@@ -119,7 +120,7 @@ spec :: Spec
 spec = describe "stopped attempts and the stall note" $ do
   describe "stallNote" $ do
     it "with the prover's errors and the last message" $
-      stallNote stop8 "does not compile: F.lean:4:2: error: BAD" (Just "I could not find the lemma.")
+      partText (stallNote stop8 "does not compile: F.lean:4:2: error: BAD" (Just "I could not find the lemma."))
         `shouldBe` T.intercalate "\n"
           [ "A previous attempt on this goal was stopped after 8 turns and $0.42 without progress on the file (turns)."
           , ""
@@ -129,12 +130,12 @@ spec = describe "stopped attempts and the stall note" $ do
           , "Its last message:"
           , "I could not find the lemma." ]
     it "with neither" $
-      stallNote (Stop StallDollars 3 1.5) "" Nothing
+      partText (stallNote (Stop StallDollars 3 1.5) "" Nothing)
         `shouldBe` "A previous attempt on this goal was stopped after 3 turns and $1.50 without progress on the file (dollars)."
     it "caps the errors and the message at 2,000 characters each" $ do
       let errs = T.replicate 3000 "e"
           msg = T.replicate 2500 "m"
-          note = stallNote stop8 errs (Just msg)
+          note = partText (stallNote stop8 errs (Just msg))
       note `shouldSatisfy` T.isInfixOf ("The prover's last errors on the file:\n" <> cap2000 errs <> "\n\n")
       note `shouldSatisfy` T.isSuffixOf ("Its last message:\n" <> cap2000 msg)
       note `shouldNotSatisfy` T.isInfixOf errs
@@ -157,19 +158,19 @@ spec = describe "stopped attempts and the stall note" $ do
     gsTried (goalOf "t" r) `shouldBe` gsTried (goalOf "t" p)
     case (rSpecs r, rSpecs p) of
       ([_, second, third], [_, second', third']) -> do
-        let b = asBrief second
+        let b = briefText second
         b `shouldSatisfy` T.isInfixOf "stopped after 8 turns and $0.42"
         b `shouldSatisfy` T.isInfixOf "The prover's last errors on the file:\n"
         b `shouldSatisfy` T.isInfixOf "error: BAD"
         b `shouldSatisfy` T.isInfixOf ("Its last message:\n" <> cap2000 long)
         b `shouldNotSatisfy` T.isInfixOf long
         -- the note follows today's brief
-        b `shouldSatisfy` T.isPrefixOf (asBrief second' <> "\n\n")
+        b `shouldSatisfy` T.isPrefixOf (briefText second' <> "\n\n")
         -- the next attempt moves up a tier
         asTier second `shouldBe` Just 1
         -- used once
-        asBrief third `shouldBe` asBrief third'
-        asBrief third `shouldNotSatisfy` T.isInfixOf "stopped after"
+        briefText third `shouldBe` briefText third'
+        briefText third `shouldNotSatisfy` T.isInfixOf "stopped after"
       (ss, ps) -> expectationFailure ("attempts: " <> show (length ss, length ps))
     gsStall (goalOf "t" r) `shouldBe` Nothing
 
@@ -178,7 +179,7 @@ spec = describe "stopped attempts and the stall note" $ do
     case (srAttempts (rReport r), rSpecs r) of
       (a1 : _, _ : second : _) -> do
         let why = fromMaybe (error "not rejected") (T.stripPrefix "rejected: " (arOutcome a1))
-        asBrief second `shouldBe` stallNote stop8 why Nothing
+        briefText second `shouldBe` partText (stallNote stop8 why Nothing)
       _ -> expectationFailure "too few attempts"
 
   it "a stopped attempt whose file closes the goal closes it, with no note" $ do
@@ -187,7 +188,7 @@ spec = describe "stopped attempts and the stall note" $ do
     gsStall (goalOf "a" r) `shouldBe` Nothing
     [i | AttemptStopped _ i _ _ _ _ <- rEvents r] `shouldBe` [1]
     take 1 (map arOutcome (srAttempts (rReport r))) `shouldBe` ["closed"]
-    [asBrief s | s <- rSpecs r] `shouldSatisfy` all (not . T.isInfixOf "stopped after")
+    [briefText s | s <- rSpecs r] `shouldSatisfy` all (not . T.isInfixOf "stopped after")
 
   it "records model, tier, stop and dollars (the run's, else the child's)" $ do
     r <- search cfgS Nothing one (Map.fromList
@@ -247,10 +248,14 @@ spec = describe "stopped attempts and the stall note" $ do
     r <- search cfgS Nothing one (Map.fromList
       [("t", [(step "exact BAD") {sStop = Just stop8}, (step "exact BAD") {sFailure = Just RateLimited}, step "exact BAD", step "exact BAD"])])
     take 2 (drop 1 (map arOutcome (srAttempts (rReport r)))) `shouldSatisfy` (\os -> take 1 os == ["model error: rate limited"])
-    case map asBrief (rSpecs r) of
+    case map briefText (rSpecs r) of
       [_, b2, b3, b4] -> do
         b2 `shouldSatisfy` T.isInfixOf "stopped after 8 turns and $0.42"
         b3 `shouldBe` b2
         b4 `shouldNotSatisfy` T.isInfixOf "stopped after"
       bs -> expectationFailure ("attempts: " <> show (length bs))
     gsStall (goalOf "t" r) `shouldBe` Nothing
+
+-- | An attempt's brief as the text the backend is handed.
+briefText :: AttemptSpec -> Text
+briefText = partText . asBrief

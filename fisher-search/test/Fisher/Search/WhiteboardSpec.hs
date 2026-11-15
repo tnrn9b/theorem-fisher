@@ -3,6 +3,7 @@ module Fisher.Search.WhiteboardSpec (spec) where
 import qualified Data.Text as T
 import Test.Hspec
 
+import Fisher.Role (partText, static)
 import Fisher.Search.Golden
 import Fisher.Search.Graph
 import Fisher.Search.Whiteboard
@@ -39,11 +40,11 @@ spec = do
       workerEnd (Just "**NOTE:**") "fb" `shouldBe` Note "fb"
   describe "whiteboard" $ do
     it "two levels with failures, shared node twice" $
-      golden "whiteboard.txt" (whiteboard tree 1 ["a: simp failed", "b: wrong type"])
-    it "no failures" $ T.isInfixOf "## Failed" (whiteboard tree 1 []) `shouldBe` False
+      golden "whiteboard.txt" (partText (whiteboard tree 1 (map static ["a: simp failed", "b: wrong type"])))
+    it "no failures" $ T.isInfixOf "## Failed" (partText (whiteboard tree 1 [])) `shouldBe` False
     it "caps at 2000 and keeps the newest failures" $ do
       let fs = [ T.pack (show i) <> ": " <> T.replicate 90 "x" | i <- [100 .. 132 :: Int] ]
-          w = whiteboard tree 1 fs
+          w = partText (whiteboard tree 1 (map static fs))
       T.length (T.intercalate "\n" fs) `shouldSatisfy` (> 3000)
       T.length w `shouldSatisfy` (<= 2000)
       w `shouldSatisfy` T.isInfixOf "132: "
@@ -53,10 +54,10 @@ spec = do
           (s, g2) = proposeSplit 1 g1
           names = [ (T.pack ("lemma" <> show i) <> T.replicate 30 "y", T.pack (show i)) | i <- [1 .. 100 :: Int] ]
           g3 = either (error . T.unpack) fst (acceptSplit (const False) s names g2)
-          w = whiteboard g3 1 ["f"]
+          w = partText (whiteboard g3 1 [static "f"])
       T.length w `shouldSatisfy` (<= 2000)
       w `shouldSatisfy` T.isSuffixOf "..."
   describe "workerBrief" $ do
-    it "golden" $ golden "brief.txt" (workerBrief "main" "theorem main : P" ["aux", "Foo.b"] "# Plan for main\n\n- main (open)")
+    it "golden" $ golden "brief.txt" (partText (workerBrief "main" "theorem main : P" ["aux", "Foo.b"] (static "# Plan for main\n\n- main (open)")))
     it "with no plan lemmas" $
-      workerBrief "main" "theorem main : P" [] "wb" `shouldSatisfy` T.isInfixOf "\nUse no declaration that still ends in `sorry`.\n"
+      partText (workerBrief "main" "theorem main : P" [] (static "wb")) `shouldSatisfy` T.isInfixOf "\nUse no declaration that still ends in `sorry`.\n"

@@ -1019,7 +1019,7 @@ smtSpec = describe "the smt arm" $ do
       ss <- smtSetupWith (\_ -> pure (Just (Z3 "/opt/z3"))) (A.object []) root (ok ["F.lean"]) src
       (ssAvailable ss, ssInserted ss, ssBase ss) `shouldBe` (False, False, src)
       ssWarning ss `shouldBe` Just "smt is not available for a module file: the arm is off for this run"
-      (ssFacts ss, isNothing (ssSmt ss), ssSolverWarning ss) `shouldBe` ("", True, Nothing)
+      (partText (ssFacts ss), isNothing (ssSmt ss), ssSolverWarning ss) `shouldBe` ("", True, Nothing)
       fmap acTactics (autoConfig (ssArgs ss)) `shouldBe` Just noSmt
       portfolioLogged d (ssArgs ss) `shouldReturn` tacticsJson noSmt
 
@@ -1041,7 +1041,7 @@ smtSpec = describe "the smt arm" $ do
       let off = A.object ["fisher" A..= A.object ["smt" A..= A.object ["enabled" A..= False]]]
       smtAvailable off root `shouldReturn` False
       ssOff <- smtSetup off root (ok ["F.lean"]) smtSource
-      (ssAvailable ssOff, ssBase ssOff, ssFacts ssOff) `shouldBe` (False, smtSource, "")
+      (ssAvailable ssOff, ssBase ssOff, partText (ssFacts ssOff)) `shouldBe` (False, smtSource, "")
       fmap acTactics (autoConfig (ssArgs ssOff)) `shouldBe` Just noSmt
 
   it "a user --auto-tactics list loses smt with one warning where it is not available" $
@@ -1076,9 +1076,9 @@ smtSpec = describe "the smt arm" $ do
       ss <- smtSetupWith z3 cfgT with (ok ["F.lean"]) smtSource
       fmap (\e -> (smSolver e, smTimeout e, smQueryTactic e)) (ssSmt ss) `shouldBe` Just (Z3 "/opt/z3", 7, "trace")
       ssSolverWarning ss `shouldBe` Nothing
-      ssFacts ss `shouldBe` smtParagraph <> " `z3` is on PATH for SMT-LIB queries."
+      partText (ssFacts ss) `shouldBe` smtParagraph <> " `z3` is on PATH for SMT-LIB queries."
       cvc <- smtSetupWith (\_ -> pure (Just (Cvc5 "/opt/cvc5"))) (A.object []) with (ok ["F.lean"]) smtSource
-      ssFacts cvc `shouldBe` smtParagraph <> " `cvc5` is on PATH for SMT-LIB queries."
+      partText (ssFacts cvc) `shouldBe` smtParagraph <> " `cvc5` is on PATH for SMT-LIB queries."
       -- no solver: no env, one warning
       bare <- smtSetupWith none (A.object []) with (ok ["F.lean"]) smtSource
       isNothing (ssSmt bare) `shouldBe` True
@@ -1094,11 +1094,11 @@ smtSpec = describe "the smt arm" $ do
       (isNothing (ssSmt offS), ssSolverWarning offS) `shouldBe` (True, Nothing)
 
   it "smtFacts: the paragraph, the solver found named, nothing without lean-smt" $ do
-    smtFacts True Nothing `shouldBe` smtParagraph
-    smtFacts True (Just "z3") `shouldBe` smtParagraph <> " `z3` is on PATH for SMT-LIB queries."
-    smtFacts True (Just "cvc5") `shouldBe` smtParagraph <> " `cvc5` is on PATH for SMT-LIB queries."
-    smtFacts False (Just "z3") `shouldBe` ""
-    smtFacts False Nothing `shouldBe` ""
+    partText (smtFacts True Nothing) `shouldBe` smtParagraph
+    partText (smtFacts True (Just "z3")) `shouldBe` smtParagraph <> " `z3` is on PATH for SMT-LIB queries."
+    partText (smtFacts True (Just "cvc5")) `shouldBe` smtParagraph <> " `cvc5` is on PATH for SMT-LIB queries."
+    partText (smtFacts False (Just "z3")) `shouldBe` ""
+    partText (smtFacts False Nothing) `shouldBe` ""
 
   it "the brief carries the smt facts only with lean-smt" $
     withSystemTempDirectory "fisher-smt" $ \d -> do
@@ -1111,7 +1111,7 @@ smtSpec = describe "the smt arm" $ do
             goal <- case openGoals (ssBase ss) of
               g : _ -> pure g
               [] -> fail "no open goal"
-            rtBrief <$> retrieveFor (Query (dName goal) (dName goal) (dStart goal + 1) (dStatement goal) Nothing [dStatement goal])
+            partText . rtBrief <$> retrieveFor (Query (dName goal) (dName goal) (dStart goal + 1) (dStatement goal) Nothing [dStatement goal])
       with <- briefIn True
       smtParagraph `T.isInfixOf` with `shouldBe` True
       without <- briefIn False

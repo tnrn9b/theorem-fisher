@@ -28,6 +28,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import System.FilePath (joinPath, normalise, splitDirectories)
 
+import Fisher.Role (PromptPart, source, static)
 import Fisher.Search.Bm25 (corpus, rank, tokens)
 import Fisher.Search.Index
 
@@ -241,7 +242,8 @@ factLine (Fact e _) = "- " <> eName e <> " : " <> oneLine (eStatement e) <> " ("
       let w = T.unwords (T.words s)
        in maybe w T.stripEnd (T.stripSuffix ":=" w)
 
--- | The facts section for a brief: empty when there are none.
-factsBrief :: [Fact] -> Text
-factsBrief [] = ""
-factsBrief fs = "Relevant project facts:\n" <> T.concat [factLine f <> "\n" | f <- fs]
+-- | The facts section for a brief: empty when there are none. The facts
+-- are the project's (source), the heading Fisher's.
+factsBrief :: [Fact] -> PromptPart
+factsBrief [] = mempty
+factsBrief fs = static "Relevant project facts:\n" <> mconcat [source (factLine f) <> static "\n" | f <- fs]

@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+
 -- | The model-call jobs of the graph search: the planner's split (with its
 -- sketch checked), the verifier's review of a split, and the verifier's
 -- check of a worker's claim that a statement is false. Each runs on its own
@@ -22,7 +24,10 @@ import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as T
 
-import Fisher.Role (Role (..))
+import Fisher.Role (PromptPart, Role (..), Said, partText, toPrompt)
+-- The planner's reply is the one place here a 'Said' is made, until Task 6
+-- moves the jobs into AgentM and its ask makes it.
+import Fisher.Role.Internal (said')
 import Fisher.Search.Check (AxiomPolicy, LeanRun, Verdict)
 import Fisher.Search.Review
 import Fisher.Search.Sketch
@@ -46,9 +51,11 @@ locked ck act = withMVar (ckLock ck) (const act)
 
 -- | A planner's split that passed its check.
 data Plan = Plan
-  { plBlueprint :: Text
+  { plBlueprint :: Said 'Planner
+  -- ^ what the planner said the split is
   , plLean :: Text
-  -- ^ the sketch as the planner wrote it
+  -- ^ the sketch as the planner wrote it; checked Lean once the kernel has
+  -- accepted it, so it goes into a prompt as source
   , plSketch :: Sketch
   , plBase :: Text
   -- ^ the base it was checked against
@@ -89,10 +96,12 @@ askTwice ask role msgsFor errText readReply = go (0 :: Int) Nothing 0
 -- | The planner's split of a node: base, node name, its printed type, the
 -- lemmas of the current plan it may use, whiteboard, notes of its failed
 -- attempts, its retrieval text (facts and library; may be empty). One
--- repair round.
-planJob :: Checker -> Ask -> Text -> Text -> Text -> [Text] -> Text -> [Text] -> Text -> IO (Asked Plan)
+-- repair round. The messages are text until the jobs build a
+-- 'Fisher.Role.Prompt' (Task 6), so the board and the retrieval become text
+-- there, at the hand-off to the model.
+planJob :: Checker -> Ask -> Text -> Text -> Text -> [Text] -> PromptPart -> [Text] -> PromptPart -> IO (Asked Plan)
 planJob ck ask base name expected usable board notes retrieved =
-  askTwice ask Planner (plannerMessages base name usable board notes retrieved) problemText readPlan
+  askTwice ask Planner (plannerMessages base name usable (partText board) notes (partText retrieved)) problemText readPlan
   where
     readPlan t = case parsePlan t of
       Left e -> pure (Left (FormatError e))
@@ -100,12 +109,17 @@ planJob ck ask base name expected usable board notes retrieved =
         Left e -> pure (Left (FormatError (sketchErrorText e)))
         Right (sk, applied) -> do
           r <- locked ck (checkSketchVerdict (ckLean ck) (ckPolicy ck) (ckRoot ck) (ckRel ck) applied name expected (map fst (skLemmas sk)))
-          pure (either (Left . LeanErrors) (\(v, tys) -> Right (Plan bp lean sk base applied v tys)) r)
+          -- the blueprint is what the planner said: made here from its
+          -- reply (Task 6 moves this into AgentM's ask)
+          pure (either (Left . LeanErrors) (\(v, tys) -> Right (Plan (said' bp) lean sk base applied v tys)) r)
 
--- | The verifier's review of a split: the node's statement, the plan, the whiteboard.
-reviewJob :: Ask -> Text -> Plan -> Text -> IO (Asked SplitVerdict)
+-- | The verifier's review of a split: the node's statement, the plan, the
+-- whiteboard. The blueprint goes in as the planner's reply ('toPrompt'),
+-- the sketch as checked source; both become text at the hand-off to the
+-- model, as the messages are text until Task 6.
+reviewJob :: Ask -> Text -> Plan -> PromptPart -> IO (Asked SplitVerdict)
 reviewJob ask stmt p board =
-  askTwice ask Verifier (retryMessages (reviewMessages stmt (plBlueprint p) (plLean p) board)) id (pure . parseReview)
+  askTwice ask Verifier (retryMessages (reviewMessages stmt (partText (toPrompt (plBlueprint p))) (plLean p) (partText board))) id (pure . parseReview)
 
 -- | The verifier's check of a claim that a statement is false.
 falseJob :: Ask -> Text -> Text -> IO (Asked (Bool, Text))

@@ -43,7 +43,7 @@ import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as LBS
 import Data.Char (isSpace)
-import Data.List (sortOn)
+import Data.List (intersperse, sortOn)
 import qualified Data.Map.Strict as M
 import Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
@@ -58,6 +58,8 @@ import System.FilePath
 import System.IO (Handle, IOMode (ReadWriteMode), hClose, openFile)
 
 import Fisher.LLM.Auth.Sha256 (sha256Hex)
+import Fisher.Role (PromptPart, toPrompt, worker)
+import qualified Fisher.Role as Role
 import Fisher.Runlog (projectKeyOf)
 import Fisher.Search.Bm25 (Corpus, corpus, rank, tokens)
 import Fisher.Search.Facts (goalModule)
@@ -540,9 +542,12 @@ normalStatement s0 = oneLine (stripTail (afterName (dropMods (T.stripStart s0)))
             _ -> t
        in maybe noBy T.stripEnd (T.stripSuffix ":=" noBy)
 
--- | The library section of a brief: empty when nothing is offered.
-libraryBrief :: Library -> Text
-libraryBrief (ls, ns) = T.intercalate "\n" (filter (not . T.null) [lemmaPart, notePart])
+-- | The library section of a brief: empty when nothing is offered. The
+-- lemmas and the goal names are project source; a note is what a worker
+-- wrote on an earlier run (its NOTE or FALSE line, kept on a whiteboard),
+-- so it goes in as a worker's text; the headings are Fisher's.
+libraryBrief :: Library -> PromptPart
+libraryBrief (ls, ns) = mconcat (intersperse (Role.static "\n") (filter (/= mempty) [lemmaPart, notePart]))
   where
     offeredNames = Set.fromList (map lmName ls)
     -- a lemma needing another offered one is shown only after it
@@ -555,18 +560,21 @@ libraryBrief (ls, ns) = T.intercalate "\n" (filter (not . T.null) [lemmaPart, no
       where
         total' = total + T.length (source l)
     lemmaPart
-      | null shown = ""
+      | null shown = mempty
       | otherwise =
-          "Lemmas proved in earlier runs (paste one above the goal as a helper if it helps):\n"
-            <> T.concat [block l | l <- shown]
+          Role.static "Lemmas proved in earlier runs (paste one above the goal as a helper if it helps):\n"
+            <> mconcat [block l | l <- shown]
     block l =
-      "```lean\n-- " <> lmName l <> " (" <> T.pack (lmFile l) <> ")" <> needs l <> "\n" <> source l <> "\n```\n"
+      Role.static "```lean\n-- " <> Role.source (lmName l <> " (" <> T.pack (lmFile l) <> ")") <> needs l
+        <> Role.static "\n" <> Role.source (source l) <> Role.static "\n```\n"
     needs l = case [p | p <- lmProofUses l, Set.member p offeredNames] of
-      [] -> ""
-      ps -> "; paste " <> T.intercalate ", " ps <> " above it"
+      [] -> mempty
+      ps -> Role.static "; paste " <> Role.source (T.intercalate ", " ps) <> Role.static " above it"
     notePart
-      | null ns = ""
-      | otherwise = "Notes from earlier runs:\n" <> T.concat ["- " <> ntGoal n <> ": " <> ntText n <> "\n" | n <- ns]
+      | null ns = mempty
+      | otherwise =
+          Role.static "Notes from earlier runs:\n"
+            <> mconcat [Role.static "- " <> Role.source (ntGoal n) <> Role.static ": " <> toPrompt (worker (ntText n)) <> Role.static "\n" | n <- ns]
 
 -- | A lemma's text: the statement, then the proof on the same line when
 -- it began there, else on the lines below.

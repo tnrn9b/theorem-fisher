@@ -12,6 +12,7 @@ import System.FilePath ((</>))
 import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
 
+import Fisher.Role (partText)
 import Fisher.Search.Index
 import Fisher.Search.Library
 
@@ -239,9 +240,9 @@ spec = do
       -- without it in the library, not at all
       fst (offer' ["Proj.bump"] goalStmt ([h2], [])) `shouldBe` []
       -- the brief shows the dependency first and never the lemma alone
-      let b = libraryBrief ([h1, h2], [])
+      let b = partText (libraryBrief ([h1, h2], []))
       T.breakOn "-- Proj.h1 (" b `shouldSatisfy` ((< T.length (fst (T.breakOn "-- Proj.h2 (" b))) . T.length . fst)
-      libraryBrief ([h1 {lmProof = "  " <> T.replicate 1600 "x"}, h2], []) `shouldBe` ""
+      partText (libraryBrief ([h1 {lmProof = "  " <> T.replicate 1600 "x"}, h2], [])) `shouldBe` ""
     it "offers one lemma per statement" $ do
       let a1 = lemma "Proj.a1" "theorem a1 : bump 7 > 0 := by" ["Proj.bump"]
           a2 = lemma "Proj.a2" "theorem a2 :  bump 7 > 0 := by" ["Proj.bump"]
@@ -257,21 +258,21 @@ spec = do
       snd (offer' ["Proj.bump"] goalStmt ([], [far, off, near])) `shouldBe` [near, far]
 
   describe "libraryBrief" $ do
-    it "is empty for an empty offer" $ libraryBrief ([], []) `shouldBe` ""
+    it "is empty for an empty offer" $ partText (libraryBrief ([], [])) `shouldBe` ""
     it "gives each lemma's statement and proof and the notes" $ do
-      let b = libraryBrief ([lemma "Proj.bump_eq" "theorem bump_eq (n : Nat) : bump n = n + 1 := by" ["Proj.bump"]], [note "omega closes it" "Proj/Top.lean"])
+      let b = partText $ libraryBrief ([lemma "Proj.bump_eq" "theorem bump_eq (n : Nat) : bump n = n + 1 := by" ["Proj.bump"]], [note "omega closes it" "Proj/Top.lean"])
       b `shouldSatisfy` T.isPrefixOf "Lemmas proved in earlier runs (paste one above the goal as a helper if it helps):"
       b `shouldSatisfy` T.isInfixOf "theorem bump_eq (n : Nat) : bump n = n + 1 := by\n  simp"
       b `shouldSatisfy` T.isInfixOf "omega closes it"
     it "skips a lemma over 1,500 characters and stops past 6,000 in all" $ do
       let big = (lemma "Proj.big" "theorem big : bump 0 = 1 := by" ["Proj.bump"]) {lmProof = "  " <> T.replicate 1500 "x"}
           mid i = (lemma ("Proj.mid" <> T.pack (show i)) ("theorem mid" <> T.pack (show i) <> " : bump 0 = 1 := by") ["Proj.bump"]) {lmProof = "  " <> T.replicate 1400 "y"}
-          b = libraryBrief (big : map mid [1 .. 5 :: Int], [])
+          b = partText (libraryBrief (big : map mid [1 .. 5 :: Int], []))
       b `shouldSatisfy` (not . T.isInfixOf "Proj.big")
       map (\i -> ("Proj.mid" <> T.pack (show i)) `T.isInfixOf` b) [1 .. 5 :: Int] `shouldBe` [True, True, True, True, False]
     it "is empty when every lemma is too long" $ do
       let big = (lemma "Proj.big" "theorem big : bump 0 = 1 := by" ["Proj.bump"]) {lmProof = "  " <> T.replicate 1500 "x"}
-      libraryBrief ([big], []) `shouldBe` ""
+      partText (libraryBrief ([big], [])) `shouldBe` ""
 
   describe "storage" $ do
     let l1 = lemma "Proj.a" "theorem a : bump 0 = 1 := by" ["Proj.bump"]

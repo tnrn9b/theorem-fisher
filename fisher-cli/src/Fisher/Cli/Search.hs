@@ -222,6 +222,7 @@ import Fisher.Paths (fisherDirName, getFisherHome)
 import Fisher.Project (InitOptions (..), defaultInitOptions, initializeProject)
 import Fisher.Py.Value (PyVal (..), get)
 import Fisher.RLM.Types (Model, ModelError (..), Reply (..))
+import Fisher.Role (PromptPart, partText)
 import Fisher.Search.Auto (AutoConfig (..), Lsp (..), defaultAutoConfig, gateTactics)
 import Fisher.Search.Check
 import Fisher.Search.Disprove (Disproof (..), SmtEnv (..))
@@ -768,7 +769,7 @@ data SmtSetup = SmtSetup
   , ssWarning :: Maybe T.Text
   -- ^ for stderr, when a user list lost @smt@ (and, when that left it
   -- empty, the automation is off)
-  , ssFacts :: T.Text
+  , ssFacts :: PromptPart
   -- ^ the briefs' smt paragraph ('smtFacts'); empty when not available
   , ssSmt :: Maybe SmtEnv
   -- ^ Disprove's SMT source: Nothing when the arm is not available or no
@@ -907,7 +908,7 @@ buildRetrievalAt readOnly home ra root runDir = do
               Left e -> (Just ([], []), [LibraryProblem 0 ("the library could not be read: " <> T.take 300 (T.pack (show e)))])
               Right (l, bad) -> (Just l, [LibraryProblem 0 ("set aside " <> T.pack b <> ": it did not parse") | b <- bad])
           else pure (Nothing, [])
-      pure (Just (RetrievalEnv ix (factsConfig ra) lib (not (readOnly || raLibraryReadOnly ra)) dir root runDir retrievalCutoff ""), evs0 <> evs1)
+      pure (Just (RetrievalEnv ix (factsConfig ra) lib (not (readOnly || raLibraryReadOnly ra)) dir root runDir retrievalCutoff mempty), evs0 <> evs1)
 
 -- | The library directory, given the Fisher home and the package root:
 -- @--library-dir@ itself (one library for every project run with it, as
@@ -951,7 +952,7 @@ printFactsMain ra file0 = do
                   <> T.pack (show (rtFacts rt)) <> " facts, " <> T.pack (show (rtFactsChars rt)) <> " chars, lemmas "
                   <> T.pack (show (rtOffered rt)) <> ", " <> T.pack (show (rtNotes rt)) <> " notes"
                   <> (if rtCutOff rt then " (cut off)" else ""))
-    TIO.putStrLn (rtBrief rt)
+    TIO.putStrLn (partText (rtBrief rt))
     hFlush stdout) goals
 
 -- | Whether the run starts the automation's language server: auto on, and
@@ -1142,7 +1143,7 @@ runMain ra0 file0 = do
               Right (argv0, cwd', env) -> case (if native then maybe Right setModel (asModel spec <|> cModel casc) argv0 else Right argv0) of
                Left e -> unstarted (plainResult Nothing Nothing e)
                Right argv -> do
-                let extra = if asGoal spec == "*" then singlePrompt rel else withBrief (attemptPrompt (asGoal spec) rel) (asBrief spec)
+                let extra = if asGoal spec == "*" then singlePrompt rel else withBrief (attemptPrompt (asGoal spec) rel) (partText (asBrief spec))
                 case headlessArgv (asBackend spec) argv extra (raMaxTurns ra) of
                   Left e -> unstarted (plainResult Nothing Nothing e)
                   Right hargv -> do

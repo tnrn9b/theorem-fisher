@@ -18,6 +18,7 @@ import System.FilePath ((</>))
 import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
 
+import Fisher.Role (partText)
 import Fisher.Search.Auto
 import Fisher.Search.Check (AxiomPolicy (..), LeanRun (..), standardAxioms)
 import Fisher.Search.Disprove (Disproof (..), DisproveSource (..), SmtEnv (..), certifyTactics)
@@ -186,11 +187,11 @@ spec = describe "the automation pre-pass in flat search" $ do
         fmap dProof (findDecl "b" (declarations (asStart second))) `shouldBe` Just "  intro x\n  sorry"
         -- a's two-line proof was merged meanwhile: the start is the current base
         T.isInfixOf "skip\n  ok" (asStart second) `shouldBe` True
-        asBrief second `shouldSatisfy` T.isPrefixOf "Start from this partial proof; fill these holes"
-        briefLines (asBrief second) `shouldBe` map hLine (holesOf "b" (asStart second))
+        briefText second `shouldSatisfy` T.isPrefixOf "Start from this partial proof; fill these holes"
+        briefLines (briefText second) `shouldBe` map hLine (holesOf "b" (asStart second))
         -- the repaired file had the hole a line higher
-        briefLines (asBrief second) `shouldBe` [9]
-        asBrief second `shouldSatisfy` T.isInfixOf "goal at line"
+        briefLines (briefText second) `shouldBe` [9]
+        briefText second `shouldSatisfy` T.isInfixOf "goal at line"
       ss -> expectationFailure ("attempts on b: " <> show (length ss))
     gsStatus (goalOf "b" (rReport r)) `shouldBe` Closed
     gsClosedBy (goalOf "b" (rReport r)) `shouldBe` Just "model+repair"
@@ -228,7 +229,7 @@ spec = describe "the automation pre-pass in flat search" $ do
     gsPartial (goalOf "t" (rReport r)) `shouldBe` Nothing
     case specsFor "t" r of
       [_, second] -> do
-        asBrief second `shouldBe` ""
+        briefText second `shouldBe` ""
         fmap dProof (findDecl "t" (declarations (asStart second))) `shouldBe` Just "  sorry"
       ss -> expectationFailure ("attempts on t: " <> show (length ss))
     gsClosedBy (goalOf "t" (rReport r)) `shouldBe` Just "model"
@@ -296,7 +297,7 @@ spec = describe "the automation pre-pass in flat search" $ do
     r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 4, scBudget = 30, scParallelPerGoal = False}) (Just auto) fake0 {fSuspects = ["t"]} noCertify one
       (Map.fromList [(("t", "*"), [("BAD", 5), ("BAD", 5), ("ok", 5)])])
     [(g, k, x) | GoalDisproved _ g k x _ _ <- rEvents r] `shouldBe` [("t", "suspect", "x := 0")]
-    map (T.isInfixOf "x := 0" . asBrief) (specsFor "t" r) `shouldBe` [False, False, True]
+    map (T.isInfixOf "x := 0" . briefText) (specsFor "t" r) `shouldBe` [False, False, True]
     let gs = goalOf "t" (rReport r)
     gsStatus gs `shouldBe` Closed
     gsDisproof gs `shouldBe` Just (DSuspect "x := 0")
@@ -343,7 +344,7 @@ spec = describe "the automation pre-pass in flat search" $ do
            (Just auto) fake0 {fQuery = const (Just "(assert true)")} noCertify one
            (Map.fromList [(("t", "*"), [("ok", 5)])])
     [(k, x, s) | GoalDisproved _ _ k x s _ <- rEvents r] `shouldBe` [("suspect", "x := 1", "smt")]
-    map asBrief (specsFor "t" r) `shouldSatisfy` all (T.isInfixOf (suspectBrief ViaSmt "x := 1"))
+    map briefText (specsFor "t" r) `shouldSatisfy` all (T.isInfixOf (partText (suspectBrief ViaSmt "x := 1")))
 
   it "the early step certifies with the witness tactic only" $ do
     -- negation probes counted; noCertify makes every one fail
@@ -533,3 +534,7 @@ spec = describe "the automation pre-pass in flat search" $ do
       _ -> Nothing
     toJSONObj :: [(Text, Text)] -> Value
     toJSONObj kvs = Object (KM.fromList [("x", Object (KM.fromList [(K.fromText k, String v) | (k, v) <- kvs]))])
+
+-- | An attempt's brief as the text the backend is handed.
+briefText :: AttemptSpec -> Text
+briefText = partText . asBrief

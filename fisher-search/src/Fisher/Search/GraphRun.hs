@@ -58,6 +58,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import System.Timeout (timeout)
 
+import Fisher.Role (PromptPart, partText, source, static, toPrompt, tool, worker)
 import Fisher.Search.Auto (AutoConfig (..), AutoFail (..), autoGoal)
 import Fisher.Search.Check (Verdict (..))
 import Fisher.Search.Child (ChildStats (..))
@@ -212,7 +213,7 @@ data St = St
   -- ^ each node's printed type, by name: what its proof must have
   , stWaiting :: IntSet
   , stRunning :: [(Async Out, Job)]
-  , stFailures :: IM.IntMap [Text]
+  , stFailures :: IM.IntMap [PromptPart]
   -- ^ whiteboard failure lines per root, oldest first
   , stNotes :: IM.IntMap [Text]
   -- ^ notes of each node's failed attempts, for the planner
@@ -236,11 +237,11 @@ data St = St
   -- ^ each node's last chosen tier
   , stModelErrors :: IM.IntMap Int
   -- ^ model errors per node kept out of its attempt count
-  , stStall :: IM.IntMap Text
+  , stStall :: IM.IntMap PromptPart
   -- ^ the note on a node's stopped worker, for its next worker's brief
   , stEscalations :: Int
   -- ^ 'NodeEscalated' events logged
-  , stStallUsed :: IM.IntMap Text
+  , stStallUsed :: IM.IntMap PromptPart
   -- ^ the stall note each running worker took into its brief, by attempt
   }
 
@@ -345,11 +346,13 @@ usableOf s n =
       above = ancestors n g
    in [nameOf s i | i <- planLemmas g (nRoot (nodeOf s n)), i /= n, not (IS.member i above)]
 
-boardOf :: St -> NodeId -> Text
+boardOf :: St -> NodeId -> PromptPart
 boardOf s r = whiteboard (stGraph s) r (IM.findWithDefault [] r (stFailures s))
 
+-- | Each root's whiteboard as text, for graph.json, the whiteboard files
+-- and the report (not a prompt).
 boards :: St -> [(NodeId, Text)]
-boards s = [(r, boardOf s r) | r <- gRoots (stGraph s)]
+boards s = [(r, partText (boardOf s r)) | r <- gRoots (stGraph s)]
 
 oneLine :: Text -> Text
 oneLine = T.take 300 . T.unwords . T.words
@@ -362,11 +365,19 @@ addCost c role d = do
   modify c (\s -> s {stDollars = Map.insertWith (+) role d (stDollars s)})
   logG c (\t -> RoleCost t role d)
 
--- | A whiteboard line @<node>: <note>@ on the node's root.
-failureLine :: Ctx -> NodeId -> Text -> IO ()
-failureLine c i note = modify c $ \s ->
+-- | A whiteboard line @<node>: <note>@ on the node's root. The node's name
+-- is the checked file's (source); the note, put on one line, goes in by
+-- the constructor its caller names for where its text came from: 'static'
+-- for Fisher's own, 'tool' for a counterexample, 'workerNote' for one
+-- quoting a worker.
+failureLine :: Ctx -> NodeId -> (Text -> PromptPart) -> Text -> IO ()
+failureLine c i from note = modify c $ \s ->
   let n = nodeOf s i
-   in s {stFailures = IM.insertWith (flip (<>)) (nRoot n) [nName n <> ": " <> oneLine note] (stFailures s)}
+   in s {stFailures = IM.insertWith (flip (<>)) (nRoot n) [source (nName n) <> static ": " <> from (oneLine note)] (stFailures s)}
+
+-- | A note quoting a worker's reply (its NOTE or FALSE line).
+workerNote :: Text -> PromptPart
+workerNote = toPrompt . worker
 
 addNote :: Ctx -> NodeId -> Text -> IO ()
 addNote c i note = modify c (\s -> s {stNotes = IM.insertWith (flip (<>)) i [note] (stNotes s)})
@@ -436,9 +447,9 @@ launchAll c skipped = do
 
 -- | A node's retrieval text, made once (before its first worker or
 -- planner call) and logged; empty with retrieval off.
-retrievalOf :: Ctx -> NodeId -> IO Text
+retrievalOf :: Ctx -> NodeId -> IO PromptPart
 retrievalOf c n = case cRetrieve c of
-  Nothing -> pure ""
+  Nothing -> pure mempty
   Just get -> do
     s <- getSt c
     case IM.lookup n (stRetrieved s) of
@@ -464,13 +475,13 @@ startWorker c n = do
   t <- elapsed c
   let name = nameOf s n
       brief0 = workerBrief name (stmtOf s n) (usableOf s n) (boardOf s (nRoot (nodeOf s n)))
-      brief = if T.null retrieved then brief0 else brief0 <> "\n" <> retrieved <> "\n"
+      brief = if retrieved == mempty then brief0 else brief0 <> static "\n" <> retrieved <> static "\n"
       -- a partial proof from Repair, spliced into the current base, and its holes
       (start, brief1) = case nPartial (nodeOf s n) >>= \p -> partialStart name p (stBase s) of
-        Just (st, holes) -> (st, brief <> "\n" <> holes <> "\n")
+        Just (st, holes) -> (st, brief <> static "\n" <> holes <> static "\n")
         Nothing -> (stBase s, brief)
       -- the note on the node's stopped worker, used once
-      brief' = maybe brief1 (\note -> brief1 <> "\n" <> note <> "\n") (IM.lookup n (stStall s))
+      brief' = maybe brief1 (\note -> brief1 <> static "\n" <> note <> static "\n") (IM.lookup n (stStall s))
       -- the node's tier: its step is its counted attempts (launchAll starts
       -- no worker once every tier is skipped)
       tiers = gcTiers (cCfg c)
@@ -556,7 +567,7 @@ harvestRun c = case seRetrieval (geSearch (cEnv c)) of
   Just re -> do
     s <- getSt c
     let failures = [ (T.strip nm, T.strip (T.drop 1 rest))
-                   | l <- concat (IM.elems (stFailures s)), let (nm, rest) = T.breakOn ":" l, not (T.null rest) ]
+                   | l <- map partText (concat (IM.elems (stFailures s))), let (nm, rest) = T.breakOn ":" l, not (T.null rest) ]
         notes = failures <> [(nameOf s i, x) | (i, xs) <- IM.toList (stNotes s), x <- xs]
     r <- saveRun re (seRel (geSearch (cEnv c))) (cBase0 c) (stBase s) notes
     case r of
@@ -616,15 +627,15 @@ handle c (Job n kind) res = case kind of
         | otherwise -> splitRejected c n sid (svReason v)
     Right _ -> pure Nothing
   KFalse claim -> case res of
-    Left e -> failureLine c n ("FALSE: " <> claim <> " (not checked: " <> showErr e <> ")") >> pure Nothing
+    Left e -> failureLine c n workerNote ("FALSE: " <> claim <> " (not checked: " <> showErr e <> ")") >> pure Nothing
     Right (OutFalse a) -> asked Verifier a $ \case
       Right (True, _) -> do
         s <- getSt c
         when (nStatus (nodeOf s n) == NOpen) $ do
           logG c (\t -> FalseLemma t n claim)
           falseNode c n claim
-      Right (False, why) -> failureLine c n ("FALSE: " <> claim <> " (not confirmed: " <> why <> ")")
-      Left e -> failureLine c n ("FALSE: " <> claim <> " (not checked: " <> e <> ")")
+      Right (False, why) -> failureLine c n workerNote ("FALSE: " <> claim <> " (not confirmed: " <> why <> ")")
+      Left e -> failureLine c n workerNote ("FALSE: " <> claim <> " (not checked: " <> e <> ")")
     Right _ -> pure Nothing
   where
     asked role a k = case a of
@@ -665,7 +676,7 @@ workerDone c n spec started res = do
             -- a node Disprove just failed gets no note and no FALSE check
             let open = nStatus (nodeOf s2 n) == NOpen
             case workerEnd final outcome of
-              Note x -> when open (failureLine c n x >> addNote c n x)
+              Note x -> when open (failureLine c n workerNote x >> addNote c n x)
               FalseClaim claim -> do
                 addNote c n ("FALSE: " <> claim)
                 if not open
@@ -673,7 +684,7 @@ workerDone c n spec started res = do
                 else if capped c s2
                   then do
                     modify c (\x -> x {stCapHit = True})
-                    failureLine c n ("FALSE: " <> claim <> " (not checked: the dollar cap)")
+                    failureLine c n workerNote ("FALSE: " <> claim <> " (not checked: the dollar cap)")
                   else startJob c n (KFalse claim) (OutFalse <$> falseJob (geAsk (cEnv c)) (stmtOf s2 n) claim)
   addCost c Worker (fromMaybe 0 dollars)
   -- a stopped worker is logged before its record, its file judged as any other's
@@ -746,7 +757,7 @@ splitFailed :: Ctx -> NodeId -> SplitId -> Text -> IO ()
 splitFailed c n sid why = do
   modGraph c (failSplit sid why)
   logG c (\t -> SplitFailed t sid why)
-  failureLine c n ("split failed: " <> why)
+  failureLine c n static ("split failed: " <> why)
   s <- getSt c
   prune c (maybe [] sLemmas (IM.lookup sid (gSplits (stGraph s))))
 
@@ -754,7 +765,7 @@ splitRejected :: Ctx -> NodeId -> SplitId -> Text -> IO ()
 splitRejected c n sid why = do
   modGraph c (rejectSplit sid why)
   logG c (\t -> SplitRejected t sid why)
-  failureLine c n ("split rejected: " <> why)
+  failureLine c n static ("split rejected: " <> why)
 
 proveNode :: Ctx -> NodeId -> IO ()
 proveNode c i = do
@@ -839,7 +850,7 @@ settle c = do
           forM_ mine $ \sid -> splitFailed c i sid "the sketch does not close with its lemmas proved"
           when (IS.member i (stWaiting s)) $ do
             modify c (\x -> x {stWaiting = IS.delete i (stWaiting x), stGraph = attemptDone i (stGraph x)})
-            failureLine c i ("rejected on recheck: " <> why)
+            failureLine c i static ("rejected on recheck: " <> why)
           pure False
         -- still waiting (on another plan lemma, say): the split stays pending
         -- and is checked again when something else closes
@@ -858,7 +869,7 @@ releaseWaiting c = do
     Closed -> proveNode c i >> pure True
     _ -> do
       modify c (\x -> x {stWaiting = IS.delete i (stWaiting x), stGraph = attemptDone i (stGraph x)})
-      failureLine c i (case v of
+      failureLine c i static (case v of
         Rejected why -> "rejected on recheck: " <> why
         _ -> "waits on lemmas that did not close")
       pure False
@@ -1030,7 +1041,7 @@ disproveNode c n = do
         falseNode c n ("the negation is proved by " <> tac)
       Just (Right (DSuspect cx, src, _)) -> do
         logG c (\t -> NodeDisproved t n "suspect" cx (maybe "" sourceName src) Nothing)
-        failureLine c n $ case src of
+        failureLine c n tool $ case src of
           Just ViaSmt -> "SUSPECT: an SMT solver found a countermodel: " <> cx
           _ -> "SUSPECT: plausible found a counterexample: " <> cx
       _ -> pure ()

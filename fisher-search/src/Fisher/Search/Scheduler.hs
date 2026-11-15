@@ -79,7 +79,7 @@ import qualified Data.Aeson.Key as K
 import qualified Data.Aeson.KeyMap as KM
 import Data.IORef
 import Data.Char (isDigit)
-import Data.List (elemIndex, nub, sortOn)
+import Data.List (elemIndex, intersperse, nub, sortOn)
 import qualified Data.Map.Strict as Map
 import Control.Applicative ((<|>))
 import Data.Maybe (fromMaybe, isJust, listToMaybe, maybeToList)
@@ -90,6 +90,7 @@ import Numeric (showFFloat)
 import System.Timeout (timeout)
 
 import Fisher.Learn.Policy (GoalPolicy (..))
+import Fisher.Role (PromptPart, static, toPrompt, tool, worker)
 import Fisher.Search.Auto (AutoConfig (..), AutoFail (..), Hole (..), Lsp (..), autoGoal, holesIn)
 import Fisher.Search.Check (AxiomPolicy, LeanRun)
 import qualified Fisher.Search.Check as C
@@ -182,7 +183,7 @@ data AttemptSpec = AttemptSpec
   , asBackend :: Text
   , asStart :: Text
   -- ^ the base the attempt starts from
-  , asBrief :: Text
+  , asBrief :: PromptPart
   -- ^ extra text for the attempt's prompt (the graph search's brief; empty here)
   , asModel :: Maybe Text
   -- ^ the tier's model; Nothing is the backend's own
@@ -267,7 +268,7 @@ data GoalState = GoalState
   , gsDisproofWitness :: Maybe Text
   -- ^ for a certified negation, the solver's model whose witness tactic
   -- certified it
-  , gsStall :: Maybe Text
+  , gsStall :: Maybe PromptPart
   -- ^ the note on a stopped attempt for the goal's next brief
   , gsTiers :: [Int]
   -- ^ the tiers the goal's attempts were launched on, each once, in order
@@ -440,7 +441,7 @@ data St = St
   -- ^ model errors per goal kept out of its attempt count
   , stEscalations :: Int
   -- ^ 'Escalated' events logged
-  , stStallUsed :: Map.Map Int Text
+  , stStallUsed :: Map.Map Int PromptPart
   -- ^ the stall note each running attempt took into its brief
   , stPolicyLogged :: Set.Set (Text, Text)
   -- ^ the goals and knobs whose 'PolicyApplied' is logged
@@ -464,26 +465,39 @@ shiftBrief d b = T.intercalate "\n" (map shift (T.splitOn "\n" b))
         | (n, ":") <- T.span isDigit r, not (T.null n) -> "- line " <> T.pack (show (read (T.unpack n) + d)) <> ":"
       _ -> l
 
+-- | A 'partialBrief' (as moved by 'shiftBrief') as a prompt part: its
+-- heading and line marks are Fisher's, the indented lines Lean's goal
+-- states (tool output).
+partialPart :: Text -> PromptPart
+partialPart b = mconcat (intersperse (static "\n") (map line (T.splitOn "\n" b)))
+  where
+    line l = maybe (static l) (\g -> static "    " <> tool g) (T.stripPrefix "    " l)
+
 -- | An attempt's brief: the goal's retrieval (already trimmed; empty
 -- without it), the repaired proof's holes, the hints, blank lines between,
--- empty parts left out. With no retrieval it is today's brief exactly.
-attemptBrief :: Text -> Text -> [Text] -> Text
-attemptBrief retrieved brief hint = T.intercalate "\n\n" (filter (not . T.null) (retrieved : brief : hint))
+-- empty parts left out (not trimmed, unlike 'Fisher.Role.parts'). With no
+-- retrieval it is today's brief exactly.
+attemptBrief :: PromptPart -> PromptPart -> [PromptPart] -> PromptPart
+attemptBrief retrieved brief hint = mconcat (intersperse (static "\n\n") (filter (/= mempty) (retrieved : brief : hint)))
 
-suspectBrief :: DisproveSource -> Text -> Text
-suspectBrief ViaPlausible c = "A counterexample search (plausible) suggests this goal may be false:\n" <> c
-suspectBrief ViaSmt c = "An SMT solver's countermodel suggests this goal may be false:\n" <> c
+-- | The hint from Disprove: Fisher's sentence, then the counterexample
+-- (plausible's) or the countermodel (the solver's), tool output.
+suspectBrief :: DisproveSource -> Text -> PromptPart
+suspectBrief ViaPlausible c = static "A counterexample search (plausible) suggests this goal may be false:\n" <> tool c
+suspectBrief ViaSmt c = static "An SMT solver's countermodel suggests this goal may be false:\n" <> tool c
 
 -- | The note on a stopped attempt for the goal's next brief: the stop,
 -- then the prover's last errors on the file and the attempt's last
--- message, each capped at 2,000 characters and left out when empty.
-stallNote :: Stop -> Text -> Maybe Text -> Text
+-- message, each capped at 2,000 characters and left out when empty. The
+-- sentences are Fisher's, the errors the prover's (tool), the message the
+-- worker's.
+stallNote :: Stop -> Text -> Maybe Text -> PromptPart
 stallNote st errs msg =
-  T.intercalate "\n\n" $
-    ( "A previous attempt on this goal was stopped after " <> T.pack (show (stTurns st)) <> " turns and $"
+  mconcat . intersperse (static "\n\n") $
+    static ( "A previous attempt on this goal was stopped after " <> T.pack (show (stTurns st)) <> " turns and $"
         <> T.pack (showFFloat (Just 2) (stDollars st) "") <> " without progress on the file (" <> stopReasonText (stReason st) <> ")." )
-      : ["The prover's last errors on the file:\n" <> cap2000 errs | not (blank errs)]
-      <> ["Its last message:\n" <> cap2000 m | Just m <- [msg], not (blank m)]
+      : [static "The prover's last errors on the file:\n" <> tool (cap2000 errs) | not (blank errs)]
+      <> [static "Its last message:\n" <> toPrompt (worker (cap2000 m)) | Just m <- [msg], not (blank m)]
   where blank = T.null . T.strip
 
 -- | What the automation did over a run: whether a step completed, and
@@ -535,7 +549,7 @@ autoStep ref track budgetLeft off timedOut act = readIORef ref >>= \case
 -- goes in cleanly (the goal's declaration replaced and nothing else, so a
 -- partial that added helpers is not reused): the start and the brief with
 -- its lines moved to the base's.
-partialStart :: Text -> (Text, Text, Text) -> Text -> Maybe (Text, Text)
+partialStart :: Text -> (Text, Text, Text) -> Text -> Maybe (Text, PromptPart)
 partialStart g (st, ag, br) base
   | Right sp <- splice st ag base g
   , Just dA <- findDecl g (declarations ag)
@@ -544,7 +558,7 @@ partialStart g (st, ag, br) base
         lsB = T.splitOn "\n" base
         plain = T.intercalate "\n" (take (dStart dB) lsB <> take (dEnd dA - dStart dA) (drop (dStart dA) lsA) <> drop (dEnd dB) lsB)
   , spText sp == plain =
-      Just (spText sp, shiftBrief (dStart dB - dStart dA) br)
+      Just (spText sp, partialPart (shiftBrief (dStart dB - dStart dA) br))
   | otherwise = Nothing
 
 -- | The partial proof a goal keeps after Repair (goal, the attempt's
@@ -617,13 +631,13 @@ runSearch cfg env base0 = do
                 hint = (case gsDisproof gs of
                   Just (DSuspect c) -> [suspectBrief (fromMaybe ViaPlausible (gsDisproofSource gs)) c]
                   _ -> []) <> maybeToList (gsStall gs)
-                (start, brief) = fromMaybe (base, "") fromPartial
+                (start, brief) = fromMaybe (base, mempty) fromPartial
              in (start, attemptBrief retrieved brief hint, isJust fromPartial)
           openStmts = map dStatement (openGoals base0)
           -- a goal's retrieval, made at its first launch; one cut off is
           -- made again, once, at the goal's next launch
           retrievalFor g = case retrieve of
-            Nothing -> pure ""
+            Nothing -> pure mempty
             Just get -> do
               s0 <- readIORef ref
               let done = Map.lookup g (stRetrieved s0)
@@ -1075,7 +1089,7 @@ runSingle env backend base0 = do
     Left e -> pure (Left e)
     Right types -> do
       t0 <- seNow env
-      let spec = AttemptSpec {asId = 1, asGoal = "*", asBackend = backend, asStart = base0, asBrief = "", asModel = Nothing, asTier = Nothing}
+      let spec = AttemptSpec {asId = 1, asGoal = "*", asBackend = backend, asStart = base0, asBrief = mempty, asModel = Nothing, asTier = Nothing}
       seLog env (Launched 0 1 "*" backend)
       ar <- seRun env spec
       t1 <- subtract t0 <$> seNow env
