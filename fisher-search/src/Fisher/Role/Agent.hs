@@ -145,17 +145,14 @@ withChecker act = withCtx $ \c -> case rcCheck c of
   Just ck -> locked ck (act ck)
 
 -- | A piece a reader takes out of what @r@ said (the planner's blueprint
--- block or a name in its sketch, the verifier's reason), with the rest of
--- what it read: the piece is still @r@'s words, and it must occur in the
--- reply as it is. A piece that does not is a programming error (an
--- exception, which 'askTwice' reports as a broken call); a reader that
--- refuses the reply gives its problem.
+-- block or a name in its sketch, the verifier's reason, JSON-decoded),
+-- with the rest of what it read: the piece is still @r@'s words. The
+-- reader must be a pure function of the reply alone, reading the piece out
+-- of it (parsing, decoding, finding); a reader whose closure supplies
+-- other text as the piece is a review error. A reader that refuses the
+-- reply gives its problem.
 excerpt :: (Text -> Either e (Text, a)) -> Said r -> Either e (Said r, a)
-excerpt readText s = case readText (saidText s) of
-  Left e -> Left e
-  Right (t, a)
-    | t `T.isInfixOf` saidText s -> Right (said' t, a)
-    | otherwise -> error "excerpt: the piece is not in the reply"
+excerpt readText s = (\(t, a) -> (said' t, a)) <$> readText (saidText s)
 
 -- | What @r@ said put on one line (its words joined by single spaces) and
 -- cut at @n@ characters, as a failure note puts it: still @r@'s words.

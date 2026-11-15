@@ -15,10 +15,9 @@ module Fisher.Search.Review
 import Data.Foldable (toList)
 import Data.List (intersperse)
 import Data.Maybe (listToMaybe, mapMaybe)
-import Data.Aeson (Value (..), decodeStrict, encode)
+import Data.Aeson (Value (..), decodeStrict)
 import qualified Data.Aeson.Key as K
 import qualified Data.Aeson.KeyMap as KM
-import qualified Data.ByteString.Lazy as BL
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
@@ -64,7 +63,7 @@ parseReview = fmap (\(r, (a, s)) -> SplitVerdict a r s) . excerpt readReview
     readReview t = case jsonObject t of
       Just o | Just (Bool a) <- KM.lookup "accept" o
              , Just r <- textOr "reason" o
-             , Just s <- listOr "suspect" o -> Right (asWritten t r, (a, s))
+             , Just s <- listOr "suspect" o -> Right (r, (a, s))
       _ -> Left "the verdict is not the JSON asked for"
 
 falseSystem :: Text
@@ -90,20 +89,8 @@ parseFalse = fmap (\(r, f) -> (f, r)) . excerpt readFalse
   where
     readFalse t = case jsonObject t of
       Just o | Just (Bool f) <- KM.lookup "false" o
-             , Just r <- textOr "reason" o -> Right (asWritten t r, f)
+             , Just r <- textOr "reason" o -> Right (r, f)
       _ -> Left "the verdict is not the JSON asked for"
-
--- | A text read out of a JSON reply, as the reply spells it, so that it
--- is an excerpt of the reply: the decoded text when the reply has it as it
--- is (no escapes in it, the usual case); else its JSON spelling (a
--- backslash before each quote) when the reply has that; else nothing.
-asWritten :: Text -> Text -> Text
-asWritten reply r
-  | r `T.isInfixOf` reply = r
-  | escaped `T.isInfixOf` reply = escaped
-  | otherwise = ""
-  where
-    escaped = T.dropEnd 1 (T.drop 1 (TE.decodeUtf8 (BL.toStrict (encode r))))
 
 -- | The messages of a call, and for a second call the previous reply (the
 -- same role's, as the role monad's @askTwice@ hands it back) and why it

@@ -31,9 +31,11 @@ spec = do
       parseReview (verifier "```text\nnot it\n```\n```javascript\n{\"accept\": false, \"reason\": \"r\"}\n```") `shouldBe` Right (SplitVerdict False (verifier "r") [])
     it "JSON inside prose" $
       parseReview (verifier "I think {\"accept\": true, \"reason\": \"a {nested} brace\"} is right.") `shouldBe` Right (SplitVerdict True (verifier "a {nested} brace") [])
-    it "a reason with an escaped quote is kept as the reply spells it (an excerpt of the reply)" $
-      fmap (saidText . svReason) (parseReview (verifier "{\"accept\": false, \"reason\": \"lemma \\\"a\\\" is false\"}"))
-        `shouldBe` Right "lemma \\\"a\\\" is false"
+    it "a reason with escapes is the verifier's, decoded" $ do
+      fmap (saidText . svReason) (parseReview (verifier "{\"accept\": false, \"reason\": \"lemma \\\"a\\\" is false\\nat 0\"}"))
+        `shouldBe` Right "lemma \"a\" is false\nat 0"
+      fmap (saidText . snd) (parseFalse (verifier "{\"false\": false, \"reason\": \"see \\\"b\\\"\"}"))
+        `shouldBe` Right "see \"b\""
     it "missing accept" $ parseReview (verifier "{\"reason\": \"x\"}") `shouldBe` Left bad
     it "invalid JSON" $ parseReview (verifier "accept: yes") `shouldBe` Left bad
     it "wrong types" $ parseReview (verifier "{\"accept\": \"yes\"}") `shouldBe` Left bad

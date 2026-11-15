@@ -4,7 +4,6 @@ module Fisher.Role.AgentSpec (spec) where
 
 import Control.Concurrent (forkIO, threadDelay)
 import Control.Concurrent.MVar (newEmptyMVar, newMVar, putMVar, takeMVar, tryReadMVar)
-import Control.Exception (evaluate)
 import Data.Aeson (Value (..))
 import Data.IORef (IORef, atomicModifyIORef', modifyIORef', newIORef, readIORef)
 import Data.Maybe (isNothing)
@@ -17,6 +16,7 @@ import Fisher.Role (Prompt, Role (..), partText, roleName, saidText, static, toP
 import Fisher.Role.Agent
 import Fisher.Search.Check (AxiomPolicy (..), LeanRun (..), Probe (..), standardAxioms)
 import Fisher.Search.GraphJobs (Ask, AskError (..), Asked (..), Checker (..))
+import Fisher.Search.Review (jsonObject, textOr)
 
 -- "runRole is the only way in": AgentM's constructor is not exported and
 -- it has no MonadIO instance, so a job in AgentM r runs only through
@@ -159,10 +159,18 @@ spec = describe "the role monad" $ do
         let piece = excerpt (\t -> if "split" `T.isInfixOf` t then Right (T.strip (T.drop 13 (T.dropEnd 4 t)), T.length t) else Left ("no split" :: Text)) s
         fmap (\(p, n) -> (partText (toPrompt p), n)) piece `shouldBe` Right ("split on n", 27)
         fmap fst (excerpt (const (Left ("refused" :: Text) :: Either Text (Text, ()))) s) `shouldBe` Left "refused"
-        -- a piece that is not in the reply is a programming error
-        evaluate (excerpt (const (Right ("split on m", ()) :: Either Text (Text, ()))) s) `shouldThrow` anyErrorCall
         partText (toPrompt (oneLineOf 300 s)) `shouldBe` "```blueprint split on n ```"
         partText (toPrompt (oneLineOf 15 s)) `shouldBe` "```blueprint sp"
+      Left _ -> expectationFailure "expected a reply"
+
+  it "excerpt accepts a piece the reader decodes from the reply (a JSON string)" $ do
+    (ask', _) <- scripted [Right "{\"reason\": \"lemma \\\"a\\\" fails\\nat n = 0\"}"]
+    (spend, ev, _, _) <- recorders
+    r <- runRole (roleCtx @'Verifier ask' Nothing spend ev) (ask (prompt "go"))
+    case r of
+      Right (s, _) -> do
+        let reason t = maybe (Left ("no reason" :: Text)) (\x -> Right (x, ())) (jsonObject t >>= textOr "reason")
+        fmap (saidText . fst) (excerpt reason s) `shouldBe` Right "lemma \"a\" fails\nat n = 0"
       Left _ -> expectationFailure "expected a reply"
 
   it "a judge context has no checker" $ do

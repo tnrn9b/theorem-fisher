@@ -58,7 +58,7 @@ planJob :: Text -> Text -> Text -> [Text] -> PromptPart -> [Text] -> PromptPart 
 planJob base name expected usable board notes retrieved =
   askTwice (plannerMessages base name usable board notes retrieved) problemText readPlan
   where
-    readPlan s = case excerpt (\t -> (\(b, l) -> (asInReply t b, l)) <$> parsePlan t) s of
+    readPlan s = case excerpt parsePlan s of
       Left e -> pure (Left (FormatError (static e)))
       Right (bp, lean) -> case parseSketch base name lean >>= \sk -> (,) sk <$> applySketch base name sk of
         Left e -> pure (Left (FormatError (sketchProblem name s e)))
@@ -66,19 +66,13 @@ planJob base name expected usable board notes retrieved =
           r <- withChecker (\ck -> checkSketchVerdict (ckLean ck) (ckPolicy ck) (ckRoot ck) (ckRel ck) applied name expected (map fst (skLemmas sk)))
           pure (either (Left . LeanErrors) (\(v, tys) -> Right (Plan bp lean sk base applied v tys)) r)
 
--- | A block as the reply has it: 'fencedBlocks' drops each line's
--- carriage return, so for a reply with CRLF line ends the block is put
--- back with them, as an excerpt of the reply must be.
-asInReply :: Text -> Text -> Text
-asInReply reply b
-  | b `T.isInfixOf` reply = b
-  | otherwise = T.replace "\n" "\r\n" b
-
 -- | A sketch error for the planner's repair round: Fisher's sentence, and
--- in it the planner's name or line as what the planner said (an 'excerpt'
--- of its reply @s@). Its text is 'sketchErrorText'. A lemma name that
--- clashes is qualified with the node's namespace (@name@'s), which is
--- Fisher's.
+-- in it the planner's name or line as what the planner said: an 'excerpt'
+-- that finds the error's name or line in the reply @s@ and reads it out of
+-- the reply (empty if it were not there; the parser took it from the
+-- reply's lean block, so it is). Its text is 'sketchErrorText'. A lemma
+-- name that clashes is qualified with the node's namespace (@name@'s),
+-- which is Fisher's.
 sketchProblem :: Text -> Said 'Planner -> SketchError -> PromptPart
 sketchProblem name s = \case
   LemmaNotOpen n -> static "the lemma " <> said n <> static " has a proof; each new lemma must end in `:= by sorry` or `:= sorry`"
@@ -88,7 +82,7 @@ sketchProblem name s = \case
   ExtraText l -> static "text outside declarations: " <> said l
   e -> static (sketchErrorText e)
   where
-    said x = case excerpt (\_ -> Right (x, ()) :: Either () (Text, ())) s of
+    said x = case excerpt (\t -> Right (T.take (T.length x) (snd (T.breakOn x t)), ()) :: Either () (Text, ())) s of
       Right (p, ()) -> toPrompt p
       Left () -> mempty
     pre = nsPrefix name
