@@ -2,7 +2,7 @@
 module Fisher.Search.Split
   ( Message
   , Problem (..)
-  , problemText
+  , problemPart
   , plannerMessages
   , parsePlan
   , fencedBlocks
@@ -22,10 +22,12 @@ type Message = (Text, Text)
 -- Lean's check of its sketch.
 data Problem = FormatError PromptPart | LeanErrors Text deriving (Eq, Show)
 
-problemText :: Problem -> Text
-problemText = \case
-  FormatError t -> partText t
-  LeanErrors t -> t
+-- | A problem as the job's error: a form problem as its pieces were
+-- labelled, Lean's errors as tool output.
+problemPart :: Problem -> PromptPart
+problemPart = \case
+  FormatError p -> p
+  LeanErrors t -> tool t
 
 plannerSystem :: Text
 plannerSystem = T.unlines

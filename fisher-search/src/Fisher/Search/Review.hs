@@ -42,18 +42,23 @@ reviewSystem = T.unlines
   , "suspect lists the names of lemmas that look false or no simpler than the goal."
   ]
 
--- | Node statement, blueprint (the planner's), sketch (checked Lean),
--- whiteboard.
-reviewMessages :: Text -> Said 'Planner -> Text -> PromptPart -> Prompt
+-- | Node statement, blueprint and sketch (both the planner's: the split is
+-- under review, not accepted), whiteboard.
+reviewMessages :: Text -> Said 'Planner -> Said 'Planner -> PromptPart -> Prompt
 reviewMessages stmt blueprint sketch board =
   [ ("system", static reviewSystem)
   , ("user", mconcat (intersperse (static "\n\n")
       [ static "The goal:\n```lean\n" <> source (T.stripEnd stmt) <> static "\n```"
       , static "The blueprint:\n" <> parts [toPrompt blueprint]
-      , static "The sketch:\n```lean\n" <> source (T.stripEnd sketch) <> static "\n```"
+      , static "The sketch:\n```lean\n" <> stripped sketch <> static "\n```"
       , static "The plan so far:\n" <> parts [board]
       ]))
   ]
+  where
+    -- the sketch without its trailing whitespace, still the planner's
+    stripped s = case excerpt (\t -> Right (T.stripEnd t, ()) :: Either () (Text, ())) s of
+      Right (p, ()) -> toPrompt p
+      Left () -> mempty
 
 -- | The verdict in the verifier's reply; its reason is read out of the
 -- reply ('excerpt').

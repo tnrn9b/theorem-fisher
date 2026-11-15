@@ -17,6 +17,7 @@ module Fisher.Search.GraphJobs
   , reviewJob
   , falseJob
   , sketchProblem
+  , acceptProblem
   ) where
 
 import qualified Data.Map.Strict as Map
@@ -27,6 +28,7 @@ import Fisher.Role (PromptPart, Role (..), Said, saidText, static, toPrompt)
 import Fisher.Role.Agent (AgentM, askTwice, excerpt, withChecker)
 import Fisher.Search.Ask
 import Fisher.Search.Check (Verdict)
+import Fisher.Search.Graph (AcceptError (..), acceptErrorText)
 import Fisher.Search.Review
 import Fisher.Search.Sketch
 import Fisher.Search.Split
@@ -36,9 +38,11 @@ data Plan = Plan
   { plBlueprint :: Said 'Planner
   -- ^ what the planner said the split is: its blueprint block, read out of
   -- its reply
-  , plLean :: Text
-  -- ^ the sketch as the planner wrote it; checked Lean once the kernel has
-  -- accepted it, so it goes into a prompt as source
+  , plLean :: Said 'Planner
+  -- ^ the sketch as the planner wrote it, its lean block read out of its
+  -- reply ('excerpt'): the planner's words, comments included, while the
+  -- split is under review; 'saidText' where the kernel-accepted text is
+  -- needed as text
   , plSketch :: Sketch
   , plBase :: Text
   -- ^ the base it was checked against
@@ -56,15 +60,17 @@ data Plan = Plan
 -- its lock.
 planJob :: Text -> Text -> Text -> [Text] -> PromptPart -> [Text] -> PromptPart -> AgentM 'Planner (Asked Plan)
 planJob base name expected usable board notes retrieved =
-  askTwice (plannerMessages base name usable board notes retrieved) problemText readPlan
+  askTwice (plannerMessages base name usable board notes retrieved) problemPart readPlan
   where
-    readPlan s = case excerpt parsePlan s of
+    -- the blueprint and the lean block, each read out of the reply
+    readPlan s = case (,) <$> excerpt parsePlan s <*> excerpt leanBlock s of
       Left e -> pure (Left (FormatError (static e)))
-      Right (bp, lean) -> case parseSketch base name lean >>= \sk -> (,) sk <$> applySketch base name sk of
+      Right ((bp, _), (lean, ())) -> case parseSketch base name (saidText lean) >>= \sk -> (,) sk <$> applySketch base name sk of
         Left e -> pure (Left (FormatError (sketchProblem name s e)))
         Right (sk, applied) -> do
           r <- withChecker (\ck -> checkSketchVerdict (ckLean ck) (ckPolicy ck) (ckRoot ck) (ckRel ck) applied name expected (map fst (skLemmas sk)))
           pure (either (Left . LeanErrors) (\(v, tys) -> Right (Plan bp lean sk base applied v tys)) r)
+    leanBlock t = (\(_, l) -> (l, ())) <$> parsePlan t
 
 -- | A sketch error for the planner's repair round: Fisher's sentence, and
 -- in it the planner's name or line as what the planner said: an 'excerpt'
@@ -82,23 +88,47 @@ sketchProblem name s = \case
   ExtraText l -> static "text outside declarations: " <> said l
   e -> static (sketchErrorText e)
   where
-    said x = case excerpt (\t -> Right (T.take (T.length x) (snd (T.breakOn x t)), ()) :: Either () (Text, ())) s of
-      Right (p, ()) -> toPrompt p
-      Left () -> mempty
+    said = plannersWords s
+    qualified = plannerName name s
+
+-- | A name of the planner's sketch as the planner wrote it, qualified with
+-- the node's namespace (@name@'s, which is Fisher's) when the planner
+-- wrote it bare.
+plannerName :: Text -> Said 'Planner -> Text -> PromptPart
+plannerName name s n
+  | not (T.null pre), not (n `T.isInfixOf` saidText s), pre `T.isPrefixOf` n = static pre <> plannersWords s (T.drop (T.length pre) n)
+  | otherwise = plannersWords s n
+  where
     pre = nsPrefix name
-    qualified n
-      | not (T.null pre), not (n `T.isInfixOf` saidText s), pre `T.isPrefixOf` n = static pre <> said (T.drop (T.length pre) n)
-      | otherwise = said n
+
+-- | @x@ as the planner's words: an 'excerpt' that finds @x@ in what the
+-- planner said and reads it out of it (empty if it were not there).
+plannersWords :: Said 'Planner -> Text -> PromptPart
+plannersWords s x = case excerpt (\t -> Right (T.take (T.length x) (snd (T.breakOn x t)), ()) :: Either () (Text, ())) s of
+  Right (p, ()) -> toPrompt p
+  Left () -> mempty
+
+-- | Why a split could not be accepted into the graph, for its failure
+-- note: Fisher's sentence, and in it the lemma's name as the planner wrote
+-- it in its sketch @s@ (qualified as 'plannerName' does). Its text is
+-- 'acceptErrorText'.
+acceptProblem :: Text -> Said 'Planner -> AcceptError -> PromptPart
+acceptProblem name s = \case
+  Cycle n -> static "cycle: " <> plannerName name s n
+  DuplicateLemma n -> static "duplicate lemma " <> plannerName name s n
+  LemmaFailed n -> static "the lemma " <> plannerName name s n <> static " already failed"
+  e -> static (acceptErrorText e)
 
 -- | The verifier's review of a split: the node's statement, the plan, the
--- whiteboard. The blueprint goes in as the planner's reply ('toPrompt'),
--- the sketch as checked source.
+-- whiteboard. The blueprint and the sketch go in as the planner's reply
+-- ('toPrompt'): the split is not accepted yet. Why a reply could not be
+-- read is Fisher's sentence ('static').
 reviewJob :: Text -> Plan -> PromptPart -> AgentM 'Verifier (Asked SplitVerdict)
 reviewJob stmt p board =
-  askTwice (retryMessages (reviewMessages stmt (plBlueprint p) (plLean p) board)) id (pure . parseReview)
+  askTwice (retryMessages (reviewMessages stmt (plBlueprint p) (plLean p) board)) static (pure . parseReview)
 
 -- | The verifier's check of a claim that a statement is false: whether it
 -- holds, and the verifier's reason.
 falseJob :: Text -> Text -> AgentM 'Verifier (Asked (Bool, Said 'Verifier))
 falseJob stmt claim =
-  askTwice (retryMessages (falseMessages stmt claim)) id (pure . parseFalse)
+  askTwice (retryMessages (falseMessages stmt claim)) static (pure . parseFalse)

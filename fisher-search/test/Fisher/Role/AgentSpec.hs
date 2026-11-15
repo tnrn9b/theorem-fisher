@@ -73,7 +73,7 @@ spec = describe "the role monad" $ do
           Nothing -> prompt "go"
           Just (p, e) -> prompt "go" ++ [("assistant", p), ("user", static e)]
         readReply s = let t = saidText s in pure (if t == "good" then Right t else Left ("refused: " <> t))
-    r <- runRole (roleCtx @'Verifier ask' Nothing spend ev) (askTwice msgsFor id readReply)
+    r <- runRole (roleCtx @'Verifier ask' Nothing spend ev) (askTwice msgsFor static readReply)
     case r of
       Asked d (Right t) -> (d, t) `shouldBe` (0.5, "good")
       _ -> expectationFailure "expected Asked with a reply"
@@ -88,7 +88,7 @@ spec = describe "the role monad" $ do
   it "askTwice stops at NoCredit" $ do
     (ask', calls) <- scripted [Left AskNoCredit, Right "never"]
     (spend, ev, spent, _) <- recorders
-    r <- runRole (roleCtx @'Planner ask' Nothing spend ev) (askTwice (const (prompt "go")) id (\s -> pure (Right (saidText s) :: Either Text Text)))
+    r <- runRole (roleCtx @'Planner ask' Nothing spend ev) (askTwice (const (prompt "go")) static (\s -> pure (Right (saidText s) :: Either Text Text)))
     case r of
       NoCredit d -> d `shouldBe` 0
       _ -> expectationFailure "expected NoCredit"
@@ -131,7 +131,7 @@ spec = describe "the role monad" $ do
     let readReply s = do
           event "read" (String (saidText s))
           pure (if saidText s == "second" then Right (saidText s) else Left "not yet")
-    r <- runRole (roleCtx @'Planner ask' Nothing spend ev) (askTwice (const (prompt "go")) id readReply)
+    r <- runRole (roleCtx @'Planner ask' Nothing spend ev) (askTwice (const (prompt "go")) static readReply)
     case r of
       Asked d (Right t) -> (d, t) `shouldBe` (0.5, "second")
       _ -> expectationFailure "expected Asked with a reply"

@@ -17,7 +17,7 @@ import System.FilePath ((</>))
 import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
 
-import Fisher.Role (Said, partText, static, tool)
+import Fisher.Role (Said, partText, static, toPrompt, tool)
 import Fisher.Role.Internal (said')
 import Fisher.Search.Auto (AutoConfig (..), defaultAutoConfig)
 import Fisher.Search.Check (AxiomPolicy (..), LeanRun (..), standardAxioms)
@@ -104,6 +104,19 @@ failureNoteSpec = describe "failureNote" $ do
           , ("claim  ", "  why") ]
     [partText (notePieces (note cl why)) | (cl, why) <- cases] `shouldBe` [whole cl why | (cl, why) <- cases]
     partText (notePieces [Piece static "split rejected: ", Quote (said' "  too\thard \n" :: Said 'Verifier)]) `shouldBe` "split rejected: too hard"
+  it "a job's error as a part keeps the bytes of the whole note on one line" $ do
+    -- a planner's refused reply, as planJob's error carries it: Fisher's
+    -- sentence with the planner's line in it
+    let planner = said' "stray   words\tthe planner\n wrote" :: Said 'Planner
+        err = static "text outside declarations: " <> toPrompt planner
+        oneLine = T.take 300 . T.unwords . T.words
+    partText (notePieces [Piece static "split failed: ", Part err])
+      `shouldBe` "split failed: text outside declarations: stray words the planner wrote"
+    let long = static "the model call failed: " <> tool (T.replicate 400 "e")
+    partText (notePieces [Piece static "split failed: ", Part long]) `shouldBe` oneLine ("split failed: " <> partText long)
+    partText (notePieces [Piece static "FALSE: ", Piece static "n = 0", Piece static " (not checked: ", Part (static "the call broke: " <> tool "  boom \n"), Piece static ")"])
+      `shouldBe` "FALSE: n = 0 (not checked: the call broke: boom )"
+    partText (notePieces [Piece static "split rejected: ", Part (static "  cycle: " <> toPrompt (said' "a" :: Said 'Planner))]) `shouldBe` "split rejected: cycle: a"
 
 runGraphSpec :: Spec
 runGraphSpec = describe "runGraph" $ do

@@ -22,6 +22,7 @@ module Fisher.Role
   , source
   , tool
   , parts
+  , oneLinePart
   , Prompt
   , Promptable (..)
     -- * Lesson candidates
@@ -38,7 +39,7 @@ import qualified Data.Text as T
 import Fisher.Lessons.File (sanitiseLesson)
 import Fisher.Redact (redactSensitiveText)
 import Fisher.Role.Internal (PromptPart (..), Role (..), Said (..), said')
-import Fisher.Role.Part (partText, parts, source, static, tool, user)
+import Fisher.Role.Part (oneLinePart, partText, parts, source, static, tool, user)
 
 -- | The run log's spelling of a role.
 roleName :: Role -> Text

@@ -9,6 +9,7 @@ import Test.Hspec
 
 import Fisher.Role (KnownRole, partText, saidText, static, toPrompt)
 import Fisher.Role.Agent (RoleCtx, ask, roleCtx, runRole)
+import Fisher.Search.Graph (AcceptError (..), acceptErrorText)
 import Fisher.Search.GraphJobs
 import Fisher.Search.Sketch (SketchError (..), sketchErrorText)
 import Fisher.Search.Split (Problem (..), plannerMessages)
@@ -40,7 +41,7 @@ spec = describe "the graph jobs" $ do
     (ask', calls) <- scripted [first, "still no blocks"]
     r <- runRole (ctxOf @'Planner ask') (planJob base "main" "P" [] board ["stuck"] mempty)
     case r of
-      Asked d (Left e) -> (d, e) `shouldBe` (0.5, problem)
+      Asked d (Left e) -> (d, partText e) `shouldBe` (0.5, problem)
       _ -> expectationFailure "expected the job to fail after two replies"
     -- the first reply as the planner said it, through the role monad's ask
     (again, _) <- scripted [first]
@@ -92,3 +93,29 @@ spec = describe "the graph jobs" $ do
         let errs = [ NoNodeDecl, NodeStatementChanged, LemmaNotOpen "aux", DuplicateName "dup", NameClash "aux"
                    , NameClash "Foo.aux", DeniedLine "axiom cheat : P", ExtraText "stray words" ]
         [partText (sketchProblem "Foo.main" s e) | e <- errs] `shouldBe` map sketchErrorText errs
+
+  it "why a split could not be accepted: Fisher's sentence, with the planner's names from its sketch" $ do
+    let reply = "```blueprint\nsplit\n```\n```lean\nlemma aux : A := by sorry\nlemma Foo.dup : B := by sorry\ntheorem main : P := by sorry\n```"
+    (ask', _) <- scripted [reply]
+    said <- runRole (ctxOf @'Planner ask') (ask [("user", static "go")])
+    case said of
+      Left _ -> expectationFailure "expected a reply"
+      Right (s, _) -> do
+        let errs = [NoSuchSplit, NotProposed, NoSuchParent, Cycle "Foo.aux", DuplicateLemma "Foo.dup", LemmaFailed "aux"]
+        [partText (acceptProblem "Foo.main" s e) | e <- errs] `shouldBe` map acceptErrorText errs
+
+  it "a refused sketch: the job's error is a part, the planner's line read out of its lean block" $ do
+    let reply = "```blueprint\nsplit on n\n```\n```lean\nstray words\ntheorem main : P := by sorry\n```"
+    (ask', _) <- scripted [reply, reply]
+    r <- runRole (ctxOf @'Planner ask') (planJob "theorem main : P := by sorry" "main" "P" [] mempty [] mempty)
+    case r of
+      Asked d (Left e) -> (d, partText e) `shouldBe` (0.5, sketchErrorText (ExtraText "stray words"))
+      _ -> expectationFailure "expected the job to fail after two replies"
+
+  it "a failed call's error is Fisher's sentence and the provider's text" $ do
+    (ask', calls) <- scripted []
+    r <- runRole (ctxOf @'Verifier ask') (falseJob "lemma a : True" "no")
+    case r of
+      Asked d (Left e) -> (d, partText e) `shouldBe` (0, "the model call failed: no more replies")
+      _ -> expectationFailure "expected a failure"
+    length <$> readIORef calls >>= (`shouldBe` 2)

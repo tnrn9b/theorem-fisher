@@ -27,7 +27,7 @@ import Data.Proxy (Proxy (..))
 import Data.Text (Text)
 import qualified Data.Text as T
 
-import Fisher.Role (KnownRole (..), Prompt, Role (..), Said, partText, saidText)
+import Fisher.Role (KnownRole (..), Prompt, Role (..), Said, partText, saidText, static, tool)
 import Fisher.Role.Internal (PromptPart (..), said')
 import Fisher.Search.Ask (Ask, AskError (..), Asked (..), Checker (..), locked)
 import Fisher.Search.Check (Probe, probe)
@@ -101,22 +101,25 @@ ask prompt = withCtx $ \c -> do
 -- call's prompt, with what was wrong with it, as a part made here: a role
 -- sees its own reply again in its own call, whatever the role (the judge
 -- too, which has no 'Fisher.Role.toPrompt'), and the builder never holds
--- the 'Said'. The last problem, as text, is the job's error.
-askTwice :: (Maybe (PromptPart, e) -> Prompt) -> (e -> Text) -> (Said r -> AgentM r (Either e a)) -> AgentM r (Asked a)
-askTwice promptFor errText readReply = withCtx $ \c -> go c (0 :: Int) Nothing 0
+-- the 'Said'. The last problem, as a part (@errPart@ gives a refused
+-- reply's problem the provenance of its pieces), is the job's error; a
+-- failed call or an exception is Fisher's sentence ('static') with the
+-- provider's or the exception's text ('tool').
+askTwice :: (Maybe (PromptPart, e) -> Prompt) -> (e -> PromptPart) -> (Said r -> AgentM r (Either e a)) -> AgentM r (Asked a)
+askTwice promptFor errPart readReply = withCtx $ \c -> go c (0 :: Int) Nothing 0
   where
     go c n prev cost = do
       r <- try (runRole c (ask (promptFor prev)))
       case r of
         Left e -> broke cost e
         Right (Left AskNoCredit) -> pure (NoCredit cost)
-        Right (Left (AskFailed e)) -> again c n cost ("the model call failed: " <> e) prev
+        Right (Left (AskFailed e)) -> again c n cost (static "the model call failed: " <> tool e) prev
         Right (Right (s, d)) -> do
           x <- try (runRole c (readReply s))
           case x of
             Left e -> broke (cost + d) e
             Right (Right a) -> pure (Asked (cost + d) (Right a))
-            Right (Left e) -> again c n (cost + d) (errText e) (Just (PromptPart (saidText s), e))
+            Right (Left e) -> again c n (cost + d) (errPart e) (Just (PromptPart (saidText s), e))
     again c n cost e next
       | n == 0 = go c 1 next cost
       | otherwise = pure (Asked cost (Left e))
@@ -124,7 +127,7 @@ askTwice promptFor errText readReply = withCtx $ \c -> go c (0 :: Int) Nothing 0
     -- spent; an asynchronous one (an interrupt, a cancel) goes on up
     broke cost e
       | Just (_ :: SomeAsyncException) <- fromException e = throwIO e
-      | otherwise = pure (Asked cost (Left ("the call broke: " <> T.take 300 (T.pack (displayException (e :: SomeException))))))
+      | otherwise = pure (Asked cost (Left (static "the call broke: " <> tool (T.take 300 (T.pack (displayException (e :: SomeException)))))))
 
 -- | The kernel probe of @text@ with each of @names@ printed, under the
 -- checker's lock. A role with 'CanCheck' always has a checker in its

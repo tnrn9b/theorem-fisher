@@ -14,7 +14,7 @@ module Fisher.Search.Ask
 import Control.Concurrent.MVar (MVar, withMVar)
 import Data.Text (Text)
 
-import Fisher.Role (Role)
+import Fisher.Role (PromptPart, Role)
 import Fisher.Search.Check (AxiomPolicy, LeanRun)
 import Fisher.Search.Split (Message)
 
@@ -23,8 +23,11 @@ data AskError = AskFailed Text | AskNoCredit deriving (Eq, Show)
 -- | One model call: the reply and its dollars.
 type Ask = Role -> [Message] -> IO (Either AskError (Text, Double))
 
--- | What a job's model calls came to, with the dollars they cost.
-data Asked a = NoCredit Double | Asked Double (Either Text a)
+-- | What a job's model calls came to, with the dollars they cost. A
+-- failure is a prompt part, so whatever its pieces are (Fisher's sentence,
+-- a role's words, a provider's or an exception's text) keeps the
+-- provenance its maker gave it on its way to a whiteboard line.
+data Asked a = NoCredit Double | Asked Double (Either PromptPart a)
 
 -- | How sketches are compiled. Probes write one scratch file beside the
 -- target, so every check takes the lock.

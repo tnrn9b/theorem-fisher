@@ -17,7 +17,7 @@ verifier = said'
 spec :: Spec
 spec = do
   describe "reviewMessages" $
-    it "golden" $ golden "review.txt" (render (reviewMessages "theorem main : P" (said' "a then b") "lemma a : A := by sorry\ntheorem main : P := by sorry" (static "# Plan for main")))
+    it "golden" $ golden "review.txt" (render (reviewMessages "theorem main : P" (said' "a then b") (said' "lemma a : A := by sorry\ntheorem main : P := by sorry") (static "# Plan for main")))
   describe "falseMessages" $
     it "golden" $ golden "false.txt" (render (falseMessages "lemma a : forall n : Nat, n > 0" "n = 0 is a counterexample"))
   describe "parseReview" $ do

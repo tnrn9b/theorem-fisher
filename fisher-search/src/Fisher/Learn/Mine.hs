@@ -111,7 +111,7 @@ import Fisher.Learn.Mistakes (AttemptView (..), Mistake (..), classify, mistakeJ
 import Fisher.Lessons.File (Template (..), renderTemplate)
 import Fisher.Lessons.Prompt (PromptLessons (..), promptLessons)
 import Fisher.Redact (redactSensitiveText)
-import Fisher.Role (Role (..), candidate, candidateText, saidText, template)
+import Fisher.Role (Role (..), candidate, candidateText, partText, saidText, template)
 import Fisher.Role.Agent (roleCtx, runRole)
 import Fisher.Runlog
 import Fisher.Search.GraphJobs (Ask, Asked (..))
@@ -443,11 +443,12 @@ judgeOne env st rid aid av = case meJudge env of
               Just (NoCredit c) -> do
                 charge c
                 stop "the judge has no credit; the rest of the run is left unjudged"
-              Just (Asked c (Left e))
-                | broken e -> do
+              Just (Asked c (Left err))
+                | e <- partText err, broken e -> do
                     charge c
                     stop ("the judge failed on " <> aid <> ": " <> e <> "; the rest of the run is left unjudged")
                 | otherwise -> do
+                    let e = partText err
                     charge c
                     meWarn env ("the judge's reply for " <> aid <> " could not be read: " <> e)
                     -- marked judged, so a later pass does not pay for it again

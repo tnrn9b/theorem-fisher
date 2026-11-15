@@ -5,6 +5,7 @@ module Fisher.Search.Graph
   , NodeStatus (..), SplitStatus (..)
   , Node (..), Split (..), Graph (..), Limits (..), Action (..), Link (..)
   , emptyGraph, addRoot, proposeSplit, rejectSplit, failSplit, closeSplit, acceptSplit
+  , AcceptError (..), acceptErrorText, acceptSplitWhy
   , attemptDone, markProved, markFailed, setPartial
   , doneSplits, liveNodes, planLemmas, nextAction, stuck, recordAction, ancestors
   ) where
@@ -15,6 +16,7 @@ import Data.IntSet (IntSet)
 import qualified Data.IntSet as IS
 import Data.List (sortOn)
 import Data.Maybe (listToMaybe)
+import Data.Bifunctor (first)
 import Data.Text (Text)
 
 type NodeId = Int
@@ -76,14 +78,32 @@ failSplit sid why g = g { gSplits = IM.adjust (\s -> s { sStatus = SFailed why }
 closeSplit :: SplitId -> Graph -> Graph
 closeSplit sid g = g { gSplits = IM.adjust (\s -> s { sStatus = SDone }) sid (gSplits g) }
 
+-- | Why a split could not be accepted; the lemma names are the split's.
+data AcceptError = NoSuchSplit | NotProposed | NoSuchParent | Cycle Text | DuplicateLemma Text | LemmaFailed Text
+  deriving (Eq, Show)
+
+acceptErrorText :: AcceptError -> Text
+acceptErrorText = \case
+  NoSuchSplit -> "no such split"
+  NotProposed -> "the split is not proposed"
+  NoSuchParent -> "no such parent"
+  Cycle n -> "cycle: " <> n
+  DuplicateLemma n -> "duplicate lemma " <> n
+  LemmaFailed n -> "the lemma " <> n <> " already failed"
+
 -- | Accept a proposed split with its lemmas, given as (name, key).
 acceptSplit :: (NodeId -> Bool) -> SplitId -> [(Text, Text)] -> Graph -> Either Text (Graph, [Link])
-acceptSplit canAlias sid lemmas g0 = case IM.lookup sid (gSplits g0) of
-  Nothing -> Left "no such split"
+acceptSplit canAlias sid lemmas = first acceptErrorText . acceptSplitWhy canAlias sid lemmas
+
+-- | 'acceptSplit' with why it could not, as data, so a caller can say
+-- where the lemma's name came from.
+acceptSplitWhy :: (NodeId -> Bool) -> SplitId -> [(Text, Text)] -> Graph -> Either AcceptError (Graph, [Link])
+acceptSplitWhy canAlias sid lemmas g0 = case IM.lookup sid (gSplits g0) of
+  Nothing -> Left NoSuchSplit
   Just sp
-    | sStatus sp /= SProposed -> Left "the split is not proposed"
+    | sStatus sp /= SProposed -> Left NotProposed
     | otherwise -> case IM.lookup (sParent sp) (gNodes g0) of
-        Nothing -> Left "no such parent"
+        Nothing -> Left NoSuchParent
         Just parent -> do
           let forbidden = nKey parent : [ nKey a | i <- IS.toList (ancestors (nId parent) g0)
                                                  , Just a <- [IM.lookup i (gNodes g0)] ]
@@ -94,14 +114,14 @@ acceptSplit canAlias sid lemmas g0 = case IM.lookup sid (gSplits g0) of
   where
     go _ _ _ g acc [] = Right (g, reverse acc)
     go parent forbidden seen g acc ((name, key) : rest)
-      | key `elem` forbidden = Left ("cycle: " <> name)
-      | key `elem` seen = Left ("duplicate lemma " <> name)
+      | key `elem` forbidden = Left (Cycle name)
+      | key `elem` seen = Left (DuplicateLemma name)
       | otherwise =
           let holders = [ n | n <- IM.elems (gNodes g), nKey n == key ]
               failed = [ () | n <- holders, NFailed _ <- [nStatus n] ]
               proved = [ nId n | n <- holders, nStatus n == NProved, canAlias (nId n) ]
               open = [ nId n | n <- holders, nStatus n == NOpen, canAlias (nId n) ]
-          in if not (null failed) then Left ("the lemma " <> name <> " already failed")
+          in if not (null failed) then Left (LemmaFailed name)
              else case (proved, open) of
                (n : _, _) -> go parent forbidden (key : seen) g (Reused n : acc) rest
                (_, n : _) -> go parent forbidden (key : seen) g (Shared n : acc) rest

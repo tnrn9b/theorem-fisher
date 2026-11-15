@@ -64,7 +64,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import System.Timeout (timeout)
 
-import Fisher.Role (PromptPart, Promptable, Said, partText, saidText, source, static, toPrompt, tool, worker)
+import Fisher.Role (PromptPart, Promptable, Said, oneLinePart, partText, saidText, source, static, toPrompt, tool, worker)
 import Fisher.Role.Agent (RoleCtx, oneLineOf, roleCtx, runRole)
 import Fisher.Search.Auto (AutoConfig (..), AutoFail (..), autoGoal)
 import Fisher.Search.Check (Verdict (..))
@@ -406,13 +406,16 @@ failurePieces c i ps = modify c $ \s ->
 -- | A piece of a failure note: text with the constructor for where it came
 -- from ('static' for Fisher's own sentences, 'tool' for Lean's errors, a
 -- checker's exception or a counterexample, 'workerNote' for a worker's
--- words), or what a role said, which goes in through 'toPrompt'.
-data Piece = Piece (Text -> PromptPart) Text | forall r. Promptable r => Quote (Said r)
+-- words), what a role said, which goes in through 'toPrompt', or a part
+-- already made (a job's error, whose pieces were labelled where it was
+-- made).
+data Piece = Piece (Text -> PromptPart) Text | forall r. Promptable r => Quote (Said r) | Part PromptPart
 
 pieceText :: Piece -> Text
 pieceText = \case
   Piece _ t -> t
   Quote s -> saidText s
+  Part p -> partText p
 
 -- | A failure note: Fisher's prefix, then the rest by the constructor its
 -- caller names for where the rest came from (see 'Piece'). Its bytes are
@@ -430,6 +433,7 @@ notePieces ps = mconcat (zipWith part ps (oneLinePieces (map pieceText ps)))
   where
     part (Piece from _) share = from share
     part (Quote s) share = quoteShare s share
+    part (Part p) share = shareOf (partText p) (`oneLinePart` p) share
 
 -- | A role's share of a note's line, as a part: the space that joins it to
 -- the piece before and the one that joins it to the piece after are
@@ -438,9 +442,17 @@ notePieces ps = mconcat (zipWith part ps (oneLinePieces (map pieceText ps)))
 -- reply. The share is a prefix of the reply's words joined by single
 -- spaces, with at most a space before and after it.
 quoteShare :: Promptable r => Said r -> Text -> PromptPart
-quoteShare s share = static lead <> toPrompt (oneLineOf m s) <> static trail
+quoteShare s = shareOf (saidText s) (\m -> toPrompt (oneLineOf m s))
+
+-- | A piece's share of a note's line, as a part: the joining spaces are
+-- Fisher's ('static'), and between them the piece's own text put on one
+-- line and cut to @m@ characters (@cut m@, which keeps the piece's
+-- provenance). The share is a prefix of the piece's words joined by single
+-- spaces, with at most a space before and after it.
+shareOf :: Text -> (Int -> PromptPart) -> Text -> PromptPart
+shareOf whole cut share = static lead <> cut m <> static trail
   where
-    core = T.unwords (T.words (saidText s))
+    core = T.unwords (T.words whole)
     (lead, rest) = if " " `T.isPrefixOf` share then (" ", T.drop 1 share) else ("", share)
     (m, trail) = if rest `T.isPrefixOf` core then (T.length rest, "") else (T.length rest - 1, " ")
 
@@ -694,9 +706,9 @@ handle c (Job n kind) res = case kind of
     forM_ res' (noteTier c spec)
     pure Nothing
   KPlan sid -> case res of
-    Left e -> splitFailed c n sid tool (showErr e) >> pure Nothing
+    Left e -> splitFailed c n sid (tool (showErr e)) >> pure Nothing
     Right (OutPlan a) -> asked Planner a $ \case
-      Left e -> splitFailed c n sid tool e
+      Left e -> splitFailed c n sid e
       Right p
         | plVerdict p == Closed -> closedSketch c n sid p
         | otherwise -> toReview c n sid p
@@ -704,13 +716,13 @@ handle c (Job n kind) res = case kind of
   KReview sid p -> case res of
     Left e -> splitRejected c n sid (Piece tool (showErr e)) >> pure Nothing
     Right (OutReview a) -> asked Verifier a $ \case
-      Left e -> splitRejected c n sid (Piece static e)
+      Left e -> splitRejected c n sid (Part e)
       Right v
         | svAccept v -> acceptSketch c n sid p
         | otherwise -> splitRejected c n sid (Quote (svReason v))
     Right _ -> pure Nothing
   KFalse claim -> case res of
-    Left e -> failureLine c n "FALSE: " workerNote (claim <> " (not checked: " <> showErr e <> ")") >> pure Nothing
+    Left e -> notChecked claim (Piece tool (showErr e)) >> pure Nothing
     Right (OutFalse a) -> asked Verifier a $ \case
       Right (True, _) -> do
         s <- getSt c
@@ -719,9 +731,11 @@ handle c (Job n kind) res = case kind of
           falseNode c n claim
       Right (False, why) ->
         failurePieces c n [Piece static "FALSE: ", Piece workerNote claim, Piece static " (not confirmed: ", Quote why, Piece static ")"]
-      Left e -> failureLine c n "FALSE: " workerNote (claim <> " (not checked: " <> e <> ")")
+      Left e -> notChecked claim (Part e)
     Right _ -> pure Nothing
   where
+    -- the worker's claim, and why the verifier did not check it
+    notChecked claim why = failurePieces c n [Piece static "FALSE: ", Piece workerNote claim, Piece static " (not checked: ", why, Piece static ")"]
     asked role a k = case a of
       NoCredit d -> addCost c role d >> pure (Just "credit")
       Asked d r -> addCost c role d >> k r >> pure Nothing
@@ -768,7 +782,7 @@ workerDone c n spec started res = do
                 else if capped c s2
                   then do
                     modify c (\x -> x {stCapHit = True})
-                    failureLine c n "FALSE: " workerNote (claim <> " (not checked: the dollar cap)")
+                    failurePieces c n [Piece static "FALSE: ", Piece workerNote claim, Piece static " (not checked: the dollar cap)"]
                   else startJob c n (KFalse claim) (OutFalse <$> runRole (rcVerifier (cRoles c)) (falseJob (stmtOf s2 n) claim))
   addCost c Worker (fromMaybe 0 dollars)
   -- a stopped worker is logged before its record, its file judged as any other's
@@ -837,18 +851,21 @@ toReview c n sid p = do
     else startJob c n (KReview sid p) $ OutReview <$>
       runRole (rcVerifier (cRoles c)) (reviewJob (stmtOf s n) p (boardOf s (nRoot (nodeOf s n))))
 
--- | A failed split; @from@ is where its reason came from ('tool' for
--- Lean's errors or an exception, 'static' for Fisher's own sentence).
-splitFailed :: Ctx -> NodeId -> SplitId -> (Text -> PromptPart) -> Text -> IO ()
-splitFailed c n sid from why = do
-  modGraph c (failSplit sid why)
-  logG c (\t -> SplitFailed t sid why)
-  failureLine c n "split failed: " from why
+-- | A failed split; its reason is a part whose pieces say where they came
+-- from ('tool' for Lean's errors or an exception, 'static' for Fisher's
+-- own sentence, the planner's words for a name of its sketch, or a job's
+-- error as the job made it).
+splitFailed :: Ctx -> NodeId -> SplitId -> PromptPart -> IO ()
+splitFailed c n sid why = do
+  modGraph c (failSplit sid (partText why))
+  logG c (\t -> SplitFailed t sid (partText why))
+  failurePieces c n [Piece static "split failed: ", Part why]
   s <- getSt c
   prune c (maybe [] sLemmas (IM.lookup sid (gSplits (stGraph s))))
 
--- | A rejected split; its reason is the verifier's ('Quote'), Fisher's
--- own sentence ('static') or an exception ('tool').
+-- | A rejected split; its reason is the verifier's ('Quote'), an exception
+-- ('tool') or a part already made (a job's error, or why the graph could
+-- not take the split, with the planner's name in it).
 splitRejected :: Ctx -> NodeId -> SplitId -> Piece -> IO ()
 splitRejected c n sid why = do
   modGraph c (rejectSplit sid (pieceText why))
@@ -935,7 +952,7 @@ settle c = do
           proveNode c i
           pure True
         Rejected why -> do
-          forM_ mine $ \sid -> splitFailed c i sid static "the sketch does not close with its lemmas proved"
+          forM_ mine $ \sid -> splitFailed c i sid (static "the sketch does not close with its lemmas proved")
           when (IS.member i (stWaiting s)) $ do
             modify c (\x -> x {stWaiting = IS.delete i (stWaiting x), stGraph = attemptDone i (stGraph x)})
             failureLine c i "rejected on recheck: " tool why
@@ -964,8 +981,10 @@ releaseWaiting c = do
   when (or closed) (settle c)
 
 -- | Fit a sketch to the current base: as checked when nothing moved, else
--- applied and checked again. The applied text, the node's verdict, the lemma types.
-refit :: Ctx -> NodeId -> Plan -> Sketch -> IO (Either Text (Text, Verdict, Map.Map Text Text))
+-- applied and checked again. The applied text, the node's verdict, the lemma types;
+-- or why not: a sketch error with the planner's words in it
+-- ('sketchProblem' of the plan's sketch), or Lean's errors ('tool').
+refit :: Ctx -> NodeId -> Plan -> Sketch -> IO (Either PromptPart (Text, Verdict, Map.Map Text Text))
 refit c n p sk = do
   s <- getSt c
   let base = stBase s
@@ -974,10 +993,10 @@ refit c n p sk = do
   if base == plBase p && sk == plSketch p
     then pure (Right (plApplied p, plVerdict p, plTypes p))
     else case applySketch base name sk of
-      Left e -> pure (Left (sketchErrorText e))
+      Left e -> pure (Left (sketchProblem name (plLean p) e))
       Right applied -> do
         r <- locked ck (checkSketchVerdict (ckLean ck) (ckPolicy ck) (ckRoot ck) (ckRel ck) applied name (expectedOf s n) (map fst (skLemmas sk)))
-        pure (fmap (\(v, tys) -> (applied, v, tys)) r)
+        pure (either (Left . tool) (\(v, tys) -> Right (applied, v, tys)) r)
 
 -- | A sketch that already closes its node: the node's new proof alone (the
 -- lemmas it does not use left out) is checked once more and merged, and the
@@ -995,7 +1014,7 @@ closedSketch c n sid p = do
     _ -> do
       r' <- refit c n p (plSketch p)
       case r' of
-        Left e -> splitFailed c n sid tool e
+        Left e -> splitFailed c n sid e
         Right (applied, v, tys) -> do
           s <- getSt c
           toReview c n sid p {plBase = stBase s, plApplied = applied, plVerdict = v, plTypes = tys}
@@ -1014,8 +1033,8 @@ acceptSketch c n sid p = do
       canAlias i = case (dStart <$> findDecl (nameOf s i) ds, parentStart) of
         (Just a, Just b) -> a < b
         _ -> False
-  case acceptSplit canAlias sid [(qn, typeKey qn printed) | (_, printed, qn) <- lemmas] g of
-    Left e -> splitRejected c n sid (Piece static e)
+  case acceptSplitWhy canAlias sid [(qn, typeKey qn printed) | (_, printed, qn) <- lemmas] g of
+    Left e -> splitRejected c n sid (Part (acceptProblem (nameOf s n) (plLean p) e))
     Right (g', links) -> do
       let tgt i = maybe "" nName (IM.lookup i (gNodes g'))
           alias sk b qn i
@@ -1028,11 +1047,11 @@ acceptSketch c n sid p = do
           sk' = foldl' step (plSketch p) (zip lemmas links)
           clashes = [qn | base /= plBase p, ((_, _, qn), NewNode _) <- zip lemmas links, isJust (findDecl qn ds)]
       case clashes of
-        (x : _) -> splitFailed c n sid static ("the name " <> x <> " is already in the file")
+        (x : _) -> splitFailed c n sid (sketchProblem (nameOf s n) (plLean p) (NameClash x))
         [] -> do
           r <- refit c n p sk'
           case r of
-            Left e -> splitFailed c n sid tool e
+            Left e -> splitFailed c n sid e
             Right (applied, v, _) -> do
               let newTypes = Map.fromList [(qn, printed) | ((_, printed, qn), NewNode _) <- zip lemmas links]
               modify c (\x -> x {stGraph = g', stTypes = Map.union (stTypes x) newTypes})

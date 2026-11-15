@@ -146,9 +146,10 @@ parseVerdict s = case jsonObject (saidText s) of
     cut = T.take 300 . T.unwords . T.words
 
 -- | One judge call (a second one when the reply cannot be read, with the
--- judge's own reply and why, as 'askTwice' hands them back).
+-- judge's own reply and why, as 'askTwice' hands them back). Why a reply
+-- could not be read is Fisher's sentence ('static').
 judgeAttempt :: AttemptView -> AgentM 'Judge (Asked Verdict)
-judgeAttempt av = askTwice (retryMessages (judgeMessages av)) id (pure . parseVerdict)
+judgeAttempt av = askTwice (retryMessages (judgeMessages av)) static (pure . parseVerdict)
 
 -- | A lesson's dedup key: the first Lean identifier it mentions,
 -- normalised, else the whole text normalised. An identifier is a dotted name

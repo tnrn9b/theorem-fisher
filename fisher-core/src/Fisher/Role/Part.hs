@@ -10,6 +10,7 @@ module Fisher.Role.Part
   , source
   , tool
   , parts
+  , oneLinePart
   ) where
 
 import Data.Text (Text)
@@ -42,4 +43,10 @@ tool = PromptPart
 -- stripped, the blank ones dropped, two newlines between the rest.
 parts :: [PromptPart] -> PromptPart
 parts = PromptPart . T.intercalate "\n\n" . map T.stripEnd . filter (not . T.null . T.strip) . map partText
+
+-- | A part put on one line (its words joined by single spaces) and cut at
+-- @n@ characters, as a failure note puts it. It only takes text away, so
+-- the part keeps the provenance its pieces were given.
+oneLinePart :: Int -> PromptPart -> PromptPart
+oneLinePart n = PromptPart . T.take n . T.unwords . T.words . partText
 

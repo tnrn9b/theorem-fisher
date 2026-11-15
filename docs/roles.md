@@ -37,6 +37,7 @@ user     :: Text -> PromptPart      -- the user's own text: "## Yours" lines, --
 source   :: Text -> PromptPart      -- project source and facts: declarations, lemmas, docs
 tool     :: Text -> PromptPart      -- prover and tool output: diagnostics, a counterexample, a model
 parts    :: [PromptPart] -> PromptPart   -- strip each, drop blanks, two newlines between
+oneLinePart :: Int -> PromptPart -> PromptPart  -- on one line, cut at n: only takes text away
 type Prompt = [(Text, PromptPart)]  -- message role ("system", "user", "assistant") and its text
 
 class Promptable (r :: Role) where toPrompt :: Said r -> PromptPart
@@ -75,7 +76,7 @@ roleCtx   :: KnownRole r => Ask -> Maybe Checker -> (Role -> Double -> IO ()) ->
 runRole   :: RoleCtx r -> AgentM r a -> IO a
 
 ask       :: Prompt -> AgentM r (Either AskError (Said r, Double))
-askTwice  :: (Maybe (PromptPart, e) -> Prompt) -> (e -> Text)
+askTwice  :: (Maybe (PromptPart, e) -> Prompt) -> (e -> PromptPart)
           -> (Said r -> AgentM r (Either e a)) -> AgentM r (Asked a)
 check     :: CanCheck r => Text -> [Text] -> AgentM r Probe
 withChecker :: CanCheck r => (Checker -> IO a) -> AgentM r a
@@ -99,7 +100,13 @@ another effect has to add it to `RoleCtx`, which is where a reviewer sees it.
   again (the judge too, which has no `toPrompt`) and the builder never holds
   the `Said`. The reader runs in `AgentM r` and gets what `r` said. Asynchronous
   exceptions are rethrown; any other exception ends the job as a failure that
-  keeps the dollars already spent.
+  keeps the dollars already spent. The job's error (`Asked Double (Either
+  PromptPart a)`) is a `PromptPart`: a refused reply's problem as the reader
+  labelled its pieces (the second argument gives it), a failed call as
+  `static "the model call failed: " <> tool providerText`, an exception as
+  `static "the call broke: " <> tool exceptionText`. GraphRun puts it on the
+  whiteboard as it is, so the planner's words in a refused sketch never
+  become tool output.
 - `check` is the kernel probe under the checker's lock; `withChecker` runs any
   other kernel check a job needs (the planner's sketch check) under the same
   lock. Both need `CanCheck r`.
@@ -135,6 +142,8 @@ Every place text enters a prompt takes a `PromptPart`. What shipped:
 | `Fisher.Search.Retrieval.rtBrief`, `reExtra`, `smtFacts`; `Fisher.Search.Facts.factsBrief`; `Fisher.Search.Library.libraryBrief` | `PromptPart` | facts and lemmas are `source`, the SMT paragraph is `static` |
 | `Fisher.Search.Scheduler.asBrief` and the disproof hint | `PromptPart` | the counterexample and model text are `tool` |
 | `Fisher.Search.GraphRun`: a planner's blueprint and sketch in worker briefs and on the board | `PromptPart` | `Said 'Planner` through `toPrompt`; a worker's note is `toPrompt . worker` |
+| `Fisher.Search.Review.reviewMessages`: the blueprint and the sketch under review | `Said 'Planner` | `plBlueprint` and `plLean` are read out of the planner's reply with `excerpt` and placed with `toPrompt`; `saidText plLean` only where the kernel-accepted text is needed |
+| A job's error on the whiteboard (`Asked`'s `Left`, `refit`, a split the graph refuses) | `PromptPart` | Fisher's sentence `static`, a provider's or an exception's text and Lean's errors `tool`, a name from the sketch the planner's words (`excerpt`) |
 | `askTwice`: the previous reply on a retry | `PromptPart` | the same role's own reply, made inside `Fisher.Role.Agent` |
 | `Fisher.Learn.Judge.Verdict` | `Said 'Judge` fields | no `toPrompt`, so it cannot reach a prompt |
 | `Fisher.Learn.Lessons.Evidence.evText` | `Candidate` | `recordEvidence` does not sanitise: the gate already ran |
