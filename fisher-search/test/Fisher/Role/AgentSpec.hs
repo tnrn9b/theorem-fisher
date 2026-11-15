@@ -12,7 +12,7 @@ import qualified Data.Text as T
 import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
 
-import Fisher.Role (Prompt, Role (..), roleName, saidText, static, toPrompt)
+import Fisher.Role (Prompt, Role (..), partText, roleName, saidText, static, toPrompt)
 import Fisher.Role.Agent
 import Fisher.Search.Check (AxiomPolicy (..), LeanRun (..), Probe (..), standardAxioms)
 import Fisher.Search.GraphJobs (Ask, AskError (..), Asked (..), Checker (..))
@@ -71,7 +71,7 @@ spec = describe "the role monad" $ do
     let msgsFor = \case
           Nothing -> prompt "go"
           Just (s, e) -> prompt "go" ++ [("assistant", toPrompt s), ("user", static e)]
-        readReply t = pure (if t == "good" then Right t else Left ("refused: " <> t))
+        readReply s = let t = saidText s in pure (if t == "good" then Right t else Left ("refused: " <> t))
     r <- runRole (roleCtx @'Verifier ask' Nothing spend ev) (askTwice msgsFor id readReply)
     case r of
       Asked d (Right t) -> (d, t) `shouldBe` (0.5, "good")
@@ -87,7 +87,7 @@ spec = describe "the role monad" $ do
   it "askTwice stops at NoCredit" $ do
     (ask', calls) <- scripted [Left AskNoCredit, Right "never"]
     (spend, ev, spent, _) <- recorders
-    r <- runRole (roleCtx @'Planner ask' Nothing spend ev) (askTwice (const (prompt "go")) id (\t -> pure (Right t :: Either Text Text)))
+    r <- runRole (roleCtx @'Planner ask' Nothing spend ev) (askTwice (const (prompt "go")) id (\s -> pure (Right (saidText s) :: Either Text Text)))
     case r of
       NoCredit d -> d `shouldBe` 0
       _ -> expectationFailure "expected NoCredit"
@@ -123,6 +123,43 @@ spec = describe "the role monad" $ do
     p <- takeMVar done
     prExit p `shouldBe` 0
     readIORef most >>= (`shouldBe` 1)
+
+  it "askTwice's reader runs in the role monad: its check is the role's, and its event is tagged" $ do
+    (ask', calls) <- scripted [Right "first", Right "second"]
+    (spend, ev, spent, events) <- recorders
+    let readReply s = do
+          event "read" (String (saidText s))
+          pure (if saidText s == "second" then Right (saidText s) else Left "not yet")
+    r <- runRole (roleCtx @'Planner ask' Nothing spend ev) (askTwice (const (prompt "go")) id readReply)
+    case r of
+      Asked d (Right t) -> (d, t) `shouldBe` (0.5, "second")
+      _ -> expectationFailure "expected Asked with a reply"
+    length <$> readIORef calls >>= (`shouldBe` 2)
+    events >>= (`shouldBe` [("planner", "read"), ("planner", "read")])
+    spent >>= (`shouldBe` [("planner", 0.25), ("planner", 0.25)])
+
+  it "withChecker runs its action with the role's checker, under the lock" $ withSystemTempDirectory "fisher-agent" $ \root -> do
+    lock <- newMVar ()
+    let ck = Checker (LeanRun (\_ _ -> pure (0, ""))) (AxiomPolicy standardAxioms False) root "Main.lean" lock
+    (spend, ev, _, _) <- recorders
+    (ask', _) <- scripted []
+    (rel, held) <- runRole (roleCtx @'Verifier ask' (Just ck) spend ev) (withChecker (\c -> (,) (ckRel c) . isNothing <$> tryReadMVar (ckLock c)))
+    rel `shouldBe` "Main.lean"
+    -- the lock is taken while the action runs, and given back after
+    held `shouldBe` True
+    tryReadMVar lock >>= (`shouldSatisfy` (not . isNothing))
+
+  it "excerpt and reshape keep the role of what was said" $ do
+    (ask', _) <- scripted [Right "```blueprint\nsplit on n\n```"]
+    (spend, ev, _, _) <- recorders
+    r <- runRole (roleCtx @'Planner ask' Nothing spend ev) (ask (prompt "go"))
+    case r of
+      Right (s, _) -> do
+        let piece = excerpt (\t -> if "split" `T.isInfixOf` t then Right (T.strip (T.drop 13 (T.dropEnd 4 t)), T.length t) else Left ("no split" :: Text)) s
+        fmap (\(p, n) -> (partText (toPrompt p), n)) piece `shouldBe` Right ("split on n", 27)
+        partText (toPrompt (reshape T.toUpper s)) `shouldBe` "```BLUEPRINT\nSPLIT ON N\n```"
+        fmap fst (excerpt (const (Left ("refused" :: Text) :: Either Text (Text, ()))) s) `shouldBe` Left "refused"
+      Left _ -> expectationFailure "expected a reply"
 
   it "a judge context has no checker" $ do
     (ask', _) <- scripted []

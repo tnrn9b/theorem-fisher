@@ -88,6 +88,9 @@ failureNoteSpec = describe "failureNote" $ do
       `shouldBe` "split failed: the sketch does not close with its lemmas proved"
     partText (failureNote "" static "waits on lemmas that did not close") `shouldBe` "waits on lemmas that did not close"
     partText (failureNote "split failed: " tool "  \n ") `shouldBe` "split failed:"
+  it "whitespace at the prefix's end and the rest's start becomes one space" $ do
+    partText (failureNote "FALSE: " static "  \n claim  with\truns \n") `shouldBe` "FALSE: claim with runs"
+    partText (failureNote "  lead " static "x") `shouldBe` "lead x"
 
 runGraphSpec :: Spec
 runGraphSpec = describe "runGraph" $ do

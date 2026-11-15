@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+
 -- | The planner: asks for a split of a goal into simpler lemmas, and reads the reply.
 module Fisher.Search.Split
   ( Message
@@ -8,8 +10,11 @@ module Fisher.Search.Split
   , fencedBlocks
   ) where
 
+import Data.List (intersperse)
 import Data.Text (Text)
 import qualified Data.Text as T
+
+import Fisher.Role (Prompt, PromptPart, Role (..), Said, partText, parts, source, static, toPrompt, tool, worker)
 
 -- | (role, content); the roles are "system", "user" and "assistant".
 type Message = (Text, Text)
@@ -36,48 +41,39 @@ plannerSystem = T.unlines
 -- | Base file, node name, the lemmas of the current plan the proof may use,
 -- whiteboard, notes of the node's failed attempts, the node's retrieval
 -- text (its facts and library offer; empty for none), and for a repair
--- round the previous reply with what was wrong with it.
-plannerMessages :: Text -> Text -> [Text] -> Text -> [Text] -> Text -> Maybe (Text, Problem) -> [Message]
+-- round the previous reply (the planner's own, through 'toPrompt') with
+-- what was wrong with it.
+plannerMessages :: Text -> Text -> [Text] -> PromptPart -> [Text] -> PromptPart -> Maybe (Said 'Planner, Problem) -> Prompt
 plannerMessages base name usable board notes retrieved prev =
-  [ ("system", plannerSystem)
-  , ("user", T.intercalate "\n\n" (map T.stripEnd (filter (not . T.null) [user, retrieved, failed])))
+  [ ("system", static plannerSystem)
+  , ("user", paragraphs [goal, retrieved, failed])
   ]
     <> case prev of
       Nothing -> []
-      Just (reply, problem) -> [("assistant", reply), ("user", T.stripEnd (repair problem))]
+      Just (reply, problem) -> [("assistant", toPrompt reply), ("user", repair problem)]
   where
-    user = T.unlines
-      [ "The goal is the declaration `" <> name <> "`."
-      , ""
-      , "The file so far:"
-      , "```lean"
-      , T.stripEnd base
-      , "```"
-      , ""
-      , "The plan so far:"
-      , T.stripEnd board
-      , ""
-      , usable'
-      ]
+    goal =
+      static "The goal is the declaration `" <> source name <> static "`.\n\nThe file so far:\n```lean\n"
+        <> source (T.stripEnd base) <> static "\n```\n\nThe plan so far:\n"
+        <> parts [board] <> static "\n\n" <> usable'
     usable' = case usable of
-      [] -> "Besides the new lemmas, the proof may use no declaration that still ends in `sorry`."
-      ns -> "Besides the new lemmas and what the file already proves, the proof may use only these lemmas of the current plan, even where they still end in `sorry`: "
-              <> T.intercalate ", " ["`" <> n <> "`" | n <- ns] <> ". It may use no other declaration that still ends in `sorry`."
+      [] -> static "Besides the new lemmas, the proof may use no declaration that still ends in `sorry`."
+      ns -> static "Besides the new lemmas and what the file already proves, the proof may use only these lemmas of the current plan, even where they still end in `sorry`: "
+              <> mconcat (intersperse (static ", ") [static "`" <> source n <> static "`" | n <- ns])
+              <> static ". It may use no other declaration that still ends in `sorry`."
+    -- a note is a worker's (its NOTE or FALSE line)
     failed
-      | null notes = ""
-      | otherwise = T.unlines ("Direct attempts at this goal failed:" : map (("- " <>) . oneLine) notes)
+      | null notes = mempty
+      | otherwise = static "Direct attempts at this goal failed:\n" <> mconcat [static "- " <> toPrompt (worker (oneLine n)) <> static "\n" | n <- notes]
     repair = \case
-      FormatError why -> T.unlines
-        [ "Your reply could not be used: " <> why
-        , "Reply again with both blocks."
-        ]
-      LeanErrors e -> T.unlines
-        [ "Lean reported:"
-        , "```"
-        , T.stripEnd e
-        , "```"
-        , "Reply again with both blocks, fixing these errors."
-        ]
+      FormatError why -> static ("Your reply could not be used: " <> why <> "\nReply again with both blocks.")
+      LeanErrors e -> static "Lean reported:\n```\n" <> tool (T.stripEnd e) <> static "\n```\nReply again with both blocks, fixing these errors."
+
+-- | The non-empty parts, each without trailing whitespace, a blank line
+-- between them. Unlike 'parts', a part of only whitespace still counts
+-- (as an empty paragraph), as the planner's messages always had it.
+paragraphs :: [PromptPart] -> PromptPart
+paragraphs ps = mconcat (intersperse (static "\n\n") [parts [p] | p <- ps, not (T.null (partText p))])
 
 -- | The first block tagged blueprint and the first tagged lean.
 parsePlan :: Text -> Either Text (Text, Text)

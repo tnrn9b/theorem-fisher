@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+
 module Fisher.Learn.JudgeSpec (spec) where
 
 import Data.Aeson (Value, object, (.=))
@@ -9,8 +11,10 @@ import Test.Hspec
 import Fisher.Learn.Judge
 import Fisher.Learn.Mistakes (AttemptView (..))
 import Fisher.Lessons.File (normaliseLesson)
-import Fisher.Role (saidText)
-import Fisher.Search.GraphJobs (AskError (..), Asked (..), Role (..))
+import Fisher.Role (Said, partText, saidText)
+import Fisher.Role.Agent (roleCtx, runRole)
+import Fisher.Role.Internal (said')
+import Fisher.Search.GraphJobs (Ask, AskError (..), Asked (..), Role (..))
 
 good :: Text
 good = "{\"mistake\": \"named a lemma that does not exist\", \"lesson\": \"Search with lean_loogle before naming a lemma.\", \"confidence\": 0.8, \"tell_yourself\": \"Look the lemma up first. Then write the proof.\"}"
@@ -26,28 +30,36 @@ texts :: Verdict -> (Text, Maybe Text, Double, Text)
 texts v = (saidText (vMistake v), saidText <$> vLesson v, vConfidence v, saidText (vTellYourself v))
 
 userText :: AttemptView -> Text
-userText av = T.concat [c | ("user", c) <- judgeMessages av]
+userText av = T.concat [partText c | ("user", c) <- judgeMessages av]
+
+-- | A judge's reply, as the role monad's ask gives it.
+judge :: Text -> Said 'Judge
+judge = said'
+
+-- | A judge call through its role context (no checker, nothing recorded).
+judged :: Ask -> AttemptView -> IO (Asked Verdict)
+judged ask av = runRole (roleCtx @'Judge ask Nothing (\_ _ -> pure ()) (\_ _ _ -> pure ())) (judgeAttempt av)
 
 spec :: Spec
 spec = do
   describe "parseVerdict" $ do
     it "reads a good object" $
-      fmap texts (parseVerdict good)
+      fmap texts (parseVerdict (judge good))
         `shouldBe` Right ("named a lemma that does not exist", Just "Search with lean_loogle before naming a lemma.", 0.8, "Look the lemma up first. Then write the proof.")
     it "reads a fenced JSON block" $
-      parseVerdict ("Here is my verdict.\n```json\n" <> good <> "\n```\n") `shouldBe` parseVerdict good
+      parseVerdict (judge ("Here is my verdict.\n```json\n" <> good <> "\n```\n")) `shouldBe` parseVerdict (judge good)
     it "refuses a confidence that is not a number" $ do
-      parseVerdict "{\"confidence\":\"high\"}" `shouldSatisfy` isLeft
-      parseVerdict "{\"mistake\": \"m\", \"lesson\": \"l\", \"confidence\": \"high\", \"tell_yourself\": \"t\"}" `shouldSatisfy` isLeft
+      parseVerdict (judge "{\"confidence\":\"high\"}") `shouldSatisfy` isLeft
+      parseVerdict (judge "{\"mistake\": \"m\", \"lesson\": \"l\", \"confidence\": \"high\", \"tell_yourself\": \"t\"}") `shouldSatisfy` isLeft
     it "refuses bad JSON and missing fields" $ do
-      parseVerdict "nope" `shouldSatisfy` isLeft
-      parseVerdict "{\"mistake\": \"m\", \"confidence\": 0.9}" `shouldSatisfy` isLeft
-      parseVerdict "{\"lesson\": \"l\", \"confidence\": 0.9, \"tell_yourself\": \"t\"}" `shouldSatisfy` isLeft
+      parseVerdict (judge "nope") `shouldSatisfy` isLeft
+      parseVerdict (judge "{\"mistake\": \"m\", \"confidence\": 0.9}") `shouldSatisfy` isLeft
+      parseVerdict (judge "{\"lesson\": \"l\", \"confidence\": 0.9, \"tell_yourself\": \"t\"}") `shouldSatisfy` isLeft
     it "drops the lesson under confidence 0.6" $
-      fmap (fmap saidText . vLesson) (parseVerdict "{\"mistake\": \"m\", \"lesson\": \"l\", \"confidence\": 0.4, \"tell_yourself\": \"t\"}") `shouldBe` Right Nothing
+      fmap (fmap saidText . vLesson) (parseVerdict (judge "{\"mistake\": \"m\", \"lesson\": \"l\", \"confidence\": 0.4, \"tell_yourself\": \"t\"}")) `shouldBe` Right Nothing
     it "cuts the lesson and tell_yourself to 300 characters" $ do
       let long = T.replicate 3000 "a"
-          r = parseVerdict ("{\"mistake\": \"m\", \"lesson\": \"" <> long <> "\", \"confidence\": 0.9, \"tell_yourself\": \"" <> long <> "\"}")
+          r = parseVerdict (judge ("{\"mistake\": \"m\", \"lesson\": \"" <> long <> "\", \"confidence\": 0.9, \"tell_yourself\": \"" <> long <> "\"}"))
       fmap (fmap (T.length . saidText) . vLesson) r `shouldBe` Right (Just 300)
       fmap (T.length . saidText . vTellYourself) r `shouldBe` Right 300
 
@@ -57,7 +69,7 @@ spec = do
       map fst ms `shouldBe` ["system", "user"]
       userText (view [msg 1 "hello"]) `shouldSatisfy` T.isInfixOf "rejected: still sorry"
       userText (view [msg 1 "hello"]) `shouldSatisfy` T.isInfixOf "assistant: hello"
-      T.concat (map snd ms) `shouldSatisfy` T.isInfixOf "tell_yourself"
+      T.concat (map (partText . snd) ms) `shouldSatisfy` T.isInfixOf "tell_yourself"
     it "keeps only the last 40 events" $ do
       let u = userText (view [msg s ("line " <> T.pack (show s) <> " end") | s <- [1 .. 60]])
       u `shouldSatisfy` T.isInfixOf "line 21 end"
@@ -111,7 +123,7 @@ spec = do
           headOr = \case
             (x : _) -> Just x
             [] -> Nothing
-      r <- judgeAttempt ask (view [msg 1 "hello"])
+      r <- judged ask (view [msg 1 "hello"])
       case r of
         Asked c (Right v) -> do
           c `shouldSatisfy` (\x -> abs (x - 0.03) < 1e-9)
@@ -119,9 +131,17 @@ spec = do
         _ -> expectationFailure "expected a verdict"
       calls <- readIORef seen
       map fst calls `shouldBe` [Judge, Judge]
-      map (map fst . snd) calls `shouldBe` [["system", "user"], ["system", "user", "assistant", "user"]]
+      -- the judge's own reply does not go back into its prompt (it has no
+      -- 'toPrompt'): the retry is the first call's messages with why
+      map (map fst . snd) calls `shouldBe` [["system", "user"], ["system", "user"]]
+      case map snd calls of
+        [first, second] -> do
+          lookup "system" second `shouldBe` lookup "system" first
+          lookup "user" second `shouldBe` fmap (<> "\n\nYour previous reply could not be used: the reply is not the JSON object asked for\nReply with the JSON object only.") (lookup "user" first)
+          T.concat (map snd second) `shouldNotSatisfy` T.isInfixOf "nope"
+        _ -> expectationFailure "expected two calls"
     it "gives NoCredit when the call has no credit" $ do
-      r <- judgeAttempt (\_ _ -> pure (Left AskNoCredit)) (view [msg 1 "hello"])
+      r <- judged (\_ _ -> pure (Left AskNoCredit)) (view [msg 1 "hello"])
       case r of
         NoCredit _ -> pure ()
         _ -> expectationFailure "expected NoCredit"

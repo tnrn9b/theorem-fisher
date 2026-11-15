@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+
 -- | The lemma-graph search: today's attempts on a file's open goals, and for
 -- a goal its attempt cannot close, a split into lemmas from the planner,
 -- reviewed by the verifier, merged into the base and worked on in turn.
@@ -48,6 +50,7 @@ import Control.Concurrent.Async (Async, async, cancel, waitAnyCatch)
 import Control.Concurrent.MVar (newMVar)
 import Control.Exception (SomeException, displayException, toException)
 import Control.Monad (forM, forM_, join, unless, void, when)
+import Data.Char (isSpace)
 import Data.IORef
 import qualified Data.IntMap.Strict as IM
 import Data.IntSet (IntSet)
@@ -59,7 +62,8 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import System.Timeout (timeout)
 
-import Fisher.Role (PromptPart, partText, source, static, toPrompt, tool, worker)
+import Fisher.Role (PromptPart, Promptable, Said, partText, saidText, source, static, toPrompt, tool, worker)
+import Fisher.Role.Agent (RoleCtx, reshape, roleCtx, runRole)
 import Fisher.Search.Auto (AutoConfig (..), AutoFail (..), autoGoal)
 import Fisher.Search.Check (Verdict (..))
 import Fisher.Search.Child (ChildStats (..))
@@ -205,7 +209,7 @@ data Out
   = OutWorker AttemptResult
   | OutPlan (Asked Plan)
   | OutReview (Asked SplitVerdict)
-  | OutFalse (Asked (Bool, Text))
+  | OutFalse (Asked (Bool, Said 'Verifier))
 
 data St = St
   { stGraph :: Graph
@@ -256,7 +260,28 @@ data Ctx = Ctx
   -- ^ the file the run started from
   , cHarvest :: IO (Int, Int)
   -- ^ the library's harvest, run once ('harvestRun')
+  , cRoles :: RoleCtxs
+  , cRoleSpent :: IORef (Map.Map Role Double)
+  -- ^ what the role contexts were charged ('roleCtx'); the run's dollars
+  -- are the jobs' 'Asked' dollars ('addCost'), and nothing reads this yet
   }
+
+-- | The role contexts of the model-call jobs, built once from 'geAsk' and
+-- the run's checker. Their spend writer adds to 'cRoleSpent'; their event
+-- writer logs nothing (the run's events are the loop's).
+data RoleCtxs = RoleCtxs
+  { rcPlanner :: RoleCtx 'Planner
+  , rcVerifier :: RoleCtx 'Verifier
+  }
+
+-- | The role contexts over the run's 'geAsk' and checker, charging
+-- @counter@. Lazily, so a call's dollars are first evaluated where its
+-- 'Asked' dollars are charged ('addCost'), as before.
+roleCtxs :: GraphEnv -> Checker -> IORef (Map.Map Role Double) -> RoleCtxs
+roleCtxs env ck counter = RoleCtxs (roleCtx (geAsk env) (Just ck) spend noEvent) (roleCtx (geAsk env) (Just ck) spend noEvent)
+  where
+    spend r d = modifyIORef counter (Map.insertWith (+) r d)
+    noEvent _ _ _ = pure ()
 
 -- | Search the open goals of @base0@ as a lemma graph.
 runGraph :: GraphConfig -> GraphEnv -> Text -> IO (Either Text GraphReport)
@@ -281,8 +306,10 @@ runGraph cfg env base0 = do
       -- one retriever for the run: its corpora are shared by every node
       retrieve <- traverse (\re -> newRetriever re (seRel se)) (seRetrieval se)
       harvestRef <- newIORef (pure (0, 0))
-      let c = Ctx cfg env (Checker (seLean se) (sePolicy se) (seRoot se) (seRel se) lock) ref t0 autoRef track retrieve base0
-                (join (readIORef harvestRef))
+      roleSpent <- newIORef Map.empty
+      let ck = Checker (seLean se) (sePolicy se) (seRoot se) (seRel se) lock
+          -- the role contexts charge the context's own counter
+          c = Ctx cfg env ck ref t0 autoRef track retrieve base0 (join (readIORef harvestRef)) (roleCtxs env ck (cRoleSpent c)) roleSpent
       writeIORef harvestRef =<< once (harvestRun c)
       forM_ (IM.elems (gNodes g0)) $ \n -> logG c (\t -> NodeAdded t (nId n) (nName n) 0)
       -- on an exception (Ctrl-C, SIGTERM): the harvest with the base as it
@@ -355,9 +382,6 @@ boardOf s r = whiteboard (stGraph s) r (IM.findWithDefault [] r (stFailures s))
 boards :: St -> [(NodeId, Text)]
 boards s = [(r, partText (boardOf s r)) | r <- gRoots (stGraph s)]
 
-oneLine :: Text -> Text
-oneLine = T.take 300 . T.unwords . T.words
-
 showErr :: SomeException -> Text
 showErr = T.take 300 . T.pack . displayException
 
@@ -369,24 +393,59 @@ addCost c role d = do
 -- | A whiteboard line @<node>: <note>@ on the node's root. The node's name
 -- is the checked file's (source); the note is 'failureNote'.
 failureLine :: Ctx -> NodeId -> Text -> (Text -> PromptPart) -> Text -> IO ()
-failureLine c i prefix from rest = modify c $ \s ->
+failureLine c i prefix from rest = failurePieces c i [Piece static prefix, Piece from rest]
+
+-- | 'failureLine' for a note of several pieces ('notePieces').
+failurePieces :: Ctx -> NodeId -> [Piece] -> IO ()
+failurePieces c i ps = modify c $ \s ->
   let n = nodeOf s i
-   in s {stFailures = IM.insertWith (flip (<>)) (nRoot n) [source (nName n) <> static ": " <> failureNote prefix from rest] (stFailures s)}
+   in s {stFailures = IM.insertWith (flip (<>)) (nRoot n) [source (nName n) <> static ": " <> notePieces ps] (stFailures s)}
+
+-- | A piece of a failure note: text with the constructor for where it came
+-- from ('static' for Fisher's own sentences, 'tool' for Lean's errors, a
+-- checker's exception or a counterexample, 'workerNote' for a worker's
+-- words), or what a role said, which goes in through 'toPrompt'.
+data Piece = Piece (Text -> PromptPart) Text | forall r. Promptable r => Quote (Said r)
+
+pieceText :: Piece -> Text
+pieceText = \case
+  Piece _ t -> t
+  Quote s -> saidText s
 
 -- | A failure note: Fisher's prefix, then the rest by the constructor its
--- caller names for where the rest came from ('static' for Fisher's own
--- sentences, 'tool' for Lean's errors, a checker's exception or a
--- counterexample, 'workerNote' for a worker's words). The whole note is
--- put on one line ('oneLine') first and then cut, so its bytes are those
--- of @oneLine (prefix <> rest)@. The cut falls one character before the
--- prefix's end (the prefixes have no runs of whitespace): the space after
--- a prefix like @"split failed: "@ goes with the rest, and a blank rest,
--- whose space 'oneLine' drops, still leaves the prefix whole.
+-- caller names for where the rest came from (see 'Piece'). Its bytes are
+-- those of @prefix <> rest@ put on one line and cut ('notePieces').
 failureNote :: Text -> (Text -> PromptPart) -> Text -> PromptPart
-failureNote prefix from rest = static (T.take k l) <> from (T.drop k l)
+failureNote prefix from rest = notePieces [Piece static prefix, Piece from rest]
+
+-- | A note of pieces, each by its own constructor: the whole note is put on
+-- one line and then cut, so its bytes are those of the pieces' texts
+-- joined, then put on one line and cut ('oneLinePieces'), and each piece
+-- keeps the characters of that line that came from it. A role's piece is
+-- reshaped from what the role said ('reshape'), so it still goes in by
+-- 'toPrompt'.
+notePieces :: [Piece] -> PromptPart
+notePieces ps = mconcat (zipWith part [0 ..] ps)
   where
-    l = oneLine (prefix <> rest)
-    k = max 0 (T.length prefix - 1)
+    texts = map pieceText ps
+    part :: Int -> Piece -> PromptPart
+    part j = \case
+      Piece from _ -> from (oneLinePieces texts !! j)
+      Quote s -> toPrompt (reshape (\t -> oneLinePieces (take j texts <> [t] <> drop (j + 1) texts) !! j) s)
+
+-- | The texts joined and put on one line, given back piece by piece: each
+-- text's share of the line. A run of whitespace becomes one space, which
+-- goes to the piece the run starts in; leading and trailing whitespace
+-- goes; the line is cut at 300 characters. Joined, the shares are
+-- @T.take 300 (T.unwords (T.words (T.concat ts)))@.
+oneLinePieces :: [Text] -> [Text]
+oneLinePieces ts = [T.pack [ch | (i, ch) <- kept, i == j] | j <- [0 .. length ts - 1]]
+  where
+    kept = take 300 (go False Nothing [(i, ch) | (i, t) <- zip [0 :: Int ..] ts, ch <- T.unpack t])
+    go _ _ [] = []
+    go started pending ((i, ch) : rest)
+      | isSpace ch = go started (if started then pending <|> Just i else Nothing) rest
+      | otherwise = maybe id (\k -> ((k, ' ') :)) pending ((i, ch) : go True Nothing rest)
 
 -- | A note quoting a worker's reply (its NOTE or FALSE line).
 workerNote :: Text -> PromptPart
@@ -523,8 +582,8 @@ startPlan c n = do
   let (sid, g') = proposeSplit n (recordAction n (stGraph s))
       root = nRoot (nodeOf s n)
   modify c (\s' -> s' {stGraph = g'})
-  startJob c n (KPlan sid) $ OutPlan <$>
-    planJob (cCk c) (geAsk (cEnv c)) (stBase s) (nameOf s n) (expectedOf s n) (usableOf s n) (boardOf s root) (IM.findWithDefault [] n (stNotes s)) retrieved
+  startJob c n (KPlan sid) $ fmap OutPlan . runRole (rcPlanner (cRoles c)) $
+    planJob (stBase s) (nameOf s n) (expectedOf s n) (usableOf s n) (boardOf s root) (IM.findWithDefault [] n (stNotes s)) retrieved
   logG c (\t -> SplitProposed t sid n)
 
 -- | Cancel what runs and end the run.
@@ -632,12 +691,12 @@ handle c (Job n kind) res = case kind of
         | otherwise -> toReview c n sid p
     Right _ -> pure Nothing
   KReview sid p -> case res of
-    Left e -> splitRejected c n sid (showErr e) >> pure Nothing
+    Left e -> splitRejected c n sid (Piece tool (showErr e)) >> pure Nothing
     Right (OutReview a) -> asked Verifier a $ \case
-      Left e -> splitRejected c n sid e
+      Left e -> splitRejected c n sid (Piece static e)
       Right v
         | svAccept v -> acceptSketch c n sid p
-        | otherwise -> splitRejected c n sid (svReason v)
+        | otherwise -> splitRejected c n sid (Quote (svReason v))
     Right _ -> pure Nothing
   KFalse claim -> case res of
     Left e -> failureLine c n "FALSE: " workerNote (claim <> " (not checked: " <> showErr e <> ")") >> pure Nothing
@@ -647,7 +706,8 @@ handle c (Job n kind) res = case kind of
         when (nStatus (nodeOf s n) == NOpen) $ do
           logG c (\t -> FalseLemma t n claim)
           falseNode c n claim
-      Right (False, why) -> failureLine c n "FALSE: " workerNote (claim <> " (not confirmed: " <> why <> ")")
+      Right (False, why) ->
+        failurePieces c n [Piece static "FALSE: ", Piece workerNote claim, Piece static " (not confirmed: ", Quote why, Piece static ")"]
       Left e -> failureLine c n "FALSE: " workerNote (claim <> " (not checked: " <> e <> ")")
     Right _ -> pure Nothing
   where
@@ -698,7 +758,7 @@ workerDone c n spec started res = do
                   then do
                     modify c (\x -> x {stCapHit = True})
                     failureLine c n "FALSE: " workerNote (claim <> " (not checked: the dollar cap)")
-                  else startJob c n (KFalse claim) (OutFalse <$> falseJob (geAsk (cEnv c)) (stmtOf s2 n) claim)
+                  else startJob c n (KFalse claim) (OutFalse <$> runRole (rcVerifier (cRoles c)) (falseJob (stmtOf s2 n) claim))
   addCost c Worker (fromMaybe 0 dollars)
   -- a stopped worker is logged before its record, its file judged as any other's
   forM_ (mar >>= arStop) $ \st ->
@@ -764,7 +824,7 @@ toReview c n sid p = do
   if capped c s
     then modify c (\x -> x {stCapHit = True})
     else startJob c n (KReview sid p) $ OutReview <$>
-      reviewJob (geAsk (cEnv c)) (stmtOf s n) p (boardOf s (nRoot (nodeOf s n)))
+      runRole (rcVerifier (cRoles c)) (reviewJob (stmtOf s n) p (boardOf s (nRoot (nodeOf s n))))
 
 -- | A failed split; @from@ is where its reason came from ('tool' for
 -- Lean's errors or an exception, 'static' for Fisher's own sentence).
@@ -776,11 +836,13 @@ splitFailed c n sid from why = do
   s <- getSt c
   prune c (maybe [] sLemmas (IM.lookup sid (gSplits (stGraph s))))
 
-splitRejected :: Ctx -> NodeId -> SplitId -> Text -> IO ()
+-- | A rejected split; its reason is the verifier's ('Quote'), Fisher's
+-- own sentence ('static') or an exception ('tool').
+splitRejected :: Ctx -> NodeId -> SplitId -> Piece -> IO ()
 splitRejected c n sid why = do
-  modGraph c (rejectSplit sid why)
-  logG c (\t -> SplitRejected t sid why)
-  failureLine c n "split rejected: " static why
+  modGraph c (rejectSplit sid (pieceText why))
+  logG c (\t -> SplitRejected t sid (pieceText why))
+  failurePieces c n [Piece static "split rejected: ", why]
 
 proveNode :: Ctx -> NodeId -> IO ()
 proveNode c i = do
@@ -942,7 +1004,7 @@ acceptSketch c n sid p = do
         (Just a, Just b) -> a < b
         _ -> False
   case acceptSplit canAlias sid [(qn, typeKey qn printed) | (_, printed, qn) <- lemmas] g of
-    Left e -> splitRejected c n sid e
+    Left e -> splitRejected c n sid (Piece static e)
     Right (g', links) -> do
       let tgt i = maybe "" nName (IM.lookup i (gNodes g'))
           alias sk b qn i

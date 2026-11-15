@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+
 -- | The mining pass: a run's attempts read back from the run log, their
 -- mistakes found by the rules ("Fisher.Learn.Mistakes"), the failures the
 -- rules do not explain shown to the judge ("Fisher.Learn.Judge") under
@@ -109,7 +111,8 @@ import Fisher.Learn.Mistakes (AttemptView (..), Mistake (..), classify, mistakeJ
 import Fisher.Lessons.File (Template (..), renderTemplate)
 import Fisher.Lessons.Prompt (PromptLessons (..), promptLessons)
 import Fisher.Redact (redactSensitiveText)
-import Fisher.Role (candidate, candidateText, saidText, template)
+import Fisher.Role (Role (..), candidate, candidateText, saidText, template)
+import Fisher.Role.Agent (roleCtx, runRole)
 import Fisher.Runlog
 import Fisher.Search.GraphJobs (Ask, Asked (..))
 
@@ -250,10 +253,14 @@ data Pass = Pass
   , pRefused :: IORef Int
   -- ^ the lesson texts the gate refused ('candidate' for a judge's text,
   -- 'template' for a rendered template)
+  , pRoleSpent :: IORef (Map.Map Role Double)
+  -- ^ the dollars the judge's role context was charged ('roleCtx'); the
+  -- caps and the spend record count the 'Asked' dollars, and nothing reads
+  -- this yet
   }
 
 newPass :: IO Pass
-newPass = Pass <$> newIORef False <*> newIORef Nothing <*> newIORef Set.empty <*> newIORef 0
+newPass = Pass <$> newIORef False <*> newIORef Nothing <*> newIORef Set.empty <*> newIORef 0 <*> newIORef Map.empty
 
 -- What the pass over one run carries along: the run's judge dollars and
 -- calls (the caps are per run), and the pass's state.
@@ -264,6 +271,7 @@ data Judging = Judging
   , jStarted :: IORef (Maybe Double)
   , jNoTemplate :: IORef (Set.Set Text)
   , jRefused :: IORef Int
+  , jRoleSpent :: IORef (Map.Map Role Double)
   }
 
 -- What an attempt came to: rule hits written, judged, left unjudged, and
@@ -279,7 +287,7 @@ mineOne env pass rid again = do
     Nothing -> pure mempty
     Just _ -> do
       attempts <- attemptsOf rl rid
-      st <- (\spent calls -> Judging spent calls (pBroke pass) (pStarted pass) (pNoTemplate pass) (pRefused pass)) <$> newIORef 0 <*> newIORef 0
+      st <- (\spent calls -> Judging spent calls (pBroke pass) (pStarted pass) (pNoTemplate pass) (pRefused pass) (pRoleSpent pass)) <$> newIORef 0 <*> newIORef 0
       mined <- forM attempts $ \(aid, av, prior) ->
         guarded env aid (Mined 0 0 0 []) (mineAttempt env st rid aid av prior again)
       unless (null attempts) . guarded env "noting the run in force" () $ do
@@ -423,7 +431,12 @@ judgeOne env st rid aid av = case meJudge env of
             when (isNothing started) $ writeIORef (jStarted st) (Just now)
             modifyIORef' (jCalls st) (+ 1)
             let limit = min (meJudgeTimeout env) left
-            timeout (round (limit * 1000000)) (judgeAttempt ask av) >>= \case
+            -- the judge's role context: no checker; its spend writer adds
+            -- to the pass's per-role counter, lazily, so a call's dollars
+            -- are first evaluated where its 'Asked' dollars are charged, as
+            -- before; it logs no events
+            let ctx = roleCtx @'Judge ask Nothing (\r d -> modifyIORef (jRoleSpent st) (Map.insertWith (+) r d)) (\_ _ _ -> pure ())
+            timeout (round (limit * 1000000)) (runRole ctx (judgeAttempt av)) >>= \case
               Nothing -> do
                 charge judgeCostEstimate
                 stop ("the judge took over " <> secs limit <> " on " <> aid <> " (its time limit); the rest of the run is left unjudged")

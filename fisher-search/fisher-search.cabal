@@ -21,6 +21,7 @@ library
       Fisher.Learn.Policy
       Fisher.Learn.Stats
       Fisher.Role.Agent
+      Fisher.Search.Ask
       Fisher.Search.Auto
       Fisher.Search.Bm25
       Fisher.Search.Check
@@ -99,6 +100,7 @@ test-suite fisher-search-test
       Fisher.Search.Golden
       Fisher.Search.GraphAutoSpec
       Fisher.Search.GraphHarness
+      Fisher.Search.GraphJobsSpec
       Fisher.Search.GraphLiveSpec
       Fisher.Search.GraphRetrievalSpec
       Fisher.Search.GraphRunSpec

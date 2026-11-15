@@ -12,6 +12,7 @@
 module Fisher.Learn.Judge
   ( Verdict (..)
   , judgeMessages
+  , judgeRetryMessages
   , parseVerdict
   , judgeAttempt
   , lessonKey
@@ -25,7 +26,7 @@ import qualified Data.Aeson.Key as K
 import qualified Data.Aeson.KeyMap as KM
 import qualified Data.ByteString.Lazy as BL
 import Data.Char (isAsciiLower, isAsciiUpper, isDigit)
-import Data.List (sortOn)
+import Data.List (intersperse, sortOn)
 import Data.Maybe (fromMaybe, listToMaybe, mapMaybe)
 import Data.Scientific (toRealFloat)
 import Data.Text (Text)
@@ -36,11 +37,11 @@ import qualified Data.Text.Encoding.Error as TEE
 import Fisher.Learn.Mistakes (AttemptView (..), ToolCall (..), resultText, toolCalls)
 import Fisher.Lessons.File (levenshtein, normaliseLesson)
 import Fisher.Redact (redactSensitiveText)
-import Fisher.Role (Said)
+import Fisher.Role (Prompt, PromptPart, Promptable (..), Role (..), Said, saidText, source, static, tool, worker)
+import Fisher.Role.Agent (AgentM, askTwice)
 import Fisher.Role.Internal (said')
-import Fisher.Search.GraphJobs (Ask, Asked, Role (..), askTwice)
-import Fisher.Search.Review (jsonObject, retryMessages, textOr)
-import Fisher.Search.Split (Message)
+import Fisher.Search.Ask (Asked)
+import Fisher.Search.Review (jsonObject, textOr)
 
 -- | The judge's reply: the mistake in one line, the lesson (Nothing when
 -- the judge was not sure enough), its confidence from 0 to 1, and what to
@@ -62,18 +63,34 @@ judgeSystem = T.unlines
   , "tell_yourself is two sentences for the agent to read before it starts this goal again."
   ]
 
--- | System and user messages for one attempt.
-judgeMessages :: AttemptView -> [Message]
+-- | System and user messages for one attempt: the goal's name (source),
+-- Fisher's classification of it and of the outcome, the outcome's text
+-- (tool output: a prover's rejection or a provider's error) and the
+-- attempt's transcript (the worker's run).
+judgeMessages :: AttemptView -> Prompt
 judgeMessages av =
-  [ ("system", judgeSystem)
-  , ( "user"
-    , T.intercalate "\n\n"
-        [ "The goal: " <> redactSensitiveText (avGoal av) <> (if T.null (avShape av) then "" else " (shape " <> avShape av <> ")")
-        , "The outcome: " <> avClass av <> (if T.null (avOutcomeText av) then "" else ", " <> T.take 500 (redactSensitiveText (avOutcomeText av)))
-        , "The last events of the attempt:\n" <> T.unlines (transcript (avEvents av))
-        , "Reply with the JSON object only."
-        ]
-    )
+  [ ("system", static judgeSystem)
+  , ("user", judgeUser av)
+  ]
+
+judgeUser :: AttemptView -> PromptPart
+judgeUser av =
+  mconcat . intersperse (static "\n\n") $
+    [ static "The goal: " <> source (redactSensitiveText (avGoal av)) <> static (if T.null (avShape av) then "" else " (shape " <> avShape av <> ")")
+    , static ("The outcome: " <> avClass av) <> (if T.null (avOutcomeText av) then mempty else static ", " <> tool (T.take 500 (redactSensitiveText (avOutcomeText av))))
+    , static "The last events of the attempt:\n" <> toPrompt (worker (T.unlines (transcript (avEvents av))))
+    , static "Reply with the JSON object only."
+    ]
+
+-- | The messages of the second call, when the first reply could not be
+-- read: the first call's, the user's turn followed by why. The judge's own
+-- reply is not in them: a judge's text reaches a prompt only as a lesson
+-- candidate, so it does not go back as an assistant turn the way the
+-- planner's and the verifier's do.
+judgeRetryMessages :: AttemptView -> Text -> Prompt
+judgeRetryMessages av why =
+  [ ("system", static judgeSystem)
+  , ("user", judgeUser av <> static ("\n\nYour previous reply could not be used: " <> why <> "\nReply with the JSON object only."))
   ]
 
 -- | The last 40 message and tool events as lines, in seq order. A tool
@@ -108,10 +125,10 @@ lastN n xs = drop (length xs - n) xs
 -- | The judge's JSON: mistake, confidence (a number) and tell_yourself are
 -- required; lesson may be missing. Texts are put on one line and cut to 300
 -- characters; under confidence 0.6 the lesson is dropped. Never throws.
--- The texts are what the judge said: here, and only here, its reply
--- becomes a @Said 'Judge@ (by @said'@).
-parseVerdict :: Text -> Either Text Verdict
-parseVerdict t = case jsonObject t of
+-- The texts are what the judge said, read out of its reply: here, and
+-- only here, its pieces are made @Said 'Judge@ (by @said'@).
+parseVerdict :: Said 'Judge -> Either Text Verdict
+parseVerdict s = case jsonObject (saidText s) of
   Nothing -> Left "the reply is not the JSON object asked for"
   Just o -> do
     mistake <- required "mistake" o
@@ -140,9 +157,10 @@ parseVerdict t = case jsonObject t of
     a <|> b = maybe b Just a
     cut = T.take 300 . T.unwords . T.words
 
--- | One judge call (a second one when the reply cannot be read).
-judgeAttempt :: Ask -> AttemptView -> IO (Asked Verdict)
-judgeAttempt ask av = askTwice ask Judge (retryMessages (judgeMessages av)) id (pure . parseVerdict)
+-- | One judge call (a second one when the reply cannot be read, see
+-- 'judgeRetryMessages').
+judgeAttempt :: AttemptView -> AgentM 'Judge (Asked Verdict)
+judgeAttempt av = askTwice (maybe (judgeMessages av) (judgeRetryMessages av . snd)) id (pure . parseVerdict)
 
 -- | A lesson's dedup key: the first Lean identifier it mentions,
 -- normalised, else the whole text normalised. An identifier is a dotted name

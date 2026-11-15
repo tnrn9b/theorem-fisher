@@ -1,14 +1,13 @@
 {-# LANGUAGE DataKinds #-}
 
--- Only Fisher.Role.Agent and Fisher.Learn.Judge.parseVerdict may import said' (besides Fisher.Role itself, for worker),
--- and, until the graph jobs run in AgentM, Fisher.Search.GraphJobs.planJob for the planner's blueprint.
+-- Only Fisher.Role, Fisher.Role.Agent and Fisher.Learn.Judge may import said'.
 -- Only Fisher.Role.Part and Fisher.Role (for toPrompt) may import the PromptPart constructor.
 
--- | The constructor of 'Said'. Only "Fisher.Role.Agent" (its @ask@),
--- "Fisher.Learn.Judge" (its @parseVerdict@) and "Fisher.Role" (its
--- @worker@) import this module; nothing re-exports 'Said' with its
--- constructor or 'said'', so elsewhere a @Said r@ can only be received,
--- never made.
+-- | The constructor of 'Said'. Only "Fisher.Role.Agent" (its @ask@, and
+-- its @excerpt@ and @reshape@ of a reply), "Fisher.Learn.Judge" (its
+-- @parseVerdict@) and "Fisher.Role" (its @worker@) import 'said'';
+-- nothing re-exports 'Said' with its constructor or 'said'', so elsewhere
+-- a @Said r@ can only be received, never made.
 --
 -- 'Role' is defined here because 'Said' is indexed by it; "Fisher.Role"
 -- re-exports it, and it is the one thing from here that leaves.

@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+
 -- | The verifier: judges a split, and checks a worker's claim that a lemma is false.
 module Fisher.Search.Review
   ( SplitVerdict (..)
@@ -11,6 +13,7 @@ module Fisher.Search.Review
   ) where
 
 import Data.Foldable (toList)
+import Data.List (intersperse)
 import Data.Maybe (listToMaybe, mapMaybe)
 import Data.Aeson (Value (..), decodeStrict)
 import qualified Data.Aeson.Key as K
@@ -19,10 +22,14 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 
-import Fisher.Search.Split (Message, fencedBlocks)
+import Fisher.Role (Prompt, PromptPart, Promptable (..), Role (..), Said, parts, source, static, worker)
+import Fisher.Role.Agent (excerpt)
+import Fisher.Search.Split (fencedBlocks)
 
+-- | The verifier's verdict on a split; its reason is what the verifier
+-- said.
 data SplitVerdict = SplitVerdict
-  { svAccept :: Bool, svReason :: Text, svSuspect :: [Text] } deriving (Eq, Show)
+  { svAccept :: Bool, svReason :: Said 'Verifier, svSuspect :: [Text] } deriving (Eq, Show)
 
 reviewSystem :: Text
 reviewSystem = T.unlines
@@ -35,25 +42,29 @@ reviewSystem = T.unlines
   , "suspect lists the names of lemmas that look false or no simpler than the goal."
   ]
 
--- | Node statement, blueprint, sketch, whiteboard.
-reviewMessages :: Text -> Text -> Text -> Text -> [Message]
+-- | Node statement, blueprint (the planner's), sketch (checked Lean),
+-- whiteboard.
+reviewMessages :: Text -> Said 'Planner -> Text -> PromptPart -> Prompt
 reviewMessages stmt blueprint sketch board =
-  [ ("system", reviewSystem)
-  , ("user", T.intercalate "\n\n"
-      [ "The goal:\n```lean\n" <> T.stripEnd stmt <> "\n```"
-      , "The blueprint:\n" <> T.stripEnd blueprint
-      , "The sketch:\n```lean\n" <> T.stripEnd sketch <> "\n```"
-      , "The plan so far:\n" <> T.stripEnd board
-      ])
+  [ ("system", static reviewSystem)
+  , ("user", mconcat (intersperse (static "\n\n")
+      [ static "The goal:\n```lean\n" <> source (T.stripEnd stmt) <> static "\n```"
+      , static "The blueprint:\n" <> parts [toPrompt blueprint]
+      , static "The sketch:\n```lean\n" <> source (T.stripEnd sketch) <> static "\n```"
+      , static "The plan so far:\n" <> parts [board]
+      ]))
   ]
 
-parseReview :: Text -> Either Text SplitVerdict
-parseReview t = case jsonObject t of
-  Just o | Just (Bool a) <- KM.lookup "accept" o
-         , Just r <- textOr "reason" o
-         , Just s <- listOr "suspect" o -> Right (SplitVerdict a r s)
-  _ -> Left bad
-  where bad = "the verdict is not the JSON asked for"
+-- | The verdict in the verifier's reply; its reason is read out of the
+-- reply ('excerpt').
+parseReview :: Said 'Verifier -> Either Text SplitVerdict
+parseReview = fmap (\(r, (a, s)) -> SplitVerdict a r s) . excerpt readReview
+  where
+    readReview t = case jsonObject t of
+      Just o | Just (Bool a) <- KM.lookup "accept" o
+             , Just r <- textOr "reason" o
+             , Just s <- listOr "suspect" o -> Right (r, (a, s))
+      _ -> Left "the verdict is not the JSON asked for"
 
 falseSystem :: Text
 falseSystem = T.unlines
@@ -64,29 +75,30 @@ falseSystem = T.unlines
   , "The value of false is true only when the claim holds up. reason is a short sentence."
   ]
 
--- | Lemma statement, the worker's claim.
-falseMessages :: Text -> Text -> [Message]
+-- | Lemma statement (source), the worker's claim (its FALSE line).
+falseMessages :: Text -> Text -> Prompt
 falseMessages stmt claim =
-  [ ("system", falseSystem)
-  , ("user", T.intercalate "\n\n"
-      [ "The statement:\n```lean\n" <> T.stripEnd stmt <> "\n```"
-      , "The claim:\n" <> T.stripEnd claim
-      ])
+  [ ("system", static falseSystem)
+  , ("user", static "The statement:\n```lean\n" <> source (T.stripEnd stmt) <> static "\n```\n\nThe claim:\n" <> toPrompt (worker (T.stripEnd claim)))
   ]
 
-parseFalse :: Text -> Either Text (Bool, Text)
-parseFalse t = case jsonObject t of
-  Just o | Just (Bool f) <- KM.lookup "false" o
-         , Just r <- textOr "reason" o -> Right (f, r)
-  _ -> Left "the verdict is not the JSON asked for"
+-- | The verdict on a FALSE claim and its reason, read out of the
+-- verifier's reply ('excerpt').
+parseFalse :: Said 'Verifier -> Either Text (Bool, Said 'Verifier)
+parseFalse = fmap (\(r, f) -> (f, r)) . excerpt readFalse
+  where
+    readFalse t = case jsonObject t of
+      Just o | Just (Bool f) <- KM.lookup "false" o
+             , Just r <- textOr "reason" o -> Right (r, f)
+      _ -> Left "the verdict is not the JSON asked for"
 
--- | The messages of a call, and for a second call the previous reply and
--- why it could not be read.
-retryMessages :: [Message] -> Maybe (Text, Text) -> [Message]
+-- | The messages of a call, and for a second call the previous reply (the
+-- same role's, through 'toPrompt') and why it could not be read.
+retryMessages :: Promptable r => Prompt -> Maybe (Said r, Text) -> Prompt
 retryMessages ms = \case
   Nothing -> ms
   Just (reply, why) ->
-    ms <> [("assistant", reply), ("user", "Your reply could not be used: " <> why <> "\nReply with the JSON object only.")]
+    ms <> [("assistant", toPrompt reply), ("user", static ("Your reply could not be used: " <> why <> "\nReply with the JSON object only."))]
 
 -- | A bare JSON object; else the first fenced block (of any tag, or none)
 -- that is one; else the text from the first @{@ to the last @}@.

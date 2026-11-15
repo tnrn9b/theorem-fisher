@@ -2,7 +2,7 @@
 
 -- | The role monad: a model-call job for role @r@ runs in @'AgentM' r@,
 -- whose only effects are the operations here ('ask', 'askTwice', 'check',
--- 'event'). Its constructor is not exported and it has no @MonadIO@
+-- 'withChecker', 'event'). Its constructor is not exported and it has no @MonadIO@
 -- instance, so a job that needs another effect has to add it to
 -- 'RoleCtx', where a reviewer sees it; 'runRole' is the only way to run
 -- one.
@@ -12,7 +12,10 @@ module Fisher.Role.Agent
   , ask
   , askTwice
   , check
+  , withChecker
   , event
+  , excerpt
+  , reshape
   , runRole
   , roleCtx
   , CanCheck
@@ -26,8 +29,8 @@ import qualified Data.Text as T
 
 import Fisher.Role (KnownRole (..), Prompt, Role (..), Said, partText, saidText)
 import Fisher.Role.Internal (said')
+import Fisher.Search.Ask (Ask, AskError (..), Asked (..), Checker (..), locked)
 import Fisher.Search.Check (Probe, probe)
-import Fisher.Search.GraphJobs (Ask, AskError (..), Asked (..), Checker (..), locked)
 import Fisher.Search.Split (Message)
 
 -- | What a job in role @r@ may do: call the model as @r@, check a sketch
@@ -92,10 +95,12 @@ ask prompt = withCtx $ \c -> do
       pure (Right (said' t, d))
 
 -- | Two calls at most: a failed call, or a reply the reader refuses, gets
--- one more. An asynchronous exception in a call is rethrown. A refused
--- reply goes to the second call's prompt with what was wrong with it; the
--- last problem, as text, is the job's error.
-askTwice :: (Maybe (Said r, e) -> Prompt) -> (e -> Text) -> (Text -> IO (Either e a)) -> AgentM r (Asked a)
+-- one more. An asynchronous exception in a call or in the reader is
+-- rethrown. The reader gets what @r@ said and runs in the role monad, so it
+-- does no IO but the role's operations. A refused reply goes to the second
+-- call's prompt with what was wrong with it; the last problem, as text, is
+-- the job's error.
+askTwice :: (Maybe (Said r, e) -> Prompt) -> (e -> Text) -> (Said r -> AgentM r (Either e a)) -> AgentM r (Asked a)
 askTwice promptFor errText readReply = withCtx $ \c -> go c (0 :: Int) Nothing 0
   where
     go c n prev cost = do
@@ -105,7 +110,7 @@ askTwice promptFor errText readReply = withCtx $ \c -> go c (0 :: Int) Nothing 0
         Right (Left AskNoCredit) -> pure (NoCredit cost)
         Right (Left (AskFailed e)) -> again c n cost ("the model call failed: " <> e) prev
         Right (Right (s, d)) -> do
-          x <- try (readReply (saidText s))
+          x <- try (runRole c (readReply s))
           case x of
             Left e -> broke (cost + d) e
             Right (Right a) -> pure (Asked (cost + d) (Right a))
@@ -127,6 +132,28 @@ check :: CanCheck r => Text -> [Text] -> AgentM r Probe
 check text names = withCtx $ \c -> case rcCheck c of
   Nothing -> error "check without a checker"
   Just ck -> locked ck (probe (ckLean ck) (ckRoot ck) (ckRel ck) text names)
+
+-- | An action with the role's checker, under the checker's lock: the
+-- kernel checks a job runs other than 'check' (the planner's
+-- @checkSketchVerdict@). The same guarantee as 'check': a role with
+-- 'CanCheck' always has a checker in its context.
+withChecker :: CanCheck r => (Checker -> IO a) -> AgentM r a
+withChecker act = withCtx $ \c -> case rcCheck c of
+  Nothing -> error "withChecker without a checker"
+  Just ck -> locked ck (act ck)
+
+-- | A piece a reader takes out of what @r@ said (the planner's blueprint
+-- block, the verifier's reason), with the rest of what it read: the piece
+-- is still @r@'s words. The reader is pure and sees only the reply, so the
+-- piece comes from it; a reader that refuses the reply gives its problem.
+excerpt :: (Text -> Either e (Text, a)) -> Said r -> Either e (Said r, a)
+excerpt readText s = (\(t, a) -> (said' t, a)) <$> readText (saidText s)
+
+-- | What @r@ said, reshaped (put on one line and cut, as a failure note
+-- puts it): still @r@'s words. Like 'excerpt', the function sees only the
+-- reply.
+reshape :: (Text -> Text) -> Said r -> Said r
+reshape f = said' . f . saidText
 
 -- | A run-log event, tagged with this role.
 event :: Text -> Value -> AgentM r ()
