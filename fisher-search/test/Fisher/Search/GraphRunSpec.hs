@@ -15,7 +15,7 @@ import System.FilePath ((</>))
 import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
 
-import Fisher.Role (partText)
+import Fisher.Role (partText, static, tool)
 import Fisher.Search.Auto (AutoConfig (..), defaultAutoConfig)
 import Fisher.Search.Check (AxiomPolicy (..), LeanRun (..), standardAxioms)
 import qualified Fisher.Search.Check as C
@@ -69,7 +69,25 @@ judge leanRun original final goal = withSystemTempDirectory "judge" $ \root -> d
       NotSpliced e -> pure (C.Rejected (T.pack (show e)))
 
 spec :: Spec
-spec = runGraphSpec >> controllerSpec
+spec = runGraphSpec >> controllerSpec >> failureNoteSpec
+
+-- | A failure line's note keeps the bytes of the whole note put on one line,
+-- whatever constructor takes its rest.
+failureNoteSpec :: Spec
+failureNoteSpec = describe "failureNote" $ do
+  it "a Lean error as tool output: the bytes of the note on one line" $ do
+    let errs = "F.lean:4:2: error: unknown identifier 'foo'\n  at   this\n\ttactic   failed  "
+    partText (failureNote "split failed: " tool errs)
+      `shouldBe` "split failed: F.lean:4:2: error: unknown identifier 'foo' at this tactic failed"
+    partText (failureNote "rejected on recheck: " tool errs)
+      `shouldBe` "rejected on recheck: F.lean:4:2: error: unknown identifier 'foo' at this tactic failed"
+    partText (failureNote "split failed: " tool (T.replicate 400 "e"))
+      `shouldBe` T.take 300 ("split failed: " <> T.replicate 400 "e")
+  it "a Fisher sentence, and a blank rest" $ do
+    partText (failureNote "split failed: " static "the sketch does not close with its lemmas proved")
+      `shouldBe` "split failed: the sketch does not close with its lemmas proved"
+    partText (failureNote "" static "waits on lemmas that did not close") `shouldBe` "waits on lemmas that did not close"
+    partText (failureNote "split failed: " tool "  \n ") `shouldBe` "split failed:"
 
 runGraphSpec :: Spec
 runGraphSpec = describe "runGraph" $ do

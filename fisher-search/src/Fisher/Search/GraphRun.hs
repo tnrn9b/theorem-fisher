@@ -40,6 +40,7 @@ module Fisher.Search.GraphRun
   , GraphReport (..)
   , plannerModel
   , runGraph
+  , failureNote
   ) where
 
 import Control.Applicative ((<|>))
@@ -366,14 +367,26 @@ addCost c role d = do
   logG c (\t -> RoleCost t role d)
 
 -- | A whiteboard line @<node>: <note>@ on the node's root. The node's name
--- is the checked file's (source); the note, put on one line, goes in by
--- the constructor its caller names for where its text came from: 'static'
--- for Fisher's own, 'tool' for a counterexample, 'workerNote' for one
--- quoting a worker.
-failureLine :: Ctx -> NodeId -> (Text -> PromptPart) -> Text -> IO ()
-failureLine c i from note = modify c $ \s ->
+-- is the checked file's (source); the note is 'failureNote'.
+failureLine :: Ctx -> NodeId -> Text -> (Text -> PromptPart) -> Text -> IO ()
+failureLine c i prefix from rest = modify c $ \s ->
   let n = nodeOf s i
-   in s {stFailures = IM.insertWith (flip (<>)) (nRoot n) [source (nName n) <> static ": " <> from (oneLine note)] (stFailures s)}
+   in s {stFailures = IM.insertWith (flip (<>)) (nRoot n) [source (nName n) <> static ": " <> failureNote prefix from rest] (stFailures s)}
+
+-- | A failure note: Fisher's prefix, then the rest by the constructor its
+-- caller names for where the rest came from ('static' for Fisher's own
+-- sentences, 'tool' for Lean's errors, a checker's exception or a
+-- counterexample, 'workerNote' for a worker's words). The whole note is
+-- put on one line ('oneLine') first and then cut, so its bytes are those
+-- of @oneLine (prefix <> rest)@. The cut falls one character before the
+-- prefix's end (the prefixes have no runs of whitespace): the space after
+-- a prefix like @"split failed: "@ goes with the rest, and a blank rest,
+-- whose space 'oneLine' drops, still leaves the prefix whole.
+failureNote :: Text -> (Text -> PromptPart) -> Text -> PromptPart
+failureNote prefix from rest = static (T.take k l) <> from (T.drop k l)
+  where
+    l = oneLine (prefix <> rest)
+    k = max 0 (T.length prefix - 1)
 
 -- | A note quoting a worker's reply (its NOTE or FALSE line).
 workerNote :: Text -> PromptPart
@@ -611,9 +624,9 @@ handle c (Job n kind) res = case kind of
     forM_ res' (noteTier c spec)
     pure Nothing
   KPlan sid -> case res of
-    Left e -> splitFailed c n sid (showErr e) >> pure Nothing
+    Left e -> splitFailed c n sid tool (showErr e) >> pure Nothing
     Right (OutPlan a) -> asked Planner a $ \case
-      Left e -> splitFailed c n sid e
+      Left e -> splitFailed c n sid tool e
       Right p
         | plVerdict p == Closed -> closedSketch c n sid p
         | otherwise -> toReview c n sid p
@@ -627,15 +640,15 @@ handle c (Job n kind) res = case kind of
         | otherwise -> splitRejected c n sid (svReason v)
     Right _ -> pure Nothing
   KFalse claim -> case res of
-    Left e -> failureLine c n workerNote ("FALSE: " <> claim <> " (not checked: " <> showErr e <> ")") >> pure Nothing
+    Left e -> failureLine c n "FALSE: " workerNote (claim <> " (not checked: " <> showErr e <> ")") >> pure Nothing
     Right (OutFalse a) -> asked Verifier a $ \case
       Right (True, _) -> do
         s <- getSt c
         when (nStatus (nodeOf s n) == NOpen) $ do
           logG c (\t -> FalseLemma t n claim)
           falseNode c n claim
-      Right (False, why) -> failureLine c n workerNote ("FALSE: " <> claim <> " (not confirmed: " <> why <> ")")
-      Left e -> failureLine c n workerNote ("FALSE: " <> claim <> " (not checked: " <> e <> ")")
+      Right (False, why) -> failureLine c n "FALSE: " workerNote (claim <> " (not confirmed: " <> why <> ")")
+      Left e -> failureLine c n "FALSE: " workerNote (claim <> " (not checked: " <> e <> ")")
     Right _ -> pure Nothing
   where
     asked role a k = case a of
@@ -676,7 +689,7 @@ workerDone c n spec started res = do
             -- a node Disprove just failed gets no note and no FALSE check
             let open = nStatus (nodeOf s2 n) == NOpen
             case workerEnd final outcome of
-              Note x -> when open (failureLine c n workerNote x >> addNote c n x)
+              Note x -> when open (failureLine c n "" workerNote x >> addNote c n x)
               FalseClaim claim -> do
                 addNote c n ("FALSE: " <> claim)
                 if not open
@@ -684,7 +697,7 @@ workerDone c n spec started res = do
                 else if capped c s2
                   then do
                     modify c (\x -> x {stCapHit = True})
-                    failureLine c n workerNote ("FALSE: " <> claim <> " (not checked: the dollar cap)")
+                    failureLine c n "FALSE: " workerNote (claim <> " (not checked: the dollar cap)")
                   else startJob c n (KFalse claim) (OutFalse <$> falseJob (geAsk (cEnv c)) (stmtOf s2 n) claim)
   addCost c Worker (fromMaybe 0 dollars)
   -- a stopped worker is logged before its record, its file judged as any other's
@@ -753,11 +766,13 @@ toReview c n sid p = do
     else startJob c n (KReview sid p) $ OutReview <$>
       reviewJob (geAsk (cEnv c)) (stmtOf s n) p (boardOf s (nRoot (nodeOf s n)))
 
-splitFailed :: Ctx -> NodeId -> SplitId -> Text -> IO ()
-splitFailed c n sid why = do
+-- | A failed split; @from@ is where its reason came from ('tool' for
+-- Lean's errors or an exception, 'static' for Fisher's own sentence).
+splitFailed :: Ctx -> NodeId -> SplitId -> (Text -> PromptPart) -> Text -> IO ()
+splitFailed c n sid from why = do
   modGraph c (failSplit sid why)
   logG c (\t -> SplitFailed t sid why)
-  failureLine c n static ("split failed: " <> why)
+  failureLine c n "split failed: " from why
   s <- getSt c
   prune c (maybe [] sLemmas (IM.lookup sid (gSplits (stGraph s))))
 
@@ -765,7 +780,7 @@ splitRejected :: Ctx -> NodeId -> SplitId -> Text -> IO ()
 splitRejected c n sid why = do
   modGraph c (rejectSplit sid why)
   logG c (\t -> SplitRejected t sid why)
-  failureLine c n static ("split rejected: " <> why)
+  failureLine c n "split rejected: " static why
 
 proveNode :: Ctx -> NodeId -> IO ()
 proveNode c i = do
@@ -847,10 +862,10 @@ settle c = do
           proveNode c i
           pure True
         Rejected why -> do
-          forM_ mine $ \sid -> splitFailed c i sid "the sketch does not close with its lemmas proved"
+          forM_ mine $ \sid -> splitFailed c i sid static "the sketch does not close with its lemmas proved"
           when (IS.member i (stWaiting s)) $ do
             modify c (\x -> x {stWaiting = IS.delete i (stWaiting x), stGraph = attemptDone i (stGraph x)})
-            failureLine c i static ("rejected on recheck: " <> why)
+            failureLine c i "rejected on recheck: " tool why
           pure False
         -- still waiting (on another plan lemma, say): the split stays pending
         -- and is checked again when something else closes
@@ -869,9 +884,9 @@ releaseWaiting c = do
     Closed -> proveNode c i >> pure True
     _ -> do
       modify c (\x -> x {stWaiting = IS.delete i (stWaiting x), stGraph = attemptDone i (stGraph x)})
-      failureLine c i static (case v of
-        Rejected why -> "rejected on recheck: " <> why
-        _ -> "waits on lemmas that did not close")
+      case v of
+        Rejected why -> failureLine c i "rejected on recheck: " tool why
+        _ -> failureLine c i "" static "waits on lemmas that did not close"
       pure False
   when (or closed) (settle c)
 
@@ -907,7 +922,7 @@ closedSketch c n sid p = do
     _ -> do
       r' <- refit c n p (plSketch p)
       case r' of
-        Left e -> splitFailed c n sid e
+        Left e -> splitFailed c n sid tool e
         Right (applied, v, tys) -> do
           s <- getSt c
           toReview c n sid p {plBase = stBase s, plApplied = applied, plVerdict = v, plTypes = tys}
@@ -940,11 +955,11 @@ acceptSketch c n sid p = do
           sk' = foldl' step (plSketch p) (zip lemmas links)
           clashes = [qn | base /= plBase p, ((_, _, qn), NewNode _) <- zip lemmas links, isJust (findDecl qn ds)]
       case clashes of
-        (x : _) -> splitFailed c n sid ("the name " <> x <> " is already in the file")
+        (x : _) -> splitFailed c n sid static ("the name " <> x <> " is already in the file")
         [] -> do
           r <- refit c n p sk'
           case r of
-            Left e -> splitFailed c n sid e
+            Left e -> splitFailed c n sid tool e
             Right (applied, v, _) -> do
               let newTypes = Map.fromList [(qn, printed) | ((_, printed, qn), NewNode _) <- zip lemmas links]
               modify c (\x -> x {stGraph = g', stTypes = Map.union (stTypes x) newTypes})
@@ -1041,9 +1056,9 @@ disproveNode c n = do
         falseNode c n ("the negation is proved by " <> tac)
       Just (Right (DSuspect cx, src, _)) -> do
         logG c (\t -> NodeDisproved t n "suspect" cx (maybe "" sourceName src) Nothing)
-        failureLine c n tool $ case src of
-          Just ViaSmt -> "SUSPECT: an SMT solver found a countermodel: " <> cx
-          _ -> "SUSPECT: plausible found a counterexample: " <> cx
+        failureLine c n (case src of
+          Just ViaSmt -> "SUSPECT: an SMT solver found a countermodel: "
+          _ -> "SUSPECT: plausible found a counterexample: ") tool cx
       _ -> pure ()
 
 -- | Repair on a failed attempt's file. A partial proof with holes left
