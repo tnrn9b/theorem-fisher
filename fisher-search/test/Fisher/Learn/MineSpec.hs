@@ -301,6 +301,14 @@ spec = do
         ms <- mistakes env "s1-1"
         [(field "lesson" m, field "key" m) | m <- ms, field "kind" m == Just (String "judged")]
           `shouldBe` [(Just (String lesson), Just Null)]
+    it "a long TOKEN= value in a judge's lesson is stored as TOKEN=***" $
+      withEnv $ \env0 _ -> do
+        calls <- newIORef 0
+        let env = env0 {meJudge = Just (fakeJudge calls (verdictWith "Set GITHUB_TOKEN=abcdefghijklmnopqrstuvwxyz0123 before building." "Look the lemma up first. Then use it."))}
+        searchRun env "s1" 10 [residue]
+        void (mineRun env "s1" False)
+        rows <- listLessons (meRunlog env) (Just (meProjectKey env)) []
+        [lrText x | x <- rows, lrKind x == "judged"] `shouldBe` ["Set GITHUB_TOKEN=*** before building."]
     it "stops at the call cap (fisher.lessons.judge_calls) even when the calls cost nothing" $
       withEnv $ \env0 _ -> do
         calls <- newIORef (0 :: Int)

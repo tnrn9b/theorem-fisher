@@ -106,7 +106,7 @@ import Text.Read (readMaybe)
 import Fisher.Learn.Judge (Verdict (..), judgeAttempt, judgeKey)
 import Fisher.Learn.Lessons (Evidence (..), Limits, noteInForce, promote, recordEvidence, regenerate, retire)
 import Fisher.Learn.Mistakes (AttemptView (..), Mistake (..), classify, mistakeJson, renderMistakeKind)
-import Fisher.Lessons.File (Template (..), renderTemplate, sanitiseLesson)
+import Fisher.Lessons.File (Template (..), renderTemplate)
 import Fisher.Lessons.Prompt (PromptLessons (..), promptLessons)
 import Fisher.Redact (redactSensitiveText)
 import Fisher.Role (candidate, candidateText, saidText, template)
@@ -248,8 +248,8 @@ data Pass = Pass
   , pStarted :: IORef (Maybe Double)
   , pNoTemplate :: IORef (Set.Set Text)
   , pRefused :: IORef Int
-  -- ^ the lesson texts the sanitiser refused ('candidate' for a judge's
-  -- text, 'ruleEvidence' for a rendered template)
+  -- ^ the lesson texts the gate refused ('candidate' for a judge's text,
+  -- 'template' for a rendered template)
   }
 
 newPass :: IO Pass
@@ -385,16 +385,15 @@ ruleEvidence :: MineEnv -> Judging -> Text -> Text -> Text -> Maybe Text -> Mayb
 ruleEvidence env st rid aid kind name new key = case find ((== kind) . tKind) (meTemplates env) of
   Just t ->
     forM_ (renderTemplate t (Map.fromList ([("name", n) | Just n <- [name]] <> [("new", n) | Just n <- [new]]))) $ \rendered ->
-      -- the rendered text passes the gate a judge's text passes (redacted,
-      -- then sanitised; a refused one is counted), as it did before
-      -- 'recordEvidence' took a 'Fisher.Role.Candidate'
-      case sanitiseLesson (redactSensitiveText rendered) of
+      -- 'template' checks the rendered text as 'candidate' does; a refused
+      -- one is counted
+      case template rendered of
         Nothing -> refused st
-        Just txt ->
+        Just c ->
           void . recordEvidence (meRunlog env) (meNow env) $
             Evidence
               { evRun = rid, evAttempt = aid, evProjectKey = meProjectKey env, evKind = kind, evKey = key
-              , evText = template txt, evJudged = False }
+              , evText = c, evJudged = False }
   Nothing -> do
     first <- atomicModifyIORef' (jNoTemplate st) (\s -> (Set.insert kind s, not (Set.member kind s)))
     when first $ meWarn env ("no lesson template for " <> kind <> "; its hits make no lesson")

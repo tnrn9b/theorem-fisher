@@ -84,15 +84,33 @@ newtype Candidate = Candidate Text deriving (Eq, Show)
 -- | A reply as lesson evidence: redacted, then sanitised; 'Nothing' when
 -- the sanitiser refuses it or nothing is left.
 candidate :: Said r -> Maybe Candidate
-candidate s
+candidate = checked . saidText
+
+-- | A rule lesson rendered from the lesson templates, checked as a reply
+-- is ('candidate'), so every 'Candidate' has passed the gate.
+template :: Text -> Maybe Candidate
+template = checked
+
+-- The gate: redacted to a fixpoint, then sanitised; 'Nothing' when the
+-- sanitiser refuses it or nothing is left.
+checked :: Text -> Maybe Candidate
+checked raw
   | T.null (T.strip redacted) = Nothing
   | otherwise = Candidate <$> sanitiseLesson redacted
   where
-    redacted = redactSensitiveText (saidText s)
+    redacted = redactFixpoint raw
 
--- | A rule lesson rendered from the lesson templates.
-template :: Text -> Candidate
-template = Candidate
+-- 'redactSensitiveText' is not idempotent: its env-assignment and JSON
+-- field patterns match their own masks again (@TOKEN=abcdef...0123@, a
+-- long token's mask, is itself a short token and becomes @TOKEN=***@), so
+-- one pass can leave a token's first 6 and last 4 characters in a lesson.
+-- Redact until the text stops changing, at most 3 passes.
+redactFixpoint :: Text -> Text
+redactFixpoint = go (3 :: Int)
+  where
+    go n t
+      | n <= 0 = t
+      | otherwise = let t' = redactSensitiveText t in if t' == t then t else go (n - 1) t'
 
 candidateText :: Candidate -> Text
 candidateText (Candidate t) = t

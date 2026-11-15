@@ -12,7 +12,7 @@ import Test.Hspec
 
 import Fisher.Learn.Lessons
 import Fisher.Lessons.File (Template (..), globalLessonsPath, loadTemplates, projectLessonsPath, renderTemplate)
-import Fisher.Role (template)
+import Fisher.Role (Candidate, template)
 import Fisher.Runlog
 
 projA, projB, projC :: FilePath
@@ -38,13 +38,18 @@ run rl proj rid t =
 
 rule :: Text -> Text -> Text -> Text -> Evidence
 rule rid pk kind name =
-  Evidence { evRun = rid, evAttempt = rid <> "-1", evProjectKey = pk, evKind = kind, evKey = kind <> ":" <> name, evText = template ("lesson " <> name), evJudged = False }
+  Evidence { evRun = rid, evAttempt = rid <> "-1", evProjectKey = pk, evKind = kind, evKey = kind <> ":" <> name, evText = cand ("lesson " <> name), evJudged = False }
+
+-- | A text the gate lets through, as a candidate ('template'); every text
+-- here passes it unchanged, and a refused one fails the test.
+cand :: Text -> Candidate
+cand t = maybe (error ("refused by the gate: " <> T.unpack t)) id (template t)
 
 -- | A judged sighting from attempt 1 of a run. Its text is a candidate as
--- 'Fisher.Role.candidate' would let it through (these texts pass the
--- gate unchanged); the gate itself is tested in RoleSpec and MineSpec.
+-- 'Fisher.Role.candidate' would let it through; the gate itself is tested
+-- in RoleSpec and MineSpec.
 judged :: Text -> Bool -> Text -> Evidence
-judged rid j txt = Evidence { evRun = rid, evAttempt = rid <> "-1", evProjectKey = keyA, evKind = "judged", evKey = "", evText = template txt, evJudged = j }
+judged rid j txt = Evidence { evRun = rid, evAttempt = rid <> "-1", evProjectKey = keyA, evKind = "judged", evKey = "", evText = cand txt, evJudged = j }
 
 -- | 'recordEvidence'.
 record :: Runlog -> Double -> Evidence -> IO LessonRow
@@ -242,7 +247,7 @@ spec = do
     (lrAgreements c, lrAgreedAttempts c) `shouldBe` (2, ["r1-1", "r2-1"])
 
   it "merges a judged text only into a judged or self row, never into a rule row" $ withLog $ \_ rl -> do
-    r <- record rl 1 (rule "r1" keyA "unknown_identifier" "Nat.foo") {evText = template "In this project `Nat.foo` does not exist."}
+    r <- record rl 1 (rule "r1" keyA "unknown_identifier" "Nat.foo") {evText = cand "In this project `Nat.foo` does not exist."}
     j <- record rl 1 (judged "r2" True "Use `Nat.foo` only after checking its type.")
     lrId j `shouldNotBe` lrId r
     lrKind j `shouldBe` "judged"
@@ -431,7 +436,7 @@ spec = do
     forM_ (zip3 [projA, projB, projC] [keyA, keyB, keyC] [1 :: Int ..]) $ \(p, k, i) -> do
       let rid = "g" <> tshow i
       run rl p rid (fromIntegral i)
-      _ <- record rl (fromIntegral i) (rule rid k "timeout_loop" "") {evText = template ("text " <> tshow i)}
+      _ <- record rl (fromIntegral i) (rule rid k "timeout_loop" "") {evText = cand ("text " <> tshow i)}
       pure ()
     _ <- promote rl 5 defaultLimits ts keyA
     Just g <- findLesson rl "*" "timeout_loop:"
