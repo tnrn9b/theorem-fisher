@@ -36,6 +36,7 @@ import Fisher.Config (getPath, lessonsAutoJudged)
 import Fisher.Learn.Lessons (Limits (..), defaultLimits)
 import Fisher.Learn.Mine (MineEnv (..), mineRun)
 import Fisher.Lessons.Prompt (PromptLessons (..), promptLessons)
+import Fisher.Role (partText)
 import Fisher.Sha256 (sha256Hex)
 import Fisher.Lessons.File (fileHash, globalLessonsPath, loadTemplates, projectLessonsPath)
 import Fisher.Runlog (Runlog, event, runEvents, runlogPath, withRunlog, projectKeyOf)
@@ -157,7 +158,8 @@ lessonsEventFrom pl home root assets = do
   ph <- fileHash (projectLessonsPath root)
   gh <- fileHash (globalLessonsPath home)
   rev <- maybe (pure Nothing) (readCheckoutRevision . checkoutRoot) assets
-  pure (object [ "ids" .= plIds pl, "block_hash" .= (if T.null (plBlock pl) then Nothing else Just (sha256Hex (TE.encodeUtf8 (plBlock pl))))
+  let block = partText (plBlock pl)
+  pure (object [ "ids" .= plIds pl, "block_hash" .= (if T.null block then Nothing else Just (sha256Hex (TE.encodeUtf8 block)))
                , "project_hash" .= ph, "global_hash" .= gh, "skill_revision" .= rev ])
 
 -- | The report's @learn@ block with its @lessons@ object (a block that is

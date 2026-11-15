@@ -56,6 +56,7 @@ import Fisher.Learn.Lessons (Limits (..))
 import Fisher.Learn.Mine (MineEnv (..), judgeCostEstimate)
 import Fisher.Lessons.File (fileHash, projectLessonsPath, writeLessonsFile)
 import Fisher.Lessons.Prompt (PromptLessons (..), promptLessons)
+import Fisher.Role (partText)
 import Fisher.Sha256 (sha256Hex)
 
 -- | Parse, then the refusals, as the command does; Nothing for a usage error.
@@ -868,9 +869,9 @@ lessonsSpec = describe "the lessons" $ do
         ev <- lessonsEventData rl (A.object []) home root Nothing
         fieldOf "ids" ev `shouldBe` Just (A.toJSON [a, b])
         pl <- promptLessons rl False home root
-        fieldOf "block_hash" ev `shouldBe` Just (A.toJSON (sha256Hex (TE.encodeUtf8 (plBlock pl))))
-        plBlock pl `shouldSatisfy` T.isInfixOf "2. Lesson b."
-        plBlock pl `shouldNotSatisfy` T.isInfixOf "planted"
+        fieldOf "block_hash" ev `shouldBe` Just (A.toJSON (sha256Hex (TE.encodeUtf8 (partText (plBlock pl)))))
+        partText (plBlock pl) `shouldSatisfy` T.isInfixOf "2. Lesson b."
+        partText (plBlock pl) `shouldNotSatisfy` T.isInfixOf "planted"
         ph <- fileHash (projectLessonsPath root)
         fieldOf "project_hash" ev `shouldBe` Just (A.toJSON ph)
   it "the lessons event of a search is the block its attempts carry, even when runs.db changes in between" $
@@ -885,7 +886,7 @@ lessonsSpec = describe "the lessons" $ do
         ev <- lessonsEventFrom pl home root Nothing
         fieldOf "ids" ev `shouldBe` Just (A.toJSON (plIds pl))
         plIds pl `shouldBe` [a]
-        fieldOf "block_hash" ev `shouldBe` Just (A.toJSON (sha256Hex (TE.encodeUtf8 (plBlock pl))))
+        fieldOf "block_hash" ev `shouldBe` Just (A.toJSON (sha256Hex (TE.encodeUtf8 (partText (plBlock pl)))))
   it "an imported launch run gets a lessons event (the ids its files held) before the rules pass" $
     withSystemTempDirectory "fisher-lessons" $ \home -> do
       let root = home </> "proj"

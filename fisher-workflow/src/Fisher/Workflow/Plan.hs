@@ -37,6 +37,7 @@ import System.FilePath (searchPathSeparator, (</>))
 
 import Fisher.Config (getPath, lessonsAutoJudged)
 import Fisher.Lessons.Prompt (PromptLessons (..), promptLessonsAt)
+import Fisher.Role (PromptPart)
 import Fisher.Paths (expandUser)
 import Fisher.Project
 import Fisher.Prover (Prover (..), ProverKind (..), ServerSpec (..), findProverRoot, prover, proverTitle, pvToolsFor)
@@ -94,9 +95,10 @@ data LaunchInputs = LaunchInputs
   }
 
 -- | The lessons block for a launch in the project at @root@
--- ('promptLessonsFor'), or "" when lessons are off.
-lessonsBlockFor :: LaunchInputs -> FilePath -> IO Text
-lessonsBlockFor li root = maybe "" plBlock <$> promptLessonsFor li root
+-- ('promptLessonsFor'), or the empty part when lessons are off. Its text
+-- enters a prompt in 'appendLessons'.
+lessonsBlockFor :: LaunchInputs -> FilePath -> IO PromptPart
+lessonsBlockFor li root = maybe mempty plBlock <$> promptLessonsFor li root
 
 -- | The lessons of a launch in the project at @root@: 'liLessons' when it
 -- was computed already, else 'promptLessonsAt' (the numbered lines from
@@ -407,7 +409,7 @@ codexRuntime li mode instruction ws b = do
   -- the block goes in the instructions file only, once
   lessons <- lessonsBlockFor li (projectRoot project)
   ctx <- writeStartupContext m (bStartup b) "codex" (projectRoot project) leanRoot (bActive b) instruction ws
-           (lpPlugin lp) cfgPath (Just cfgPath) (Just skills) ""
+           (lpPlugin lp) cfgPath (Just cfgPath) (Just skills) mempty
   writeCodexInstructions instructions (Just ctx) (projectRoot project) leanRoot (bActive b) skills (lpPlugin lp)
     (lpScripts lp) (skills </> "references") (Just ws) lessons
   writeCodexConfig cfgPath instructions (bRunner b) leanRoot
@@ -448,7 +450,7 @@ fisherRuntime li mode instruction ws b = do
   -- the block goes in the system prompt only, once
   lessons <- lessonsBlockFor li (projectRoot project)
   ctx <- writeStartupContext m (bStartup b) "fisher" (projectRoot project) leanRoot (bActive b) instruction ws
-           (lpPlugin lp) mcpPath Nothing (Just (lpSkill lp)) ""
+           (lpPlugin lp) mcpPath Nothing (Just (lpSkill lp)) mempty
   systemPrompt <- appendLessons lessons <$> fisherSystemPrompt lp ws
   let promptPath = ctx <> ".system.md"
   TIO.writeFile promptPath systemPrompt
@@ -738,7 +740,7 @@ proverCodexRuntime li mode ws pb = do
   -- the block goes in the instructions file only, once
   lessons <- lessonsBlockFor li (projectRoot project)
   ctx <- writeProverStartupContext m (pbStartup pb) kind "codex" (projectRoot project) root (pbActive pb) (wsArgs ws) ws
-           (skills </> "SKILL.md") guide cfgPath (pbFisher pb) ""
+           (skills </> "SKILL.md") guide cfgPath (pbFisher pb) mempty
   writeProverCodexInstructions instructions kind ctx (projectRoot project) root (pbActive pb) skills ws lessons
   writeCodexConfigFor kind cfgPath instructions (pbCommand pb) root (pbCoqc pb)
   let c = ManagedContext "codex" (pbManaged pb) (projectRoot project) root backendHome skills cfgPath
@@ -782,7 +784,7 @@ proverFisherRuntime li mode ws pb = do
   -- the block goes in the system prompt only, once
   lessons <- lessonsBlockFor li (projectRoot project)
   ctx <- writeProverStartupContext m (pbStartup pb) kind "fisher" (projectRoot project) root (pbActive pb) (wsArgs ws) ws
-           (skills </> "SKILL.md") guide mcpPath (pbFisher pb) ""
+           (skills </> "SKILL.md") guide mcpPath (pbFisher pb) mempty
   let promptPath = ctx <> ".system.md"
   TIO.writeFile promptPath (appendLessons lessons (proverSystemPrompt kind ws pluginRoot pet))
   let home = if provider == "anthropic" then pbManaged pb </> "fisher-home" else pbRealHome pb

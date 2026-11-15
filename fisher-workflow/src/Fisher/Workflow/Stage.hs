@@ -36,6 +36,7 @@ import System.Directory hiding (isSymbolicLink)
 import System.FilePath (takeDirectory, (</>))
 import System.Posix.Files (createSymbolicLink, getSymbolicLinkStatus, isSymbolicLink, readSymbolicLink)
 
+import Fisher.Role (PromptPart, partText)
 import Fisher.Workflow.Assets (removeExistingPath)
 import Fisher.Workflow.Command (WorkflowSpec (..))
 import Fisher.Workflow.Json
@@ -242,16 +243,19 @@ workflowDocPath pluginRoot kind = do
   pure (if ok then Just p else Nothing)
 
 -- | A prompt with the lessons block as its last section, after a blank
--- line; the prompt as it is when the block is empty.
-appendLessons :: Text -> Text -> Text
-appendLessons block body
+-- line; the prompt as it is when the block is empty. The block's text
+-- enters the prompt here ('partText').
+appendLessons :: PromptPart -> Text -> Text
+appendLessons part body
   | T.null block = body
   | otherwise = T.dropWhileEnd (== '\n') body <> "\n\n" <> block
+  where
+    block = partText part
 
 -- | Codex's instructions file, the lessons block last.
 writeCodexInstructions
   :: FilePath -> Maybe FilePath -> FilePath -> FilePath -> FilePath -> FilePath -> FilePath -> FilePath -> FilePath
-  -> Maybe WorkflowSpec -> Text -> IO ()
+  -> Maybe WorkflowSpec -> PromptPart -> IO ()
 writeCodexInstructions path startup projectRoot leanRoot cwd skills plugin scripts refs workflow lessons = do
   doc <- maybe (pure Nothing) (workflowDocPath plugin . wsKind) workflow
   TIO.writeFile path . appendLessons lessons . T.intercalate "\n" $
@@ -286,7 +290,7 @@ writeCodexInstructions path startup projectRoot leanRoot cwd skills plugin scrip
 -- the file written.
 writeStartupContext
   :: Machine -> FilePath -> Text -> FilePath -> FilePath -> FilePath -> Text -> WorkflowSpec
-  -> FilePath -> FilePath -> Maybe FilePath -> Maybe FilePath -> Text -> IO FilePath
+  -> FilePath -> FilePath -> Maybe FilePath -> Maybe FilePath -> PromptPart -> IO FilePath
 writeStartupContext m dir backend projectRoot leanRoot cwd instruction ws plugin mcp backendCfg skills lessons = do
   stamp <- mStamp m
   doc <- workflowDocPath plugin (wsKind ws)

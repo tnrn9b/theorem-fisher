@@ -37,7 +37,8 @@ import qualified Data.Text as T
 
 import Fisher.Lessons.File (sanitiseLesson)
 import Fisher.Redact (redactSensitiveText)
-import Fisher.Role.Internal (Role (..), Said (..), said')
+import Fisher.Role.Internal (PromptPart (..), Role (..), Said (..), said')
+import Fisher.Role.Part (partText, parts, source, static, tool, user)
 
 -- | The run log's spelling of a role.
 roleName :: Role -> Text
@@ -60,35 +61,6 @@ instance KnownRole 'Judge where roleVal _ = Judge
 -- results, which do not come from an agent call).
 worker :: Text -> Said 'Worker
 worker = said'
-
--- | A piece of a prompt.
-newtype PromptPart = PromptPart Text deriving (Eq, Show)
-
-partText :: PromptPart -> Text
-partText (PromptPart t) = t
-
--- | Fisher's own text: templates, headings, the guard sentence, hints.
-static :: Text -> PromptPart
-static = PromptPart
-
--- | The user's own text: @## Yours@ lines, @--statement@, a chat message.
-user :: Text -> PromptPart
-user = PromptPart
-
--- | Project source and facts read from the project (declarations, lemmas,
--- docs).
-source :: Text -> PromptPart
-source = PromptPart
-
--- | Tool and prover output: Lean diagnostics, a counterexample, a solver's
--- model.
-tool :: Text -> PromptPart
-tool = PromptPart
-
--- | Parts joined by the brief's rule: each one's trailing whitespace
--- stripped, the blank ones dropped, two newlines between the rest.
-parts :: [PromptPart] -> PromptPart
-parts = PromptPart . T.intercalate "\n\n" . map T.stripEnd . filter (not . T.null . T.strip) . map partText
 
 -- | A conversation: each message's role (@"system"@, @"user"@ or
 -- @"assistant"@) and its text.

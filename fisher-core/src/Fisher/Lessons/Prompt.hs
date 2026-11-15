@@ -34,13 +34,14 @@ import qualified Data.Text as T
 import System.Directory (doesFileExist)
 
 import Fisher.Lessons.File (LessonsFile (..), blockFrom, globalLessonsPath, projectLessonsPath, readLessonsFile, renderLessonsBlock)
+import Fisher.Role (PromptPart)
 import Fisher.Runlog
 
--- | The block's text, the ids of the rows whose lines it kept (after the
+-- | The block, the ids of the rows whose lines it kept (after the
 -- sanitiser and the caps), project ones first, and why runs.db could not
 -- be read when it could not (the block then has the Yours lines only).
 data PromptLessons = PromptLessons
-  { plBlock :: Text
+  { plBlock :: PromptPart
   , plIds :: [Int]
   , plWarning :: Maybe Text
   }

@@ -25,9 +25,14 @@ import Fisher.A2Fixture
 import Fisher.Golden
 import Fisher.Lessons.File (lessonsGuard, renderLessonsFile)
 import Fisher.Lessons.Prompt (PromptLessons (..))
+import Fisher.Role (partText)
 import Fisher.Runlog
 import Fisher.Workflow.Plan
 import Fisher.Workflow.Types
+
+-- | The text 'lessonsBlockFor' puts into a prompt.
+blockFor :: LaunchInputs -> FilePath -> IO Text
+blockFor li root = partText <$> lessonsBlockFor li root
 
 heading :: Text
 heading = "Lessons from earlier runs on this project"
@@ -166,7 +171,7 @@ spec = do
         root <- canonicalizePath d
         bothFiles root
         li <- inputs (root </> "fisher-home") [] (object [])
-        b <- lessonsBlockFor li (root </> "project")
+        b <- blockFor li (root </> "project")
         T.lines b `shouldBe` [heading, lessonsGuard, "", "1. Project lesson one.", "2. Global lesson two."]
     it "uses the block computed for the launch, even when runs.db changes after it" $
       withSystemTempDirectory "fisher-lessons" $ \d -> do
@@ -176,11 +181,11 @@ spec = do
         Just pl <- promptLessonsFor li (root </> "project")
         withRunlog (runlogPath (root </> "fisher-home")) $ \rl ->
           () <$ upsertLesson rl (shown (projectKeyOf (root </> "project")) "k:late" "A lesson promoted later.")
-        b <- lessonsBlockFor li {liLessons = Just pl} (root </> "project")
-        b `shouldBe` plBlock pl
+        b <- blockFor li {liLessons = Just pl} (root </> "project")
+        b `shouldBe` partText (plBlock pl)
         b `shouldNotSatisfy` T.isInfixOf "promoted later"
         -- computed afresh, it would carry the new row
-        lessonsBlockFor li (root </> "project") >>= (`shouldSatisfy` T.isInfixOf "promoted later")
+        blockFor li (root </> "project") >>= (`shouldSatisfy` T.isInfixOf "promoted later")
     it "opens runs.db read-only and notes once when it cannot be read" $
       withSystemTempDirectory "fisher-lessons" $ \d -> do
         root <- canonicalizePath d
@@ -188,13 +193,13 @@ spec = do
         let db = runlogPath (root </> "fisher-home")
         bytes0 <- BS.readFile db
         li <- inputs (root </> "fisher-home") [] (object [])
-        _ <- lessonsBlockFor li (root </> "project")
+        _ <- blockFor li (root </> "project")
         BS.readFile db `shouldReturn` bytes0
         doesFileExist (db <> "-wal") `shouldReturn` False
         writeText db "not a database"
         notes <- newIORef []
         let li' = li {liMachine = (liMachine li) {mNote = \t -> modifyIORef notes (<> [t])}}
-        b <- lessonsBlockFor li' (root </> "project")
+        b <- blockFor li' (root </> "project")
         b `shouldNotSatisfy` T.isInfixOf "Project lesson one."
         readIORef notes >>= \ns -> do
           length ns `shouldBe` 1
@@ -205,15 +210,15 @@ spec = do
         root <- canonicalizePath d
         bothFiles root
         li <- inputs (root </> "fisher-home") off (object [])
-        lessonsBlockFor li (root </> "project") `shouldReturn` ""
+        blockFor li (root </> "project") `shouldReturn` ""
         li2 <- inputs (root </> "fisher-home") [] (object ["fisher" .= object disabled])
-        lessonsBlockFor li2 (root </> "project") `shouldReturn` ""
+        blockFor li2 (root </> "project") `shouldReturn` ""
         li3 <- inputs (root </> "fisher-home") [("FISHER_LESSONS", "1")] (object ["fisher" .= object ["lessons" .= object ["enabled" .= True]]])
-        lessonsBlockFor li3 (root </> "project") >>= (`shouldBe` 1) . T.count heading
+        blockFor li3 (root </> "project") >>= (`shouldBe` 1) . T.count heading
     it "is empty without files and creates nothing in a project without .fisher" $
       withSystemTempDirectory "fisher-lessons" $ \d -> do
         root <- canonicalizePath d
         li <- inputs (root </> "fisher-home") [] (object [])
-        lessonsBlockFor li root `shouldReturn` ""
+        blockFor li root `shouldReturn` ""
         doesDirectoryExist (root </> ".fisher") `shouldReturn` False
         doesDirectoryExist (root </> "fisher-home") `shouldReturn` False

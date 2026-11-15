@@ -63,6 +63,7 @@ import System.IO.Error (isDoesNotExistError)
 import System.FilePath ((</>))
 
 import Fisher.Atomic (atomicWriteFile)
+import Fisher.Role.Part (PromptPart, partText, static, user)
 import Fisher.Sha256 (sha256Hex)
 
 -- The file ---------------------------------------------------------------
@@ -272,29 +273,32 @@ blockFrom project global yours = fit items
     split xs = ([x | P x <- xs], [x | G x <- xs], [x | Y x <- xs])
     texts (p, g, y) = (map snd p, map snd g, y)
     fit xs
-      | T.length (renderBlock (texts (split xs))) <= 4000 = split xs
+      | T.length (partText (renderBlock (texts (split xs)))) <= 4000 = split xs
       | otherwise = fit (drop 1 xs)
 
 data Part a = P (a, Text) | G (a, Text) | Y Text
 
--- | The block's text from its three parts (as 'blockFrom' keeps them):
--- empty when there is no line, else the heading, 'lessonsGuard', the
--- numbered list and the Yours lines under @Your notes:@.
-renderLessonsBlock :: ([Text], [Text], [Text]) -> Text
+-- | The block from its three parts (as 'blockFrom' keeps them): empty
+-- when there is no line, else the heading, 'lessonsGuard', the numbered
+-- list and the Yours lines under @Your notes:@, each line ended by a
+-- newline. The heading, the guard, the numbered rows (they passed
+-- 'sanitiseLesson') and the separators are 'static'; the Yours lines are
+-- 'user'.
+renderLessonsBlock :: ([Text], [Text], [Text]) -> PromptPart
 renderLessonsBlock = renderBlock
 
-renderBlock :: ([Text], [Text], [Text]) -> Text
+renderBlock :: ([Text], [Text], [Text]) -> PromptPart
 renderBlock (proj, glob, yours)
-  | null gen && null yours = ""
-  | otherwise = T.unlines (["Lessons from earlier runs on this project", lessonsGuard] <> listPart <> yoursPart)
+  | null gen && null yours = mempty
+  | otherwise = foldMap (<> static "\n") (map static ["Lessons from earlier runs on this project", lessonsGuard] <> listPart <> yoursPart)
   where
     gen = proj <> glob
     listPart
       | null gen = []
-      | otherwise = "" : [T.pack (show i) <> ". " <> g | (i, g) <- zip [1 :: Int ..] gen]
+      | otherwise = static "" : [static (T.pack (show i) <> ". " <> g) | (i, g) <- zip [1 :: Int ..] gen]
     yoursPart
       | null yours = []
-      | otherwise = ["", "Your notes:"] <> yours
+      | otherwise = [static "", static "Your notes:"] <> map user yours
 
 -- Templates --------------------------------------------------------------
 

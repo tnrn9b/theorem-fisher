@@ -74,6 +74,7 @@ import System.FilePath (takeDirectory, takeFileName, (</>))
 
 import Fisher.Prover (Prover (..), ProverKind (..), ServerSpec (..), binaryFix, findIsabelle, findRocqCompiler, prover, proverByName, proverTitle, versionBelow)
 import Fisher.Py (lookupKey)
+import Fisher.Role (PromptPart)
 import Data.Text.Encoding (decodeUtf8)
 import Fisher.Workflow.Assets (removeExistingPath)
 import Fisher.Workflow.Command (WorkflowSpec (..))
@@ -642,7 +643,7 @@ proverStartupPrompt k backend ctx ws skills =
 -- any) last. Returns the file written.
 writeProverStartupContext
   :: Machine -> FilePath -> ProverKind -> Text -> FilePath -> FilePath -> FilePath -> Text -> WorkflowSpec
-  -> FilePath -> FilePath -> FilePath -> FilePath -> Text -> IO FilePath
+  -> FilePath -> FilePath -> FilePath -> FilePath -> PromptPart -> IO FilePath
 writeProverStartupContext m dir k backend projectRoot root cwd instruction ws skillDoc guide mcp fisherExe lessons = do
   stamp <- mStamp m
   let path = dir </> (stamp <> "-" <> T.unpack (wsKind ws) <> ".md")
@@ -688,7 +689,7 @@ writeProverStartupContext m dir k backend projectRoot root cwd instruction ws sk
 
 -- | Codex's instructions file for a prover session, the lessons block last.
 writeProverCodexInstructions
-  :: FilePath -> ProverKind -> FilePath -> FilePath -> FilePath -> FilePath -> FilePath -> WorkflowSpec -> Text -> IO ()
+  :: FilePath -> ProverKind -> FilePath -> FilePath -> FilePath -> FilePath -> FilePath -> WorkflowSpec -> PromptPart -> IO ()
 writeProverCodexInstructions path k ctx projectRoot root cwd skills ws lessons = do
   let t = T.pack
       title = proverTitle k
