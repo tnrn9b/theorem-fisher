@@ -20,6 +20,7 @@ library
       Fisher.Learn.Mistakes
       Fisher.Learn.Policy
       Fisher.Learn.Stats
+      Fisher.Role.Agent
       Fisher.Search.Auto
       Fisher.Search.Bm25
       Fisher.Search.Check
@@ -86,6 +87,7 @@ test-suite fisher-search-test
       Fisher.Learn.MistakesSpec
       Fisher.Learn.PolicySpec
       Fisher.Learn.StatsSpec
+      Fisher.Role.AgentSpec
       Fisher.Search.AutoSpec
       Fisher.Search.Bm25Spec
       Fisher.Search.CheckSpec
