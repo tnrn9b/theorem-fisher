@@ -16,12 +16,14 @@ module Fisher.Search.GraphJobs
   , planJob
   , reviewJob
   , falseJob
+  , sketchProblem
   ) where
 
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
+import qualified Data.Text as T
 
-import Fisher.Role (PromptPart, Role (..), Said)
+import Fisher.Role (PromptPart, Role (..), Said, saidText, static, toPrompt)
 import Fisher.Role.Agent (AgentM, askTwice, excerpt, withChecker)
 import Fisher.Search.Ask
 import Fisher.Search.Check (Verdict)
@@ -56,13 +58,43 @@ planJob :: Text -> Text -> Text -> [Text] -> PromptPart -> [Text] -> PromptPart 
 planJob base name expected usable board notes retrieved =
   askTwice (plannerMessages base name usable board notes retrieved) problemText readPlan
   where
-    readPlan s = case excerpt parsePlan s of
-      Left e -> pure (Left (FormatError e))
+    readPlan s = case excerpt (\t -> (\(b, l) -> (asInReply t b, l)) <$> parsePlan t) s of
+      Left e -> pure (Left (FormatError (static e)))
       Right (bp, lean) -> case parseSketch base name lean >>= \sk -> (,) sk <$> applySketch base name sk of
-        Left e -> pure (Left (FormatError (sketchErrorText e)))
+        Left e -> pure (Left (FormatError (sketchProblem name s e)))
         Right (sk, applied) -> do
           r <- withChecker (\ck -> checkSketchVerdict (ckLean ck) (ckPolicy ck) (ckRoot ck) (ckRel ck) applied name expected (map fst (skLemmas sk)))
           pure (either (Left . LeanErrors) (\(v, tys) -> Right (Plan bp lean sk base applied v tys)) r)
+
+-- | A block as the reply has it: 'fencedBlocks' drops each line's
+-- carriage return, so for a reply with CRLF line ends the block is put
+-- back with them, as an excerpt of the reply must be.
+asInReply :: Text -> Text -> Text
+asInReply reply b
+  | b `T.isInfixOf` reply = b
+  | otherwise = T.replace "\n" "\r\n" b
+
+-- | A sketch error for the planner's repair round: Fisher's sentence, and
+-- in it the planner's name or line as what the planner said (an 'excerpt'
+-- of its reply @s@). Its text is 'sketchErrorText'. A lemma name that
+-- clashes is qualified with the node's namespace (@name@'s), which is
+-- Fisher's.
+sketchProblem :: Text -> Said 'Planner -> SketchError -> PromptPart
+sketchProblem name s = \case
+  LemmaNotOpen n -> static "the lemma " <> said n <> static " has a proof; each new lemma must end in `:= by sorry` or `:= sorry`"
+  DuplicateName n -> static "the name " <> said n <> static " is used for two lemmas"
+  NameClash n -> static "the name " <> qualified n <> static " is already in the file"
+  DeniedLine l -> static "a line is not allowed (axiom, #exit or an option that turns checks off): " <> said l
+  ExtraText l -> static "text outside declarations: " <> said l
+  e -> static (sketchErrorText e)
+  where
+    said x = case excerpt (\_ -> Right (x, ()) :: Either () (Text, ())) s of
+      Right (p, ()) -> toPrompt p
+      Left () -> mempty
+    pre = nsPrefix name
+    qualified n
+      | not (T.null pre), not (n `T.isInfixOf` saidText s), pre `T.isPrefixOf` n = static pre <> said (T.drop (T.length pre) n)
+      | otherwise = said n
 
 -- | The verifier's review of a split: the node's statement, the plan, the
 -- whiteboard. The blueprint goes in as the planner's reply ('toPrompt'),

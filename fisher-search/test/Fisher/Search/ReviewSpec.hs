@@ -5,7 +5,7 @@ module Fisher.Search.ReviewSpec (spec) where
 import Data.Text (Text)
 import Test.Hspec
 
-import Fisher.Role (Role (..), Said, partText, static)
+import Fisher.Role (Role (..), Said, partText, saidText, static, toPrompt)
 import Fisher.Role.Internal (said')
 import Fisher.Search.Golden
 import Fisher.Search.Review
@@ -31,6 +31,9 @@ spec = do
       parseReview (verifier "```text\nnot it\n```\n```javascript\n{\"accept\": false, \"reason\": \"r\"}\n```") `shouldBe` Right (SplitVerdict False (verifier "r") [])
     it "JSON inside prose" $
       parseReview (verifier "I think {\"accept\": true, \"reason\": \"a {nested} brace\"} is right.") `shouldBe` Right (SplitVerdict True (verifier "a {nested} brace") [])
+    it "a reason with an escaped quote is kept as the reply spells it (an excerpt of the reply)" $
+      fmap (saidText . svReason) (parseReview (verifier "{\"accept\": false, \"reason\": \"lemma \\\"a\\\" is false\"}"))
+        `shouldBe` Right "lemma \\\"a\\\" is false"
     it "missing accept" $ parseReview (verifier "{\"reason\": \"x\"}") `shouldBe` Left bad
     it "invalid JSON" $ parseReview (verifier "accept: yes") `shouldBe` Left bad
     it "wrong types" $ parseReview (verifier "{\"accept\": \"yes\"}") `shouldBe` Left bad
@@ -43,11 +46,11 @@ spec = do
     it "invalid JSON" $ parseFalse (verifier "nope") `shouldBe` Left bad
   describe "retryMessages" $ do
     it "adds the previous reply and the parse error" $
-      texts (retryMessages [("system", static "s"), ("user", static "u")] (Just (verifier "prev", "the verdict is not the JSON asked for")))
+      texts (retryMessages [("system", static "s"), ("user", static "u")] (Just (toPrompt (verifier "prev"), "the verdict is not the JSON asked for")))
         `shouldBe` [ ("system", "s"), ("user", "u"), ("assistant", "prev")
                    , ("user", "Your reply could not be used: the verdict is not the JSON asked for\nReply with the JSON object only.") ]
     it "leaves the first call alone" $
-      texts (retryMessages @'Verifier [("user", static "u")] Nothing) `shouldBe` [("user", "u")]
+      texts (retryMessages [("user", static "u")] Nothing) `shouldBe` [("user", "u")]
   where
     bad = "the verdict is not the JSON asked for"
     render ms = mconcat [ "[" <> r <> "]\n" <> partText c <> "\n" | (r, c) <- ms ]

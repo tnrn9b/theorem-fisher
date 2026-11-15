@@ -4,6 +4,7 @@ module Fisher.Role.AgentSpec (spec) where
 
 import Control.Concurrent (forkIO, threadDelay)
 import Control.Concurrent.MVar (newEmptyMVar, newMVar, putMVar, takeMVar, tryReadMVar)
+import Control.Exception (evaluate)
 import Data.Aeson (Value (..))
 import Data.IORef (IORef, atomicModifyIORef', modifyIORef', newIORef, readIORef)
 import Data.Maybe (isNothing)
@@ -70,7 +71,7 @@ spec = describe "the role monad" $ do
     (spend, ev, spent, _) <- recorders
     let msgsFor = \case
           Nothing -> prompt "go"
-          Just (s, e) -> prompt "go" ++ [("assistant", toPrompt s), ("user", static e)]
+          Just (p, e) -> prompt "go" ++ [("assistant", p), ("user", static e)]
         readReply s = let t = saidText s in pure (if t == "good" then Right t else Left ("refused: " <> t))
     r <- runRole (roleCtx @'Verifier ask' Nothing spend ev) (askTwice msgsFor id readReply)
     case r of
@@ -149,7 +150,7 @@ spec = describe "the role monad" $ do
     held `shouldBe` True
     tryReadMVar lock >>= (`shouldSatisfy` (not . isNothing))
 
-  it "excerpt and reshape keep the role of what was said" $ do
+  it "excerpt and oneLineOf keep the role of what was said" $ do
     (ask', _) <- scripted [Right "```blueprint\nsplit on n\n```"]
     (spend, ev, _, _) <- recorders
     r <- runRole (roleCtx @'Planner ask' Nothing spend ev) (ask (prompt "go"))
@@ -157,8 +158,11 @@ spec = describe "the role monad" $ do
       Right (s, _) -> do
         let piece = excerpt (\t -> if "split" `T.isInfixOf` t then Right (T.strip (T.drop 13 (T.dropEnd 4 t)), T.length t) else Left ("no split" :: Text)) s
         fmap (\(p, n) -> (partText (toPrompt p), n)) piece `shouldBe` Right ("split on n", 27)
-        partText (toPrompt (reshape T.toUpper s)) `shouldBe` "```BLUEPRINT\nSPLIT ON N\n```"
         fmap fst (excerpt (const (Left ("refused" :: Text) :: Either Text (Text, ()))) s) `shouldBe` Left "refused"
+        -- a piece that is not in the reply is a programming error
+        evaluate (excerpt (const (Right ("split on m", ()) :: Either Text (Text, ()))) s) `shouldThrow` anyErrorCall
+        partText (toPrompt (oneLineOf 300 s)) `shouldBe` "```blueprint split on n ```"
+        partText (toPrompt (oneLineOf 15 s)) `shouldBe` "```blueprint sp"
       Left _ -> expectationFailure "expected a reply"
 
   it "a judge context has no checker" $ do

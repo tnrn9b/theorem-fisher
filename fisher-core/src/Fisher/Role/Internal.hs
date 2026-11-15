@@ -1,10 +1,10 @@
 {-# LANGUAGE DataKinds #-}
 
 -- Only Fisher.Role, Fisher.Role.Agent and Fisher.Learn.Judge may import said'.
--- Only Fisher.Role.Part and Fisher.Role (for toPrompt) may import the PromptPart constructor.
+-- Only Fisher.Role.Part, Fisher.Role (for toPrompt) and Fisher.Role.Agent (askTwice's previous reply) may import the PromptPart constructor.
 
 -- | The constructor of 'Said'. Only "Fisher.Role.Agent" (its @ask@, and
--- its @excerpt@ and @reshape@ of a reply), "Fisher.Learn.Judge" (its
+-- its @excerpt@ and @oneLineOf@ of a reply), "Fisher.Learn.Judge" (its
 -- @parseVerdict@) and "Fisher.Role" (its @worker@) import 'said'';
 -- nothing re-exports 'Said' with its constructor or 'said'', so elsewhere
 -- a @Said r@ can only be received, never made.
@@ -16,6 +16,9 @@
 -- (which "Fisher.Lessons.File" imports, and which "Fisher.Role" cannot be,
 -- since it imports "Fisher.Lessons.File") and "Fisher.Role" (its
 -- 'Fisher.Role.toPrompt' instances) can both make one; neither exports it.
+-- "Fisher.Role.Agent" makes one too: @askTwice@ puts a role's refused
+-- reply into the same role's second call, and exports no way to do it
+-- elsewhere.
 module Fisher.Role.Internal
   ( Role (..)
   , Said (..)

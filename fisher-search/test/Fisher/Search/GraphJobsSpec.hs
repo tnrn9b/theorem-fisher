@@ -10,6 +10,7 @@ import Test.Hspec
 import Fisher.Role (KnownRole, Role (..), partText, saidText, static, toPrompt)
 import Fisher.Role.Agent (RoleCtx, ask, roleCtx, runRole)
 import Fisher.Search.GraphJobs
+import Fisher.Search.Sketch (SketchError (..), sketchErrorText)
 import Fisher.Search.Split (Problem (..), plannerMessages)
 
 -- | An Ask that replies with the given texts in turn, 0.25 dollars each,
@@ -57,7 +58,7 @@ spec = describe "the graph jobs" $ do
             drop 2 m2 `shouldBe`
               [ ("assistant", partText (toPrompt s))
               , ("user", "Your reply could not be used: " <> problem <> "\nReply again with both blocks.") ]
-            m2 `shouldBe` map (fmap partText) (plannerMessages base "main" [] board ["stuck"] mempty (Just (s, FormatError problem)))
+            m2 `shouldBe` map (fmap partText) (plannerMessages base "main" [] board ["stuck"] mempty (Just (toPrompt s, FormatError (static problem))))
             T.concat (map snd m2) `shouldNotSatisfy` T.isInfixOf "lesson"
           _ -> expectationFailure "expected two calls"
 
@@ -80,3 +81,14 @@ spec = describe "the graph jobs" $ do
     case cs of
       [_, (_, m2)] -> lookup "assistant" m2 `shouldBe` Just "no json"
       _ -> expectationFailure "expected two calls"
+
+  it "a sketch error's text is the sentence's, with the planner's names from its reply" $ do
+    let reply = "```lean\nlemma aux : A := by simp\nlemma dup : B := by sorry\naxiom cheat : P\nstray words\n```"
+    (ask', _) <- scripted [reply]
+    said <- runRole (ctxOf @'Planner ask') (ask [("user", static "go")])
+    case said of
+      Left _ -> expectationFailure "expected a reply"
+      Right (s, _) -> do
+        let errs = [ NoNodeDecl, NodeStatementChanged, LemmaNotOpen "aux", DuplicateName "dup", NameClash "aux"
+                   , NameClash "Foo.aux", DeniedLine "axiom cheat : P", ExtraText "stray words" ]
+        [partText (sketchProblem "Foo.main" s e) | e <- errs] `shouldBe` map sketchErrorText errs

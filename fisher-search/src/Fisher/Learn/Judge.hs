@@ -12,7 +12,6 @@
 module Fisher.Learn.Judge
   ( Verdict (..)
   , judgeMessages
-  , judgeRetryMessages
   , parseVerdict
   , judgeAttempt
   , lessonKey
@@ -41,7 +40,7 @@ import Fisher.Role (Prompt, PromptPart, Promptable (..), Role (..), Said, saidTe
 import Fisher.Role.Agent (AgentM, askTwice)
 import Fisher.Role.Internal (said')
 import Fisher.Search.Ask (Asked)
-import Fisher.Search.Review (jsonObject, textOr)
+import Fisher.Search.Review (jsonObject, retryMessages, textOr)
 
 -- | The judge's reply: the mistake in one line, the lesson (Nothing when
 -- the judge was not sure enough), its confidence from 0 to 1, and what to
@@ -81,17 +80,6 @@ judgeUser av =
     , static "The last events of the attempt:\n" <> toPrompt (worker (T.unlines (transcript (avEvents av))))
     , static "Reply with the JSON object only."
     ]
-
--- | The messages of the second call, when the first reply could not be
--- read: the first call's, the user's turn followed by why. The judge's own
--- reply is not in them: a judge's text reaches a prompt only as a lesson
--- candidate, so it does not go back as an assistant turn the way the
--- planner's and the verifier's do.
-judgeRetryMessages :: AttemptView -> Text -> Prompt
-judgeRetryMessages av why =
-  [ ("system", static judgeSystem)
-  , ("user", judgeUser av <> static ("\n\nYour previous reply could not be used: " <> why <> "\nReply with the JSON object only."))
-  ]
 
 -- | The last 40 message and tool events as lines, in seq order. A tool
 -- call is one line, @tool NAME(args) -> result@, when its start and end are
@@ -157,10 +145,10 @@ parseVerdict s = case jsonObject (saidText s) of
     a <|> b = maybe b Just a
     cut = T.take 300 . T.unwords . T.words
 
--- | One judge call (a second one when the reply cannot be read, see
--- 'judgeRetryMessages').
+-- | One judge call (a second one when the reply cannot be read, with the
+-- judge's own reply and why, as 'askTwice' hands them back).
 judgeAttempt :: AttemptView -> AgentM 'Judge (Asked Verdict)
-judgeAttempt av = askTwice (maybe (judgeMessages av) (judgeRetryMessages av . snd)) id (pure . parseVerdict)
+judgeAttempt av = askTwice (retryMessages (judgeMessages av)) id (pure . parseVerdict)
 
 -- | A lesson's dedup key: the first Lean identifier it mentions,
 -- normalised, else the whole text normalised. An identifier is a dotted name

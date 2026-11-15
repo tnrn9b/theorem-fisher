@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+
 module Fisher.Search.GraphRunSpec (spec) where
 
 import qualified Data.Aeson as A
@@ -15,7 +17,8 @@ import System.FilePath ((</>))
 import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
 
-import Fisher.Role (partText, static, tool)
+import Fisher.Role (Said, partText, static, tool)
+import Fisher.Role.Internal (said')
 import Fisher.Search.Auto (AutoConfig (..), defaultAutoConfig)
 import Fisher.Search.Check (AxiomPolicy (..), LeanRun (..), standardAxioms)
 import qualified Fisher.Search.Check as C
@@ -91,6 +94,16 @@ failureNoteSpec = describe "failureNote" $ do
   it "whitespace at the prefix's end and the rest's start becomes one space" $ do
     partText (failureNote "FALSE: " static "  \n claim  with\truns \n") `shouldBe` "FALSE: claim with runs"
     partText (failureNote "  lead " static "x") `shouldBe` "lead x"
+  it "a note quoting the verifier keeps the bytes of the whole note on one line" $ do
+    let oneLine = T.take 300 . T.unwords . T.words
+        note claim why = [Piece static "FALSE: ", Piece static claim, Piece static " (not confirmed: ", Quote (said' why :: Said 'Verifier), Piece static ")"]
+        whole claim why = oneLine ("FALSE: " <> claim <> " (not confirmed: " <> why <> ")")
+        cases =
+          [ ("n = 0", "n = 1 works"), ("n = 0", "  spaced \n  out  "), ("n = 0", ""), ("n = 0", "   ")
+          , ("n = 0", T.replicate 400 "w"), (T.replicate 270 "c", "a b c d e f g h"), (T.replicate 280 "c", "ab cd")
+          , ("claim  ", "  why") ]
+    [partText (notePieces (note cl why)) | (cl, why) <- cases] `shouldBe` [whole cl why | (cl, why) <- cases]
+    partText (notePieces [Piece static "split rejected: ", Quote (said' "  too\thard \n" :: Said 'Verifier)]) `shouldBe` "split rejected: too hard"
 
 runGraphSpec :: Spec
 runGraphSpec = describe "runGraph" $ do

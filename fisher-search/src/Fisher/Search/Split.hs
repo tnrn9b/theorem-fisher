@@ -1,5 +1,3 @@
-{-# LANGUAGE DataKinds #-}
-
 -- | The planner: asks for a split of a goal into simpler lemmas, and reads the reply.
 module Fisher.Search.Split
   ( Message
@@ -14,17 +12,19 @@ import Data.List (intersperse)
 import Data.Text (Text)
 import qualified Data.Text as T
 
-import Fisher.Role (Prompt, PromptPart, Role (..), Said, partText, parts, source, static, toPrompt, tool, worker)
+import Fisher.Role (Prompt, PromptPart, partText, parts, source, static, toPrompt, tool, worker)
 
 -- | (role, content); the roles are "system", "user" and "assistant".
 type Message = (Text, Text)
 
--- | Why a planner's reply was not used: its form, or Lean's check of its sketch.
-data Problem = FormatError Text | LeanErrors Text deriving (Eq, Show)
+-- | Why a planner's reply was not used: its form (Fisher's sentence, with
+-- any name or line of the planner's in it as the planner's words), or
+-- Lean's check of its sketch.
+data Problem = FormatError PromptPart | LeanErrors Text deriving (Eq, Show)
 
 problemText :: Problem -> Text
 problemText = \case
-  FormatError t -> t
+  FormatError t -> partText t
   LeanErrors t -> t
 
 plannerSystem :: Text
@@ -41,16 +41,16 @@ plannerSystem = T.unlines
 -- | Base file, node name, the lemmas of the current plan the proof may use,
 -- whiteboard, notes of the node's failed attempts, the node's retrieval
 -- text (its facts and library offer; empty for none), and for a repair
--- round the previous reply (the planner's own, through 'toPrompt') with
--- what was wrong with it.
-plannerMessages :: Text -> Text -> [Text] -> PromptPart -> [Text] -> PromptPart -> Maybe (Said 'Planner, Problem) -> Prompt
+-- round the previous reply (the planner's own, as the role monad's
+-- @askTwice@ hands it back) with what was wrong with it.
+plannerMessages :: Text -> Text -> [Text] -> PromptPart -> [Text] -> PromptPart -> Maybe (PromptPart, Problem) -> Prompt
 plannerMessages base name usable board notes retrieved prev =
   [ ("system", static plannerSystem)
   , ("user", paragraphs [goal, retrieved, failed])
   ]
     <> case prev of
       Nothing -> []
-      Just (reply, problem) -> [("assistant", toPrompt reply), ("user", repair problem)]
+      Just (reply, problem) -> [("assistant", reply), ("user", repair problem)]
   where
     goal =
       static "The goal is the declaration `" <> source name <> static "`.\n\nThe file so far:\n```lean\n"
@@ -66,7 +66,7 @@ plannerMessages base name usable board notes retrieved prev =
       | null notes = mempty
       | otherwise = static "Direct attempts at this goal failed:\n" <> mconcat [static "- " <> toPrompt (worker (oneLine n)) <> static "\n" | n <- notes]
     repair = \case
-      FormatError why -> static ("Your reply could not be used: " <> why <> "\nReply again with both blocks.")
+      FormatError why -> static "Your reply could not be used: " <> why <> static "\nReply again with both blocks."
       LeanErrors e -> static "Lean reported:\n```\n" <> tool (T.stripEnd e) <> static "\n```\nReply again with both blocks, fixing these errors."
 
 -- | The non-empty parts, each without trailing whitespace, a blank line

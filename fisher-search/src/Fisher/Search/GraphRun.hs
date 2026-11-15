@@ -43,6 +43,8 @@ module Fisher.Search.GraphRun
   , plannerModel
   , runGraph
   , failureNote
+  , Piece (..)
+  , notePieces
   ) where
 
 import Control.Applicative ((<|>))
@@ -63,7 +65,7 @@ import qualified Data.Text as T
 import System.Timeout (timeout)
 
 import Fisher.Role (PromptPart, Promptable, Said, partText, saidText, source, static, toPrompt, tool, worker)
-import Fisher.Role.Agent (RoleCtx, reshape, roleCtx, runRole)
+import Fisher.Role.Agent (RoleCtx, oneLineOf, roleCtx, runRole)
 import Fisher.Search.Auto (AutoConfig (..), AutoFail (..), autoGoal)
 import Fisher.Search.Check (Verdict (..))
 import Fisher.Search.Child (ChildStats (..))
@@ -421,17 +423,26 @@ failureNote prefix from rest = notePieces [Piece static prefix, Piece from rest]
 -- | A note of pieces, each by its own constructor: the whole note is put on
 -- one line and then cut, so its bytes are those of the pieces' texts
 -- joined, then put on one line and cut ('oneLinePieces'), and each piece
--- keeps the characters of that line that came from it. A role's piece is
--- reshaped from what the role said ('reshape'), so it still goes in by
--- 'toPrompt'.
+-- keeps the characters of that line that came from it ('quoteShare' for
+-- a role's piece).
 notePieces :: [Piece] -> PromptPart
-notePieces ps = mconcat (zipWith part [0 ..] ps)
+notePieces ps = mconcat (zipWith part ps (oneLinePieces (map pieceText ps)))
   where
-    texts = map pieceText ps
-    part :: Int -> Piece -> PromptPart
-    part j = \case
-      Piece from _ -> from (oneLinePieces texts !! j)
-      Quote s -> toPrompt (reshape (\t -> oneLinePieces (take j texts <> [t] <> drop (j + 1) texts) !! j) s)
+    part (Piece from _) share = from share
+    part (Quote s) share = quoteShare s share
+
+-- | A role's share of a note's line, as a part: the space that joins it to
+-- the piece before and the one that joins it to the piece after are
+-- Fisher's ('static'); between them is what the role said, put on one
+-- line and cut ('oneLineOf'), so the role's words come only from its
+-- reply. The share is a prefix of the reply's words joined by single
+-- spaces, with at most a space before and after it.
+quoteShare :: Promptable r => Said r -> Text -> PromptPart
+quoteShare s share = static lead <> toPrompt (oneLineOf m s) <> static trail
+  where
+    core = T.unwords (T.words (saidText s))
+    (lead, rest) = if " " `T.isPrefixOf` share then (" ", T.drop 1 share) else ("", share)
+    (m, trail) = if rest `T.isPrefixOf` core then (T.length rest, "") else (T.length rest - 1, " ")
 
 -- | The texts joined and put on one line, given back piece by piece: each
 -- text's share of the line. A run of whitespace becomes one space, which

@@ -2,8 +2,8 @@
 
 -- | The role monad: a model-call job for role @r@ runs in @'AgentM' r@,
 -- whose only effects are the operations here ('ask', 'askTwice', 'check',
--- 'withChecker', 'event'). Its constructor is not exported and it has no @MonadIO@
--- instance, so a job that needs another effect has to add it to
+-- 'withChecker', 'event'). Its constructor is not exported and it has no
+-- @MonadIO@ instance, so a job that needs another effect has to add it to
 -- 'RoleCtx', where a reviewer sees it; 'runRole' is the only way to run
 -- one.
 module Fisher.Role.Agent
@@ -15,7 +15,7 @@ module Fisher.Role.Agent
   , withChecker
   , event
   , excerpt
-  , reshape
+  , oneLineOf
   , runRole
   , roleCtx
   , CanCheck
@@ -28,7 +28,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 
 import Fisher.Role (KnownRole (..), Prompt, Role (..), Said, partText, saidText)
-import Fisher.Role.Internal (said')
+import Fisher.Role.Internal (PromptPart (..), said')
 import Fisher.Search.Ask (Ask, AskError (..), Asked (..), Checker (..), locked)
 import Fisher.Search.Check (Probe, probe)
 import Fisher.Search.Split (Message)
@@ -98,9 +98,11 @@ ask prompt = withCtx $ \c -> do
 -- one more. An asynchronous exception in a call or in the reader is
 -- rethrown. The reader gets what @r@ said and runs in the role monad, so it
 -- does no IO but the role's operations. A refused reply goes to the second
--- call's prompt with what was wrong with it; the last problem, as text, is
--- the job's error.
-askTwice :: (Maybe (Said r, e) -> Prompt) -> (e -> Text) -> (Said r -> AgentM r (Either e a)) -> AgentM r (Asked a)
+-- call's prompt, with what was wrong with it, as a part made here: a role
+-- sees its own reply again in its own call, whatever the role (the judge
+-- too, which has no 'Fisher.Role.toPrompt'), and the builder never holds
+-- the 'Said'. The last problem, as text, is the job's error.
+askTwice :: (Maybe (PromptPart, e) -> Prompt) -> (e -> Text) -> (Said r -> AgentM r (Either e a)) -> AgentM r (Asked a)
 askTwice promptFor errText readReply = withCtx $ \c -> go c (0 :: Int) Nothing 0
   where
     go c n prev cost = do
@@ -114,7 +116,7 @@ askTwice promptFor errText readReply = withCtx $ \c -> go c (0 :: Int) Nothing 0
           case x of
             Left e -> broke (cost + d) e
             Right (Right a) -> pure (Asked (cost + d) (Right a))
-            Right (Left e) -> again c n (cost + d) (errText e) (Just (s, e))
+            Right (Left e) -> again c n (cost + d) (errText e) (Just (PromptPart (saidText s), e))
     again c n cost e next
       | n == 0 = go c 1 next cost
       | otherwise = pure (Asked cost (Left e))
@@ -143,17 +145,22 @@ withChecker act = withCtx $ \c -> case rcCheck c of
   Just ck -> locked ck (act ck)
 
 -- | A piece a reader takes out of what @r@ said (the planner's blueprint
--- block, the verifier's reason), with the rest of what it read: the piece
--- is still @r@'s words. The reader is pure and sees only the reply, so the
--- piece comes from it; a reader that refuses the reply gives its problem.
+-- block or a name in its sketch, the verifier's reason), with the rest of
+-- what it read: the piece is still @r@'s words, and it must occur in the
+-- reply as it is. A piece that does not is a programming error (an
+-- exception, which 'askTwice' reports as a broken call); a reader that
+-- refuses the reply gives its problem.
 excerpt :: (Text -> Either e (Text, a)) -> Said r -> Either e (Said r, a)
-excerpt readText s = (\(t, a) -> (said' t, a)) <$> readText (saidText s)
+excerpt readText s = case readText (saidText s) of
+  Left e -> Left e
+  Right (t, a)
+    | t `T.isInfixOf` saidText s -> Right (said' t, a)
+    | otherwise -> error "excerpt: the piece is not in the reply"
 
--- | What @r@ said, reshaped (put on one line and cut, as a failure note
--- puts it): still @r@'s words. Like 'excerpt', the function sees only the
--- reply.
-reshape :: (Text -> Text) -> Said r -> Said r
-reshape f = said' . f . saidText
+-- | What @r@ said put on one line (its words joined by single spaces) and
+-- cut at @n@ characters, as a failure note puts it: still @r@'s words.
+oneLineOf :: Int -> Said r -> Said r
+oneLineOf n = said' . T.take n . T.unwords . T.words . saidText
 
 -- | A run-log event, tagged with this role.
 event :: Text -> Value -> AgentM r ()

@@ -131,15 +131,7 @@ spec = do
         _ -> expectationFailure "expected a verdict"
       calls <- readIORef seen
       map fst calls `shouldBe` [Judge, Judge]
-      -- the judge's own reply does not go back into its prompt (it has no
-      -- 'toPrompt'): the retry is the first call's messages with why
-      map (map fst . snd) calls `shouldBe` [["system", "user"], ["system", "user"]]
-      case map snd calls of
-        [first, second] -> do
-          lookup "system" second `shouldBe` lookup "system" first
-          lookup "user" second `shouldBe` fmap (<> "\n\nYour previous reply could not be used: the reply is not the JSON object asked for\nReply with the JSON object only.") (lookup "user" first)
-          T.concat (map snd second) `shouldNotSatisfy` T.isInfixOf "nope"
-        _ -> expectationFailure "expected two calls"
+      map (map fst . snd) calls `shouldBe` [["system", "user"], ["system", "user", "assistant", "user"]]
     it "gives NoCredit when the call has no credit" $ do
       r <- judged (\_ _ -> pure (Left AskNoCredit)) (view [msg 1 "hello"])
       case r of
