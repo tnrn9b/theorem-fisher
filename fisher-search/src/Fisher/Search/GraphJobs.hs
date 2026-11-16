@@ -52,6 +52,7 @@ data Plan = Plan
   , plTypes :: Map.Map Text Text
   -- ^ each lemma's printed type, by its name in the sketch
   }
+  deriving (Eq)
 
 -- | The planner's split of a node: base, node name, its printed type, the
 -- lemmas of the current plan it may use, whiteboard, notes of its failed

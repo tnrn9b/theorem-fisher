@@ -242,7 +242,7 @@ import Fisher.Search.Shape (renderShape, shapeOf)
 import Fisher.Search.Stream (StreamEvent (..), streamEvents)
 import Fisher.Search.Controller (StallRule (..), Stop (..), StopReason (..), defaultStallRule, stopReasonText)
 import Fisher.Search.Graph (Graph (..), Node (..), NodeId)
-import Fisher.Search.GraphRun (AskError (..), GraphConfig (..), GraphEnv (..), GraphEvent (..), GraphReport (..), plannerModel, runGraph)
+import Fisher.Search.GraphRun (AskError (..), GraphConfig (..), GraphEnv (..), GraphEvent (..), GraphReport (..), Job (..), Kind (..), plannerModel, runGraph)
 import Fisher.Search.Headless
 import Fisher.Search.Lean (Decl (..), declarations, openGoals)
 import Fisher.Search.Orchestrate (Orchestrator (..), realOrchestrator)
@@ -1291,8 +1291,15 @@ graphMain ra casc file root rel runDir eventsH env0 offAtStart startEvents autoE
       saveG g boards = do
         BL8.writeFile (runDir </> "graph.json") (encodePretty (graphJson g boards))
         mapM_ (\(r, t) -> BS.writeFile (runDir </> whiteboardFile g r) (TE.encodeUtf8 t)) boards
+      -- the graph's jobs on an orchestrator with the attempts' clock, log
+      -- and ledger price (a worker's; the other jobs have none)
+      orch0 = seOrch env0
+      priceJob job = case jKind job of
+        KWorker spec _ -> oPrice orch0 spec
+        _ -> pure Nothing
       genv = GraphEnv
         { geSearch = env0
+        , geOrch = \run -> realOrchestrator run (oNow orch0) (oLog orch0) priceJob
         , geAsk = \_ msgs -> askResult <$> model Nothing msgs
         , geLogG = logG
         , geSave = saveG }

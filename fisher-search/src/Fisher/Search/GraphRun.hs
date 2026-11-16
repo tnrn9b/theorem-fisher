@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 -- | The lemma-graph search: today's attempts on a file's open goals, and for
 -- a goal its attempt cannot close, a split into lemmas from the planner,
@@ -40,6 +41,14 @@ module Fisher.Search.GraphRun
   , GraphEvent (..)
   , GraphEnv (..)
   , GraphReport (..)
+  , Job (..)
+  , jobKey
+  , Kind (..)
+  , PlanInputs (..)
+  , ReviewInputs (..)
+  , FalseInputs (..)
+  , RoleCtxs
+  , runGraphJob
   , plannerModel
   , runGraph
   , failureNote
@@ -48,9 +57,8 @@ module Fisher.Search.GraphRun
   ) where
 
 import Control.Applicative ((<|>))
-import Control.Concurrent.Async (Async, async, cancel, waitAnyCatch)
 import Control.Concurrent.MVar (newMVar)
-import Control.Exception (SomeException, displayException, toException)
+import Control.Exception (SomeAsyncException, SomeException, displayException, fromException, throwIO, toException, try)
 import Control.Monad (forM, forM_, join, unless, void, when)
 import Data.Char (isSpace)
 import Data.IORef
@@ -62,7 +70,6 @@ import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe, isJust)
 import Data.Text (Text)
 import qualified Data.Text as T
-import System.Timeout (timeout)
 
 import Fisher.Role (PromptPart, Promptable, Said, oneLinePart, partText, saidText, source, static, toPrompt, tool, worker)
 import Fisher.Role.Agent (RoleCtx, oneLineOf, roleCtx, runRole)
@@ -76,13 +83,13 @@ import Fisher.Search.Graph
 import Fisher.Search.GraphJobs
 import Fisher.Search.Headless (nativeBackend)
 import Fisher.Search.Lean
-import Fisher.Search.Orchestrate (Orchestrator (..))
+import Fisher.Search.Orchestrate (AttemptOrchestrator, Orchestrator (..), Running)
 import qualified Fisher.Search.Repair as R
 import Fisher.Search.Retrieval
 import Fisher.Search.Review (SplitVerdict (..))
 import Fisher.Search.Scheduler
   ( AttemptRecord (..), plainRecord, AttemptResult (..), AttemptSpec (..), AutoEnv (..), AutoTrack (..), Event (..), SearchEnv (..)
-  , autoStep, keptPartial, noAutoTrack, partialStart, priceCancelled, runToEnd, stallNote, trackRan )
+  , autoStep, keptPartial, noAutoTrack, partialStart, runToEnd, stallNote, trackRan )
 import Fisher.Search.Sketch
 import Fisher.Search.Split (Message)
 import Fisher.Search.Verify
@@ -164,6 +171,10 @@ data GraphEvent
 data GraphEnv = GraphEnv
   { geSearch :: SearchEnv
   -- ^ its orchestrator's log is not used
+  , geOrch :: (Job -> IO Out) -> IO (Orchestrator Job Out)
+  -- ^ the graph's orchestrator (its jobs, clock, automation cap and a
+  -- cancelled worker's price), built once by 'runGraph' from the run
+  -- function it is given ('runGraphJob' over the run's role contexts)
   , geAsk :: Role -> [Message] -> IO (Either AskError (Text, Double))
   , geLogG :: GraphEvent -> IO ()
   , geSave :: Graph -> [(NodeId, Text)] -> IO ()
@@ -199,14 +210,57 @@ data GraphReport = GraphReport
 workerBackend :: Text
 workerBackend = nativeBackend
 
+-- | What a job is, with what it needs to run ('runGraphJob').
 data Kind
   = KWorker AttemptSpec Double
   -- ^ the attempt and when it started
-  | KPlan SplitId
-  | KReview SplitId Plan
-  | KFalse Text
+  | KPlan SplitId PlanInputs
+  | KReview SplitId Plan ReviewInputs
+  | KFalse Text FalseInputs
+  -- ^ the worker's claim
+  deriving (Eq)
 
-data Job = Job {jNode :: NodeId, jKind :: Kind}
+-- | The planner's arguments ('planJob').
+data PlanInputs = PlanInputs
+  { piBase :: Text
+  , piName :: Text
+  , piExpected :: Text
+  , piUsable :: [Text]
+  , piBoard :: PromptPart
+  , piNotes :: [Text]
+  , piRetrieved :: PromptPart
+  }
+  deriving (Eq)
+
+-- | The reviewer's arguments ('reviewJob').
+data ReviewInputs = ReviewInputs
+  { riStatement :: Text
+  , riPlan :: Plan
+  , riBoard :: PromptPart
+  }
+  deriving (Eq)
+
+-- | The falsifier's arguments ('falseJob').
+data FalseInputs = FalseInputs
+  { fiStatement :: Text
+  , fiClaim :: Text
+  }
+  deriving (Eq)
+
+-- | A job of the graph: its number (unique in the run), its node, the
+-- node's name and what it is.
+data Job = Job {jId :: Int, jNode :: NodeId, jName :: Text, jKind :: Kind}
+  deriving (Eq)
+
+-- | A job's key in a script: the node's name and the job's kind.
+jobKey :: Job -> (Text, Text)
+jobKey j = (jName j, kindName (jKind j))
+  where
+    kindName = \case
+      KWorker {} -> "worker"
+      KPlan {} -> "plan"
+      KReview {} -> "review"
+      KFalse {} -> "false"
 
 data Out
   = OutWorker AttemptResult
@@ -220,7 +274,7 @@ data St = St
   , stTypes :: Map.Map Text Text
   -- ^ each node's printed type, by name: what its proof must have
   , stWaiting :: IntSet
-  , stRunning :: [(Async Out, Job)]
+  , stRunning :: [(Running, Job)]
   , stFailures :: IM.IntMap [PromptPart]
   -- ^ whiteboard failure lines per root, oldest first
   , stNotes :: IM.IntMap [Text]
@@ -230,6 +284,9 @@ data St = St
   -- ^ something could not start for the dollar cap (the stop reason only
   -- when some root is still open at the end)
   , stNext :: Int
+  -- ^ the next attempt's number
+  , stNextJob :: Int
+  -- ^ the next job's number
   , stRecords :: [AttemptRecord]
   , stDisproveTried :: IntSet
   -- ^ nodes Disprove has run on
@@ -263,7 +320,8 @@ data Ctx = Ctx
   -- ^ the file the run started from
   , cHarvest :: IO (Int, Int)
   -- ^ the library's harvest, run once ('harvestRun')
-  , cRoles :: RoleCtxs
+  , cOrch :: Orchestrator Job Out
+  -- ^ the graph's orchestrator
   }
 
 -- | The role contexts of the model-call jobs, built once from 'geAsk' and
@@ -283,6 +341,16 @@ roleCtxs env ck = RoleCtxs (roleCtx (geAsk env) (Just ck) noSpend noEvent) (role
     noSpend _ _ = pure ()
     noEvent _ _ _ = pure ()
 
+-- | Run one job of the graph: a worker's attempt to its end on the
+-- attempts' orchestrator, or a role's call over the job's inputs.
+runGraphJob :: RoleCtxs -> AttemptOrchestrator -> Job -> IO Out
+runGraphJob rc orch job = case jKind job of
+  KWorker spec _ -> OutWorker <$> runToEnd orch spec
+  KPlan _ i -> OutPlan <$> runRole (rcPlanner rc)
+    (planJob (piBase i) (piName i) (piExpected i) (piUsable i) (piBoard i) (piNotes i) (piRetrieved i))
+  KReview _ _ i -> OutReview <$> runRole (rcVerifier rc) (reviewJob (riStatement i) (riPlan i) (riBoard i))
+  KFalse _ i -> OutFalse <$> runRole (rcVerifier rc) (falseJob (fiStatement i) (fiClaim i))
+
 -- | Search the open goals of @base0@ as a lemma graph.
 runGraph :: GraphConfig -> GraphEnv -> Text -> IO (Either Text GraphReport)
 runGraph cfg env base0 = do
@@ -293,11 +361,14 @@ runGraph cfg env base0 = do
     Left e -> pure (Left e)
     Right types -> do
       lock <- newMVar ()
-      t0 <- oNow (seOrch se)
+      let ck = Checker (seLean se) (sePolicy se) (seRoot se) (seRel se) lock
+          roles = roleCtxs env ck
+      orch <- geOrch env (runGraphJob roles (seOrch se))
+      t0 <- oNow orch
       let g0 = foldl' (\g n -> snd (addRoot n (typeKey n (Map.findWithDefault "" n types)) g)) emptyGraph order
       ref <- newIORef St
         { stGraph = g0, stBase = base0, stTypes = types, stWaiting = IS.empty, stRunning = [], stFailures = IM.empty
-        , stNotes = IM.empty, stDollars = Map.empty, stCapHit = False, stNext = 1, stRecords = [], stDisproveTried = IS.empty
+        , stNotes = IM.empty, stDollars = Map.empty, stCapHit = False, stNext = 1, stNextJob = 1, stRecords = [], stDisproveTried = IS.empty
         , stRetrieved = IM.empty, stHelpers = IM.empty, stRetried = IS.empty
         , stHealth = emptyHealth, stLastTier = IM.empty, stModelErrors = IM.empty, stStall = IM.empty, stEscalations = 0
         , stStallUsed = IM.empty }
@@ -306,13 +377,12 @@ runGraph cfg env base0 = do
       -- one retriever for the run: its corpora are shared by every node
       retrieve <- traverse (\re -> newRetriever re (seRel se)) (seRetrieval se)
       harvestRef <- newIORef (pure (0, 0))
-      let ck = Checker (seLean se) (sePolicy se) (seRoot se) (seRel se) lock
-          c = Ctx cfg env ck ref t0 autoRef track retrieve base0 (join (readIORef harvestRef)) (roleCtxs env ck)
+      let c = Ctx cfg env ck ref t0 autoRef track retrieve base0 (join (readIORef harvestRef)) orch
       writeIORef harvestRef =<< once (harvestRun c)
       forM_ (IM.elems (gNodes g0)) $ \n -> logG c (\t -> NodeAdded t (nId n) (nName n) 0)
       -- on an exception (Ctrl-C, SIGTERM): the harvest with the base as it
       -- is then, the jobs stopped, and the exception goes on
-      let stopJobs = getSt c >>= mapM_ (cancel . fst) . stRunning
+      let stopJobs = getSt c >>= mapM_ (oCancel (cOrch c) . fst) . stRunning
       harvestOnException (void (cHarvest c)) stopJobs $ do
         -- the pre-pass: Auto at each root before any model call
         forM_ (gRoots g0) (autoNode c)
@@ -321,7 +391,7 @@ runGraph cfg env base0 = do
 -- * Small helpers
 
 elapsed :: Ctx -> IO Double
-elapsed c = subtract (cT0 c) <$> oNow (seOrch (geSearch (cEnv c)))
+elapsed c = subtract (cT0 c) <$> oNow (cOrch c)
 
 logG :: Ctx -> (Double -> GraphEvent) -> IO ()
 logG c f = elapsed c >>= geLogG (cEnv c) . f
@@ -478,10 +548,14 @@ mergeBase c text = do
   modify c (\s -> s {stBase = text})
   seBaseChanged (geSearch (cEnv c)) text
 
-startJob :: Ctx -> NodeId -> Kind -> IO Out -> IO ()
-startJob c n kind act = do
-  a <- async act
-  modify c (\s -> s {stRunning = (a, Job n kind) : stRunning s})
+-- | Start a job on the node through the graph's orchestrator.
+startJob :: Ctx -> NodeId -> Kind -> IO ()
+startJob c n kind = do
+  s <- getSt c
+  let job = Job (stNextJob s) n (nameOf s n) kind
+  modify c (\s' -> s' {stNextJob = stNextJob s' + 1})
+  r <- oSpawn (cOrch c) job
+  modify c (\s' -> s' {stRunning = (r, job) : stRunning s'})
 
 -- * The loop
 
@@ -502,11 +576,11 @@ loop c = do
         else do
           t' <- elapsed c
           let left = max 0 (gcBudget (cCfg c) - t')
-          r <- timeout (ceiling (left * 1000000)) (waitAnyCatch (map fst (stRunning s)))
+          r <- oAwaitAny (cOrch c) left (map fst (stRunning s))
           case r of
             Nothing -> stopAll c "time"
             Just (a, res) -> do
-              let job = head [j | (a', j) <- stRunning s, a' == a]
+              let job = fromMaybe (error "loop: the orchestrator delivered a job that is not running") (lookup a (stRunning s))
               modify c (\s' -> s' {stRunning = [x | x@(a', _) <- stRunning s', a' /= a]})
               stop <- handle c job res
               case stop of
@@ -524,7 +598,7 @@ launchAll :: Ctx -> IntSet -> IO ()
 launchAll c skipped = do
   s <- getSt c
   let excl = IS.unions [busySet s, stWaiting s, skipped]
-      workers = length [() | (_, Job _ KWorker {}) <- stRunning s]
+      workers = length [() | (_, Job {jKind = KWorker {}}) <- stRunning s]
   case nextAction (limits c) excl (stGraph s) of
     Nothing -> pure ()
     Just _ | allSkipped c s -> pure ()
@@ -583,7 +657,7 @@ startWorker c n = do
   modify c (\s' -> s' { stNext = stNext s' + 1, stGraph = recordAction n (stGraph s'), stStall = IM.delete n (stStall s')
                       , stLastTier = maybe id (IM.insert n) tier (stLastTier s')
                       , stStallUsed = maybe id (IM.insert (asId spec)) (IM.lookup n (stStall s)) (stStallUsed s') })
-  startJob c n (KWorker spec t) (OutWorker <$> runToEnd (seOrch (geSearch (cEnv c))) spec)
+  startJob c n (KWorker spec t)
   logG c (\t' -> AttemptLaunched t' (asId spec) n)
   forM_ ((,) <$> tier <*> asModel spec) $ \(k, m) -> do
     logG c (\t' -> NodeTierChosen t' (asId spec) n k m)
@@ -601,8 +675,8 @@ startPlan c n = do
   let (sid, g') = proposeSplit n (recordAction n (stGraph s))
       root = nRoot (nodeOf s n)
   modify c (\s' -> s' {stGraph = g'})
-  startJob c n (KPlan sid) $ fmap OutPlan . runRole (rcPlanner (cRoles c)) $
-    planJob (stBase s) (nameOf s n) (expectedOf s n) (usableOf s n) (boardOf s root) (IM.findWithDefault [] n (stNotes s)) retrieved
+  startJob c n . KPlan sid $
+    PlanInputs (stBase s) (nameOf s n) (expectedOf s n) (usableOf s n) (boardOf s root) (IM.findWithDefault [] n (stNotes s)) retrieved
   logG c (\t -> SplitProposed t sid n)
 
 -- | Cancel what runs and end the run.
@@ -610,11 +684,11 @@ stopAll :: Ctx -> Text -> IO GraphReport
 stopAll c why = do
   s <- getSt c
   forM_ (stRunning s) $ \(a, job) -> do
-    cancel a
+    oCancel (cOrch c) a
     case jKind job of
       KWorker spec started -> do
         -- priced from its ledger with the controller on
-        d <- priceCancelled (gcControl (cCfg c)) (geSearch (cEnv c)) spec
+        d <- priceJob c job
         t <- elapsed c
         let outcome = "cancelled: " <> why
         modify c (\s' -> s' {stRecords = (recordOf spec started t outcome Nothing) {arCost = d} : stRecords s'})
@@ -623,6 +697,17 @@ stopAll c why = do
       _ -> pure ()
   modify c (\s' -> s' {stRunning = []})
   finish c (Just why)
+
+-- | A cancelled job's dollars (the graph orchestrator's 'oPrice') with
+-- the controller on; else, or when the price fails, none. An
+-- asynchronous exception is rethrown.
+priceJob :: Ctx -> Job -> IO (Maybe Double)
+priceJob c job
+  | not (gcControl (cCfg c)) = pure Nothing
+  | otherwise = try (oPrice (cOrch c) job) >>= \case
+      Left e | Just (_ :: SomeAsyncException) <- fromException e -> throwIO e
+      Left (_ :: SomeException) -> pure Nothing
+      Right d -> pure d
 
 finish :: Ctx -> Maybe Text -> IO GraphReport
 finish c why = do
@@ -689,7 +774,7 @@ save c = do
 
 -- | Apply one job's result; a reason when the run must stop.
 handle :: Ctx -> Job -> Either SomeException Out -> IO (Maybe Text)
-handle c (Job n kind) res = case kind of
+handle c (Job _ n _ kind) res = case kind of
   KWorker spec started -> do
     let unwrap = \case
           OutWorker ar -> Right ar
@@ -701,7 +786,7 @@ handle c (Job n kind) res = case kind of
     -- about the model and is not fed
     forM_ res' (noteTier c spec)
     pure Nothing
-  KPlan sid -> case res of
+  KPlan sid _ -> case res of
     Left e -> splitFailed c n sid (tool (showErr e)) >> pure Nothing
     Right (OutPlan a) -> asked Planner a $ \case
       Left e -> splitFailed c n sid e
@@ -709,7 +794,7 @@ handle c (Job n kind) res = case kind of
         | plVerdict p == Closed -> closedSketch c n sid p
         | otherwise -> toReview c n sid p
     Right _ -> pure Nothing
-  KReview sid p -> case res of
+  KReview sid p _ -> case res of
     Left e -> splitRejected c n sid (Piece tool (showErr e)) >> pure Nothing
     Right (OutReview a) -> asked Verifier a $ \case
       Left e -> splitRejected c n sid (Part e)
@@ -717,7 +802,7 @@ handle c (Job n kind) res = case kind of
         | svAccept v -> acceptSketch c n sid p
         | otherwise -> splitRejected c n sid (Quote (svReason v))
     Right _ -> pure Nothing
-  KFalse claim -> case res of
+  KFalse claim _ -> case res of
     Left e -> notChecked claim (Piece tool (showErr e)) >> pure Nothing
     Right (OutFalse a) -> asked Verifier a $ \case
       Right (True, _) -> do
@@ -779,7 +864,7 @@ workerDone c n spec started res = do
                   then do
                     modify c (\x -> x {stCapHit = True})
                     failurePieces c n [Piece static "FALSE: ", Piece workerNote claim, Piece static " (not checked: the dollar cap)"]
-                  else startJob c n (KFalse claim) (OutFalse <$> runRole (rcVerifier (cRoles c)) (falseJob (stmtOf s2 n) claim))
+                  else startJob c n (KFalse claim (FalseInputs (stmtOf s2 n) claim))
   addCost c Worker (fromMaybe 0 dollars)
   -- a stopped worker is logged before its record, its file judged as any other's
   forM_ (mar >>= arStop) $ \st ->
@@ -844,8 +929,7 @@ toReview c n sid p = do
   s <- getSt c
   if capped c s
     then modify c (\x -> x {stCapHit = True})
-    else startJob c n (KReview sid p) $ OutReview <$>
-      runRole (rcVerifier (cRoles c)) (reviewJob (stmtOf s n) p (boardOf s (nRoot (nodeOf s n))))
+    else startJob c n (KReview sid p (ReviewInputs (stmtOf s n) p (boardOf s (nRoot (nodeOf s n)))))
 
 -- | A failed split; its reason is a part whose pieces say where they came
 -- from ('tool' for Lean's errors or an exception, 'static' for Fisher's
@@ -1081,7 +1165,7 @@ withAuto c step n act k = readIORef (cAuto c) >>= \case
   Nothing -> pure Nothing
   Just _ -> locked (cCk c) $ do
     let budgetLeft = (gcBudget (cCfg c) -) <$> elapsed c
-    r <- autoStep (oCapped (seOrch (geSearch (cEnv c)))) step (cAuto c) (cTrack c) budgetLeft (\why -> logG c (`GraphAutoOff` why))
+    r <- autoStep (oCapped (cOrch c)) step (cAuto c) (cTrack c) budgetLeft (\why -> logG c (`GraphAutoOff` why))
            (logG c (\t -> NodeAutoTimeout t n step)) act
     traverse (traverse k) r
 

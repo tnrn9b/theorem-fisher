@@ -216,7 +216,10 @@ runGPriced price mkRet leanRun mkAuto gcfg file runs0 replies0 = withSystemTempD
   orch <- realOrchestrator seRunF (readIORef clock) (\_ -> pure ()) price
   let senv = SearchEnv orch lean (AxiomPolicy standardAxioms False) root "F.lean"
                (\_ -> pure ()) (fmap (\mk -> watched (mk trace)) mkAuto) ret
-      genv = GraphEnv senv ask (\e -> atomicModifyIORef' events (\es -> (e : es, ()))) (\_ _ -> pure ())
+      priceJob job = case jKind job of
+        KWorker sp _ -> price sp
+        _ -> pure Nothing
+      genv = GraphEnv senv (\run -> realOrchestrator run (readIORef clock) (\_ -> pure ()) priceJob) ask (\e -> atomicModifyIORef' events (\es -> (e : es, ()))) (\_ _ -> pure ())
   r <- timeout 20000000 (runGraph gcfg genv file)
   rep <- case r of
     Nothing -> fail "the run did not end"
@@ -256,7 +259,7 @@ runGInterrupted stopAt mkRet gcfg file runs0 replies0 = withSystemTempDirectory 
   orch <- realOrchestrator seRunF (pure 0) (\_ -> pure ()) (\_ -> pure Nothing)
   let senv = SearchEnv orch keyLean (AxiomPolicy standardAxioms False) root "F.lean"
                (\_ -> pure ()) Nothing ret
-      genv = GraphEnv senv ask (\e -> atomicModifyIORef' events (\es -> (e : es, ()))) (\_ _ -> pure ())
+      genv = GraphEnv senv (\run -> realOrchestrator run (pure 0) (\_ -> pure ()) (\_ -> pure Nothing)) ask (\e -> atomicModifyIORef' events (\es -> (e : es, ()))) (\_ _ -> pure ())
   a <- async (runGraph gcfg genv file)
   let waitFor n = do
         es <- readIORef events

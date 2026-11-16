@@ -57,7 +57,7 @@ spec = describe "runGraph on a Lean project" $ do
       orch <- realOrchestrator run (pure 0) (\_ -> pure ()) (\_ -> pure Nothing)
       let senv = SearchEnv orch (lakeLeanRun 600) (AxiomPolicy standardAxioms False) root "GraphProj.lean"
                    (\_ -> pure ()) Nothing Nothing
-          genv = GraphEnv senv ask (\_ -> pure ()) (\_ _ -> pure ())
+          genv = GraphEnv senv (\runIt -> realOrchestrator runIt (pure 0) (\_ -> pure ()) (\_ -> pure Nothing)) ask (\_ -> pure ()) (\_ _ -> pure ())
       r <- timeout 900000000 (runGraph defaultGraphConfig genv file)
       case r of
         Nothing -> expectationFailure "the run did not end"
