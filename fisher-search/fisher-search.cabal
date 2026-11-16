@@ -102,6 +102,7 @@ test-suite fisher-search-test
       Fisher.Search.Golden
       Fisher.Search.GraphAutoSpec
       Fisher.Search.GraphHarness
+      Fisher.Search.GraphIdentitySpec
       Fisher.Search.GraphJobsSpec
       Fisher.Search.GraphLiveSpec
       Fisher.Search.GraphRetrievalSpec
