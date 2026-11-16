@@ -117,6 +117,7 @@ module Fisher.Cli.Search
   , goalTable
     -- * Recording and replay
   , recordingTo
+  , replaceFile
   , checkRecordPath
   , readRecording
   , replaying
@@ -1374,12 +1375,14 @@ recordingTo (Just path) o = do
 
 -- | FILE replaced by these bytes: written to a temporary file in its
 -- directory, then renamed over it, so FILE is either as it was or whole.
--- The temporary file is removed when the write fails.
+-- The temporary file is removed when the write fails: its close and its
+-- removal are tried apart, so a close that throws (flushing after a
+-- failed write) does not skip the removal.
 replaceFile :: FilePath -> BL8.ByteString -> IO ()
 replaceFile path bytes = do
   (tmp, h) <- openBinaryTempFile (takeDirectory path) (takeFileName path <> ".tmp")
   (BL8.hPut h bytes >> hClose h >> renameFile tmp path)
-    `onException` try @SomeException (hClose h >> removeFile tmp)
+    `onException` (void (try @SomeException (hClose h)) >> void (try @SomeException (removeFile tmp)))
 
 -- | @--record FILE@ checked before the run: FILE opened for appending (so
 -- a file already there keeps its content until the tape replaces it, and

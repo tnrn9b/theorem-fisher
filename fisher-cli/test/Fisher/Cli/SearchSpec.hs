@@ -5,7 +5,7 @@ module Fisher.Cli.SearchSpec (spec) where
 
 import Control.Concurrent (forkIO, threadDelay)
 import Control.Concurrent.MVar (newEmptyMVar, putMVar, takeMVar)
-import Control.Exception (AsyncException (..), SomeAsyncException, SomeException, finally, fromException, throwIO, try)
+import Control.Exception (AsyncException (..), IOException, SomeAsyncException, SomeException, finally, fromException, throwIO, try)
 import qualified Data.ByteString as BS
 import System.Exit (ExitCode (..))
 import System.Posix.Signals (Handler (Default), installHandler, raiseSignal, sigTERM)
@@ -1285,6 +1285,20 @@ recordSpec = describe "--record and --replay" $ do
       writeTape
       readRecording tape >>= either (fail . T.unpack) (\rc -> rcSteps rc `shouldBe` [Now 7])
       listDirectory d `shouldReturn` ["tape.json"]
+
+  it "replaceFile: a write that fails leaves the target as it was and no temporary file" $
+    withSystemTempDirectory "fisher-replace" $ \d -> do
+      -- the rename fails (the target is a directory), after the temporary
+      -- file was written and closed
+      let target = d </> "tape.json"
+      createDirectoryIfMissing True (target </> "inside")
+      (replaceFile target "{}" >> pure ()) `shouldThrow` (\(_ :: IOException) -> True)
+      listDirectory d `shouldReturn` ["tape.json"]
+      doesDirectoryExist (target </> "inside") `shouldReturn` True
+      -- a write that succeeds replaces the file whole
+      replaceFile (d </> "other.json") "{}"
+      BS.readFile (d </> "other.json") `shouldReturn` "{}"
+      sort <$> listDirectory d `shouldReturn` ["other.json", "tape.json"]
 
   it "replaying: a tape left unconsumed, and a divergence, are errors" $ do
     replaying (\_ -> pure ()) (Recording tapeVersion [Now 1]) (\_ -> pure ())
