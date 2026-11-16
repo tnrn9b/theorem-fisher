@@ -81,11 +81,14 @@
 -- is still written). The report's @learn@ says which.
 --
 -- @--record FILE@ (not with @--graph@) writes the flat search's tape, the
--- attempt orchestrator's answers in call order ('recordOrchestrator'), to
--- FILE as JSON once the search returns its report (FILE is checked
--- writable before the run starts). @--replay FILE@ plays such a tape
--- back ('replayOrchestrator') under the same flags: the model side comes
--- from the tape and Lean still checks every proof. A replay prints the
+-- attempt orchestrator's answers and the events logged through it in call
+-- order ('recordOrchestrator'), to FILE as JSON once the search returns
+-- its report (FILE is checked writable before the run starts without
+-- being truncated, and the tape replaces it whole through a temporary
+-- file). @--replay FILE@ plays such a tape back ('replayOrchestrator')
+-- under the same flags: the model side comes from the tape, Lean still
+-- checks every proof, and every event logged through the orchestrator is
+-- compared with the tape's. A replay prints the
 -- events and the report as a run does, with the tape's path where a run
 -- names its run directory, and writes nothing (no run directory, run log,
 -- ledger, lessons or policy; @--apply@, @--out@, @--record@ and @--graph@
@@ -119,8 +122,6 @@ module Fisher.Cli.Search
   , replaying
   , swarmSearch
   , swarmReportLines
-  , searchHeader
-  , replayLearn
   , learnLine
   , ReplayIO (..)
   , replayMainWith
@@ -216,7 +217,7 @@ import System.Environment (getArgs)
 import qualified Data.Text.IO as TIO
 import Data.Time (defaultTimeLocale, formatTime, getZonedTime)
 import Data.Time.Clock.POSIX (getPOSIXTime)
-import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesFileExist, getHomeDirectory, getTemporaryDirectory, makeAbsolute, removeDirectoryRecursive)
+import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesFileExist, getHomeDirectory, getTemporaryDirectory, makeAbsolute, removeDirectoryRecursive, removeFile, renameFile)
 import System.Info (os)
 import System.Process (proc, readCreateProcessWithExitCode)
 import qualified Data.ByteString as BS
@@ -270,11 +271,12 @@ import Fisher.Search.Graph (Graph (..), Node (..), NodeId)
 import Fisher.Search.GraphRun (AskError (..), GraphConfig (..), GraphEnv (..), GraphEvent (..), GraphReport (..), Job (..), Kind (..), plannerModel, runGraph)
 import Fisher.Search.Headless
 import Fisher.Search.Lean (Decl (..), declarations, openGoals)
-import Fisher.Search.Orchestrate (AttemptOrchestrator, AttemptScript, Orchestrator (..), Recording (..), ReplayDiverged (..), attemptKey, realOrchestrator, recordOrchestrator, replayOrchestrator)
+import Fisher.Search.Orchestrate (AttemptOrchestrator, Orchestrator (..), attemptKey, realOrchestrator)
 import Fisher.Search.Report
 import Fisher.Search.Scheduler hiding (GoalStatus (..))
 import qualified Fisher.Search.Scheduler as S
 import Fisher.Search.Splice (SpliceError, applySmtImport, smtKept)
+import Fisher.Search.Tape (AttemptScript, Recording (..), ReplayDiverged (..), recordOrchestrator, replayOrchestrator)
 import Fisher.Smt (Solver, SmtConfig (..), findSolver, runQuery, smtConfig, solverName)
 import Fisher.Smt.Lake (HeaderKind (..), hasSmt, headerKind, insertImportSmt)
 import Fisher.Search.Verify
@@ -1261,15 +1263,15 @@ runMain ra0 file0 = do
                 <> either (const []) (maybe [] (\(_, w) -> ["auto_warmup_s" .= (fromIntegral (round (w * 10) :: Int) / 10 :: Double)])) started
       ( if raGraph ra
           then graphMain ra casc file root rel runDir eventsH env1 offAtStart retrievalEvents autoExtra learnV original (searchLogGraphEvent slog) finish mineAfter smtOut
-          else swarmMain ra file root rel runDir eventsH env1 cfg offAtStart retrievalEvents autoExtra learnV original stmts finish mineAfter smtOut writeTape )
+          else swarmMain ra file root rel runDir eventsH logE env1 cfg offAtStart retrievalEvents autoExtra learnV original stmts finish mineAfter smtOut writeTape )
         `finally` mapM_ (lspClose . aeLsp) (seAuto env1)
     ) `onException` cancelled `finally` closeSearchLog slog
 
-swarmMain :: RunArgs -> FilePath -> FilePath -> FilePath -> FilePath -> Handle -> SearchEnv -> SearchConfig -> Maybe T.Text
+swarmMain :: RunArgs -> FilePath -> FilePath -> FilePath -> FilePath -> Handle -> (Event -> IO ()) -> SearchEnv -> SearchConfig -> Maybe T.Text
           -> [Event] -> ((Bool, Maybe T.Text) -> [Pair]) -> A.Value -> T.Text -> [(T.Text, T.Text)] -> Finish -> IO A.Value
           -> (T.Text -> (T.Text, [Pair])) -> IO () -> IO ()
-swarmMain ra file root rel runDir eventsH env0 cfg offAtStart startEvents autoExtra learnV original stmts finish mineAfter smtOut writeTape = do
-  r <- swarmSearch ra env0 cfg offAtStart startEvents original
+swarmMain ra file root rel runDir eventsH logE env0 cfg offAtStart startEvents autoExtra learnV original stmts finish mineAfter smtOut writeTape = do
+  r <- swarmSearch ra logE env0 cfg offAtStart startEvents original
   hClose eventsH
   case r of
     Left e -> finish [] [] "failed" Nothing >> hPutStrLn stderr ("(>_<) " <> T.unpack e) >> exitWith (ExitFailure 1)
@@ -1294,10 +1296,14 @@ swarmMain ra file root rel runDir eventsH env0 cfg offAtStart startEvents autoEx
 
 -- | The flat search on its env: the automation's off reason and the
 -- start's events logged, then the search (the baseline with @--single@).
-swarmSearch :: RunArgs -> SearchEnv -> SearchConfig -> Maybe T.Text -> [Event] -> T.Text -> IO (Either T.Text SearchReport)
-swarmSearch ra env cfg offAtStart startEvents original = do
-  mapM_ (oLog (seOrch env) . AutoOff 0) offAtStart
-  mapM_ (oLog (seOrch env)) startEvents
+-- The start's events are computed before the search (the index's carry
+-- its build's own seconds), so they are written with the given log
+-- function, around the orchestrator: a tape neither holds nor compares
+-- them.
+swarmSearch :: RunArgs -> (Event -> IO ()) -> SearchEnv -> SearchConfig -> Maybe T.Text -> [Event] -> T.Text -> IO (Either T.Text SearchReport)
+swarmSearch ra logStart env cfg offAtStart startEvents original = do
+  mapM_ (logStart . AutoOff 0) offAtStart
+  mapM_ logStart startEvents
   case raSingle ra of
     Just b -> runSingle env b original
     Nothing -> runSearch cfg env original
@@ -1348,15 +1354,17 @@ serverOff = either (\e -> Just ("the Lean server did not start: " <> e)) (const 
 -- | @--record FILE@: the attempts' orchestrator wrapped to tape its
 -- answers ('recordOrchestrator'), and the action that writes the tape to
 -- FILE as JSON, run once the search returns its report (an interrupted
--- or failed run writes nothing). A write that fails is a warning on
--- stderr, so the run still finishes. Without the flag, the orchestrator
--- as it is and no write.
+-- or failed run writes nothing, and a file already at FILE stays as it
+-- was). The tape goes to a temporary file in FILE's directory, renamed
+-- over FILE once whole. A write that fails is a warning on stderr, so the
+-- run still finishes. Without the flag, the orchestrator as it is and no
+-- write.
 recordingTo :: Maybe FilePath -> AttemptOrchestrator -> IO (AttemptOrchestrator, IO ())
 recordingTo Nothing o = pure (o, pure ())
 recordingTo (Just path) o = do
   (o', tape) <- recordOrchestrator attemptKey o
   let write = do
-        r <- try @SomeException (tape >>= BL8.writeFile path . encodePretty)
+        r <- try @SomeException (tape >>= replaceFile path . encodePretty)
         case r of
           Right () -> pure ()
           Left e
@@ -1364,13 +1372,23 @@ recordingTo (Just path) o = do
             | otherwise -> hPutStrLn stderr ("fisher: --record: the tape was not written to " <> path <> ": " <> displayException e)
   pure (o', write)
 
--- | @--record FILE@ checked before the run: FILE opened for writing (left
--- empty until the tape is written) and closed. Left with the message when
+-- | FILE replaced by these bytes: written to a temporary file in its
+-- directory, then renamed over it, so FILE is either as it was or whole.
+-- The temporary file is removed when the write fails.
+replaceFile :: FilePath -> BL8.ByteString -> IO ()
+replaceFile path bytes = do
+  (tmp, h) <- openBinaryTempFile (takeDirectory path) (takeFileName path <> ".tmp")
+  (BL8.hPut h bytes >> hClose h >> renameFile tmp path)
+    `onException` try @SomeException (hClose h >> removeFile tmp)
+
+-- | @--record FILE@ checked before the run: FILE opened for appending (so
+-- a file already there keeps its content until the tape replaces it, and
+-- a missing one is created empty) and closed. Left with the message when
 -- it cannot be.
 checkRecordPath :: Maybe FilePath -> IO (Either T.Text ())
 checkRecordPath Nothing = pure (Right ())
 checkRecordPath (Just path) = do
-  r <- try @IOException (withFile path WriteMode (\_ -> pure ()))
+  r <- try @IOException (withFile path AppendMode (\_ -> pure ()))
   pure (either (\e -> Left ("--record: cannot write " <> T.pack path <> ": " <> T.pack (displayException e))) Right r)
 
 -- | The tape @--replay FILE@ plays, or why it cannot be read.
@@ -1467,7 +1485,7 @@ replayMainWith rio ra0 file0 tapePath = do
           { seOrch = o, seLean = rpLean rio, sePolicy = pol, seRoot = baseWs, seRel = rel
           , seBaseChanged = \t -> BS.writeFile (baseWs </> rel) (TE.encodeUtf8 t)
           , seAuto = auto, seRetrieval = (\re -> re {reExtra = ssFacts smt}) <$> retrieval }
-    r <- replaying (say . eventLine) tape (\o -> swarmSearch ra (env o) scfg (serverOff started) retrievalEvents original)
+    r <- replaying (say . eventLine) tape (\o -> swarmSearch ra (say . eventLine) (env o) scfg (serverOff started) retrievalEvents original)
            `finally` mapM_ (lspClose . aeLsp) auto
     case r of
       Left e -> failWith e

@@ -2,8 +2,9 @@
 
 This page describes `Fisher.Search.Orchestrate` (fisher-search), the record
 through which the searches do everything that touches threads, time or the
-outside world, the scripted simulator that stands in for it in tests, and
-the recorder and replayer that turn a real run into a tape. It is the
+outside world, and the scripted simulator that stands in for it in tests,
+and `Fisher.Search.Tape`, the recorder and replayer that turn a real run
+into a tape. It is the
 companion page to [roles.md](roles.md): that page says who may say what in a
 prompt, this one says what the search itself may do.
 
@@ -425,33 +426,50 @@ same for the graph search.
 
 ## Recording and replay
 
-A recording is a tape: the orchestrator's answers in call order. It is not a
-script for the simulator. A real run has time of its own outside its awaits
-(Lean checks, steps that run without a cap), so measuring each job's seconds
-since its spawn and feeding them to the simulator would reorder deliveries or
-spawn a job the run never made; and a cap named only by its step's name cannot
-tell its occurrences apart. A tape holds exactly what the search was told, in
-the order it asked, and a replay plays it back.
+The recorder and the replayer are in `Fisher.Search.Tape` (fisher-search),
+which imports `AttemptKey`, `attemptKey` and `spawnKey` from
+`Fisher.Search.Orchestrate`; `Orchestrate` itself keeps the record and its two
+interpreters and has no aeson. A recording is a tape: the orchestrator's
+answers, and the events logged through it, in call order. It is not a script
+for the simulator. A real run has time of its own outside its awaits (Lean
+checks, steps that run without a cap), so measuring each job's seconds since
+its spawn and feeding them to the simulator would reorder deliveries or spawn
+a job the run never made; and a cap named only by its step's name cannot tell
+its occurrences apart. A tape holds exactly what the search was told and what
+it logged, in the order it asked, and a replay plays it back.
 
 ```haskell
-newtype Recording spec res = Recording { rcSteps :: [Step res] }
+data Recording spec res = Recording { rcVersion :: Int, rcSteps :: [Step res] }
 data Step res
   = Now Double
   | Spawned AttemptKey
   | Delivered Double AttemptKey Double (Either Text res)
   | AwaitTimedOut Double Double
   | Cancelled AttemptKey
-  | Capped Text Double Bool
+  | Capped Text Double Bool [Event]
   | Priced AttemptKey (Maybe Double)
   | Logged Event
+tapeVersion :: Int                      -- 1
 type AttemptScript = Recording AttemptSpec AttemptResult
 recordOrchestrator :: (spec -> (Text, Text)) -> Orchestrator spec res -> IO (Orchestrator spec res, IO (Recording spec res))
 replayOrchestrator :: (spec -> (Text, Text)) -> (Event -> IO ()) -> Recording spec res -> IO (Orchestrator spec res, IO Int)
 ```
 
+The guarantee: every orchestrator answer and every event logged through the
+orchestrator is compared, and a difference ends the replay with
+`ReplayDiverged`; what a replay re-runs (Lean, the language server, retrieval
+over the library as it is now) can therefore only fail loudly, never
+silently; events written around the orchestrator (the CLI's `LedgerUnread`
+lines from the watcher, and the start events the CLI computes before the
+search and writes with its own log function: the language server's `AutoOff`
+at the start and the retrieval's `IndexBuilt`, `IndexSkipped` and
+`LibraryProblem`, the first of which carries the index build's own seconds;
+besides these, the learn line, the header and the language server's warm-up
+lines are printed, not logged) are not covered.
+
 The spec is not recorded: on replay the search builds the specs again, and
 each spawn's key is checked against the tape. Each constructor of `Step` is
-one answer:
+one answer or one event:
 
 | Step | What it records | How replay answers it |
 |---|---|---|
@@ -460,59 +478,71 @@ one answer:
 | `Delivered secs key t res` | An await of `secs` that delivered the job `key` with `res` (an exception as its text), and the wrapped clock `t` after it. | `oAwaitAny` delivers the job with that key, which must be among those awaited, with `res` (a Left becomes an `ErrorCall` of its text); `secs` must equal the call's within 1e-9. `t` is for readers; replay does not use it. |
 | `AwaitTimedOut secs t` | An await of `secs` that delivered nothing, and the clock after it. | `oAwaitAny` returns Nothing; `secs` is checked. |
 | `Cancelled key` | A cancel of the job `key`. | `oCancel` accepts a cancel of the job with that key. |
-| `Capped name secs hit` | A capped step: its name, its seconds, whether the cap hit. | When it hit, `oCapped` returns Nothing without running the action; when it did not, the action runs again and its result is returned. The name and seconds are checked. |
-| `Priced key d` | A price asked for a spec, under the key of the latest spawn with the spec's goal and backend, and the answer. | `oPrice` returns `d`. |
-| `Logged e` | An event a capped step logged before its cap hit; it follows that step's `Capped`. | When the hit step is replayed the events that follow it are logged, in order, through the log function given to `replayOrchestrator`. |
+| `Capped name secs hit evs` | A capped step: its name, its seconds, whether the cap hit, and for a hit the events its action logged before the cap hit, in order (empty for a step that ran). | When it hit, `oCapped` gives `evs` to the log function and returns Nothing without running the action. When it ran, the action runs again under a real `timeout` of `secs` and its result is returned; when the timeout fires, `ReplayDiverged` with "the step `name` did not end within its recorded cap". The name and seconds are checked. |
+| `Priced key d` | A price asked for a spec, under the key of the latest spawn with the spec's goal and backend, and the answer the caller used: a price that throws a synchronous exception is recorded as Nothing (as `priceCancelled` uses it) and the exception rethrown. | `oPrice` returns `d`. |
+| `Logged e` | An event logged through the orchestrator. | `oLog e'` must find `Logged e` with `e' == e`; the event is then given to the log function. Otherwise `ReplayDiverged`, its description showing both events. |
 
 `recordOrchestrator keyFn orch` wraps an orchestrator in use. Every field is
 the wrapped one's, and each call appends its step once the wrapped call
-returns. A capped step takes its place on the tape when it starts, so the
-calls made inside a step that ran follow it. A step whose cap hit drops the
-calls made inside it, because replay does not run its action (the loop waits
-on it, so they are all after its place); the events it logged go on the tape
-as `Logged` steps after it, so replay logs them. A step that throws leaves no
-step. The log of the run is not otherwise recorded: the search writes the same
-events again on replay.
+returns; `oLog` writes through the wrapped log and appends a `Logged` step. A
+capped step takes its place on the tape when it starts, so the calls made
+inside a step that ran, and the events it logged, follow it. A step whose
+cap hit drops the steps made inside it, because replay does not run its
+action (the loop waits on it, so they are all after its place), and gathers
+the events among them into its own list: each dropped `Logged` step's event,
+and each dropped hit `Capped` step's own list, in order. So a cap nested in a
+cap whose outer one hits after the inner one ran is one `Capped` step whose
+list holds the inner step's events and then the outer's. A step that throws
+leaves no step.
 
 `replayOrchestrator keyFn logE tape` plays the tape back and returns, beside the
 orchestrator, a reader of the number of steps consumed. Each call takes the
 tape's next step and answers from it. A call that is not the next step (the
-wrong kind, a different key, seconds that differ), or any call past the tape's
-end, throws `ReplayDiverged`, which names the step's position (from 0), what
-the tape had and what the search asked for:
+wrong kind, a different key, seconds that differ, another event), any call
+past the tape's end, or a step that ran and does not end within its recorded
+seconds, throws `ReplayDiverged`, which names the step's position (from 0),
+what the tape had and what the search asked for:
 
 ```haskell
 data ReplayDiverged = ReplayDiverged { rdPosition :: Int, rdExpected :: Text, rdActual :: Text }
 -- ReplayDiverged 0 "now 1.0" "spawn a/x/0"
 -- ReplayDiverged 1 "the end of the tape" "now"
 -- ReplayDiverged 0 "capped auto 2.0 (hit)" "capped auto 3.0"
+-- ReplayDiverged 0 "log BudgetSpent 0.0" "log BudgetSpent 1.0"
+-- ReplayDiverged 0 "capped repair 5.0e-2 (ran)" "the step `repair` did not end within its recorded cap"
 ```
 
 Replay reproduces the events byte for byte, times included: the clock is the
-tape's readings, and Lean still runs for any step that ran. A tape that the
-search does not consume to its end is not an error inside the orchestrator;
-the caller compares the steps consumed with the tape's length (the CLI does).
+tape's readings, Lean still runs for any step that ran, and every event is
+checked against the tape before it is written. A Lean that judges a proof
+otherwise on replay changes the event the search logs (an attempt's
+`Finished` outcome, say), and the replay stops there. A tape that the search
+does not consume to its end is not an error inside the orchestrator; the
+caller compares the steps consumed with the tape's length (the CLI does).
 
 The flat search's tape has JSON instances, so a run can be written to a file.
-`Step` and `Recording` are generic: an object with the constructor's name under
-`tag` and its fields under `contents`, and `{"rcSteps": [...]}` for the tape.
-`AttemptKey` is an object with its field names, an `Either` is `{"Left": ...}`
-or `{"Right": ...}`, and `AttemptResult`, `ChildStats`, `Stop`,
-`StopReason`, `ModelFailure` and the scheduler's `Event` have generic
+`Step` is generic: an object with the constructor's name under `tag` and its
+fields under `contents`. `Recording` is `{"rcVersion": 1, "rcSteps": [...]}`;
+its decoder refuses a tape whose `rcVersion` is not `tapeVersion` (1), with a
+message naming the version found, and one without `rcVersion`. `AttemptKey`
+is an object with its field names (its instances are in `Tape`), an `Either`
+is `{"Left": ...}` or `{"Right": ...}`, and `AttemptResult`, `ChildStats`,
+`Stop`, `StopReason`, `ModelFailure` and the scheduler's `Event` have generic
 instances in their own modules, field names as they are. An example of a few
-steps (the first attempt fails, the second is cancelled, an automation step
-hits its cap after logging an event):
+steps (the first attempt fails and its end is logged, the second is
+cancelled, an automation step hits its cap after logging an event):
 
 ```json
-{"rcSteps": [
+{"rcVersion": 1, "rcSteps": [
   {"tag": "Now", "contents": 1000.5},
   {"tag": "Spawned", "contents": {"akGoal": "a", "akBackend": "x", "akIndex": 0}},
   {"tag": "Spawned", "contents": {"akGoal": "a", "akBackend": "y", "akIndex": 0}},
   {"tag": "Delivered", "contents": [30, {"akGoal": "a", "akBackend": "x", "akIndex": 0}, 1002.25, {"Left": "boom"}]},
+  {"tag": "Now", "contents": 1002.5},
+  {"tag": "Logged", "contents": {"tag": "Finished", "contents": [2, 1, "a", "x", "error: boom", null, null]}},
   {"tag": "Cancelled", "contents": {"akGoal": "a", "akBackend": "y", "akIndex": 0}},
   {"tag": "Priced", "contents": [{"akGoal": "a", "akBackend": "y", "akIndex": 0}, 0.125]},
-  {"tag": "Capped", "contents": ["auto", 4, true]},
-  {"tag": "Logged", "contents": {"tag": "AutoTimeout", "contents": [3.5, "a", "auto"]}},
+  {"tag": "Capped", "contents": ["auto", 4, true, [{"tag": "AutoTimeout", "contents": [3.5, "a", "auto"]}]]},
   {"tag": "AwaitTimedOut", "contents": [5, 1008.5]}
 ]}
 ```
@@ -527,37 +557,46 @@ spec is not recorded), so no `PromptPart` is ever built from a file.
 with `recordOrchestrator attemptKey` and, once the search returns its
 report, writes its tape (an `AttemptScript`) to TAPE as JSON. The run is
 otherwise a normal run: run directory, run log, ledger, lessons and policy as
-before. TAPE is opened for writing before the run starts, and a path that
-cannot be written is refused then; an interrupted or failed run writes no
-tape, and a final write that fails is a warning on stderr while the run still
-finishes. The flag is refused with `--graph`, whose jobs carry values that are
-never built from a file.
+before. Before the run starts TAPE is opened for appending and closed, so a
+path that cannot be written is refused then, a missing file is created empty
+and a file already there keeps its content. An interrupted or failed run
+writes no tape (an existing TAPE survives it). The final write goes to a
+temporary file in TAPE's directory, renamed over TAPE once whole, so TAPE is
+either the old file or the whole new tape; a final write that fails is a
+warning on stderr while the run still finishes. The flag is refused with
+`--graph`, whose jobs carry values that are never built from a file.
 
 `fisher search FILE --replay TAPE`, with the recorded run's other flags,
 plays the tape back through `replayOrchestrator attemptKey`: every spawn,
-await, cancel, clock reading, cap and price comes from the tape, while
-Lean still runs for the proof checks (the replay reproduces the model
-side only). It prints the learn line, the header, the events and the
-report as a run prints them, with `replay of TAPE` where a run names its
-run directory, and writes nothing: no run directory (its base workspace
-is a temporary directory, removed at the end), no run log, ledger, lessons
-or learned policy. It refuses `--apply`, `--graph`, `--out` and
-`--record`. A tape that cannot be read or decoded, a search that asks for
-something the tape does not hold (`ReplayDiverged`), and a search that
-leaves steps of the tape unconsumed (the consumed count is checked against the
-tape's length) each end the replay with a message on stderr and exit code 1.
-The replay runs no learned policy (the policy is not in the tape, and the one
-on disk is the one the run left, not the one it ran with), so a tape
-recorded with one replays only when the policy left the run's choices as
-the defaults; record with `--no-learn` to replay reliably. A replay's
-retrieval reads the library as it is now, which the recorded run may have
-added to (the briefs and the retrieval events can differ, the tape's keys
-do not), and the `LedgerUnread` events the run's watcher logged outside
-the orchestrator are not replayed.
+await, cancel, clock reading, cap and price comes from the tape, and every
+event the search logs is checked against it, while Lean still runs for the
+proof checks (the replay reproduces the model side only). It prints the learn
+line, the header, the events and the report as a run prints them, with
+`replay of TAPE` where a run names its run directory, and writes nothing: no
+run directory (its base workspace is a temporary directory, removed at the
+end), no run log, ledger, lessons or learned policy. It refuses `--apply`,
+`--graph`, `--out` and `--record`. A tape that cannot be read or decoded (of
+another version, say), a search that asks for something the tape does not
+hold or logs an event other than the tape's (`ReplayDiverged`), and a search
+that leaves steps of the tape unconsumed (the consumed count is checked
+against the tape's length) each end the replay with a message on stderr and
+exit code 1. The replay runs no learned policy (the policy is not in the
+tape, and the one on disk is the one the run left, not the one it ran with),
+so a tape recorded with one replays only when the policy left the run's
+choices as the defaults; record with `--no-learn` to replay reliably. A
+replay's retrieval reads the library as it is now, which the recorded run may
+have added to: a brief that differs is not compared, but a retrieval event
+that differs (`Facts`, `LibraryOffered`) ends the replay. The start events
+and the `LedgerUnread` lines are written around the orchestrator, as the
+guarantee above says, so they are neither on the tape nor compared; the
+watcher's lines are not replayed at all.
 
 The graph search has the recorder and the replayer too, in memory, since both
-are polymorphic: `recordOrchestrator jobKey` wraps its orchestrator. Its tape
-has no file format and no flags (see below).
+are polymorphic: `recordOrchestrator jobKey` wraps its orchestrator, and
+`GraphIdentitySpec` records a real graph run and replays it to the same
+events. Its tape has no file format and no flags (see below), and the graph
+search logs its events through `geLogG`, not through the orchestrator, so a
+graph tape compares the orchestrator's answers only.
 
 ## What is not here
 
@@ -571,4 +610,5 @@ has no file format and no flags (see below).
 - The learned policy in the tape. A replay runs none, so a recording made with
   a learned policy is faithful only when the policy left the choices as they
   were.
-- Lean or Lsp answers in a recording. A replay runs them again.
+- Lean or Lsp answers in a recording. A replay runs them again, and the
+  events they lead to are compared with the tape's.

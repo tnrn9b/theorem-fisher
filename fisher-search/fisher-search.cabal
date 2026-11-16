@@ -49,6 +49,7 @@ library
       Fisher.Search.Splice
       Fisher.Search.Split
       Fisher.Search.Stream
+      Fisher.Search.Tape
       Fisher.Search.Verify
       Fisher.Search.Whiteboard
       Fisher.Search.Workspace

@@ -48,7 +48,8 @@ import Fisher.Search.Report (eventJson, eventLine)
 import Fisher.Search.Attempt (AttemptSpec (..), plainResult)
 import Fisher.Search.Check (AxiomPolicy (..), LeanRun (..), standardAxioms)
 import qualified Fisher.Search.Lean as L
-import Fisher.Search.Orchestrate (Orchestrator (..), Recording (..), Step (..), realOrchestrator)
+import Fisher.Search.Orchestrate (Orchestrator (..), attemptKey, realOrchestrator)
+import Fisher.Search.Tape (Recording (..), ReplayDiverged (..), Step (..), replayOrchestrator, tapeVersion)
 import Fisher.Search.Scheduler (SearchEnv (..))
 import qualified Data.Set as Set
 import Data.IORef (atomicModifyIORef')
@@ -1130,13 +1131,18 @@ smtSpec = describe "the smt arm" $ do
 -- does not compile, an open goal warns, a proof naming an open goal
 -- depends on sorryAx, every name's type is its statement.
 fakeLean :: LeanRun
-fakeLean = LeanRun $ \root rel -> do
+fakeLean = fakeLeanWith (const False)
+
+-- | 'fakeLean' where a closed declaration the predicate names does not
+-- compile either.
+fakeLeanWith :: (Decl -> Bool) -> LeanRun
+fakeLeanWith refused = LeanRun $ \root rel -> do
   t <- TE.decodeUtf8 <$> BS.readFile (root </> rel)
   let body = fst (T.breakOn "\n\n#print axioms" t)
       ds = L.declarations body
       opens = Set.fromList (map dName (filter L.isOpen ds))
       queried = [T.strip (T.drop (T.length "#print axioms ") l) | l <- T.lines t, "#print axioms " `T.isPrefixOf` l]
-      errs = [rel <> ":" <> show (dStart d + 1) <> ":2: error: BAD" | d <- ds, "BAD" `T.isInfixOf` dProof d]
+      errs = [rel <> ":" <> show (dStart d + 1) <> ":2: error: BAD" | d <- ds, "BAD" `T.isInfixOf` dProof d || (refused d && not (L.isOpen d))]
       warns = [rel <> ":" <> show (dStart d + 1) <> ":8: warning: declaration uses `sorry`" | d <- ds, L.isOpen d]
       uses dirty d = any (\o -> o /= dName d && o `Set.member` dirty) (T.words (dProof d))
       grow dirty =
@@ -1174,6 +1180,10 @@ recordSpec = describe "--record and --replay" $ do
         BS.writeFile (root </> "lakefile.lean") "import Lake\nopen Lake DSL\npackage p\n"
         BS.writeFile (root </> "F.lean") (TE.encodeUtf8 source)
         pure root
+      -- the flat search's env on an orchestrator, a Lean and a workspace
+      envOn o lean ws = SearchEnv
+        { seOrch = o, seLean = lean, sePolicy = AxiomPolicy standardAxioms False, seRoot = ws, seRel = "F.lean"
+        , seBaseChanged = \_ -> pure (), seAuto = Nothing, seRetrieval = Nothing }
       -- the flat search recorded to the tape, printed as a run prints it
       -- from its search on: the event lines and the report's lines
       record d tape = do
@@ -1186,10 +1196,7 @@ recordSpec = describe "--record and --replay" $ do
         let say t = modifyIORef' out (t :)
         o0 <- realOrchestrator fakeRun (atomicModifyIORef' clock (\t -> (t + 1, t + 1))) (say . eventLine) (\_ -> pure Nothing)
         (o, writeTape) <- recordingTo (raRecord ra) o0
-        let env = SearchEnv
-              { seOrch = o, seLean = fakeLean, sePolicy = AxiomPolicy standardAxioms False, seRoot = ws, seRel = "F.lean"
-              , seBaseChanged = \_ -> pure (), seAuto = Nothing, seRetrieval = Nothing }
-        r <- swarmSearch ra env (searchConfigFor ra (cascadeFor ra [])) Nothing [] source
+        r <- swarmSearch ra (say . eventLine) (envOn o fakeLean ws) (searchConfigFor ra (cascadeFor ra [])) Nothing [] source
         writeTape
         rep <- either (fail . T.unpack) pure r
         mapM_ say (swarmReportLines rep "; recorded")
@@ -1244,12 +1251,28 @@ recordSpec = describe "--record and --replay" $ do
       (_, writeTape) <- recordingTo (Just (d </> "missing" </> "tape.json")) o
       writeTape `shouldReturn` ()
 
+  it "an existing file at the --record path survives a run that fails before writing, and is replaced whole after one that writes" $
+    withSystemTempDirectory "fisher-record-keep" $ \d -> do
+      let tape = d </> "tape.json"
+      BS.writeFile tape "the old tape"
+      checkRecordPath (Just tape) `shouldReturn` Right ()
+      o <- realOrchestrator (\_ -> pure (plainResult Nothing Nothing "")) (pure 7) (\_ -> pure ()) (\_ -> pure Nothing)
+      (o', writeTape) <- recordingTo (Just tape) o
+      -- the run reads the clock, then fails: its tape is never written
+      _ <- oNow o'
+      BS.readFile tape `shouldReturn` "the old tape"
+      -- a run that returns writes its tape over the old one, and leaves
+      -- no temporary file beside it
+      writeTape
+      readRecording tape >>= either (fail . T.unpack) (\rc -> rcSteps rc `shouldBe` [Now 7])
+      listDirectory d `shouldReturn` ["tape.json"]
+
   it "replaying: a tape left unconsumed, and a divergence, are errors" $ do
-    replaying (\_ -> pure ()) (Recording [Now 1]) (\_ -> pure ())
+    replaying (\_ -> pure ()) (Recording tapeVersion [Now 1]) (\_ -> pure ())
       `shouldReturn` Left "the replay did not consume the whole recording (0 of 1 steps)"
-    r <- replaying (\_ -> pure ()) (Recording [Now 1]) (\o -> oNow o >> oNow o)
+    r <- replaying (\_ -> pure ()) (Recording tapeVersion [Now 1]) (\o -> oNow o >> oNow o)
     either id (const "") r `shouldSatisfy` T.isPrefixOf "the replay diverged from the recording at step 1: the recording has the end of the tape"
-    replaying (\_ -> pure ()) (Recording [Now 1]) oNow `shouldReturn` Right 1
+    replaying (\_ -> pure ()) (Recording tapeVersion [Now 1]) oNow `shouldReturn` Right 1
 
   it "a corrupted tape is a decode error, and the replay exits with code 1" $
     withSystemTempDirectory "fisher-replay-bad" $ \d -> do
@@ -1291,8 +1314,34 @@ recordSpec = describe "--record and --replay" $ do
         listDirectory tmpd `shouldReturn` []
         (sort <$> listDirectory root) `shouldReturn` listed
       -- a tape with a step the search does not take: exit code 1
-      BL.writeFile (d </> "long.json") (A.encode (Recording (rcSteps rc <> [Now 0]) `asTypeOf` rc))
+      BL.writeFile (d </> "long.json") (A.encode rc {rcSteps = rcSteps rc <> [Now 0]})
       fst <$> replay root (d </> "long.json") `shouldReturn` Left (ExitFailure 1)
       -- a tape short of a step: the replay diverges, exit code 1
-      BL.writeFile (d </> "short.json") (A.encode (Recording (init (rcSteps rc)) `asTypeOf` rc))
+      BL.writeFile (d </> "short.json") (A.encode rc {rcSteps = init (rcSteps rc)})
       fst <$> replay root (d </> "short.json") `shouldReturn` Left (ExitFailure 1)
+
+  it "a replay whose Lean judges a proof otherwise ends with ReplayDiverged at that attempt's Finished event" $
+    withSystemTempDirectory "fisher-replay-lean" $ \d -> do
+      let tape = d </> "tape.json"
+      _ <- record d tape
+      rc <- readRecording tape >>= either (fail . T.unpack) pure
+      -- every logged event is on the tape
+      [() | Logged (Finished {}) <- rcSteps rc] `shouldSatisfy` (not . null)
+      -- the replay's Lean refuses a's proof, which the run's closed
+      let ws = d </> "rep"
+          ra = ok (flags <> ["--replay", tape])
+      createDirectoryIfMissing True ws
+      BS.writeFile (ws </> "F.lean") (TE.encodeUtf8 source)
+      (o, _) <- replayOrchestrator attemptKey (\_ -> pure ()) rc
+      r <- try (swarmSearch ra (\_ -> pure ()) (envOn o (fakeLeanWith ((== "a") . dName)) ws) (searchConfigFor ra (cascadeFor ra [])) Nothing [] source)
+      case r of
+        -- the search asked to log a's Finished with its new outcome where
+        -- the tape has the run's next step (a's closing took one more
+        -- clock read than the rejection does)
+        Left (ReplayDiverged at expected actual) -> do
+          at `shouldSatisfy` (< length (rcSteps rc))
+          expected `shouldSatisfy` (/= "the end of the tape")
+          actual `shouldSatisfy` T.isPrefixOf "log Finished"
+          actual `shouldSatisfy` T.isInfixOf "\"a\""
+          actual `shouldSatisfy` T.isInfixOf "rejected"
+        Right _ -> expectationFailure "the replay did not diverge"

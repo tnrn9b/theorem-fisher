@@ -101,10 +101,11 @@ import Fisher.Search.Controller (Health, Stop (..), cap2000, emptyHealth, modelF
 import Fisher.Search.Disprove (Disproof (..), DisproveInfo (..), DisproveSource (..), SmtEnv, disprove, disproveAfterSuspect, disproveWitnessOnly, sourceName)
 import Fisher.Search.Headless (nativeBackend)
 import Fisher.Search.Lean
-import Fisher.Search.Orchestrate (AttemptOrchestrator, Orchestrator (..), ReplayDiverged, Running)
+import Fisher.Search.Orchestrate (AttemptOrchestrator, Orchestrator (..), Running)
 import qualified Fisher.Search.Repair as R
 import Fisher.Search.Retrieval
 import Fisher.Search.Splice (Spliced (..), splice)
+import Fisher.Search.Tape (ReplayDiverged)
 import Fisher.Search.Verify
 
 data SearchConfig = SearchConfig

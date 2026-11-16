@@ -1,9 +1,12 @@
 -- | The graph search's events on the simulator are those on the real
 -- orchestrator: one scenario run through both, the events compared with
--- their times set to 0. The only graph spec of the harness on real
--- threads; its sleeps total well under a second.
+-- their times set to 0. The same scenario on the real orchestrator,
+-- recorded ('recordOrchestrator' over 'jobKey') and replayed, gives the
+-- same events exactly and consumes the tape. The only graph specs of the
+-- harness on real threads; their sleeps total well under a second each.
 module Fisher.Search.GraphIdentitySpec (spec) where
 
+import Data.IORef
 import Data.Text (Text)
 import Test.Hspec
 
@@ -12,6 +15,7 @@ import Fisher.Search.GraphHarness
 import Fisher.Search.GraphReal (realFor)
 import Fisher.Search.GraphRun
 import Fisher.Search.Scripted (accept, plan)
+import Fisher.Search.Tape (Recording (..), Step (..), recordOrchestrator, replayOrchestrator)
 
 -- | Two roots: r1's worker fails at 2 s, its split into l is accepted at
 -- once, l's worker proves l (and so r1) at 4 s; r2's worker would take
@@ -70,7 +74,7 @@ zeroG = \case
       e -> e
 
 spec :: Spec
-spec = describe "the graph search on the simulator against the real orchestrator" $
+spec = describe "the graph search on the simulator against the real orchestrator" $ do
   it "gives the same events, times aside, for the same script" $ do
     sim <- runG gcfg twoRoots runs replies
     -- a real worker cancelled in its sleep records no bookkeeping (see
@@ -85,3 +89,25 @@ spec = describe "the graph search on the simulator against the real orchestrator
     [(t, i, o) | AttemptEnded t i _ o <- evs, i == 2] `shouldBe` [(8, 2, "cancelled: time")]
     [t | GraphStopped t "time" <- evs] `shouldBe` [8]
     grClosedRoots (oRep sim) `shouldBe` 1
+
+  it "a real run recorded replays to the same events exactly, its tape consumed" $ do
+    tapeRef <- newIORef Nothing
+    let rgcfg = gcfg {gcBudget = gcBudget gcfg * msPerSec / 1000}
+        -- the real builder, its orchestrator taped
+        recFor sc run = do
+          o <- realFor msPerSec sc run
+          (o', rd) <- recordOrchestrator jobKey o
+          writeIORef tapeRef (Just rd)
+          pure o'
+    real <- runGBy recFor rgcfg twoRoots runs replies
+    rc <- readIORef tapeRef >>= maybe (fail "the builder was not used") id
+    [() | Spawned _ <- rcSteps rc] `shouldSatisfy` (not . null)
+    countRef <- newIORef (pure 0)
+    let repFor _ _ = do
+          (o, n) <- replayOrchestrator jobKey (\_ -> pure ()) rc
+          writeIORef countRef n
+          pure o
+    replayed <- runGBy repFor rgcfg twoRoots runs replies
+    oEvents replayed `shouldBe` oEvents real
+    n <- readIORef countRef >>= id
+    n `shouldBe` length (rcSteps rc)
