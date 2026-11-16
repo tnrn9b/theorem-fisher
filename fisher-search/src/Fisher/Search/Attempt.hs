@@ -9,8 +9,9 @@ module Fisher.Search.Attempt
   , Event (..)
   ) where
 
-import Data.Aeson (Value)
+import Data.Aeson (FromJSON, ToJSON, Value)
 import Data.Text (Text)
+import GHC.Generics (Generic)
 
 import Fisher.Role (PromptPart)
 import Fisher.Search.Child (ChildStats)
@@ -45,7 +46,13 @@ data AttemptResult = AttemptResult
   , arFailure :: Maybe ModelFailure
   -- ^ the model failed (not the proof)
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Generic)
+
+-- | Generic, with the field names as they are: a recorded run's results
+-- are written to a file and read back for a replay.
+instance ToJSON AttemptResult
+
+instance FromJSON AttemptResult
 
 -- | A result with no controller fields.
 plainResult :: Maybe Text -> Maybe ChildStats -> Text -> AttemptResult

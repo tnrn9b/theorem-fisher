@@ -24,7 +24,7 @@ module Fisher.Search.Controller
   , cap2000
   ) where
 
-import Data.Aeson (Value (..))
+import Data.Aeson (FromJSON, ToJSON, Value (..))
 import qualified Data.Aeson.Key as K
 import qualified Data.Aeson.KeyMap as KM
 import qualified Data.Map.Strict as M
@@ -33,8 +33,14 @@ import Data.Scientific (toRealFloat)
 import qualified Data.Set as S
 import Data.Text (Text)
 import qualified Data.Text as T
+import GHC.Generics (Generic)
 
-data StopReason = StallTurns | StallDollars deriving (Eq, Show)
+data StopReason = StallTurns | StallDollars deriving (Eq, Show, Generic)
+
+-- | Generic: the constructor's name as a string.
+instance ToJSON StopReason
+
+instance FromJSON StopReason
 
 stopReasonText :: StopReason -> Text
 stopReasonText = \case
@@ -43,7 +49,12 @@ stopReasonText = \case
 
 -- | Why and where a goal was stopped: turns and dollars since the last change.
 data Stop = Stop { stReason :: StopReason, stTurns :: Int, stDollars :: Double }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Generic)
+
+-- | Generic, with the field names as they are.
+instance ToJSON Stop
+
+instance FromJSON Stop
 
 -- | Stop after this many turns, or this many dollars, without a change to the
 -- target.  Nothing for dollars means the turn rule only.
@@ -108,7 +119,12 @@ field k = \case
 lastAssistant :: [(Int, Text, Value)] -> Maybe Text
 lastAssistant rows = listToMaybe (reverse [t | (_, "message", v) <- rows, field "role" v == Just (String "assistant"), Just (String t) <- [field "text" v]])
 
-data ModelFailure = Unavailable | NoTools | RateLimited deriving (Eq, Show)
+data ModelFailure = Unavailable | NoTools | RateLimited deriving (Eq, Show, Generic)
+
+-- | Generic: the constructor's name as a string.
+instance ToJSON ModelFailure
+
+instance FromJSON ModelFailure
 
 modelFailureText :: ModelFailure -> Text
 modelFailureText = \case

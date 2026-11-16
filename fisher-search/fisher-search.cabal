@@ -116,6 +116,7 @@ test-suite fisher-search-test
       Fisher.Search.OldName
       Fisher.Search.OrchestrateSpec
       Fisher.Search.OutcomeSpec
+      Fisher.Search.RecordSpec
       Fisher.Search.RepairSpec
       Fisher.Search.ReportSpec
       Fisher.Search.RetrievalFixture

@@ -13,6 +13,12 @@
 -- instead: which job finishes when, in virtual seconds, with what
 -- result. It never sleeps and never forks, so an ordering rule can be
 -- tested deterministically, and its 'SimTrace' records what was done.
+--
+-- 'recordOrchestrator' wraps any orchestrator and records what it did as
+-- a 'Recording', which 'recordingScript' turns into a 'Script' that
+-- replays the run through the simulator. The flat search's recording
+-- ('AttemptScript') has JSON instances, so a run can be written to a
+-- file and replayed later.
 module Fisher.Search.Orchestrate
   ( Running
   , Orchestrator (..)
@@ -27,16 +33,25 @@ module Fisher.Search.Orchestrate
   , scriptEntry
   , SimTrace (..)
   , simOrchestrator
+  , Seconds (..)
+  , Recording (..)
+  , AttemptScript
+  , recordOrchestrator
+  , recordingScript
   ) where
 
 import Control.Concurrent.Async (Async, asyncWithUnmask, cancel, poll, waitAnyCatch)
-import Control.Exception (ErrorCall (..), SomeAsyncException, SomeException, fromException, mask_, throwIO, toException, try)
+import Control.Exception (ErrorCall (..), SomeAsyncException, SomeException, displayException, fromException, mask_, throwIO, toException, try)
+import Control.Monad (forM_, when)
+import Data.Aeson (FromJSON (..), ToJSON (..), Value (..))
 import Data.IORef
 import Data.List (find, minimumBy)
 import qualified Data.Map.Strict as Map
+import Data.Maybe (fromMaybe, isNothing)
 import Data.Ord (comparing)
 import Data.Text (Text)
 import qualified Data.Text as T
+import GHC.Generics (Generic)
 import System.Timeout (timeout)
 
 import Fisher.Search.Attempt
@@ -139,7 +154,12 @@ realOrchestrator run now logE price = do
 -- attempt, its goal and its backend) and how many jobs with that key were
 -- spawned before it (the first is 0).
 data AttemptKey = AttemptKey { akGoal :: Text, akBackend :: Text, akIndex :: Int }
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord, Show, Generic)
+
+-- | Generic, with the field names as they are.
+instance ToJSON AttemptKey
+
+instance FromJSON AttemptKey
 
 -- | The key function for attempts: an attempt's goal and backend.
 attemptKey :: AttemptSpec -> (Text, Text)
@@ -194,15 +214,20 @@ scriptEntry
   -> spec
   -> Either Text (ScriptHit spec res, Map.Map (Text, Text) Int)
 scriptEntry keyFn sc counts sp =
-  let pair@(g, b) = keyFn sp
-      i = Map.findWithDefault 0 pair counts
-      k = AttemptKey g b i
-      counts' = Map.insert pair (i + 1) counts
+  let (k, counts') = spawnKey keyFn counts sp
    in case find (\(k', _, _) -> k' == k) (scAttempts sc) of
         Just (_, d, e) -> Right (ScriptHit k d e False, counts')
         Nothing -> case scDefault sc of
           Just e -> Right (ScriptHit k 0 e True, counts')
           Nothing -> Left ("no script entry for " <> T.pack (show k))
+
+-- | The key of a job spawned now, given how many were spawned before
+-- with each key, and the counts with this spawn added.
+spawnKey :: (spec -> (Text, Text)) -> Map.Map (Text, Text) Int -> spec -> (AttemptKey, Map.Map (Text, Text) Int)
+spawnKey keyFn counts sp =
+  let pair@(g, b) = keyFn sp
+      i = Map.findWithDefault 0 pair counts
+   in (AttemptKey g b i, Map.insert pair (i + 1) counts)
 
 -- | No attempts, no default, no caps, no prices, and steps that take no
 -- time.
@@ -347,3 +372,140 @@ simOrchestrator keyFn script = do
         , oPrice = priceOf
         }
   pure (orch, trace)
+
+-- | Seconds in a recording; infinite for a job never delivered, written
+-- in JSON as the string @never@ (JSON has no infinite number).
+newtype Seconds = Seconds Double
+  deriving (Eq, Ord, Show)
+
+instance ToJSON Seconds where
+  toJSON (Seconds d)
+    | isInfinite d && d > 0 = String "never"
+    | otherwise = toJSON d
+
+instance FromJSON Seconds where
+  parseJSON (String "never") = pure (Seconds (1 / 0))
+  parseJSON v = Seconds <$> parseJSON v
+
+-- | What 'recordOrchestrator' saw, each list oldest first: per spawned
+-- job its key, the seconds from its spawn to its delivery (infinite for
+-- one cancelled or never delivered) and its result (or the exception's
+-- text); the named steps whose cap hit, each with the seconds it was
+-- given; the prices given.
+data Recording spec res = Recording
+  { rcEntries :: [(AttemptKey, Seconds, Either Text res)]
+  , rcCaps :: [(Text, Double)]
+  , rcPrices :: [(AttemptKey, Double)]
+  }
+  deriving (Eq, Show, Generic)
+
+-- | Generic, with the field names as they are: tuples are arrays and a
+-- result is @{"Left": text}@ or @{"Right": result}@. The spec is not
+-- written: on replay the Scheduler builds the specs again.
+instance ToJSON res => ToJSON (Recording spec res)
+
+instance FromJSON res => FromJSON (Recording spec res)
+
+-- | The flat search's recording, the file @--record@ writes.
+type AttemptScript = Recording AttemptSpec AttemptResult
+
+-- | The recorder's state; its lists are newest first.
+data Rec spec res = Rec
+  { rkCounts :: Map.Map (Text, Text) Int
+  , rkSpawns :: [(Running, spec, AttemptKey, Double)]
+  -- ^ every spawn with its key and the clock at spawn
+  , rkDone :: Map.Map Running (Seconds, Either Text res)
+  -- ^ the jobs delivered or cancelled
+  , rkCaps :: [(Text, Double)]
+  , rkPrices :: [(AttemptKey, Double)]
+  }
+
+-- | A wrapper over an orchestrator (a real one, in use) that records what
+-- it did, given the key function, and a reader of the recording so far.
+-- Every field is the wrapped one's; besides, a spawn records the job's
+-- key (counted as 'scriptEntry' counts) and the clock; an await that
+-- delivers a job records the seconds since its spawn and its result (an
+-- exception as its text); a cancel of a job not yet delivered records it
+-- as never delivered, with the text @cancelled@; a capped step whose cap
+-- hit records its name and the seconds it was given (a step that ran is
+-- not recorded); a price given records it under the key of the spec's
+-- latest spawn, found by equality. A job still in flight when the
+-- recording is read is never delivered, with the text @in flight@.
+recordOrchestrator
+  :: forall spec res
+   . Eq spec
+  => (spec -> (Text, Text))
+  -> Orchestrator spec res
+  -> IO (Orchestrator spec res, IO (Recording spec res))
+recordOrchestrator keyFn o = do
+  ref <- newIORef Rec {rkCounts = Map.empty, rkSpawns = [], rkDone = Map.empty, rkCaps = [], rkPrices = []}
+  let never = Seconds (1 / 0)
+      spawn sp = do
+        t0 <- oNow o
+        r <- oSpawn o sp
+        atomicModifyIORef' ref $ \s ->
+          let (k, counts) = spawnKey keyFn (rkCounts s) sp
+           in (s {rkCounts = counts, rkSpawns = (r, sp, k, t0) : rkSpawns s}, ())
+        pure r
+      awaitAny secs rs = do
+        got <- oAwaitAny o secs rs
+        forM_ got $ \(r, res) -> do
+          t1 <- oNow o
+          let res' = either (Left . T.pack . displayException) Right res
+          atomicModifyIORef' ref $ \s -> case [t0 | (r', _, _, t0) <- rkSpawns s, r' == r] of
+            t0 : _ -> (s {rkDone = Map.insert r (Seconds (t1 - t0), res') (rkDone s)}, ())
+            [] -> (s, ())
+        pure got
+      cancelOne r = do
+        oCancel o r
+        -- one delivered or already cancelled keeps its entry
+        atomicModifyIORef' ref $ \s ->
+          if any (\(r', _, _, _) -> r' == r) (rkSpawns s)
+            then (s {rkDone = Map.insertWith (\_ old -> old) r (never, Left "cancelled") (rkDone s)}, ())
+            else (s, ())
+      capped :: Text -> Double -> IO a -> IO (Maybe a)
+      capped name secs act = do
+        got <- oCapped o name secs act
+        when (isNothing got) $ atomicModifyIORef' ref (\s -> (s {rkCaps = (name, secs) : rkCaps s}, ()))
+        pure got
+      priceOf sp = do
+        got <- oPrice o sp
+        forM_ got $ \d -> atomicModifyIORef' ref $ \s ->
+          let k = case [k' | (_, sp', k', _) <- rkSpawns s, sp' == sp] of
+                k' : _ -> k'
+                [] -> fst (spawnKey keyFn (rkCounts s) sp)
+           in (s {rkPrices = (k, d) : rkPrices s}, ())
+        pure got
+      recording = do
+        s <- readIORef ref
+        pure Recording
+          { rcEntries =
+              [ (k, secs, res)
+              | (r, _, k, _) <- reverse (rkSpawns s)
+              , let (secs, res) = fromMaybe (never, Left "in flight") (Map.lookup r (rkDone s)) ]
+          , rcCaps = reverse (rkCaps s)
+          , rcPrices = reverse (rkPrices s)
+          }
+      orch = Orchestrator
+        { oSpawn = spawn
+        , oAwaitAny = awaitAny
+        , oCancel = cancelOne
+        , oNow = oNow o
+        , oLog = oLog o
+        , oCapped = capped
+        , oPrice = priceOf
+        }
+  pure (orch, recording)
+
+-- | The script that replays a recording through 'simOrchestrator': each
+-- entry's constant result after its seconds (one never delivered is never
+-- due, so it is cancelled on replay as it was in the run), the caps and
+-- prices as recorded, no default and no step cost.
+recordingScript :: Recording spec res -> Script spec res
+recordingScript rc = Script
+  { scAttempts = [(k, secs, Scripted (const (pure res))) | (k, Seconds secs, res) <- rcEntries rc]
+  , scDefault = Nothing
+  , scCaps = rcCaps rc
+  , scPrices = rcPrices rc
+  , scStepCost = 0
+  }

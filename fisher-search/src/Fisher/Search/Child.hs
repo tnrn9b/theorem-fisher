@@ -9,7 +9,7 @@ module Fisher.Search.Child
 
 import Control.Exception (SomeException, bracketOnError, try)
 import Control.Monad (void)
-import Data.Aeson (Value (..), decodeStrict)
+import Data.Aeson (FromJSON, ToJSON, Value (..), decodeStrict)
 import qualified Data.Aeson.Key as K
 import qualified Data.Aeson.KeyMap as KM
 import qualified Data.ByteString as BS
@@ -18,6 +18,7 @@ import qualified Data.Map.Strict as Map
 import Data.Scientific (toBoundedInteger)
 import Data.Text (Text)
 import Data.Time.Clock.POSIX (getPOSIXTime)
+import GHC.Generics (Generic)
 import System.Exit (ExitCode (..))
 import System.FilePath ((</>))
 import System.IO (IOMode (..), withFile)
@@ -36,7 +37,12 @@ data ChildStats = ChildStats
   , csResult :: Maybe Text
   , csTools :: Map.Map Text Int
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Generic)
+
+-- | Generic, with the field names as they are.
+instance ToJSON ChildStats
+
+instance FromJSON ChildStats
 
 -- | Run @argv@ in @cwd@ with @env@, stdout to @dir/stream.jsonl@ and
 -- stderr to @dir/stderr.txt@, for at most @secs@ seconds. An exception
