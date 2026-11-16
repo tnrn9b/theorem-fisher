@@ -44,11 +44,6 @@ module Fisher.Search.GraphRun
   , jobKey
   , Kind (..)
   , Out (..)
-  , PlanInputs (..)
-  , ReviewInputs (..)
-  , FalseInputs (..)
-  , RoleCtxs
-  , runGraphJob
   , plannerModel
   , runGraph
   , failureNote
@@ -216,6 +211,7 @@ data Kind
   -- ^ the attempt and when it started
   | KPlan SplitId PlanInputs
   | KReview SplitId Plan ReviewInputs
+  -- ^ the split and the plan under review
   | KFalse Text FalseInputs
   -- ^ the worker's claim
   deriving (Eq)
@@ -232,18 +228,18 @@ data PlanInputs = PlanInputs
   }
   deriving (Eq)
 
--- | The reviewer's arguments ('reviewJob').
+-- | The reviewer's arguments ('reviewJob') besides the plan, which is
+-- 'KReview''s own.
 data ReviewInputs = ReviewInputs
   { riStatement :: Text
-  , riPlan :: Plan
   , riBoard :: PromptPart
   }
   deriving (Eq)
 
--- | The falsifier's arguments ('falseJob').
-data FalseInputs = FalseInputs
+-- | The falsifier's arguments ('falseJob') besides the claim, which is
+-- 'KFalse''s own.
+newtype FalseInputs = FalseInputs
   { fiStatement :: Text
-  , fiClaim :: Text
   }
   deriving (Eq)
 
@@ -349,8 +345,8 @@ runGraphJob rc orch job = case jKind job of
   KWorker spec _ -> OutWorker <$> runToEnd orch spec
   KPlan _ i -> OutPlan <$> runRole (rcPlanner rc)
     (planJob (piBase i) (piName i) (piExpected i) (piUsable i) (piBoard i) (piNotes i) (piRetrieved i))
-  KReview _ _ i -> OutReview <$> runRole (rcVerifier rc) (reviewJob (riStatement i) (riPlan i) (riBoard i))
-  KFalse _ i -> OutFalse <$> runRole (rcVerifier rc) (falseJob (fiStatement i) (fiClaim i))
+  KReview _ p i -> OutReview <$> runRole (rcVerifier rc) (reviewJob (riStatement i) p (riBoard i))
+  KFalse claim i -> OutFalse <$> runRole (rcVerifier rc) (falseJob (fiStatement i) claim)
 
 -- | Search the open goals of @base0@ as a lemma graph.
 runGraph :: GraphConfig -> GraphEnv -> Text -> IO (Either Text GraphReport)
@@ -860,7 +856,7 @@ workerDone c n spec started res = do
                   then do
                     modify c (\x -> x {stCapHit = True})
                     failurePieces c n [Piece static "FALSE: ", Piece workerNote claim, Piece static " (not checked: the dollar cap)"]
-                  else startJob c n (KFalse claim (FalseInputs (stmtOf s2 n) claim))
+                  else startJob c n (KFalse claim (FalseInputs (stmtOf s2 n)))
   addCost c Worker (fromMaybe 0 dollars)
   -- a stopped worker is logged before its record, its file judged as any other's
   forM_ (mar >>= arStop) $ \st ->
@@ -925,7 +921,7 @@ toReview c n sid p = do
   s <- getSt c
   if capped c s
     then modify c (\x -> x {stCapHit = True})
-    else startJob c n (KReview sid p (ReviewInputs (stmtOf s n) p (boardOf s (nRoot (nodeOf s n)))))
+    else startJob c n (KReview sid p (ReviewInputs (stmtOf s n) (boardOf s (nRoot (nodeOf s n)))))
 
 -- | A failed split; its reason is a part whose pieces say where they came
 -- from ('tool' for Lean's errors or an exception, 'static' for Fisher's

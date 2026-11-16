@@ -189,7 +189,7 @@ data Job = Job { jId :: Int, jNode :: NodeId, jName :: Text, jKind :: Kind }
 data Kind
   = KWorker AttemptSpec Double          -- the attempt, and when it started
   | KPlan SplitId PlanInputs
-  | KReview SplitId Plan ReviewInputs
+  | KReview SplitId Plan ReviewInputs   -- the split and the plan under review
   | KFalse Text FalseInputs             -- the worker's claim
 data Out
   = OutWorker AttemptResult
@@ -197,7 +197,7 @@ data Out
   | OutReview (Asked SplitVerdict)
   | OutFalse (Asked (Bool, Said 'Verifier))
 jobKey :: Job -> (Text, Text)           -- (node name, "worker" | "plan" | "review" | "false")
-runGraphJob :: RoleCtxs -> AttemptOrchestrator -> Job -> IO Out
+runGraphJob :: RoleCtxs -> AttemptOrchestrator -> Job -> IO Out   -- not exported
 ```
 
 `jId` is the job's number, unique in the run, so two jobs that look alike
@@ -207,16 +207,21 @@ node's name and `jKind` says what the job is. `Kind` carries each job's
 inputs, so the job is a value that can be run later: `PlanInputs` is what the
 planner's job is called with (the base, the node's name and expected type,
 the usable lemmas, the whiteboard, the notes of failed attempts and the
-retrieved text), `ReviewInputs` the reviewer's (the statement, the plan and
-the whiteboard) and `FalseInputs` the falsifier's (the statement and the
-claim). `Out` is the result by kind: a worker's `AttemptResult`, or what a
+retrieved text), `ReviewInputs` the reviewer's besides the plan (the
+statement and the whiteboard) and `FalseInputs` the falsifier's besides the
+claim (the statement); the plan and the claim are `KReview`'s and `KFalse`'s
+own fields, held once. The input records, `RoleCtxs` and `runGraphJob` are
+internal to `GraphRun`; `Job (..)`, `jobKey`, `Kind (..)` and `Out (..)` are
+exported for the harness. `Out` is the result by kind: a worker's `AttemptResult`, or what a
 role call returned (`Asked`, the call's reply with its dollars).
 
 `runGraphJob` is the one place that says how a job runs: a worker's attempt
 goes to its end on the flat orchestrator (`runToEnd`), and a planner, reviewer
 or falsifier is a role call over the job's inputs, through the run's role
-contexts. The CLI and the test harness both use it, so the dispatch is not
-repeated.
+contexts. Only `runGraph` calls it: it hands `runGraphJob` over the run's
+role contexts to the builder (`geOrch`), so a real builder's orchestrator
+runs jobs with it, and neither the CLI nor the test harness repeats the
+dispatch.
 
 ### GraphEnv.geOrch
 
