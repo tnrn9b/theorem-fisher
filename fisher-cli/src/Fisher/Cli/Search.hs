@@ -217,7 +217,7 @@ import System.Environment (getArgs)
 import qualified Data.Text.IO as TIO
 import Data.Time (defaultTimeLocale, formatTime, getZonedTime)
 import Data.Time.Clock.POSIX (getPOSIXTime)
-import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesFileExist, getHomeDirectory, getTemporaryDirectory, makeAbsolute, removeDirectoryRecursive, removeFile, renameFile)
+import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesFileExist, getHomeDirectory, getTemporaryDirectory, makeAbsolute, removeDirectoryRecursive, removeFile, renameFile, copyFile, listDirectory)
 import System.Info (os)
 import System.Process (proc, readCreateProcessWithExitCode)
 import qualified Data.ByteString as BS
@@ -1432,6 +1432,18 @@ data ReplayIO = ReplayIO
   , rpSay :: T.Text -> IO ()
   }
 
+-- | Copy the directory @from@ (its files and subdirectories) to @to@,
+-- created; nothing when @from@ does not exist.
+copyTree :: FilePath -> FilePath -> IO ()
+copyTree from to = do
+  there <- doesDirectoryExist from
+  when there $ do
+    createDirectoryIfMissing True to
+    names <- listDirectory from
+    forM_ names $ \n -> do
+      isDir <- doesDirectoryExist (from </> n)
+      if isDir then copyTree (from </> n) (to </> n) else copyFile (from </> n) (to </> n)
+
 -- | @fisher search FILE --replay TAPE@ on the live Lean, config and console.
 replayMain :: RunArgs -> FilePath -> FilePath -> IO ()
 replayMain ra file tape = do
@@ -1442,8 +1454,10 @@ replayMain ra file tape = do
 
 -- | The replay: the tape read (else its error on stderr, exit code 1),
 -- then the flat search as a run sets it up (the smt arm, the controller,
--- the automation, read-only retrieval) on the replaying orchestrator,
--- its base workspace a temporary directory removed at the end; the learn
+-- the automation, the retrieval over a copy of the library in the
+-- temporary directory, which the harvest saves into) on the replaying
+-- orchestrator, its base workspace in that temporary directory, removed
+-- at the end with the copy; the learn
 -- line, the header (the tape's path where a run names its run
 -- directory), the events and the report printed as a run prints them.
 -- No run directory, run log, ledger, lessons, policy or @--apply@. A
@@ -1476,9 +1490,15 @@ replayMainWith rio ra0 file0 tapePath = do
     say (learnLine (replayLearn ra))
     say (searchHeader rel root (length (openGoals original)) at False)
     started <- startServer say ra (ssSmt smt) baseWs rel
+    -- the retrieval over a copy of the library in the temporary
+    -- directory, written back as the run's was: the harvest runs and
+    -- logs as it did, and saves into the copy, removed with the rest
     (retrieval, retrievalEvents) <-
       if retrievalWanted ra && raSingle ra == Nothing
-        then getFisherHome >>= \home -> buildRetrievalAt True home ra root dir
+        then getFisherHome >>= \home -> do
+          let copy = dir </> "library"
+          copyTree (libraryDirFor ra home root) copy
+          buildRetrievalAt False home ra {raLibraryDir = Just copy} root dir
         else pure (Nothing, [])
     let auto = either (const Nothing) (fmap fst) started
         env o = SearchEnv

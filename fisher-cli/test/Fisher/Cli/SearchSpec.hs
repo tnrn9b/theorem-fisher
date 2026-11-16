@@ -1127,6 +1127,18 @@ smtSpec = describe "the smt arm" $ do
       without <- briefIn False
       "lean-smt" `T.isInfixOf` without `shouldBe` False
 
+-- | Every file under a directory, by its path in it, with its bytes, in
+-- order.
+snapshotDir :: FilePath -> IO [(FilePath, BS.ByteString)]
+snapshotDir top = go ""
+  where
+    go rel = do
+      names <- sort <$> listDirectory (top </> rel)
+      concat <$> mapM (\n -> do
+        let p = if null rel then n else rel </> n
+        isDir <- doesDirectoryExist (top </> p)
+        if isDir then go p else (\b -> [(p, b)]) <$> BS.readFile (top </> p)) names
+
 -- | A Lean stand-in (fisher-search's test one): a proof containing BAD
 -- does not compile, an open goal warns, a proof naming an open goal
 -- depends on sorryAx, every name's type is its statement.
@@ -1186,9 +1198,16 @@ recordSpec = describe "--record and --replay" $ do
         , seBaseChanged = \_ -> pure (), seAuto = Nothing, seRetrieval = Nothing }
       -- the flat search recorded to the tape, printed as a run prints it
       -- from its search on: the event lines and the report's lines
-      record d tape = do
-        let ra = ok (flags <> ["--record", tape])
+      record = recordWith flags
+      -- the same with these flags; with the library or retrieval on, its
+      -- retrieval built as a run builds it (over the project at proj, its
+      -- run directory run)
+      recordWith fl d tape = do
+        let ra = ok (fl <> ["--record", tape])
             ws = d </> "rec"
+        createDirectoryIfMissing True (d </> "run")
+        (ret, retEvents) <-
+          if retrievalWanted ra then buildRetrievalAt False (d </> "fhome") ra (d </> "proj") (d </> "run") else pure (Nothing, [])
         createDirectoryIfMissing True ws
         BS.writeFile (ws </> "F.lean") (TE.encodeUtf8 source)
         out <- newIORef []
@@ -1196,7 +1215,7 @@ recordSpec = describe "--record and --replay" $ do
         let say t = modifyIORef' out (t :)
         o0 <- realOrchestrator fakeRun (atomicModifyIORef' clock (\t -> (t + 1, t + 1))) (say . eventLine) (\_ -> pure Nothing)
         (o, writeTape) <- recordingTo (raRecord ra) o0
-        r <- swarmSearch ra (say . eventLine) (envOn o fakeLean ws) (searchConfigFor ra (cascadeFor ra [])) Nothing [] source
+        r <- swarmSearch ra (say . eventLine) (envOn o fakeLean ws) {seRetrieval = ret} (searchConfigFor ra (cascadeFor ra [])) Nothing retEvents source
         writeTape
         rep <- either (fail . T.unpack) pure r
         mapM_ say (swarmReportLines rep "; recorded")
@@ -1319,6 +1338,30 @@ recordSpec = describe "--record and --replay" $ do
       -- a tape short of a step: the replay diverges, exit code 1
       BL.writeFile (d </> "short.json") (A.encode rc {rcSteps = init (rcSteps rc)})
       fst <$> replay root (d </> "short.json") `shouldReturn` Left (ExitFailure 1)
+
+  it "a search recorded with the library on replays to its end, harvesting into a copy: the library is left as it was" $
+    withSystemTempDirectory "fisher-replay-lib" $ \d -> do
+      root <- project d
+      let tape = d </> "tape.json"
+          lib = d </> "lib"
+          libFlags = ["F.lean", "--no-auto", "--no-retrieval", "--no-learn", "--no-lessons", "--library-dir", lib]
+      _ <- recordWith libFlags d tape
+      rc <- readRecording tape >>= either (fail . T.unpack) pure
+      -- the run's harvest is on the tape
+      [() | Logged (LibrarySaved {}) <- rcSteps rc] `shouldSatisfy` (not . null)
+      libBefore <- snapshotDir lib
+      libBefore `shouldSatisfy` (not . null)
+      private d $ \home tmpd -> do
+        out <- newIORef []
+        r <- try (replayMainWith (ReplayIO fakeLean (A.object []) (\t -> modifyIORef' out (t :))) (ok (libFlags <> ["--replay", tape])) (root </> "F.lean") tape)
+        -- a replay that diverged or left steps unconsumed exits 1, so
+        -- this one consumed the whole tape, the harvest's steps included
+        (r :: Either ExitCode ()) `shouldBe` Right ()
+        ls <- readIORef out
+        any ("library saved" `T.isInfixOf`) ls `shouldBe` True
+        snapshotDir lib `shouldReturn` libBefore
+        listDirectory home `shouldReturn` []
+        listDirectory tmpd `shouldReturn` []
 
   it "a replay whose Lean judges a proof otherwise ends with ReplayDiverged at that attempt's Finished event" $
     withSystemTempDirectory "fisher-replay-lean" $ \d -> do

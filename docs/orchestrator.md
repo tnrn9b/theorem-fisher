@@ -570,7 +570,9 @@ and a file already there keeps its content. An interrupted or failed run
 writes no tape (an existing TAPE survives it). The final write goes to a
 temporary file in TAPE's directory, renamed over TAPE once whole, so TAPE is
 either the old file or the whole new tape; a final write that fails is a
-warning on stderr while the run still finishes. The flag is refused with
+warning on stderr while the run still finishes. The tape file is written
+through a temporary file and so has mode 0600, and a replay harvests into
+a temporary copy of the library. The flag is refused with
 `--graph`, whose jobs carry values that are never built from a file.
 
 `fisher search FILE --replay TAPE`, with the recorded run's other flags,

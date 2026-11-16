@@ -19,7 +19,7 @@ module Fisher.Search.Tape
   , replayOrchestrator
   ) where
 
-import Control.Exception (ErrorCall (..), Exception, SomeAsyncException, SomeException, displayException, fromException, throwIO, toException, try)
+import Control.Exception (ErrorCall (..), Exception, SomeAsyncException, SomeException, displayException, fromException, throwIO, toException, try, uninterruptibleMask_)
 import Data.Aeson (FromJSON (..), ToJSON, withObject, (.:))
 import Data.IORef
 import qualified Data.Map.Strict as Map
@@ -171,7 +171,9 @@ recordOrchestrator keyFn o = do
       cancelOne r = do
         oCancel o r
         keyOf r >>= append . Cancelled
-      logOne e = do
+      -- the log and its step are one, uninterruptibly masked: a hit cap's
+      -- timeout cannot land between them
+      logOne e = uninterruptibleMask_ $ do
         oLog o e
         append (Logged e)
       capped :: Text -> Double -> IO a -> IO (Maybe a)
