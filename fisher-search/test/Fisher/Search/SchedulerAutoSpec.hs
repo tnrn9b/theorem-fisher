@@ -25,8 +25,8 @@ import Fisher.Search.Disprove (Disproof (..), DisproveSource (..), SmtEnv (..), 
 import Fisher.Search.FakeLean (fakeLean)
 import Fisher.Search.FakeLsp
 import Fisher.Search.Lean
-import Fisher.Search.Report
 import Fisher.Search.Orchestrate (realOrchestrator)
+import Fisher.Search.Report
 import Fisher.Search.Scheduler
 import Fisher.Search.Splice (applySmtImport, smtKept)
 import Fisher.Smt (Model (..), SmtResult (..), Solver (..), Sort (..))

@@ -23,8 +23,8 @@ import Fisher.Search.Controller (ModelFailure (..), Stop (..), StopReason (..), 
 import Fisher.Search.FakeLean (fakeLean)
 import Fisher.Search.FakeLsp
 import Fisher.Search.Lean
-import Fisher.Search.Report (eventJson, reportJson)
 import Fisher.Search.Orchestrate (realOrchestrator)
+import Fisher.Search.Report (eventJson, reportJson)
 import Fisher.Search.Scheduler
 
 one :: Text
@@ -89,7 +89,7 @@ searchPriced price cfg ac file script0 = withSystemTempDirectory "stops" $ \root
               stats = (\c -> ChildStats (Just 1) 1 (Just 3) Nothing Nothing (Just c) Nothing Map.empty) <$> sCost s
           pure (plainResult (Just out) stats "exit 1")
             { arStop = sStop s, arLastMessage = sMessage s, arDollars = sDollars s, arFailure = sFailure s }
-  orch <- realOrchestrator run (realToFrac <$> getPOSIXTime) (\e -> modifyIORef events (e :)) (price)
+  orch <- realOrchestrator run (realToFrac <$> getPOSIXTime) (\e -> modifyIORef events (e :)) price
   let env = SearchEnv
         { seOrch = orch, seLean = fakeLean, sePolicy = AxiomPolicy standardAxioms False, seRoot = root, seRel = "F.lean"
         , seBaseChanged = \_ -> pure ()

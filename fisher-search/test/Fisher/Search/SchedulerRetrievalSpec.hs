@@ -29,10 +29,10 @@ import Fisher.Search.FakeLsp
 import Fisher.Search.Index
 import Fisher.Search.Lean
 import Fisher.Search.Library
+import Fisher.Search.Orchestrate (realOrchestrator)
 import Fisher.Search.Report
 import Fisher.Search.RetrievalFixture
 import Fisher.Search.Retrieval
-import Fisher.Search.Orchestrate (realOrchestrator)
 import Fisher.Search.Scheduler
 
 goals :: Text

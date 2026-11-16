@@ -20,8 +20,8 @@ module Fisher.Search.Orchestrate
   , simOrchestrator
   ) where
 
-import Control.Concurrent.Async (Async, async, cancel, waitAnyCatch)
-import Control.Exception (ErrorCall (..), SomeException, throwIO, toException)
+import Control.Concurrent.Async (Async, asyncWithUnmask, cancel, waitAnyCatch)
+import Control.Exception (ErrorCall (..), SomeException, mask_, throwIO, toException)
 import Data.IORef
 import Data.List (find, minimumBy)
 import qualified Data.Map.Strict as Map
@@ -68,8 +68,11 @@ realOrchestrator
 realOrchestrator run now logE price = do
   handles <- newIORef (Map.empty :: Map.Map Int (Async AttemptResult))
   counter <- newIORef (0 :: Int)
-  let spawn sp = do
-        a <- async (run sp)
+  -- the fork and the handle's record are one step, masked, so no
+  -- asynchronous exception can leave a thread nobody can cancel; the
+  -- attempt itself runs unmasked
+  let spawn sp = mask_ $ do
+        a <- asyncWithUnmask (\unmask -> unmask (run sp))
         n <- atomicModifyIORef' counter (\c -> (c + 1, c))
         atomicModifyIORef' handles (\m -> (Map.insert n a m, ()))
         pure (Running n)

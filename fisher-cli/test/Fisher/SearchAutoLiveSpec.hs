@@ -33,8 +33,8 @@ import Fisher.Search.Auto (AutoConfig (..), Diag (..), Lsp (..), Trial (..), cut
 import Fisher.Search.Lean (declarations, findDecl)
 import Fisher.Search.Check (AxiomPolicy (..), lakeLeanRun, standardAxioms)
 import Fisher.Search.Disprove (Disproof (..))
-import Fisher.Search.Report (eventLine)
 import Fisher.Search.Orchestrate (realOrchestrator)
+import Fisher.Search.Report (eventLine)
 import Fisher.Search.Scheduler
 
 cloneLean :: FilePath -> FilePath

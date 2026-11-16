@@ -24,8 +24,8 @@ import Fisher.Search.Controller (ModelFailure (..))
 import Fisher.Search.FakeLean (fakeLean)
 import Fisher.Search.FakeLsp
 import Fisher.Search.Lean
-import Fisher.Search.Report
 import Fisher.Search.Orchestrate (realOrchestrator)
+import Fisher.Search.Report
 import Fisher.Search.Scheduler
 
 one :: Text

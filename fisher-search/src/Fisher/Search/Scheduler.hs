@@ -72,7 +72,7 @@ module Fisher.Search.Scheduler
   , runToEnd
   ) where
 
-import Control.Exception (SomeAsyncException, SomeException, displayException, fromException, onException, throwIO, try)
+import Control.Exception (SomeAsyncException, SomeException, displayException, fromException, mask, onException, throwIO, try)
 import Control.Monad (forM_, join, void, when)
 import Data.Aeson (Value (..))
 import qualified Data.Aeson.Key as K
@@ -1028,11 +1028,16 @@ runSingle env backend base0 = do
 
 -- | One attempt spawned and waited for to the end: its result, or its
 -- exception rethrown. An exception while waiting (the caller cancelled)
--- cancels the attempt.
+-- cancels the attempt; the spawn and the handler are set up masked, so
+-- no asynchronous exception between them leaves the attempt running.
+--
+-- The caller is the only holder of the 'Running': nobody else cancels or
+-- awaits it. If anyone did, 'oAwaitAny' would return Nothing at once and
+-- the wait would spin.
 runToEnd :: Orchestrator -> AttemptSpec -> IO AttemptResult
-runToEnd orch spec = do
+runToEnd orch spec = mask $ \restore -> do
   r <- oSpawn orch spec
   let wait = oAwaitAny orch 86400 [r] >>= \case
         Nothing -> wait
         Just (_, res) -> either throwIO pure res
-  wait `onException` oCancel orch r
+  restore wait `onException` oCancel orch r

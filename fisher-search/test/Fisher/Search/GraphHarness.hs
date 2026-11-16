@@ -59,8 +59,8 @@ import Fisher.Search.FakeLean (fakeLeanBy)
 import Fisher.Search.Graph
 import Fisher.Search.GraphRun
 import Fisher.Search.Lean
-import Fisher.Search.Orchestrate (realOrchestrator)
 import Fisher.Search.Library (Library, loadLibrary)
+import Fisher.Search.Orchestrate (realOrchestrator)
 import Fisher.Search.Retrieval (RetrievalEnv (..))
 import Fisher.Search.Scheduler
 import Fisher.Search.Scripted (withProof)
