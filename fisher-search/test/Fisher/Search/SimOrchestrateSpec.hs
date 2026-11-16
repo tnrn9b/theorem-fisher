@@ -49,6 +49,27 @@ spec = describe "simOrchestrator" $ do
     outcome got' `shouldBe` Just (r, Right "late")
     oNow o `shouldReturn` 12
 
+  it "an attempt due just after the deadline is not delivered even with a step cost" $ do
+    (o, _) <- simOrchestrator emptyScript {scAttempts = [(key "a" "x" 0, 10.5, done "late")], scStepCost = 1}
+    r <- oSpawn o (attempt 1 "a" "x")
+    outcome <$> oAwaitAny o 10 [r] `shouldReturn` Nothing
+    -- a timed out await stops at the deadline, with no step cost
+    oNow o `shouldReturn` 10
+    -- a delivery charges the step cost after the due time
+    outcome <$> oAwaitAny o 5 [r] `shouldReturn` Just (r, Right "late")
+    oNow o `shouldReturn` 11.5
+    -- with nothing in flight an await returns at once and charges nothing
+    outcome <$> oAwaitAny o 5 [r] `shouldReturn` Nothing
+    oNow o `shouldReturn` 11.5
+
+  it "negative seconds never move the clock backwards" $ do
+    (o, _) <- simOrchestrator emptyScript {scAttempts = [(key "a" "x" 0, 3, done "ok")], scCaps = [("disprove", 2)]}
+    r <- oSpawn o (attempt 1 "a" "x")
+    outcome <$> oAwaitAny o (-5) [r] `shouldReturn` Nothing
+    oNow o `shouldReturn` 0
+    oCapped o "disprove" (-5) (pure 'x') `shouldReturn` Nothing
+    oNow o `shouldReturn` 0
+
   it "two attempts due together" $ do
     (o, _) <- simOrchestrator emptyScript
       {scAttempts = [(key "a" "x" 0, 3, done "first"), (key "b" "y" 0, 3, done "second")]}

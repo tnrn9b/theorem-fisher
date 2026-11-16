@@ -36,20 +36,33 @@ import Fisher.Search.Attempt
 newtype Running = Running Int
   deriving (Eq, Ord, Show)
 
+-- | The Scheduler's effects. Each field's haddock is the contract every
+-- interpreter keeps.
 data Orchestrator = Orchestrator
   { oSpawn :: AttemptSpec -> IO Running
+  -- ^ start an attempt now and return its handle
   , oAwaitAny :: Double -> [Running] -> IO (Maybe (Running, Either SomeException AttemptResult))
-  -- ^ the first of these to finish, or Nothing when the given seconds pass
-  -- first (at once when none of them is still in flight); one delivered is
-  -- gone
+  -- ^ the first of these to finish, with its result or its exception;
+  -- Nothing when the given seconds pass first, and Nothing at once when
+  -- none of them is still in flight. An attempt delivered is gone: it is
+  -- never delivered again. The two interpreters differ in two places the
+  -- Scheduler never reaches: on a tie the real one delivers in list
+  -- order (newest first, as the Scheduler lists them) and the simulator
+  -- delivers the one spawned first; and with zero seconds the real one
+  -- returns Nothing (@timeout 0@) while the simulator delivers an attempt
+  -- already due.
   , oCancel :: Running -> IO ()
+  -- ^ stop an attempt, so it is never delivered; cancelling one already
+  -- delivered, or unknown, is a no-op
   , oNow :: IO Double
+  -- ^ the clock, in seconds
   , oLog :: Event -> IO ()
+  -- ^ write one event to the run log
   , oCapped :: forall a. Text -> Double -> IO a -> IO (Maybe a)
   -- ^ run a named step under a wall cap in seconds; Nothing when the cap
-  -- hits (the step name is for the simulator's script and the
-  -- @AutoTimeout@ event)
+  -- hits. The name is for the simulator's script; it is not logged.
   , oPrice :: AttemptSpec -> IO (Maybe Double)
+  -- ^ the dollars a cancelled attempt spent, when known
   }
 
 -- | The real one, from the run function, the clock, the log and the
@@ -86,7 +99,8 @@ realOrchestrator run now logE price = do
             case got of
               Nothing -> pure Nothing
               Just (a, res) -> case find ((== a) . snd) live of
-                Nothing -> pure Nothing
+                -- waitAnyCatch returns one of the handles it was given
+                Nothing -> error "realOrchestrator: waitAnyCatch returned a handle it was not given"
                 Just (r@(Running n), _) -> do
                   atomicModifyIORef' handles (\m' -> (Map.delete n m', ()))
                   pure (Just (r, res))
@@ -121,7 +135,8 @@ data Script = Script
   -- consumed
   , scPrices :: [(AttemptKey, Double)]
   , scStepCost :: Double
-  -- ^ virtual seconds every other capped step and every await consumes
+  -- ^ virtual seconds every other capped step consumes, and every await
+  -- that delivers an attempt, after the delivery
   }
 
 -- | No attempts, no default, no caps, no prices, and steps that take no
@@ -152,8 +167,11 @@ data Sim = Sim
   }
 
 -- | The simulated one and a reader of its trace. Virtual time starts at
--- 0 and moves only through an await (to the attempt delivered, or to the
--- deadline) and a capped step. An attempt neither scripted nor covered by
+-- 0, never moves backwards, and moves only through an await (to the
+-- attempt delivered plus 'scStepCost', or to the deadline) and a capped
+-- step. An await's deadline is the clock plus its seconds, taken before
+-- any step cost; an await with none of its attempts in flight returns at
+-- once and leaves the clock alone. An attempt neither scripted nor covered by
 -- 'scDefault', or a price the script does not list, throws an 'ErrorCall'
 -- naming its key. Awaiting delivers the earliest due of the given
 -- attempts, the one spawned first among those due together; a cancelled
@@ -181,20 +199,20 @@ simOrchestrator script = do
           }
         pure (Running n)
       awaitAny secs rs = do
-        modifyIORef' ref (\s -> s {smClock = smClock s + scStepCost script})
         s <- readIORef ref
         let now = smClock s
+            deadline = now + max 0 secs
             live = [(due, n, res) | Running n <- rs, Just (due, res) <- [Map.lookup n (smDue s)]]
         case live of
           [] -> pure Nothing
           _ -> do
             let (due, n, res) = minimumBy (comparing (\(d, i, _) -> (d, i))) live
-            if due <= now + secs
+            if due <= deadline
               then do
-                writeIORef ref s {smClock = max now due, smDue = Map.delete n (smDue s)}
+                writeIORef ref s {smClock = max now due + scStepCost script, smDue = Map.delete n (smDue s)}
                 pure (Just (Running n, either (Left . toException . ErrorCall . T.unpack) Right res))
               else do
-                writeIORef ref s {smClock = now + secs}
+                writeIORef ref s {smClock = deadline}
                 pure Nothing
       cancelOne r@(Running n) = modifyIORef' ref $ \s ->
         if Map.member n (smDue s)
@@ -203,7 +221,7 @@ simOrchestrator script = do
       capped :: Text -> Double -> IO a -> IO (Maybe a)
       capped name secs act = case lookup name (scCaps script) of
         Just c -> do
-          modifyIORef' ref (\s -> s {smClock = smClock s + min c secs})
+          modifyIORef' ref (\s -> s {smClock = smClock s + min c (max 0 secs)})
           pure Nothing
         Nothing -> do
           modifyIORef' ref (\s -> s {smClock = smClock s + scStepCost script})

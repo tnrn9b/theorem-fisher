@@ -80,8 +80,9 @@ data Event
   | AutoOff Double Text
   -- ^ time, why
   | AutoTimeout Double Text Text
-  -- ^ time, goal, the step whose Lsp call (or the step itself) was cut
-  -- off at its cap: @auto@, @repair@ or @disprove@
+  -- ^ time, goal, the step whose Lsp call was cut off at its cap:
+  -- @auto@, @repair@ or @disprove@ (a step cut by @oCapped@ is
+  -- @AutoMissed@)
   | IndexBuilt Double Int Int Double
   -- ^ time, files, declarations, seconds the build took
   | IndexSkipped Double FilePath Text

@@ -40,7 +40,7 @@ data Orchestrator = Orchestrator
 | `oCancel` | Stops an attempt. Cancelling one already delivered, or unknown, does nothing. |
 | `oNow` | The clock, in seconds. |
 | `oLog` | Writes one event to the run log. |
-| `oCapped` | Runs a named step under a cap in seconds; Nothing when the cap hits. The name is for the simulator's script and for the `AutoTimeout` event. |
+| `oCapped` | Runs a named step under a cap in seconds; Nothing when the cap hits. The name is for the simulator's script; it is not logged. |
 | `oPrice` | The dollars a cancelled attempt spent, when known. Asked only with the controller on, once the attempt is cancelled. |
 
 `oCapped` has a rank-2 type (`RankNTypes`) so that one field covers the
@@ -61,8 +61,8 @@ with the rounding `max 1 (ceiling (secs * 1000000))`. `oNow`, `oLog` and
 
 `simOrchestrator script` returns the orchestrator and an `IO SimTrace` that
 reads what was done so far. It never sleeps and never forks. Virtual time
-starts at 0 and moves only through an await (to the attempt delivered, or to
-the deadline) and a capped step.
+starts at 0, never moves backwards, and moves only through an await (to the
+attempt delivered plus `scStepCost`, or to the deadline) and a capped step.
 
 ```haskell
 data Script = Script
@@ -94,11 +94,13 @@ The simulator's rules, in the order they come up:
 | Call | Behaviour |
 |---|---|
 | `oSpawn` | Looks up the entry for the attempt's key and marks it due at now plus its seconds. |
-| `oAwaitAny secs rs` | Charges `scStepCost`, then takes the earliest due of `rs` (the one spawned first among those due together). If it is due at or before now plus `secs`, the clock moves to its due time and it is delivered; otherwise the clock moves to now plus `secs` and the result is Nothing. |
+| `oAwaitAny secs rs` | With none of `rs` in flight, returns Nothing at once and leaves the clock alone. Otherwise the deadline is now plus `secs` (never less than now), and it takes the earliest due of `rs` (the one spawned first among those due together). If it is due at or before the deadline, the clock moves to its due time plus `scStepCost` and it is delivered; otherwise the clock moves to the deadline and the result is Nothing. |
 | `oCancel` | Removes the attempt from the due list and records it in `stCancelled`. The attempt is never delivered, even though its entry would have finished. |
-| `oCapped name secs act` | When `name` is in `scCaps`, the clock moves by the listed seconds (or `secs`, whichever is less) and the result is Nothing without running `act`. Otherwise the clock moves by `scStepCost` and `act` runs. |
+| `oCapped name secs act` | When `name` is in `scCaps`, the clock moves by the listed seconds (or `secs` clamped at 0, whichever is less) and the result is Nothing without running `act`. Otherwise the clock moves by `scStepCost` and `act` runs. |
 | `oPrice` | Looks the attempt's key up in `scPrices`. |
 | `oLog` | Appends to the trace. |
+
+The simulator differs from the real side in two places, and the Scheduler reaches neither: on a tie the real side delivers in list order (newest first, as the Scheduler lists them) while the simulator delivers the attempt spawned first, and with zero seconds the real side returns Nothing (`timeout 0`) while the simulator delivers an attempt already due.
 
 ## SearchEnv and runToEnd
 
@@ -219,8 +221,9 @@ to 0, so the simulator's events cannot drift from the real ones unnoticed.
 ## What is not here
 
 Two things are not built. The graph search (`GraphRun`) has its own context, thread pool and
-automation wrapper, and only its workers' attempts go through the record
-(by `runToEnd`); moving the rest of it onto the record is future work.
+automation wrapper. Its workers' attempts (by `runToEnd`), its clock and its
+automation cap go through the record; only its own thread pool and job
+handling do not, and moving those onto the record is future work.
 Recording a real run's choices as a `Script` and replaying it is also future
 work. The record is not a type class or a transformer, and the process
 swarm in `Fisher.Swarm` does not use it.

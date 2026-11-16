@@ -2,7 +2,7 @@ module Fisher.Search.OrchestrateSpec (spec) where
 
 import Control.Concurrent (forkIO, myThreadId, threadDelay, throwTo)
 import Control.Concurrent.MVar
-import Control.Exception (AsyncException (..), SomeException, try)
+import Control.Exception (AsyncException (..), ErrorCall (..), SomeException, displayException, throwIO, try)
 import Data.IORef
 import Data.Text (Text)
 import GHC.Clock (getMonotonicTime)
@@ -101,3 +101,29 @@ spec = describe "realOrchestrator" $ do
     (r, secs) <- timed (try (oCapped o "auto" 5 (putMVar started () >> threadDelay 5000000)))
     r `shouldBe` (Left UserInterrupt :: Either AsyncException (Maybe ()))
     secs `shouldSatisfy` (< 2)
+
+  it "an attempt that throws is delivered as a Left" $ do
+    o <- realOrchestrator (\_ -> threadDelay 10000 >> throwIO (ErrorCall "boom")) (pure 0) (\_ -> pure ()) (\_ -> pure Nothing)
+    r <- oSpawn o (attempt 1 "fast")
+    got <- oAwaitAny o 5 [r]
+    fmap (\(r', e) -> (r', either (Left . displayException) (Right . arNote) e)) got
+      `shouldBe` Just (r, Left "boom")
+
+  -- the Running constructor is hidden, so an attempt cancelled twice
+  -- stands in for one the orchestrator never issued
+  it "cancelling an attempt twice is a no-op" $ do
+    (o, finished) <- orchestrator
+    slow <- oSpawn o (attempt 1 "slow")
+    oCancel o slow
+    (_, secs) <- timed (oCancel o slow)
+    secs `shouldSatisfy` (< 0.1)
+    (got, secs') <- timed (oAwaitAny o 5 [slow])
+    note got `shouldBe` Nothing
+    secs' `shouldSatisfy` (< 0.1)
+    readIORef finished `shouldReturn` []
+
+  it "a price comes from the given function" $ do
+    o <- realOrchestrator (\_ -> pure (plainResult Nothing Nothing "")) (pure 0) (\_ -> pure ())
+      (\sp -> pure (if asGoal sp == "priced" then Just (fromIntegral (asId sp) / 4) else Nothing))
+    oPrice o (attempt 3 "priced") `shouldReturn` Just 0.75
+    oPrice o (attempt 3 "free") `shouldReturn` Nothing
