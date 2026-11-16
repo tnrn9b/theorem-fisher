@@ -685,7 +685,7 @@ runSearch cfg env base0 = do
           dropRunning aid = modifyIORef' ref $ \s ->
             s { stRunning = [r | r@(_, sp, _) <- stRunning s, asId sp /= aid]
               , stGoals = Map.map (\gs -> gs {gsRunning = [x | x@(i, _) <- gsRunning gs, i /= aid]}) (stGoals s) }
-          priceOf = priceCancelled (scControl cfg) env
+          priceOf = priceCancelled (scControl cfg) (seOrch env)
           cancelOthers why g = do
             s <- readIORef ref
             forM_ [r | r@(_, sp, _) <- stRunning s, asGoal sp == g] $ \(a, sp, started) -> do
@@ -977,13 +977,13 @@ runSearch cfg env base0 = do
           stopRunning = readIORef ref >>= mapM_ (\(a, _, _) -> oCancel orch a) . stRunning
       harvestOnException (void harvestOnce) stopRunning loop
 
--- | A cancelled attempt's dollars ('oPrice') with the controller on (the
--- Bool); else, or when the price fails, none. An asynchronous exception
--- is rethrown.
-priceCancelled :: Bool -> SearchEnv -> AttemptSpec -> IO (Maybe Double)
-priceCancelled control env sp
+-- | A cancelled job's dollars (the orchestrator's 'oPrice') with the
+-- controller on (the Bool); else, or when the price fails, none. An
+-- asynchronous exception is rethrown.
+priceCancelled :: Bool -> Orchestrator spec res -> spec -> IO (Maybe Double)
+priceCancelled control orch sp
   | not control = pure Nothing
-  | otherwise = try (oPrice (seOrch env) sp) >>= \case
+  | otherwise = try (oPrice orch sp) >>= \case
       Left e | Just (_ :: SomeAsyncException) <- fromException e -> throwIO e
       Left (_ :: SomeException) -> pure Nothing
       Right d -> pure d

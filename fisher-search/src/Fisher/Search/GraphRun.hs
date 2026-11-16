@@ -1,5 +1,4 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 
 -- | The lemma-graph search: today's attempts on a file's open goals, and for
 -- a goal its attempt cannot close, a split into lemmas from the planner,
@@ -58,7 +57,7 @@ module Fisher.Search.GraphRun
 
 import Control.Applicative ((<|>))
 import Control.Concurrent.MVar (newMVar)
-import Control.Exception (SomeAsyncException, SomeException, displayException, fromException, throwIO, toException, try)
+import Control.Exception (SomeException, displayException, toException)
 import Control.Monad (forM, forM_, join, unless, void, when)
 import Data.Char (isSpace)
 import Data.IORef
@@ -89,7 +88,7 @@ import Fisher.Search.Retrieval
 import Fisher.Search.Review (SplitVerdict (..))
 import Fisher.Search.Scheduler
   ( AttemptRecord (..), plainRecord, AttemptResult (..), AttemptSpec (..), AutoEnv (..), AutoTrack (..), Event (..), SearchEnv (..)
-  , autoStep, keptPartial, noAutoTrack, partialStart, runToEnd, stallNote, trackRan )
+  , autoStep, keptPartial, noAutoTrack, partialStart, priceCancelled, runToEnd, stallNote, trackRan )
 import Fisher.Search.Sketch
 import Fisher.Search.Split (Message)
 import Fisher.Search.Verify
@@ -559,6 +558,9 @@ startJob c n kind = do
 
 -- * The loop
 
+-- | Start what can start, wait for the first job to finish and apply it,
+-- until the run ends. With no budget left it stops without waiting, so a
+-- job that has already finished is not applied after the budget is spent.
 loop :: Ctx -> IO GraphReport
 loop c = do
   t <- elapsed c
@@ -576,19 +578,22 @@ loop c = do
         else do
           t' <- elapsed c
           let left = max 0 (gcBudget (cCfg c) - t')
-          r <- oAwaitAny (cOrch c) left (map fst (stRunning s))
-          case r of
-            Nothing -> stopAll c "time"
-            Just (a, res) -> do
-              let job = fromMaybe (error "loop: the orchestrator delivered a job that is not running") (lookup a (stRunning s))
-              modify c (\s' -> s' {stRunning = [x | x@(a', _) <- stRunning s', a' /= a]})
-              stop <- handle c job res
-              case stop of
-                Just why -> stopAll c why
-                Nothing -> do
-                  failStuck c
-                  save c
-                  loop c
+          if left <= 0
+            then stopAll c "time"
+            else do
+              r <- oAwaitAny (cOrch c) left (map fst (stRunning s))
+              case r of
+                Nothing -> stopAll c "time"
+                Just (a, res) -> do
+                  let job = fromMaybe (error "loop: the orchestrator delivered a job that is not running") (lookup a (stRunning s))
+                  modify c (\s' -> s' {stRunning = [x | x@(a', _) <- stRunning s', a' /= a]})
+                  stop <- handle c job res
+                  case stop of
+                    Just why -> stopAll c why
+                    Nothing -> do
+                      failStuck c
+                      save c
+                      loop c
 
 -- | Some root is neither proved nor failed.
 rootOpen :: St -> Bool
@@ -688,7 +693,7 @@ stopAll c why = do
     case jKind job of
       KWorker spec started -> do
         -- priced from its ledger with the controller on
-        d <- priceJob c job
+        d <- priceCancelled (gcControl (cCfg c)) (cOrch c) job
         t <- elapsed c
         let outcome = "cancelled: " <> why
         modify c (\s' -> s' {stRecords = (recordOf spec started t outcome Nothing) {arCost = d} : stRecords s'})
@@ -697,17 +702,6 @@ stopAll c why = do
       _ -> pure ()
   modify c (\s' -> s' {stRunning = []})
   finish c (Just why)
-
--- | A cancelled job's dollars (the graph orchestrator's 'oPrice') with
--- the controller on; else, or when the price fails, none. An
--- asynchronous exception is rethrown.
-priceJob :: Ctx -> Job -> IO (Maybe Double)
-priceJob c job
-  | not (gcControl (cCfg c)) = pure Nothing
-  | otherwise = try (oPrice (cOrch c) job) >>= \case
-      Left e | Just (_ :: SomeAsyncException) <- fromException e -> throwIO e
-      Left (_ :: SomeException) -> pure Nothing
-      Right d -> pure d
 
 finish :: Ctx -> Maybe Text -> IO GraphReport
 finish c why = do
