@@ -101,7 +101,7 @@ import Fisher.Search.Controller (Health, Stop (..), cap2000, emptyHealth, modelF
 import Fisher.Search.Disprove (Disproof (..), DisproveInfo (..), DisproveSource (..), SmtEnv, disprove, disproveAfterSuspect, disproveWitnessOnly, sourceName)
 import Fisher.Search.Headless (nativeBackend)
 import Fisher.Search.Lean
-import Fisher.Search.Orchestrate (AttemptOrchestrator, Orchestrator (..), Running)
+import Fisher.Search.Orchestrate (AttemptOrchestrator, Orchestrator (..), ReplayDiverged, Running)
 import qualified Fisher.Search.Repair as R
 import Fisher.Search.Retrieval
 import Fisher.Search.Splice (Spliced (..), splice)
@@ -979,12 +979,13 @@ runSearch cfg env base0 = do
 
 -- | A cancelled job's dollars (the orchestrator's 'oPrice') with the
 -- controller on (the Bool); else, or when the price fails, none. An
--- asynchronous exception is rethrown.
+-- asynchronous exception, and a replay's divergence, is rethrown.
 priceCancelled :: Bool -> Orchestrator spec res -> spec -> IO (Maybe Double)
 priceCancelled control orch sp
   | not control = pure Nothing
   | otherwise = try (oPrice orch sp) >>= \case
       Left e | Just (_ :: SomeAsyncException) <- fromException e -> throwIO e
+      Left e | Just (_ :: ReplayDiverged) <- fromException e -> throwIO e
       Left (_ :: SomeException) -> pure Nothing
       Right d -> pure d
 

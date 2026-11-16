@@ -380,11 +380,13 @@ data Step res
   -- ^ the clock read
   | Spawned AttemptKey
   -- ^ a job spawned, with its key
-  | Delivered AttemptKey Double (Either Text res)
-  -- ^ an await delivered this job: the clock after it, and the result
-  -- (an exception as its text)
-  | AwaitTimedOut Double
-  -- ^ an await delivered nothing: the clock after it
+  | Delivered Double AttemptKey Double (Either Text res)
+  -- ^ an await of these seconds delivered this job: the clock after it
+  -- (for readers; replay does not use it), and the result (an exception
+  -- as its text)
+  | AwaitTimedOut Double Double
+  -- ^ an await of these seconds delivered nothing: the clock after it
+  -- (for readers)
   | Cancelled AttemptKey
   | Capped Text Double Bool
   -- ^ a capped step: its name, its seconds, whether the cap hit
@@ -440,11 +442,13 @@ priceKey keyFn counts sp =
 -- far. Every field is the wrapped one's, and each call appends its step
 -- once the wrapped call returns: the clock read ('Now'); a spawn's key,
 -- counted as 'scriptEntry' counts ('Spawned'); an await's job and result
--- (an exception as its text) or its timing out, each with the wrapped
--- clock read after it ('Delivered', 'AwaitTimedOut'); a cancel
--- ('Cancelled'); a capped step's name, seconds and whether its cap hit
--- ('Capped'; its place is taken when it starts, so the calls made
--- inside it follow it, and a step that throws leaves no step); a price
+-- (an exception as its text) or its timing out, each with its seconds
+-- and the wrapped clock read after it ('Delivered', 'AwaitTimedOut'); a
+-- cancel ('Cancelled'); a capped step's name, seconds and whether its
+-- cap hit ('Capped'; its place is taken when it starts, so the calls
+-- made inside a step that ran follow it; a step whose cap hit drops the
+-- calls made inside it, since replay skips its action; a step that
+-- throws leaves no step); a price
 -- and its answer, under the key of the latest spawn with the spec's goal
 -- and backend ('Priced'). The log is not recorded.
 recordOrchestrator
@@ -473,10 +477,10 @@ recordOrchestrator keyFn o = do
         got <- oAwaitAny o secs rs
         t <- oNow o
         case got of
-          Nothing -> append (AwaitTimedOut t)
+          Nothing -> append (AwaitTimedOut secs t)
           Just (r, res) -> do
             k <- keyOf r
-            append (Delivered k t (either (Left . T.pack . displayException) Right res))
+            append (Delivered secs k t (either (Left . T.pack . displayException) Right res))
         pure got
       cancelOne r = do
         oCancel o r
@@ -485,7 +489,11 @@ recordOrchestrator keyFn o = do
       capped name secs act = do
         n <- slot
         got <- oCapped o name secs act
-        put n (Capped name secs (isNothing got))
+        -- a hit cap's action is skipped on replay, so the steps it took
+        -- (the loop waits on it, so they are all after its slot) go
+        atomicModifyIORef' ref $ \s ->
+          let kept = if isNothing got then Map.filterWithKey (\i _ -> i < n) (rkSteps s) else rkSteps s
+           in (s {rkSteps = Map.insert n (Capped name secs (isNothing got)) kept, rkNext = if isNothing got then n + 1 else rkNext s}, ())
         pure got
       priceOf sp = do
         d <- oPrice o sp
@@ -515,14 +523,19 @@ describeStep :: Step res -> Text
 describeStep = \case
   Now t -> "now " <> tshow t
   Spawned k -> "spawn " <> showKey k
-  Delivered k t _ -> "await delivering " <> showKey k <> " at " <> tshow t
-  AwaitTimedOut t -> "await timing out at " <> tshow t
+  Delivered secs k t _ -> "await " <> tshow secs <> " delivering " <> showKey k <> " at " <> tshow t
+  AwaitTimedOut secs t -> "await " <> tshow secs <> " timing out at " <> tshow t
   Cancelled k -> "cancel " <> showKey k
   Capped name secs hit -> "capped " <> name <> " " <> tshow secs <> (if hit then " (hit)" else " (ran)")
   Priced k _ -> "price " <> showKey k
 
 showKey :: AttemptKey -> Text
 showKey (AttemptKey g b i) = g <> "/" <> b <> "/" <> tshow i
+
+-- | Seconds equal within 1e-9 (the replay's are computed from the tape's
+-- clock readings as the run's were).
+near :: Double -> Double -> Bool
+near a b = a == b || abs (a - b) <= 1e-9
 
 tshow :: Show a => a -> Text
 tshow = T.pack . show
@@ -543,8 +556,9 @@ data Replay res = Replay
 -- for a spawn whose key (counted as 'scriptEntry' counts) is the step's
 -- ('Spawned'); for an await, the job with the step's key, which must be
 -- among those awaited, with its result (a Left as an 'ErrorCall' of its
--- text), or Nothing ('Delivered', 'AwaitTimedOut'); a cancel of the job
--- with the step's key ('Cancelled'); a capped step with the step's name,
+-- text), or Nothing ('Delivered', 'AwaitTimedOut'), the await's seconds
+-- the step's within 1e-9; a cancel of the job with the step's key
+-- ('Cancelled'); a capped step with the step's name and seconds,
 -- Nothing without running the action when the cap hit and otherwise the
 -- action's result ('Capped'); a price asked under the step's key, its
 -- answer ('Priced'). Any other call, or a call past the tape's end,
@@ -580,12 +594,12 @@ replayOrchestrator keyFn logE rc = do
                     let r = Running (rpNext s)
                      in Just (s {rpCounts = counts, rpNext = rpNext s + 1, rpByKey = Map.insert k r (rpByKey s), rpKeys = Map.insert r k (rpKeys s)}, pure r)
               _ -> Nothing
-      awaitAny _ rs = readIORef ref >>= \s0 ->
-        next ("await " <> T.intercalate ", " (map (showKey . keyOf s0) rs)) $ \st s -> case st of
-          Delivered k _ res
-            | Just r <- Map.lookup k (rpByKey s), r `elem` rs ->
+      awaitAny secs rs = readIORef ref >>= \s0 ->
+        next ("await " <> tshow secs <> " on " <> T.intercalate ", " (map (showKey . keyOf s0) rs)) $ \st s -> case st of
+          Delivered secs' k _ res
+            | near secs secs', Just r <- Map.lookup k (rpByKey s), r `elem` rs ->
                 Just (s, pure (Just (r, either (Left . toException . ErrorCall . T.unpack) Right res)))
-          AwaitTimedOut _ -> Just (s, pure Nothing)
+          AwaitTimedOut secs' _ | near secs secs' -> Just (s, pure Nothing)
           _ -> Nothing
       cancelOne r = readIORef ref >>= \s0 ->
         next ("cancel " <> showKey (keyOf s0 r)) $ \st s -> case st of
@@ -594,7 +608,7 @@ replayOrchestrator keyFn logE rc = do
       capped :: Text -> Double -> IO a -> IO (Maybe a)
       capped name secs act = do
         hit <- next ("capped " <> name <> " " <> tshow secs) $ \st s -> case st of
-          Capped name' _ h | name' == name -> Just (s, pure h)
+          Capped name' secs' h | name' == name, near secs secs' -> Just (s, pure h)
           _ -> Nothing
         if hit then pure Nothing else Just <$> act
       priceOf sp = readIORef ref >>= \s0 ->

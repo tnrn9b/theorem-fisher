@@ -85,14 +85,17 @@ spec = describe "recordOrchestrator and replayOrchestrator" $ do
     -- a's attempt fails on the tape now, so the replay retries a where
     -- the run went on with b
     let failA = \case
-          Delivered k t _ | k == AttemptKey "a" "x" 0 -> Delivered k t (Left "boom")
+          Delivered secs k t _ | k == AttemptKey "a" "x" 0 -> Delivered secs k t (Left "boom")
           st -> st
     replayIdentity (Recording (map failA (rcSteps rc))) `shouldThrow` diverged
     (o, n) <- replayed (Recording [Now 1])
-    oSpawn o (attemptOn 1 "a" "x") `shouldThrow` diverged
+    oSpawn o (attemptOn 1 "a" "x") `shouldThrow` (== ReplayDiverged 0 "now 1.0" "spawn a/x/0")
     n `shouldReturn` 0
     oNow o `shouldReturn` 1
-    oNow o `shouldThrow` diverged
+    oNow o `shouldThrow` (== ReplayDiverged 1 "the end of the tape" "now")
+    -- the seconds are checked too
+    (c, _) <- replayed (Recording [Capped "auto" 2 True])
+    oCapped c "auto" 3 (pure ()) `shouldThrow` (== ReplayDiverged 0 "capped auto 2.0 (hit)" "capped auto 3.0")
 
   it "a cap that hit replays without running the step; one that ran runs again" $ do
     (o, rd) <- quick Nothing >>= recorded
@@ -107,6 +110,24 @@ spec = describe "recordOrchestrator and replayOrchestrator" $ do
     oCapped s "repair" 5 (writeIORef ran True >> pure (3 :: Int)) `shouldReturn` Just 3
     readIORef ran `shouldReturn` True
     n `shouldReturn` 2
+
+  it "a cap that hit drops the steps its action took" $ do
+    clock <- newIORef (0 :: Double)
+    let tick = atomicModifyIORef' clock (\t -> (t + 1, t + 1))
+    o0 <- realOrchestrator (\_ -> pure (plainResult Nothing Nothing "")) tick (\_ -> pure ()) (\_ -> pure Nothing)
+    (o, rd) <- recorded o0
+    oNow o `shouldReturn` 1
+    oCapped o "repair" 0.05 (oNow o >> oNow o >> threadDelay 1000000) `shouldReturn` Nothing
+    oNow o `shouldReturn` 4
+    rc <- rd
+    rcSteps rc `shouldBe` [Now 1, Capped "repair" 0.05 True, Now 4]
+    (s, n) <- replayed rc
+    ran <- newIORef False
+    oNow s `shouldReturn` 1
+    oCapped s "repair" 0.05 (writeIORef ran True) `shouldReturn` Nothing
+    readIORef ran `shouldReturn` False
+    oNow s `shouldReturn` 4
+    n `shouldReturn` 3
 
   it "a price answered Nothing replays as Nothing" $ do
     (o, rd) <- quick Nothing >>= recorded
@@ -129,8 +150,8 @@ spec = describe "recordOrchestrator and replayOrchestrator" $ do
         a = AttemptKey "a" "x" 0
         b = AttemptKey "b" "y" 0
         rc = Recording
-          [ Now 0.5, Spawned a, Spawned b, Delivered a 2.5 (Right full), Delivered b 3 (Right failed)
-          , AwaitTimedOut 4, Delivered b 4.25 (Left "boom"), Cancelled b, Capped "auto" 4 True, Capped "repair" 2 False
+          [ Now 0.5, Spawned a, Spawned b, Delivered 8 a 2.5 (Right full), Delivered 5.5 b 3 (Right failed)
+          , AwaitTimedOut 1 4, Delivered 4 b 4.25 (Left "boom"), Cancelled b, Capped "auto" 4 True, Capped "repair" 2 False
           , Priced a (Just 0.125), Priced b Nothing ] :: AttemptScript
     decode (encode rc) `shouldBe` Just rc
     decode "{\"akGoal\":\"a\",\"akBackend\":\"x\",\"akIndex\":2}" `shouldBe` Just (AttemptKey "a" "x" 2)
