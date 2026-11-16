@@ -1,0 +1,105 @@
+module Fisher.Search.OrchestrateSpec (spec) where
+
+import Control.Concurrent (forkIO, myThreadId, threadDelay, throwTo)
+import Control.Concurrent.Async (AsyncCancelled (..))
+import Control.Concurrent.MVar
+import Control.Exception (AsyncException (..), SomeException, fromException, try)
+import Data.IORef
+import Data.Text (Text)
+import GHC.Clock (getMonotonicTime)
+import Test.Hspec
+
+import Fisher.Search.Orchestrate
+import Fisher.Search.Scheduler (AttemptResult (..), AttemptSpec (..), plainResult)
+
+-- | An attempt on a goal, with its id.
+attempt :: Int -> Text -> AttemptSpec
+attempt i g = AttemptSpec
+  { asId = i, asGoal = g, asBackend = "x", asStart = "start", asBrief = mempty, asModel = Nothing, asTier = Nothing }
+
+-- | The goal @fast@ takes 10 ms and @slow@ 200 ms; each records its goal
+-- when it finishes and returns it as its note.
+runner :: IORef [Text] -> AttemptSpec -> IO AttemptResult
+runner finished sp = do
+  threadDelay (if asGoal sp == "fast" then 10000 else 200000)
+  atomicModifyIORef' finished (\xs -> (asGoal sp : xs, ()))
+  pure (plainResult Nothing Nothing (asGoal sp))
+
+orchestrator :: IO (Orchestrator, IORef [Text])
+orchestrator = do
+  finished <- newIORef []
+  o <- realOrchestrator (runner finished) (pure 0) (\_ -> pure ()) (\_ -> pure Nothing)
+  pure (o, finished)
+
+note :: Maybe (Running, Either SomeException AttemptResult) -> Maybe (Running, Either String Text)
+note = fmap (\(r, e) -> (r, either (Left . show) (Right . arNote) e))
+
+-- | The action's result and the seconds it took.
+timed :: IO a -> IO (a, Double)
+timed act = do
+  t0 <- getMonotonicTime
+  x <- act
+  t1 <- getMonotonicTime
+  pure (x, t1 - t0)
+
+spec :: Spec
+spec = describe "realOrchestrator" $ do
+  it "await the first of two" $ do
+    (o, _) <- orchestrator
+    slow <- oSpawn o (attempt 1 "slow")
+    fast <- oSpawn o (attempt 2 "fast")
+    (got, secs) <- timed (oAwaitAny o 5 [slow, fast])
+    note got `shouldBe` Just (fast, Right "fast")
+    secs `shouldSatisfy` (< 0.15)
+    -- the slow one is still there and is delivered next
+    note <$> oAwaitAny o 5 [slow, fast] `shouldReturn` Just (slow, Right "slow")
+
+  it "cancel the other" $ do
+    (o, finished) <- orchestrator
+    slow <- oSpawn o (attempt 1 "slow")
+    fast <- oSpawn o (attempt 2 "fast")
+    note <$> oAwaitAny o 5 [slow, fast] `shouldReturn` Just (fast, Right "fast")
+    oCancel o slow
+    threadDelay 300000
+    readIORef finished `shouldReturn` ["fast"]
+    -- cancelling again, or cancelling one already delivered, is harmless
+    oCancel o slow
+    oCancel o fast
+    readIORef finished `shouldReturn` ["fast"]
+
+  it "a cap that hits returns Nothing" $ do
+    (o, _) <- orchestrator
+    (r, secs) <- timed (oCapped o "auto" 0.02 (threadDelay 2000000 >> pure 'x'))
+    r `shouldBe` Nothing
+    secs `shouldSatisfy` (< 1)
+    oCapped o "auto" 1 (pure (3 :: Int)) `shouldReturn` Just 3
+
+  it "a cancelled real attempt is a Left" $ do
+    (o, _) <- orchestrator
+    slow <- oSpawn o (attempt 1 "slow")
+    oCancel o slow
+    got <- oAwaitAny o 5 [slow]
+    case got of
+      Just (r, Left e) -> do
+        r `shouldBe` slow
+        fromException e `shouldBe` Just AsyncCancelled
+      _ -> expectationFailure ("expected the cancelled attempt as a Left, got " <> show (note got))
+    -- once delivered it is gone
+    (again, secs) <- timed (oAwaitAny o 5 [slow])
+    note again `shouldBe` Nothing
+    secs `shouldSatisfy` (< 1)
+
+  it "await on no attempts returns at once" $ do
+    (o, _) <- orchestrator
+    (got, secs) <- timed (oAwaitAny o 100 [])
+    note got `shouldBe` Nothing
+    secs `shouldSatisfy` (< 1)
+
+  it "capped rethrows async" $ do
+    (o, _) <- orchestrator
+    me <- myThreadId
+    started <- newEmptyMVar
+    _ <- forkIO (takeMVar started >> throwTo me UserInterrupt)
+    (r, secs) <- timed (try (oCapped o "auto" 5 (putMVar started () >> threadDelay 5000000)))
+    r `shouldBe` (Left UserInterrupt :: Either AsyncException (Maybe ()))
+    secs `shouldSatisfy` (< 2)

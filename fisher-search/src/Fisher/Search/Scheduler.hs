@@ -91,11 +91,12 @@ import System.Timeout (timeout)
 
 import Fisher.Learn.Policy (GoalPolicy (..))
 import Fisher.Role (PromptPart, static, toPrompt, tool, worker)
+import Fisher.Search.Attempt
 import Fisher.Search.Auto (AutoConfig (..), AutoFail (..), Hole (..), Lsp (..), autoGoal, holesIn)
 import Fisher.Search.Check (AxiomPolicy, LeanRun)
 import qualified Fisher.Search.Check as C
 import Fisher.Search.Child (ChildStats (..))
-import Fisher.Search.Controller (Health, ModelFailure, Stop (..), cap2000, emptyHealth, modelFailureText, noteResult, skipped, stopReasonText)
+import Fisher.Search.Controller (Health, Stop (..), cap2000, emptyHealth, modelFailureText, noteResult, skipped, stopReasonText)
 import Fisher.Search.Disprove (Disproof (..), DisproveInfo (..), DisproveSource (..), SmtEnv, disprove, disproveAfterSuspect, disproveWitnessOnly, sourceName)
 import Fisher.Search.Headless (nativeBackend)
 import Fisher.Search.Lean
@@ -177,42 +178,6 @@ tierIn ord h k = (ord !!) <$> case [p | p <- [start .. n - 1], ok p] of
     start = max 0 (min k (n - 1))
     ok p = not (skipped h (ord !! p))
 
-data AttemptSpec = AttemptSpec
-  { asId :: Int
-  , asGoal :: Text
-  , asBackend :: Text
-  , asStart :: Text
-  -- ^ the base the attempt starts from
-  , asBrief :: PromptPart
-  -- ^ extra text for the attempt's prompt (the graph search's brief; empty here)
-  , asModel :: Maybe Text
-  -- ^ the tier's model; Nothing is the backend's own
-  , asTier :: Maybe Int
-  -- ^ the index of the tier in 'scTiers'
-  }
-  deriving (Eq, Show)
-
-data AttemptResult = AttemptResult
-  { arText :: Maybe Text
-  -- ^ the target file as the agent left it
-  , arStats :: Maybe ChildStats
-  , arNote :: Text
-  , arStop :: Maybe Stop
-  -- ^ the controller stopped the attempt, and why
-  , arDollars :: Maybe Double
-  -- ^ what the attempt spent, when known
-  , arLastMessage :: Maybe Text
-  -- ^ the attempt's last assistant text, when known
-  , arFailure :: Maybe ModelFailure
-  -- ^ the model failed (not the proof)
-  }
-  deriving (Eq, Show)
-
--- | A result with no controller fields.
-plainResult :: Maybe Text -> Maybe ChildStats -> Text -> AttemptResult
-plainResult t s n = AttemptResult
-  { arText = t, arStats = s, arNote = n, arStop = Nothing, arDollars = Nothing, arLastMessage = Nothing, arFailure = Nothing }
-
 data SearchEnv = SearchEnv
   { seRun :: AttemptSpec -> IO AttemptResult
   -- ^ runs one attempt to the end; cancelling its thread must stop it
@@ -273,65 +238,6 @@ data GoalState = GoalState
   , gsTiers :: [Int]
   -- ^ the tiers the goal's attempts were launched on, each once, in order
   }
-  deriving (Eq, Show)
-
-data Event
-  = Launched Double Int Text Text
-  | Finished Double Int Text Text Text (Maybe ChildStats) (Maybe Double)
-  -- ^ time, attempt, goal, backend, outcome, stats, dollars (Nothing
-  -- unless the controller is on)
-  | GoalClosed Double Text Int
-  | GoalWaiting Double Text Int
-  | GoalGaveUp Double Text
-  | AttemptCancelled Double Int Text (Maybe Double)
-  -- ^ time, attempt, goal, dollars (Nothing unless the controller is on
-  -- and the attempt was priced)
-  | BudgetSpent Double
-  | AutoClosed Double Text Text Double
-  -- ^ time, goal, the snippets joined by @; @, seconds Auto took
-  | AutoMissed Double Text Double
-  -- ^ time, goal, seconds
-  | Repaired Double Int Text Int Int Int
-  -- ^ time, attempt, goal, holes before Auto, holes after, holes Auto closed
-  | GoalDisproved Double Text Text Text Text (Maybe Text)
-  -- ^ time, goal, @false@ or @suspect@, the negation's tactic or the
-  -- counterexample, the source (@plausible@ or @smt@), and for a negation
-  -- proved by a model's witness tactic the model
-  | DisproveRan Double Text Text Text
-  -- ^ time, goal, the source (@plausible@ or @smt@), its result:
-  -- @counterexample@, @none@, @unsat@, @sat@, @unknown@ or @error@
-  | AutoOff Double Text
-  -- ^ time, why
-  | AutoTimeout Double Text Text
-  -- ^ time, goal, the step whose Lsp call (or the step itself) was cut
-  -- off at its cap: @auto@, @repair@ or @disprove@
-  | IndexBuilt Double Int Int Double
-  -- ^ time, files, declarations, seconds the build took
-  | IndexSkipped Double FilePath Text
-  -- ^ time, a file the index left out, why
-  | Facts Double Text Int Int Bool
-  -- ^ time, goal, facts, characters of the facts section, whether the
-  -- retrieval was cut off
-  | LibraryOffered Double Text [Text] Int Bool
-  -- ^ time, goal, the lemmas offered, the notes offered, whether the
-  -- retrieval was cut off
-  | LibrarySaved Double Int Int
-  -- ^ time, lemmas and notes the run added to the library
-  | LibraryProblem Double Text
-  -- ^ time, a library file set aside or a save that failed
-  | TierChosen Double Int Text Int Text
-  -- ^ time, attempt, goal or node, tier index, model
-  | AttemptStopped Double Int Text Text Int Double
-  -- ^ time, attempt, goal, reason (@turns@ or @dollars@), turns, dollars
-  | Escalated Double Text Int Int
-  -- ^ time, goal or node, from tier, to tier
-  | TierSkipped Double Text Text
-  -- ^ time, model, reason
-  | LedgerUnread Double Int Text
-  -- ^ time, attempt, reason
-  | PolicyApplied Double Text Text Text Text Value Bool
-  -- ^ time, goal, knob, the configured default, the value applied, the
-  -- evidence, whether the attempt is exploration (the learned policy)
   deriving (Eq, Show)
 
 data AttemptRecord = AttemptRecord
