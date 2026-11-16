@@ -24,7 +24,7 @@ runner finished sp = do
   atomicModifyIORef' finished (\xs -> (asGoal sp : xs, ()))
   pure (plainResult Nothing Nothing (asGoal sp))
 
-orchestrator :: IO (Orchestrator, IORef [Text])
+orchestrator :: IO (AttemptOrchestrator, IORef [Text])
 orchestrator = do
   finished <- newIORef []
   o <- realOrchestrator (runner finished) (pure 0) (\_ -> pure ()) (\_ -> pure Nothing)

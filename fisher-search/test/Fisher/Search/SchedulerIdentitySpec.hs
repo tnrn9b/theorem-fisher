@@ -48,18 +48,20 @@ msPerSec = 50
 -- | The script as a real run function, read as the simulator reads it
 -- ('scriptEntry'): each attempt sleeps its seconds scaled to
 -- milliseconds, then returns the script's result (or throws its text).
-realRun :: Script -> IO (AttemptSpec -> IO AttemptResult)
+realRun :: Script AttemptSpec AttemptResult -> IO (AttemptSpec -> IO AttemptResult)
 realRun sc = do
   counts <- newIORef (Map.empty :: Map.Map (Text, Text) Int)
   pure $ \sp -> do
-    found <- atomicModifyIORef' counts (\m -> either (\e -> (m, Left e)) (\(hit, m') -> (m', Right hit)) (scriptEntry sc m sp))
+    found <- atomicModifyIORef' counts (\m -> either (\e -> (m, Left e)) (\(hit, m') -> (m', Right hit)) (scriptEntry attemptKey sc m sp))
     hit <- either (throwIO . ErrorCall . T.unpack) pure found
     threadDelay (round (sdSecs hit * msPerSec * 1000))
-    either (throwIO . ErrorCall . T.unpack) pure (sdResult hit sp)
+    case sdEntry hit of
+      Scripted f -> f sp >>= either (throwIO . ErrorCall . T.unpack) pure
+      Run _ -> fail "realRun: a Run entry in the identity script"
 
 -- | The same search on the real orchestrator, its budget scaled as the
 -- sleeps are: the events, oldest first.
-realEvents :: Script -> IO [Event]
+realEvents :: Script AttemptSpec AttemptResult -> IO [Event]
 realEvents sc = withSystemTempDirectory "real" $ \root -> do
   BS.writeFile (root </> "F.lean") (TE.encodeUtf8 file)
   events <- newIORef []

@@ -66,11 +66,11 @@ simEnv file = SimEnv
 
 -- | The search's env over the simulator in a fresh root, with the root
 -- and the trace's reader.
-withSimEnv :: SimEnv -> Script -> (FilePath -> SearchEnv -> IO SimTrace -> IO a) -> IO a
+withSimEnv :: SimEnv -> Script AttemptSpec AttemptResult -> (FilePath -> SearchEnv -> IO (SimTrace AttemptSpec) -> IO a) -> IO a
 withSimEnv se sc k = withSystemTempDirectory "sim" $ \root -> do
   simSetup se root (simFile se)
   ret <- simRetrieval se root
-  (o, trace) <- simOrchestrator sc
+  (o, trace) <- simOrchestrator attemptKey sc
   let orch = Orchestrator
         { oSpawn = oSpawn o
         , oAwaitAny = oAwaitAny o
@@ -88,27 +88,27 @@ withSimEnv se sc k = withSystemTempDirectory "sim" $ \root -> do
 
 -- | A search run to its end: the report, the events (oldest first) and
 -- the trace, handed on with the root while it still exists.
-simSearchIn :: SimEnv -> SearchConfig -> Script -> (FilePath -> (SearchReport, [Event], SimTrace) -> IO a) -> IO a
+simSearchIn :: SimEnv -> SearchConfig -> Script AttemptSpec AttemptResult -> (FilePath -> (SearchReport, [Event], SimTrace AttemptSpec) -> IO a) -> IO a
 simSearchIn se cfg sc k = withSimEnv se sc $ \root env trace -> do
   r <- runSearch cfg env (simFile se)
   tr <- trace
   rep <- either (fail . T.unpack) pure r
   k root (rep, stEvents tr, tr)
 
-simSearchEnv :: SimEnv -> SearchConfig -> Script -> IO (SearchReport, [Event], SimTrace)
+simSearchEnv :: SimEnv -> SearchConfig -> Script AttemptSpec AttemptResult -> IO (SearchReport, [Event], SimTrace AttemptSpec)
 simSearchEnv se cfg sc = simSearchIn se cfg sc (\_ r -> pure r)
 
 -- | A search of this file with nothing but the script.
-simSearch :: Text -> SearchConfig -> Script -> IO (SearchReport, [Event], SimTrace)
+simSearch :: Text -> SearchConfig -> Script AttemptSpec AttemptResult -> IO (SearchReport, [Event], SimTrace AttemptSpec)
 simSearch file = simSearchEnv (simEnv file)
 
 -- | One script entry: the attempt, its virtual seconds, its result.
-type ScriptEntry = (AttemptKey, Double, AttemptSpec -> Either Text AttemptResult)
+type ScriptEntry = (AttemptKey, Double, Entry AttemptSpec AttemptResult)
 
 -- | A script of these entries, unscripted attempts writing @sorry@ at
 -- once (as the specs' fake runs did).
-script :: [ScriptEntry] -> Script
-script es = emptyScript {scAttempts = es, scDefault = Just sorryAttempt}
+script :: [ScriptEntry] -> Script AttemptSpec AttemptResult
+script es = emptyScript {scAttempts = es, scDefault = Just (Scripted (pure . sorryAttempt))}
 
 -- | The first attempt on this goal and backend: it takes these seconds.
 attempt :: Text -> Text -> Double -> (AttemptSpec -> Either Text AttemptResult) -> ScriptEntry
@@ -116,7 +116,7 @@ attempt g b = attemptN g b 0
 
 -- | The attempt on this goal and backend with this many before it.
 attemptN :: Text -> Text -> Int -> Double -> (AttemptSpec -> Either Text AttemptResult) -> ScriptEntry
-attemptN g b i secs f = (AttemptKey g b i, secs, f)
+attemptN g b i secs f = (AttemptKey g b i, secs, Scripted (pure . f))
 
 -- | Every attempt on this goal and backend alike. Only indices 0 to 99
 -- are scripted: a hundred and first attempt on the pair falls to the
@@ -145,7 +145,7 @@ proofAttempt proof sp = Right (plainResult (Just (spliceProof proof sp)) Nothing
 -- | No attempt fell to the script's default: for a scenario whose script
 -- names every attempt it expects, so a default cannot hide a wrong guess
 -- about which goal or backend runs.
-allNamed :: SimTrace -> Expectation
+allNamed :: SimTrace AttemptSpec -> Expectation
 allNamed tr = stDefaulted tr `shouldBe` []
 
 -- | An attempt that gives up, writing @sorry@.

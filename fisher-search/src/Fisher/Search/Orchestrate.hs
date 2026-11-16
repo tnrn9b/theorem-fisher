@@ -1,29 +1,36 @@
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 
 -- | The Scheduler's effects behind one record ('Orchestrator'): spawning
--- an attempt, waiting for the first of some to finish, cancelling one,
--- the clock, the run log, a capped step and a cancelled attempt's price.
+-- a job, waiting for the first of some to finish, cancelling one, the
+-- clock, the run log, a capped step and a cancelled job's price. The
+-- record is polymorphic in the job's spec and result; the flat search's
+-- is 'AttemptOrchestrator'.
 --
 -- 'realOrchestrator' is the behaviour the Scheduler had inline: threads,
 -- the wall clock and the run log. 'simOrchestrator' runs a 'Script'
--- instead: which attempt finishes when, in virtual seconds, with what
+-- instead: which job finishes when, in virtual seconds, with what
 -- result. It never sleeps and never forks, so an ordering rule can be
 -- tested deterministically, and its 'SimTrace' records what was done.
 module Fisher.Search.Orchestrate
   ( Running
   , Orchestrator (..)
+  , AttemptOrchestrator
   , realOrchestrator
   , AttemptKey (..)
+  , attemptKey
+  , Entry (..)
   , Script (..)
   , emptyScript
-  , Scripted (..)
+  , ScriptHit (..)
   , scriptEntry
   , SimTrace (..)
   , simOrchestrator
   ) where
 
 import Control.Concurrent.Async (Async, asyncWithUnmask, cancel, poll, waitAnyCatch)
-import Control.Exception (ErrorCall (..), SomeException, mask_, throwIO, toException)
+import Control.Exception (ErrorCall (..), SomeAsyncException, SomeException, fromException, mask_, throwIO, toException, try)
 import Data.IORef
 import Data.List (find, minimumBy)
 import qualified Data.Map.Strict as Map
@@ -34,16 +41,16 @@ import System.Timeout (timeout)
 
 import Fisher.Search.Attempt
 
--- | An attempt in flight, opaque to the Scheduler.
+-- | A job in flight, opaque to the Scheduler.
 newtype Running = Running Int
   deriving (Eq, Ord, Show)
 
--- | The Scheduler's effects. Each field's haddock is the contract every
--- interpreter keeps.
-data Orchestrator = Orchestrator
-  { oSpawn :: AttemptSpec -> IO Running
+-- | The Scheduler's effects, for jobs described by @spec@ that give a
+-- @res@. Each field's haddock is the contract every interpreter keeps.
+data Orchestrator spec res = Orchestrator
+  { oSpawn :: spec -> IO Running
   -- ^ start an attempt now and return its handle
-  , oAwaitAny :: Double -> [Running] -> IO (Maybe (Running, Either SomeException AttemptResult))
+  , oAwaitAny :: Double -> [Running] -> IO (Maybe (Running, Either SomeException res))
   -- ^ the first of these to finish, with its result or its exception;
   -- Nothing when the given seconds pass first, and Nothing at once when
   -- none of them is still in flight. An attempt already finished is
@@ -60,9 +67,12 @@ data Orchestrator = Orchestrator
   , oCapped :: forall a. Text -> Double -> IO a -> IO (Maybe a)
   -- ^ run a named step under a wall cap in seconds; Nothing when the cap
   -- hits. The name is for the simulator's script; it is not logged.
-  , oPrice :: AttemptSpec -> IO (Maybe Double)
+  , oPrice :: spec -> IO (Maybe Double)
   -- ^ the dollars a cancelled attempt spent, when known
   }
+
+-- | The flat search's orchestrator: its jobs are attempts.
+type AttemptOrchestrator = Orchestrator AttemptSpec AttemptResult
 
 -- | The real one, from the run function, the clock, the log and the
 -- price: each attempt runs on its own thread, waiting polls the handles
@@ -73,13 +83,14 @@ data Orchestrator = Orchestrator
 -- already delivered is a no-op; a cancelled attempt is forgotten, so it
 -- is never delivered.
 realOrchestrator
-  :: (AttemptSpec -> IO AttemptResult)
+  :: forall spec res
+   . (spec -> IO res)
   -> IO Double
   -> (Event -> IO ())
-  -> (AttemptSpec -> IO (Maybe Double))
-  -> IO Orchestrator
+  -> (spec -> IO (Maybe Double))
+  -> IO (Orchestrator spec res)
 realOrchestrator run now logE price = do
-  handles <- newIORef (Map.empty :: Map.Map Int (Async AttemptResult))
+  handles <- newIORef (Map.empty :: Map.Map Int (Async res))
   counter <- newIORef (0 :: Int)
   -- the fork and the handle's record are one step, masked, so no
   -- asynchronous exception can leave a thread nobody can cancel; the
@@ -124,66 +135,84 @@ realOrchestrator run now logE price = do
     , oPrice = price
     }
 
--- | Names a spawned attempt in a 'Script': its goal, its backend and how
--- many attempts on that goal and backend were spawned before it (the
--- first is 0).
+-- | Names a spawned job in a 'Script': the two halves of its key (for an
+-- attempt, its goal and its backend) and how many jobs with that key were
+-- spawned before it (the first is 0).
 data AttemptKey = AttemptKey { akGoal :: Text, akBackend :: Text, akIndex :: Int }
   deriving (Eq, Ord, Show)
 
-data Script = Script
-  { scAttempts :: [(AttemptKey, Double, AttemptSpec -> Either Text AttemptResult)]
-  -- ^ per spawned attempt, the first entry with its key: the virtual
-  -- seconds it takes, and from its spec its result or an exception's text
-  , scDefault :: Maybe (AttemptSpec -> Either Text AttemptResult)
-  -- ^ the result of an attempt no entry names, taking no virtual time;
-  -- Nothing makes such an attempt throw at spawn
+-- | The key function for attempts: an attempt's goal and backend.
+attemptKey :: AttemptSpec -> (Text, Text)
+attemptKey sp = (asGoal sp, asBackend sp)
+
+-- | How a scripted job finishes.
+data Entry spec res
+  = Scripted (spec -> IO (Either Text res))
+  -- ^ the result (or an exception's text) from the spec, computed at
+  -- spawn; IO so a harness can record what was spawned
+  | Run (spec -> IO res)
+  -- ^ run this action at spawn, on the caller's thread, and deliver its
+  -- result (or its exception) after the entry's seconds
+
+data Script spec res = Script
+  { scAttempts :: [(AttemptKey, Double, Entry spec res)]
+  -- ^ per spawned job, the first entry with its key: the virtual
+  -- seconds it takes, and how it finishes
+  , scDefault :: Maybe (Entry spec res)
+  -- ^ how a job no entry names finishes, taking no virtual time;
+  -- Nothing makes such a job throw at spawn
   , scCaps :: [(Text, Double)]
   -- ^ named steps that hit their cap, each with the virtual seconds
   -- consumed
   , scPrices :: [(AttemptKey, Double)]
   , scStepCost :: Double
   -- ^ virtual seconds every other capped step consumes, and every await
-  -- that delivers an attempt, after the delivery
+  -- that delivers a job, after the delivery
   }
 
--- | Where a spawned attempt falls in a script.
-data Scripted = Scripted
+-- | Where a spawned job falls in a script.
+data ScriptHit spec res = ScriptHit
   { sdKey :: AttemptKey
   , sdSecs :: Double
   -- ^ its virtual seconds (0 for the default)
-  , sdResult :: AttemptSpec -> Either Text AttemptResult
+  , sdEntry :: Entry spec res
   , sdDefaulted :: Bool
-  -- ^ no entry names it, so 'scDefault' gives its result
+  -- ^ no entry names it, so 'scDefault' gives its entry
   }
 
--- | The script's answer for an attempt spawned now, given how many were
--- spawned before on each goal and backend: its key (the count is its
--- index), the first entry with that key or else 'scDefault', and the
--- counts with this spawn added. Left names the key of an attempt neither
+-- | The script's answer for a job spawned now, given the key function
+-- and how many were spawned before with each key: its key (the count is
+-- its index), the first entry with that key or else 'scDefault', and the
+-- counts with this spawn added. Left names the key of a job neither
 -- scripted nor covered by a default.
-scriptEntry :: Script -> Map.Map (Text, Text) Int -> AttemptSpec -> Either Text (Scripted, Map.Map (Text, Text) Int)
-scriptEntry sc counts sp =
-  let pair = (asGoal sp, asBackend sp)
+scriptEntry
+  :: (spec -> (Text, Text))
+  -> Script spec res
+  -> Map.Map (Text, Text) Int
+  -> spec
+  -> Either Text (ScriptHit spec res, Map.Map (Text, Text) Int)
+scriptEntry keyFn sc counts sp =
+  let pair@(g, b) = keyFn sp
       i = Map.findWithDefault 0 pair counts
-      k = AttemptKey (asGoal sp) (asBackend sp) i
+      k = AttemptKey g b i
       counts' = Map.insert pair (i + 1) counts
    in case find (\(k', _, _) -> k' == k) (scAttempts sc) of
-        Just (_, d, f) -> Right (Scripted k d f False, counts')
+        Just (_, d, e) -> Right (ScriptHit k d e False, counts')
         Nothing -> case scDefault sc of
-          Just f -> Right (Scripted k 0 f True, counts')
+          Just e -> Right (ScriptHit k 0 e True, counts')
           Nothing -> Left ("no script entry for " <> T.pack (show k))
 
 -- | No attempts, no default, no caps, no prices, and steps that take no
 -- time.
-emptyScript :: Script
+emptyScript :: Script spec res
 emptyScript = Script {scAttempts = [], scDefault = Nothing, scCaps = [], scPrices = [], scStepCost = 0}
 
 -- | What the simulator was asked to do, each list oldest first, and its
 -- clock.
-data SimTrace = SimTrace
-  { stSpawned :: [AttemptSpec]
-  , stDefaulted :: [AttemptSpec]
-  -- ^ the spawned attempts no entry named, whose result came from
+data SimTrace spec = SimTrace
+  { stSpawned :: [spec]
+  , stDefaulted :: [spec]
+  -- ^ the spawned jobs no entry named, whose entry came from
   -- 'scDefault'
   , stCancelled :: [Running]
   , stEvents :: [Event]
@@ -192,51 +221,67 @@ data SimTrace = SimTrace
   deriving (Eq, Show)
 
 -- | The simulator's state; the trace's lists are newest first.
-data Sim = Sim
+data Sim spec res = Sim
   { smClock :: Double
   , smNext :: Int
-  , smKeys :: [(AttemptSpec, AttemptKey)]
+  , smKeys :: [(spec, AttemptKey)]
   -- ^ every spawned spec with its key, newest first
   , smCounts :: Map.Map (Text, Text) Int
-  -- ^ how many were spawned on each goal and backend
-  , smDefaulted :: [AttemptSpec]
-  , smDue :: Map.Map Int (Double, Either Text AttemptResult)
-  -- ^ the attempts in flight: when each finishes and its result
+  -- ^ how many were spawned with each key
+  , smDefaulted :: [spec]
+  , smDue :: Map.Map Int (Double, Either SomeException res)
+  -- ^ the jobs in flight: when each finishes and its result
   , smCancelled :: [Running]
   , smEvents :: [Event]
   }
 
--- | The simulated one and a reader of its trace. Virtual time starts at
--- 0, never moves backwards, and moves only through an await (to the
--- attempt delivered plus 'scStepCost', or to the deadline) and a capped
--- step. An await's deadline is the clock plus its seconds, taken before
--- any step cost; an await with none of its attempts in flight returns at
--- once and leaves the clock alone. An attempt neither scripted nor covered by
--- 'scDefault', or a price the script does not list, throws an 'ErrorCall'
--- naming its key. Awaiting delivers, as the real one does, the first in
--- the list of the given attempts already due (at or before now), and
--- otherwise the earliest due, the first in the list among those due
--- together; a cancelled attempt is never delivered and its exception never thrown. Cancelling
--- an attempt already delivered, or unknown, is a no-op and is not
--- recorded.
-simOrchestrator :: Script -> IO (Orchestrator, IO SimTrace)
-simOrchestrator script = do
+-- | The simulated one and a reader of its trace, given the key function
+-- (how a spec is matched to a script entry: 'attemptKey' for attempts).
+-- Virtual time starts at 0, never moves backwards, and moves only through
+-- an await (to the job delivered plus 'scStepCost', or to the deadline)
+-- and a capped step. An await's deadline is the clock plus its seconds,
+-- taken before any step cost; an await with none of its jobs in flight
+-- returns at once and leaves the clock alone. A job neither scripted nor
+-- covered by 'scDefault', or a price the script does not list, throws an
+-- 'ErrorCall' naming its key. A 'Scripted' entry's function and a 'Run'
+-- entry's action run at spawn, on the caller's thread, after the spawn is
+-- recorded; the job is due at the clock at spawn plus the entry's
+-- seconds. A 'Run' action's exception is the job's result (a Left);
+-- an asynchronous one is rethrown from 'oSpawn', and that job is never
+-- delivered. Awaiting delivers, as the real one does, the first in the
+-- list of the given jobs already due (at or before now), and otherwise
+-- the earliest due, the first in the list among those due together; a
+-- cancelled job is never delivered and its exception never thrown.
+-- Cancelling a job already delivered, or unknown, is a no-op and is not
+-- recorded. A spec is priced as its latest spawn, found by equality.
+simOrchestrator :: forall spec res. Eq spec => (spec -> (Text, Text)) -> Script spec res -> IO (Orchestrator spec res, IO (SimTrace spec))
+simOrchestrator keyFn script = do
   ref <- newIORef Sim
     { smClock = 0, smNext = 0, smKeys = [], smCounts = Map.empty, smDefaulted = []
     , smDue = Map.empty, smCancelled = [], smEvents = [] }
-  let keyOf s sp = AttemptKey (asGoal sp) (asBackend sp) (Map.findWithDefault 0 (asGoal sp, asBackend sp) (smCounts s))
+  let keyOf s sp =
+        let pair@(g, b) = keyFn sp
+         in AttemptKey g b (Map.findWithDefault 0 pair (smCounts s))
       spawn sp = do
         s <- readIORef ref
         (hit, counts) <- either (throwIO . ErrorCall . ("simOrchestrator: " <>) . T.unpack) pure
-          (scriptEntry script (smCounts s) sp)
+          (scriptEntry keyFn script (smCounts s) sp)
         let n = smNext s
+            due = smClock s + sdSecs hit
+        -- the spawn is recorded before its entry runs, so an entry that
+        -- uses this orchestrator sees it
         writeIORef ref s
           { smNext = n + 1
           , smKeys = (sp, sdKey hit) : smKeys s
           , smCounts = counts
           , smDefaulted = if sdDefaulted hit then sp : smDefaulted s else smDefaulted s
-          , smDue = Map.insert n (smClock s + sdSecs hit, sdResult hit sp) (smDue s)
           }
+        res <- case sdEntry hit of
+          Scripted f -> either (Left . toException . ErrorCall . T.unpack) Right <$> f sp
+          Run f -> try @SomeException (f sp) >>= \case
+            Left e | Just (_ :: SomeAsyncException) <- fromException e -> throwIO e
+            r -> pure r
+        modifyIORef' ref (\s' -> s' {smDue = Map.insert n (due, res) (smDue s')})
         pure (Running n)
       awaitAny secs rs = do
         s <- readIORef ref
@@ -254,7 +299,7 @@ simOrchestrator script = do
             if due <= deadline
               then do
                 writeIORef ref s {smClock = max now due + scStepCost script, smDue = Map.delete n (smDue s)}
-                pure (Just (Running n, either (Left . toException . ErrorCall . T.unpack) Right res))
+                pure (Just (Running n, res))
               else do
                 writeIORef ref s {smClock = deadline}
                 pure Nothing

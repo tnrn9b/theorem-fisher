@@ -1,6 +1,7 @@
 module Fisher.Search.SimOrchestrateSpec (spec) where
 
-import Control.Exception (ErrorCall (..), SomeException, displayException)
+import Control.Concurrent (myThreadId)
+import Control.Exception (AsyncException (..), ErrorCall (..), SomeException, displayException, throwIO)
 import Data.IORef
 import Data.List (isInfixOf)
 import Data.Text (Text)
@@ -14,13 +15,17 @@ attempt :: Int -> Text -> Text -> AttemptSpec
 attempt i g b = AttemptSpec
   { asId = i, asGoal = g, asBackend = b, asStart = "start", asBrief = mempty, asModel = Nothing, asTier = Nothing }
 
--- | A script result that finishes with this note.
-done :: Text -> AttemptSpec -> Either Text AttemptResult
-done n _ = Right (plainResult Nothing Nothing n)
+-- | A script entry that finishes with this note.
+done :: Text -> Entry AttemptSpec AttemptResult
+done n = Scripted (\_ -> pure (Right (plainResult Nothing Nothing n)))
 
--- | A script result that throws with this text.
-boom :: Text -> AttemptSpec -> Either Text AttemptResult
-boom t _ = Left t
+-- | A script entry that throws with this text.
+boom :: Text -> Entry AttemptSpec AttemptResult
+boom t = Scripted (\_ -> pure (Left t))
+
+-- | The simulator over attempts.
+sim :: Script AttemptSpec AttemptResult -> IO (AttemptOrchestrator, IO (SimTrace AttemptSpec))
+sim = simOrchestrator attemptKey
 
 key :: Text -> Text -> Int -> AttemptKey
 key = AttemptKey
@@ -32,7 +37,7 @@ outcome = fmap (\(r, e) -> (r, either (Left . displayException) (Right . arNote)
 spec :: Spec
 spec = describe "simOrchestrator" $ do
   it "spawn then await returns the scripted result and moves the clock" $ do
-    (o, _) <- simOrchestrator emptyScript {scAttempts = [(key "a" "x" 0, 5, done "ok")]}
+    (o, _) <- sim emptyScript {scAttempts = [(key "a" "x" 0, 5, done "ok")]}
     r <- oSpawn o (attempt 1 "a" "x")
     oNow o `shouldReturn` 0
     got <- oAwaitAny o 10 [r]
@@ -40,7 +45,7 @@ spec = describe "simOrchestrator" $ do
     oNow o `shouldReturn` 5
 
   it "await past the deadline returns Nothing and moves the clock to the deadline" $ do
-    (o, _) <- simOrchestrator emptyScript {scAttempts = [(key "a" "x" 0, 12, done "late")]}
+    (o, _) <- sim emptyScript {scAttempts = [(key "a" "x" 0, 12, done "late")]}
     r <- oSpawn o (attempt 1 "a" "x")
     got <- oAwaitAny o 10 [r]
     outcome got `shouldBe` Nothing
@@ -50,7 +55,7 @@ spec = describe "simOrchestrator" $ do
     oNow o `shouldReturn` 12
 
   it "an attempt due just after the deadline is not delivered even with a step cost" $ do
-    (o, _) <- simOrchestrator emptyScript {scAttempts = [(key "a" "x" 0, 10.5, done "late")], scStepCost = 1}
+    (o, _) <- sim emptyScript {scAttempts = [(key "a" "x" 0, 10.5, done "late")], scStepCost = 1}
     r <- oSpawn o (attempt 1 "a" "x")
     outcome <$> oAwaitAny o 10 [r] `shouldReturn` Nothing
     -- a timed out await stops at the deadline, with no step cost
@@ -63,7 +68,7 @@ spec = describe "simOrchestrator" $ do
     oNow o `shouldReturn` 11.5
 
   it "negative seconds never move the clock backwards" $ do
-    (o, _) <- simOrchestrator emptyScript {scAttempts = [(key "a" "x" 0, 3, done "ok")], scCaps = [("disprove", 2)]}
+    (o, _) <- sim emptyScript {scAttempts = [(key "a" "x" 0, 3, done "ok")], scCaps = [("disprove", 2)]}
     r <- oSpawn o (attempt 1 "a" "x")
     outcome <$> oAwaitAny o (-5) [r] `shouldReturn` Nothing
     oNow o `shouldReturn` 0
@@ -71,7 +76,7 @@ spec = describe "simOrchestrator" $ do
     oNow o `shouldReturn` 0
 
   it "two attempts due together" $ do
-    (o, _) <- simOrchestrator emptyScript
+    (o, _) <- sim emptyScript
       {scAttempts = [(key "a" "x" 0, 3, done "first"), (key "b" "y" 0, 3, done "second")]}
     ra <- oSpawn o (attempt 1 "a" "x")
     rb <- oSpawn o (attempt 2 "b" "y")
@@ -84,7 +89,7 @@ spec = describe "simOrchestrator" $ do
     oNow o `shouldReturn` 3
 
   it "two attempts already past due are delivered in list order" $ do
-    (o, _) <- simOrchestrator emptyScript
+    (o, _) <- sim emptyScript
       { scAttempts = [(key "a" "x" 0, 1, done "early"), (key "b" "x" 0, 2, done "later"), (key "c" "x" 0, 9, done "c")]
       , scCaps = [("step", 5)] }
     ra <- oSpawn o (attempt 1 "a" "x")
@@ -104,7 +109,7 @@ spec = describe "simOrchestrator" $ do
     oNow o `shouldReturn` 14
 
   it "a due attempt at deadline zero" $ do
-    (o, _) <- simOrchestrator emptyScript
+    (o, _) <- sim emptyScript
       {scAttempts = [(key "a" "x" 0, 0, done "now"), (key "b" "x" 0, 4, done "edge")]}
     r <- oSpawn o (attempt 1 "a" "x")
     outcome <$> oAwaitAny o 0 [r] `shouldReturn` Just (r, Right "now")
@@ -115,7 +120,7 @@ spec = describe "simOrchestrator" $ do
     oNow o `shouldReturn` 4
 
   it "cancel removes an attempt and records it" $ do
-    (o, trace) <- simOrchestrator emptyScript
+    (o, trace) <- sim emptyScript
       {scAttempts = [(key "a" "x" 0, 3, done "cancelled"), (key "a" "y" 0, 5, done "kept")]}
     r1 <- oSpawn o (attempt 1 "a" "x")
     r2 <- oSpawn o (attempt 2 "a" "y")
@@ -125,14 +130,14 @@ spec = describe "simOrchestrator" $ do
     stCancelled <$> trace `shouldReturn` [r1]
 
   it "cancelling an attempt after it was delivered is not recorded" $ do
-    (o, trace) <- simOrchestrator emptyScript {scAttempts = [(key "a" "x" 0, 2, done "ok")]}
+    (o, trace) <- sim emptyScript {scAttempts = [(key "a" "x" 0, 2, done "ok")]}
     r <- oSpawn o (attempt 1 "a" "x")
     outcome <$> oAwaitAny o 10 [r] `shouldReturn` Just (r, Right "ok")
     oCancel o r
     stCancelled <$> trace `shouldReturn` []
 
   it "a cancelled attempt that would have thrown" $ do
-    (o, _) <- simOrchestrator emptyScript
+    (o, _) <- sim emptyScript
       {scAttempts = [(key "a" "x" 0, 1, boom "boom"), (key "b" "x" 0, 2, boom "bang")]}
     r1 <- oSpawn o (attempt 1 "a" "x")
     oCancel o r1
@@ -143,7 +148,7 @@ spec = describe "simOrchestrator" $ do
     oNow o `shouldReturn` 2
 
   it "a capped step does not run and charges its seconds" $ do
-    (o, _) <- simOrchestrator emptyScript {scCaps = [("disprove", 3)], scStepCost = 1}
+    (o, _) <- sim emptyScript {scCaps = [("disprove", 3)], scStepCost = 1}
     ran <- newIORef False
     oCapped o "disprove" 10 (writeIORef ran True >> pure 'x') `shouldReturn` Nothing
     readIORef ran `shouldReturn` False
@@ -154,12 +159,12 @@ spec = describe "simOrchestrator" $ do
     oNow o `shouldReturn` 5
 
   it "an unlisted step runs and charges scStepCost" $ do
-    (o, _) <- simOrchestrator emptyScript {scCaps = [("disprove", 3)], scStepCost = 0.5}
+    (o, _) <- sim emptyScript {scCaps = [("disprove", 3)], scStepCost = 0.5}
     oCapped o "auto" 10 (pure (7 :: Int)) `shouldReturn` Just 7
     oNow o `shouldReturn` 0.5
 
   it "an unscripted attempt throws at spawn with its key" $ do
-    (o, trace) <- simOrchestrator emptyScript {scAttempts = [(key "a" "x" 0, 1, done "once")]}
+    (o, trace) <- sim emptyScript {scAttempts = [(key "a" "x" 0, 1, done "once")]}
     r <- oSpawn o (attempt 1 "a" "x")
     -- a second spawn on the same goal and backend is index 1, not scripted
     let named (ErrorCall m) = all (`isInfixOf` m) ["akGoal = \"a\"", "akBackend = \"x\"", "akIndex = 1"]
@@ -170,9 +175,9 @@ spec = describe "simOrchestrator" $ do
     outcome <$> oAwaitAny o 10 [r] `shouldReturn` Just (r, Right "once")
 
   it "scDefault covers an unscripted attempt" $ do
-    (o, trace) <- simOrchestrator emptyScript
+    (o, trace) <- sim emptyScript
       { scAttempts = [(key "a" "x" 0, 2, done "scripted")]
-      , scDefault = Just (\s -> Right (plainResult Nothing Nothing (asGoal s <> "/" <> asBackend s)))
+      , scDefault = Just (Scripted (\s -> pure (Right (plainResult Nothing Nothing (asGoal s <> "/" <> asBackend s)))))
       }
     r1 <- oSpawn o (attempt 1 "a" "x")
     r2 <- oSpawn o (attempt 2 "a" "x")
@@ -185,7 +190,7 @@ spec = describe "simOrchestrator" $ do
     stDefaulted <$> trace `shouldReturn` [attempt 2 "a" "x"]
 
   it "prices come from the script" $ do
-    (o, _) <- simOrchestrator emptyScript
+    (o, _) <- sim emptyScript
       { scAttempts = [(key "a" "x" 0, 1, done "p"), (key "a" "x" 1, 1, done "q")]
       , scPrices = [(key "a" "x" 0, 0.25)]
       }
@@ -196,7 +201,7 @@ spec = describe "simOrchestrator" $ do
     oPrice o (attempt 2 "a" "x") `shouldThrow` unpriced
 
   it "the trace holds spawns, cancels, events and the clock" $ do
-    (o, trace) <- simOrchestrator emptyScript
+    (o, trace) <- sim emptyScript
       {scAttempts = [(key "a" "x" 0, 4, done "a"), (key "b" "x" 0, 9, done "b"), (key "c" "x" 0, 9, done "c")]}
     let s1 = attempt 1 "a" "x"
         s2 = attempt 2 "b" "x"
@@ -215,3 +220,31 @@ spec = describe "simOrchestrator" $ do
     stCancelled t `shouldBe` [r3, r2]
     stEvents t `shouldBe` [Launched 0 1 "a" "x", BudgetSpent 4]
     stClock t `shouldBe` 4
+
+  it "a Run entry runs at spawn on the caller's thread and is delivered after its seconds" $ do
+    ran <- newIORef Nothing
+    let job sp = do
+          tid <- myThreadId
+          writeIORef ran (Just tid)
+          pure (plainResult Nothing Nothing ("ran " <> asGoal sp))
+    (o, _) <- sim emptyScript {scAttempts = [(key "a" "x" 0, 6, Run job)]}
+    me <- myThreadId
+    r <- oSpawn o (attempt 1 "a" "x")
+    -- the action has run, on this thread, before any await
+    readIORef ran `shouldReturn` Just me
+    oNow o `shouldReturn` 0
+    outcome <$> oAwaitAny o 5 [r] `shouldReturn` Nothing
+    oNow o `shouldReturn` 5
+    outcome <$> oAwaitAny o 5 [r] `shouldReturn` Just (r, Right "ran a")
+    oNow o `shouldReturn` 6
+
+  it "a Run entry's exception is a Left delivered at its time" $ do
+    (o, _) <- sim emptyScript {scAttempts = [(key "a" "x" 0, 3, Run (\_ -> ioError (userError "boom")))]}
+    r <- oSpawn o (attempt 1 "a" "x")
+    outcome <$> oAwaitAny o 2 [r] `shouldReturn` Nothing
+    outcome <$> oAwaitAny o 10 [r] `shouldReturn` Just (r, Left "user error (boom)")
+    oNow o `shouldReturn` 3
+
+  it "a Run entry's asynchronous exception is rethrown at spawn" $ do
+    (o, _) <- sim emptyScript {scAttempts = [(key "a" "x" 0, 3, Run (\_ -> throwIO ThreadKilled))]}
+    oSpawn o (attempt 1 "a" "x") `shouldThrow` (== ThreadKilled)

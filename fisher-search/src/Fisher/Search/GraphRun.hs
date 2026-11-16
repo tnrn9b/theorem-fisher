@@ -1081,7 +1081,7 @@ withAuto c step n act k = readIORef (cAuto c) >>= \case
   Nothing -> pure Nothing
   Just _ -> locked (cCk c) $ do
     let budgetLeft = (gcBudget (cCfg c) -) <$> elapsed c
-    r <- autoStep (seOrch (geSearch (cEnv c))) step (cAuto c) (cTrack c) budgetLeft (\why -> logG c (`GraphAutoOff` why))
+    r <- autoStep (oCapped (seOrch (geSearch (cEnv c)))) step (cAuto c) (cTrack c) budgetLeft (\why -> logG c (`GraphAutoOff` why))
            (logG c (\t -> NodeAutoTimeout t n step)) act
     traverse (traverse k) r
 

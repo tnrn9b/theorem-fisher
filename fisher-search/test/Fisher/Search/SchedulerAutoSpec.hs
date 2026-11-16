@@ -86,12 +86,12 @@ searchPast cfg ac f lean file = runScript False Nothing cfg ac f lean file . scr
 searchSmt :: Maybe SmtEnv -> SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> [ScriptEntry] -> IO Run
 searchSmt smt cfg ac f lean file = searchScript smt cfg ac f lean file . script
 
-searchScript :: Maybe SmtEnv -> SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> Script -> IO Run
+searchScript :: Maybe SmtEnv -> SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> Script AttemptSpec AttemptResult -> IO Run
 searchScript = runScript True
 
 -- | A search of this script; with True every attempt launched must be
 -- named ('allNamed').
-runScript :: Bool -> Maybe SmtEnv -> SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> Script -> IO Run
+runScript :: Bool -> Maybe SmtEnv -> SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> Script AttemptSpec AttemptResult -> IO Run
 runScript named smt cfg ac f lean file sc = do
   calls <- newIORef []
   let se = (simEnv file) {simLean = lean, simAuto = fmap (\c -> AutoEnv c (fakeLsp calls f) smt) ac}

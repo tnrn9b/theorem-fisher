@@ -13,7 +13,8 @@ import Test.Hspec
 import Fisher.Search.Auto
 import Fisher.Search.Controller (ModelFailure (..))
 import Fisher.Search.FakeLsp
-import Fisher.Search.Orchestrate (Script (..), SimTrace (..), emptyScript)
+import Fisher.Search.Orchestrate (Entry (Scripted), Script (..), SimTrace (..), emptyScript)
+import qualified Fisher.Search.Orchestrate as O
 import Fisher.Search.Report
 import Fisher.Search.Scheduler
 import Fisher.Search.SimHarness
@@ -67,10 +68,14 @@ searchWith :: Bool -> (AttemptSpec -> Maybe ModelFailure) -> SearchConfig -> May
 searchWith named failOf cfg ac f file es = do
   calls <- newIORef []
   let se = (simEnv file) {simAuto = fmap (\c -> AutoEnv c (fakeLsp calls f) Nothing) ac}
-      failing g sp = fmap (\r -> r {arFailure = failOf sp <|> arFailure r}) (g sp)
+      fixR sp r = r {arFailure = failOf sp <|> arFailure r}
+      failing g sp = fmap (fixR sp) (g sp)
+      failingE = \case
+        Scripted h -> Scripted (\sp -> fmap (fixR sp) <$> h sp)
+        O.Run h -> O.Run (\sp -> fixR sp <$> h sp)
       sc = emptyScript
-        { scAttempts = [(k, secs, failing g) | (k, secs, g) <- es]
-        , scDefault = Just (failing (resultOf "exact BAD" Nothing)) }
+        { scAttempts = [(k, secs, failingE e) | (k, secs, e) <- es]
+        , scDefault = Just (Scripted (pure . failing (resultOf "exact BAD" Nothing))) }
   (rep, evs, tr) <- simSearchEnv se cfg sc
   if named then allNamed tr else pure ()
   pure (Run rep evs (stSpawned tr))

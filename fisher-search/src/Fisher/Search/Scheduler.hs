@@ -1,3 +1,5 @@
+{-# LANGUAGE RankNTypes #-}
+
 -- | The swarm's scheduler: attempts on a file's open goals, run in
 -- parallel across backends, each proof checked by the kernel and merged
 -- into a shared base that later attempts start from.
@@ -99,7 +101,7 @@ import Fisher.Search.Controller (Health, Stop (..), cap2000, emptyHealth, modelF
 import Fisher.Search.Disprove (Disproof (..), DisproveInfo (..), DisproveSource (..), SmtEnv, disprove, disproveAfterSuspect, disproveWitnessOnly, sourceName)
 import Fisher.Search.Headless (nativeBackend)
 import Fisher.Search.Lean
-import Fisher.Search.Orchestrate (Orchestrator (..), Running)
+import Fisher.Search.Orchestrate (AttemptOrchestrator, Orchestrator (..), Running)
 import qualified Fisher.Search.Repair as R
 import Fisher.Search.Retrieval
 import Fisher.Search.Splice (Spliced (..), splice)
@@ -179,7 +181,7 @@ tierIn ord h k = (ord !!) <$> case [p | p <- [start .. n - 1], ok p] of
     ok p = not (skipped h (ord !! p))
 
 data SearchEnv = SearchEnv
-  { seOrch :: Orchestrator
+  { seOrch :: AttemptOrchestrator
   -- ^ the effects: an attempt spawned runs to the end and cancelling it
   -- must stop it; the clock; the run log; the automation's capped steps;
   -- and a cancelled attempt's dollars (fisher search: its ledger rows),
@@ -423,11 +425,11 @@ trackRan = maybe True snd . atOff
 -- is spent, or the server just failed (which turns it off, once, closing
 -- the 'Lsp' and calling @off@ with why). The step gets the per-hole cap
 -- cut to the budget left and is stopped there as a whole: 'Missed' when
--- it runs out (the orchestrator's 'oCapped', under the step's name). Its
--- Lsp calls @timedOut@ when a call is cut off at its cap. The track
--- records a completed step and the server's failure.
-autoStep :: Orchestrator -> Text -> IORef (Maybe AutoEnv) -> IORef AutoTrack -> IO Double -> (Text -> IO ()) -> IO () -> (AutoEnv -> IO (Either AutoFail a)) -> IO (Maybe (Either AutoFail a))
-autoStep orch step ref track budgetLeft off timedOut act = readIORef ref >>= \case
+-- it runs out (the cap function, an orchestrator's 'oCapped', under the
+-- step's name). Its Lsp calls @timedOut@ when a call is cut off at its
+-- cap. The track records a completed step and the server's failure.
+autoStep :: (forall b. Text -> Double -> IO b -> IO (Maybe b)) -> Text -> IORef (Maybe AutoEnv) -> IORef AutoTrack -> IO Double -> (Text -> IO ()) -> IO () -> (AutoEnv -> IO (Either AutoFail a)) -> IO (Maybe (Either AutoFail a))
+autoStep capped step ref track budgetLeft off timedOut act = readIORef ref >>= \case
   Nothing -> pure Nothing
   Just ae -> do
     left <- budgetLeft
@@ -435,7 +437,7 @@ autoStep orch step ref track budgetLeft off timedOut act = readIORef ref >>= \ca
       then pure Nothing
       else do
         let ac = aeConfig ae
-        r <- oCapped orch step left
+        r <- capped step left
                (act ae {aeConfig = ac {acSeconds = min (acSeconds ac) left}, aeLsp = (aeLsp ae) {lspTimedOut = timedOut}})
         case r of
           Nothing -> pure (Just (Left Missed))
@@ -525,7 +527,7 @@ runSearch cfg env base0 = do
           -- and is stopped there as a whole: 'Missed' when it runs out.
           -- @step@ and @g@ name it in a timeout's event.
           withAuto :: Text -> Text -> (AutoEnv -> IO (Either AutoFail a)) -> IO (Maybe (Either AutoFail a))
-          withAuto step g = autoStep orch step autoRef track budgetLeft (\why -> elapsed >>= \t -> oLog orch (AutoOff t why))
+          withAuto step g = autoStep (oCapped orch) step autoRef track budgetLeft (\why -> elapsed >>= \t -> oLog orch (AutoOff t why))
                               (elapsed >>= \t -> oLog orch (AutoTimeout t g step))
           -- the start and brief of a goal's next attempt: the goal's
           -- retrieval, a repaired partial proof spliced into the current
@@ -1037,7 +1039,7 @@ runSingle env backend base0 = do
 -- The caller is the only holder of the 'Running': nobody else cancels or
 -- awaits it. If anyone did, 'oAwaitAny' would return Nothing at once and
 -- the wait would spin.
-runToEnd :: Orchestrator -> AttemptSpec -> IO AttemptResult
+runToEnd :: AttemptOrchestrator -> AttemptSpec -> IO AttemptResult
 runToEnd orch spec = mask $ \restore -> do
   r <- oSpawn orch spec
   let wait = oAwaitAny orch 86400 [r] >>= \case

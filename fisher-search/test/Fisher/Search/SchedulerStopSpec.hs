@@ -14,7 +14,7 @@ import Fisher.Search.Auto
 import Fisher.Search.Child (ChildStats (..))
 import Fisher.Search.Controller (ModelFailure (..), Stop (..), StopReason (..), cap2000)
 import Fisher.Search.FakeLsp
-import Fisher.Search.Orchestrate (AttemptKey (..), Script (..), SimTrace (..), emptyScript)
+import Fisher.Search.Orchestrate (AttemptKey (..), Entry (Scripted), Script (..), SimTrace (..), emptyScript)
 import Fisher.Search.Report (eventJson, reportJson)
 import Fisher.Search.Scheduler
 import Fisher.Search.SimHarness
@@ -64,14 +64,14 @@ steps :: Text -> [Step] -> [ScriptEntry]
 steps g = stepsOn g . map ((,) "x")
 
 -- | The script: past its entries an attempt writes @BAD@ at once.
-scriptOf :: [ScriptEntry] -> Script
-scriptOf es = emptyScript {scAttempts = es, scDefault = Just (stepResult (step "exact BAD") {sSecs = 0})}
+scriptOf :: [ScriptEntry] -> Script AttemptSpec AttemptResult
+scriptOf es = emptyScript {scAttempts = es, scDefault = Just (Scripted (pure . stepResult (step "exact BAD") {sSecs = 0}))}
 
 data Run = Run
   { rReport :: SearchReport
   , rEvents :: [Event]
   , rSpecs :: [AttemptSpec]
-  , rTrace :: SimTrace
+  , rTrace :: SimTrace AttemptSpec
   }
 
 -- | A search; every attempt launched must be named ('allNamed').
@@ -88,12 +88,12 @@ searchPast cfg ac file = runScript False Nothing cfg ac file . scriptOf
 searchPriced :: (AttemptSpec -> IO (Maybe Double)) -> SearchConfig -> Maybe AutoConfig -> Text -> [ScriptEntry] -> IO Run
 searchPriced price cfg ac file = searchScript (Just price) cfg ac file . scriptOf
 
-searchScript :: Maybe (AttemptSpec -> IO (Maybe Double)) -> SearchConfig -> Maybe AutoConfig -> Text -> Script -> IO Run
+searchScript :: Maybe (AttemptSpec -> IO (Maybe Double)) -> SearchConfig -> Maybe AutoConfig -> Text -> Script AttemptSpec AttemptResult -> IO Run
 searchScript = runScript True
 
 -- | A search of this script; with True every attempt launched must be
 -- named ('allNamed').
-runScript :: Bool -> Maybe (AttemptSpec -> IO (Maybe Double)) -> SearchConfig -> Maybe AutoConfig -> Text -> Script -> IO Run
+runScript :: Bool -> Maybe (AttemptSpec -> IO (Maybe Double)) -> SearchConfig -> Maybe AutoConfig -> Text -> Script AttemptSpec AttemptResult -> IO Run
 runScript named price cfg ac file sc = do
   calls <- newIORef []
   let se = (simEnv file) {simAuto = fmap (\c -> AutoEnv c (fakeLsp calls fake0) Nothing) ac, simPrice = price}
