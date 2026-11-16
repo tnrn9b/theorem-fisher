@@ -208,6 +208,21 @@ spec = describe "recordOrchestrator and replayOrchestrator" $ do
     oCapped s "repair" 0.05 (threadDelay 2000000) `shouldThrow`
       (== ReplayDiverged 0 "capped repair 5.0e-2 (ran)" "the step `repair` did not end within its recorded cap")
 
+  it "a capped step whose action throws keeps its place, before the calls it made, and throws again on replay" $ do
+    (o, rd) <- quick Nothing >>= recorded
+    let boom = userError "boom"
+    oCapped o "repair" 5 (oNow o >> throwIO boom :: IO ()) `shouldThrow` (== boom)
+    oNow o `shouldReturn` 0
+    rc <- rd
+    rcSteps rc `shouldBe` [Capped "repair" 5 False [], Now 0, Now 0]
+    (s, n) <- replayed rc
+    ran <- newIORef False
+    oCapped s "repair" 5 (writeIORef ran True >> oNow s >> throwIO boom :: IO ()) `shouldThrow` (== boom)
+    readIORef ran `shouldReturn` True
+    n `shouldReturn` 2
+    oNow s `shouldReturn` 0
+    n `shouldReturn` 3
+
   it "a price answered Nothing replays as Nothing" $ do
     (o, rd) <- quick Nothing >>= recorded
     let sp = attemptOn 1 "a" "x"

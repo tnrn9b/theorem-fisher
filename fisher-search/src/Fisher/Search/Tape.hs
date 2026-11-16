@@ -50,7 +50,10 @@ data Step res
   | Capped Text Double Bool [Event]
   -- ^ a capped step: its name, its seconds, whether the cap hit, and
   -- for a hit the events its action logged before the cap hit, in order
-  -- (empty for a step that ran: its events follow it as 'Logged' steps)
+  -- (empty for a step that ran: its events follow it as 'Logged' steps).
+  -- A step whose action threw (a synchronous exception, not the cap) is
+  -- one that ran: the calls made inside it follow it, and on replay its
+  -- action runs again and throws again
   | Priced AttemptKey (Maybe Double)
   -- ^ a price asked for, and the answer the caller used (Nothing when
   -- the price threw)
@@ -132,7 +135,10 @@ loggedIn = \case
 -- cap hit ('Capped'; its place is taken when it starts, so the calls
 -- made inside a step that ran follow it; a step whose cap hit drops the
 -- calls made inside it, since replay skips its action, and carries the
--- events they logged, in order; a step that throws leaves no step); a
+-- events they logged, in order; a step whose action throws a synchronous
+-- exception is written as one that ran, the calls made inside it kept
+-- after it, and the exception rethrown; an asynchronous one leaves no
+-- step); a
 -- price and the answer the caller used, under the key of the latest spawn
 -- with the spec's goal and backend ('Priced'; a price that throws a
 -- synchronous exception is recorded as Nothing, as 'priceCancelled' uses
@@ -179,7 +185,15 @@ recordOrchestrator keyFn o = do
       capped :: Text -> Double -> IO a -> IO (Maybe a)
       capped name secs act = do
         n <- slot
-        got <- oCapped o name secs act
+        got <- try @SomeException (oCapped o name secs act) >>= \case
+          Right x -> pure x
+          Left e
+            | Just (_ :: SomeAsyncException) <- fromException e -> throwIO e
+            | otherwise -> do
+                -- the step ran and threw: it keeps its place, before the
+                -- calls made inside it, and replays by running again
+                put n (Capped name secs False [])
+                throwIO e
         -- a hit cap's action is skipped on replay, so the steps it took
         -- (the loop waits on it, so they are all after its slot) go, and
         -- the events among them go into the step, to be logged on replay
