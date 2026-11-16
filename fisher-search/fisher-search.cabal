@@ -119,6 +119,7 @@ test-suite fisher-search-test
       Fisher.Search.RetrievalFixture
       Fisher.Search.ReviewSpec
       Fisher.Search.SchedulerAutoSpec
+      Fisher.Search.SchedulerIdentitySpec
       Fisher.Search.SchedulerPolicySpec
       Fisher.Search.SchedulerRetrievalSpec
       Fisher.Search.SchedulerSpec
@@ -126,6 +127,7 @@ test-suite fisher-search-test
       Fisher.Search.SchedulerTierSpec
       Fisher.Search.Scripted
       Fisher.Search.ShapeSpec
+      Fisher.Search.SimHarness
       Fisher.Search.SimOrchestrateSpec
       Fisher.Search.SketchSpec
       Fisher.Search.SpliceSpec

@@ -3,7 +3,7 @@
 -- the report's fields, and today's search when both are off.
 module Fisher.Search.SchedulerRetrievalSpec (spec) where
 
-import Control.Concurrent (threadDelay)
+import Control.Concurrent.MVar (MVar, newEmptyMVar, putMVar, takeMVar, tryPutMVar)
 import Control.Concurrent.Async (async, asyncThreadId, waitCatch)
 import Control.Exception (AsyncException (UserInterrupt), SomeException, fromException, throwTo, toException)
 import Data.Aeson (Value (..), toJSON)
@@ -11,29 +11,29 @@ import qualified Data.Aeson.Key as K
 import qualified Data.Aeson.KeyMap as KM
 import Data.IORef
 import Data.List (sort)
-import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
-import Data.Time.Clock.POSIX (getPOSIXTime)
 import System.Directory (doesFileExist)
 import System.FilePath ((</>))
-import System.IO.Temp (withSystemTempDirectory)
+import System.IO.Unsafe (unsafeInterleaveIO)
+import System.Timeout (timeout)
 import Test.Hspec
 
 import Fisher.Role (partText, static)
 import Fisher.Search.Auto
-import Fisher.Search.Check (AxiomPolicy (..), LeanRun, standardAxioms)
+import Fisher.Search.Check (LeanRun)
 import Fisher.Search.FakeLean (fakeLean)
 import Fisher.Search.FakeLsp
 import Fisher.Search.Index
 import Fisher.Search.Lean
 import Fisher.Search.Library
-import Fisher.Search.Orchestrate (realOrchestrator)
+import Fisher.Search.Orchestrate (SimTrace (..))
 import Fisher.Search.Report
 import Fisher.Search.RetrievalFixture
 import Fisher.Search.Retrieval
 import Fisher.Search.Scheduler
+import Fisher.Search.SimHarness
 
 goals :: Text
 goals = T.unlines
@@ -44,8 +44,6 @@ goals = T.unlines
 one :: Text
 one = T.unlines ["import Mathlib", "import P.Defs", "", "theorem t : P.bump 2 = 3 := by", "  sorry"]
 
-type Script = Map.Map (Text, Text) [(Text, Int)]
-
 data Run = Run
   { rReport :: SearchReport
   , rEvents :: [Event]
@@ -53,84 +51,64 @@ data Run = Run
   , rRoot :: FilePath
   }
 
+-- | An attempt that writes this proof; one starting with @HELPER@ also
+-- adds a helper lemma above the goal.
+helperAttempt :: Text -> AttemptSpec -> Either Text AttemptResult
+helperAttempt proof0 sp =
+  let ls = T.splitOn "\n" (asStart sp)
+      d = fromMaybe (error "no goal") (findDecl (asGoal sp) (declarations (asStart sp)))
+      (helper, proof) = case T.stripPrefix "HELPER " proof0 of
+        Just p -> (["theorem P.bump_succ (n : Nat) : P.bump (n + 1) = n + 2 := by", "  rfl", ""], p)
+        Nothing -> ([], proof0)
+      out = T.intercalate "\n" (take (dStart d) ls <> helper <> take (dStmtEnd d + 1 - dStart d) (drop (dStart d) ls) <> ["  " <> proof] <> drop (dEnd d) ls)
+   in Right (plainResult (Just out) Nothing "")
+
+-- | A goal's attempts in launch order on the one backend @x@: the proof
+-- and the virtual seconds.
+proofs :: Text -> [(Text, Double)] -> [ScriptEntry]
+proofs g xs = inOrder g [("x", secs, helperAttempt p) | (p, secs) <- xs]
+
 -- | A search in a fresh project; @check@ runs on the result inside the
--- project's directory. A proof starting with @HELPER@ also adds a helper
--- lemma above the goal.
-search :: SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> Script -> (FilePath -> IO (Maybe RetrievalEnv)) -> (Run -> IO a) -> IO a
-search cfg ac f lean file script0 mkRet check = withSystemTempDirectory "search" $ \root -> do
-  project root file
-  ret <- mkRet root
-  events <- newIORef []
-  specs <- newIORef []
+-- project's directory. Unscripted attempts write @sorry@ at once.
+search :: SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> [ScriptEntry] -> (FilePath -> IO (Maybe RetrievalEnv)) -> (Run -> IO a) -> IO a
+search cfg ac f lean file es mkRet check = do
   calls <- newIORef []
-  script <- newIORef script0
-  let pop g b = atomicModifyIORef' script $ \m ->
-        case [(k, x, xs) | k <- [(g, b), (g, "*")], x : xs <- [Map.findWithDefault [] k m]] of
-          ((k, x, xs) : _) -> (Map.insert k xs m, x)
-          [] -> (m, ("sorry", 0))
-      run sp = do
-        atomicModifyIORef' specs (\ss -> (ss <> [sp], ()))
-        (proof0, delay) <- pop (asGoal sp) (asBackend sp)
-        threadDelay (delay * 1000)
-        let ls = T.splitOn "\n" (asStart sp)
-            d = fromMaybe (error "no goal") (findDecl (asGoal sp) (declarations (asStart sp)))
-            (helper, proof) = case T.stripPrefix "HELPER " proof0 of
-              Just p -> (["theorem P.bump_succ (n : Nat) : P.bump (n + 1) = n + 2 := by", "  rfl", ""], p)
-              Nothing -> ([], proof0)
-            out = T.intercalate "\n" (take (dStart d) ls <> helper <> take (dStmtEnd d + 1 - dStart d) (drop (dStart d) ls) <> ["  " <> proof] <> drop (dEnd d) ls)
-        pure (plainResult (Just out) Nothing "")
-  orch <- realOrchestrator run (realToFrac <$> getPOSIXTime) (\e -> modifyIORef events (e :)) (\_ -> pure Nothing)
-  let env = SearchEnv orch lean (AxiomPolicy standardAxioms False) root "F.lean"
-              (\_ -> pure ())
-              (fmap (\c -> AutoEnv c (fakeLsp calls f) Nothing) ac) ret
-  r <- runSearch cfg env file
-  es <- reverse <$> readIORef events
-  ss <- readIORef specs
-  rep <- either (fail . T.unpack) pure r
-  check (Run rep es ss root)
+  let se = (simEnv file) {simSetup = project, simLean = lean, simAuto = fmap (\c -> AutoEnv c (fakeLsp calls f) Nothing) ac, simRetrieval = mkRet}
+  simSearchIn se cfg (script es) $ \root (rep, evs, tr) -> check (Run rep evs (stSpawned tr) root)
 
 -- | A search interrupted (Ctrl-C's exception thrown to its thread) once an
--- event satisfies the predicate: what it ended with, its events, the root.
-interrupted :: (Event -> Bool) -> Text -> Script -> (FilePath -> IO (Maybe RetrievalEnv)) -> ((Either SomeException (Either Text SearchReport), [Event], FilePath) -> IO a) -> IO a
-interrupted stopAt = interruptedBy (toException UserInterrupt) Nothing (Right stopAt)
+-- event is logged that satisfies the predicate: what it ended with, its
+-- events, the root.
+interrupted :: (Event -> Bool) -> Text -> [ScriptEntry] -> (FilePath -> IO (Maybe RetrievalEnv)) -> ((Either SomeException (Either Text SearchReport), [Event], FilePath) -> IO a) -> IO a
+interrupted stopAt file es mkRet check = do
+  ready <- newEmptyMVar
+  interruptedBy (toException UserInterrupt) Nothing ready stopAt file es (const mkRet) check
 
--- | 'interrupted' with the exception, the automation, and when: after so
--- many ms, or once an event satisfies the predicate.
-interruptedBy :: SomeException -> Maybe AutoEnv -> Either Int (Event -> Bool) -> Text -> Script -> (FilePath -> IO (Maybe RetrievalEnv)) -> ((Either SomeException (Either Text SearchReport), [Event], FilePath) -> IO a) -> IO a
-interruptedBy ex ae when_ file script0 mkRet check = withSystemTempDirectory "search" $ \root -> do
-  project root file
-  ret <- mkRet root
-  events <- newIORef []
-  script <- newIORef script0
-  let pop g = atomicModifyIORef' script $ \m -> case Map.findWithDefault [] (g, "*") m of
-        x : xs -> (Map.insert (g, "*") xs m, x)
-        [] -> (m, ("sorry", 0))
-      run sp = do
-        (proof0, delay) <- pop (asGoal sp)
-        threadDelay (delay * 1000)
-        let ls = T.splitOn "\n" (asStart sp)
-            d = fromMaybe (error "no goal") (findDecl (asGoal sp) (declarations (asStart sp)))
-            (helper, proof) = case T.stripPrefix "HELPER " proof0 of
-              Just p -> (["theorem P.bump_succ (n : Nat) : P.bump (n + 1) = n + 2 := by", "  rfl", ""], p)
-              Nothing -> ([], proof0)
-            out = T.intercalate "\n" (take (dStart d) ls <> helper <> take (dStmtEnd d + 1 - dStart d) (drop (dStart d) ls) <> ["  " <> proof] <> drop (dEnd d) ls)
-        pure (plainResult (Just out) Nothing "")
-  orch <- realOrchestrator run (realToFrac <$> getPOSIXTime) (\e -> atomicModifyIORef' events (\es -> (e : es, ()))) (\_ -> pure Nothing)
-  let env = SearchEnv orch fakeLean (AxiomPolicy standardAxioms False) root "F.lean"
-              (\_ -> pure ()) ae ret
-  a <- async (runSearch cfg0 env file)
-  let waitFor n = do
-        es <- readIORef events
-        if any stopAt es || n > (2000 :: Int) then pure () else threadDelay 10000 >> waitFor (n + 1)
-      stopAt = either (const (const False)) id when_
-  either (\ms -> threadDelay (ms * 1000)) (const (waitFor 0)) when_
-  throwTo (asyncThreadId a) ex
-  r <- waitCatch a
-  es <- reverse <$> readIORef events
-  check (r, es, root)
+-- | 'interrupted' with the exception and the automation: it is thrown
+-- once @ready@ is filled, by the search itself when it logs an event that
+-- satisfies the predicate (the search then waits there for it), or by
+-- whatever else the caller hands @ready@ to (the retrieval env is built
+-- with it).
+interruptedBy
+  :: SomeException -> Maybe AutoEnv -> MVar () -> (Event -> Bool) -> Text -> [ScriptEntry]
+  -> (MVar () -> FilePath -> IO (Maybe RetrievalEnv))
+  -> ((Either SomeException (Either Text SearchReport), [Event], FilePath) -> IO a) -> IO a
+interruptedBy ex ae ready stopAt file es mkRet check = do
+  hold <- newEmptyMVar
+  let hook e = if stopAt e then putMVar ready () >> takeMVar hold else pure ()
+      se = (simEnv file) {simSetup = project, simAuto = ae, simRetrieval = mkRet ready, simLogHook = hook}
+  withSimEnv se (script es) $ \root env trace -> do
+    a <- async (runSearch cfg0 env file)
+    takeMVar ready
+    throwTo (asyncThreadId a) ex
+    r <- waitCatch a
+    -- the search may still hold @hold@; it is released only now
+    _ <- tryPutMVar hold ()
+    evs <- stEvents <$> trace
+    check (r, evs, root)
 
 cfg0 :: SearchConfig
-cfg0 = defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = False}
+cfg0 = defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 6000, scParallelPerGoal = False}
 
 auto :: AutoConfig
 auto = defaultAutoConfig {acTactics = ["rfl", "simp_all"]}
@@ -171,7 +149,7 @@ spec :: Spec
 spec = do
   describe "retrieval in flat search" $ do
     it "puts the facts, then the library, in an attempt's brief" $
-      search cfg0 Nothing fake0 fakeLean goals (Map.fromList [(("a", "*"), [("ok", 0)]), (("b", "*"), [("ok", 0)])])
+      search cfg0 Nothing fake0 fakeLean goals (proofs "a" [("ok", 0)] <> proofs "b" [("ok", 0)])
         (fmap Just . retrievalIn (Just ([bumpLemma], []))) $ \r -> do
           case specsFor "a" r of
             [sp] -> do
@@ -188,8 +166,8 @@ spec = do
           length [() | Facts {} <- rEvents r] `shouldBe` 2
 
     it "puts the facts and the library before the suspect text" $
-      search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 4, scBudget = 30, scParallelPerGoal = False}) (Just auto) fake0 {fSuspects = ["t"]} noCertify one
-        (Map.fromList [(("t", "*"), [("BAD", 5), ("BAD", 5), ("ok", 5)])])
+      search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 4, scBudget = 6000, scParallelPerGoal = False}) (Just auto) fake0 {fSuspects = ["t"]} noCertify one
+        (proofs "t" [("BAD", 1), ("BAD", 1), ("ok", 1)])
         (fmap Just . retrievalIn (Just ([bumpLemma], []))) $ \r ->
           case specsFor "t" r of
             [_, _, third] -> do
@@ -201,7 +179,7 @@ spec = do
 
     it "puts the facts and the library before the repaired proof's holes" $
       search cfg0 {scMaxAttempts = 2} (Just auto) fake0 fakeLean one
-        (Map.fromList [(("t", "*"), [("intro x\n  exact BAD", 10), ("ok", 5)])])
+        (proofs "t" [("intro x\n  exact BAD", 2), ("ok", 1)])
         (fmap Just . retrievalIn (Just ([bumpLemma], []))) $ \r ->
           case specsFor "t" r of
             [_, second] -> do
@@ -218,29 +196,28 @@ spec = do
             -- an index that never finishes building its tables
             let e = head (ixEntries (reIndex env))
             pure (Just env {reIndex = (reIndex env) {ixEntries = cycle [e]}, reCutoff = 0.3})
-      t0 <- getPOSIXTime
-      search cfg0 Nothing fake0 fakeLean one (Map.fromList [(("t", "*"), [("ok", 0)])]) slow $ \r -> do
+      -- the cut-off is the retrieval's own real one: well within 5 s
+      done <- timeout 5000000 $ search cfg0 Nothing fake0 fakeLean one (proofs "t" [("ok", 0)]) slow $ \r -> do
         map briefText (specsFor "t" r) `shouldBe` [""]
         gsStatus (fromMaybe (error "t") (lookup "t" (srGoals (rReport r)))) `shouldBe` Closed
         [(g, n, c) | Facts _ g n _ c <- rEvents r] `shouldBe` [("t", 0, True)]
         [c | LibraryOffered _ _ _ _ c <- rEvents r] `shouldBe` [True]
         [field "cut" (eventJson e) | e@Facts {} <- rEvents r] `shouldBe` [Bool True]
         [T.isSuffixOf "(cut off)" (eventLine e) | e@LibraryOffered {} <- rEvents r] `shouldBe` [True]
-      t1 <- getPOSIXTime
-      realToFrac (t1 - t0) `shouldSatisfy` (< (5 :: Double))
+      done `shouldBe` Just ()
 
     it "retries a cut-off retrieval once, at the goal's next launch" $ do
       let slow root = do
             env <- retrievalIn (Just ([bumpLemma], [])) root
             let e = head (ixEntries (reIndex env))
             pure (Just env {reIndex = (reIndex env) {ixEntries = cycle [e]}, reCutoff = 0.2})
-      search cfg0 {scMaxAttempts = 3} Nothing fake0 fakeLean one (Map.fromList [(("t", "*"), [("BAD", 0), ("BAD", 0), ("ok", 0)])]) slow $ \r -> do
+      search cfg0 {scMaxAttempts = 3} Nothing fake0 fakeLean one (proofs "t" [("BAD", 0), ("BAD", 0), ("ok", 0)]) slow $ \r -> do
         length (specsFor "t" r) `shouldBe` 3
         [(g, c) | Facts _ g _ _ c <- rEvents r] `shouldBe` [("t", True), ("t", True)]
         length [() | LibraryOffered {} <- rEvents r] `shouldBe` 2
 
     it "saves the merged helpers to the library at the end, logged" $
-      search cfg0 Nothing fake0 fakeLean one (Map.fromList [(("t", "*"), [("HELPER exact P.bump_eq 2", 0)])])
+      search cfg0 Nothing fake0 fakeLean one (proofs "t" [("HELPER exact P.bump_eq 2", 0)])
         (fmap Just . retrievalIn (Just ([bumpLemma], []))) $ \r -> do
           [(l, n) | LibrarySaved _ l n <- rEvents r] `shouldBe` [(1, 0)]
           (ls, _) <- loadLibrary (rRoot r </> "lib")
@@ -250,7 +227,7 @@ spec = do
           doesFileExist (rRoot r </> "lib" </> "root.txt") `shouldReturn` True
 
     it "saves nothing with the library off" $
-      search cfg0 Nothing fake0 fakeLean one (Map.fromList [(("t", "*"), [("HELPER exact P.bump_eq 2", 0)])])
+      search cfg0 Nothing fake0 fakeLean one (proofs "t" [("HELPER exact P.bump_eq 2", 0)])
         (\root -> Just . (\e -> e {reLibrary = Nothing}) <$> retrievalIn Nothing root) $ \r -> do
           [() | LibrarySaved {} <- rEvents r] `shouldBe` []
           [() | LibraryOffered {} <- rEvents r] `shouldBe` []
@@ -259,7 +236,7 @@ spec = do
 
     it "gives facts, offered and used per goal in report.json, and the totals" $
       search cfg0 Nothing fake0 fakeLean goals
-        (Map.fromList [(("a", "*"), [("exact P.bump_eq 0", 0)]), (("b", "*"), [("HELPER rfl", 0)])])
+        (proofs "a" [("exact P.bump_eq 0", 0)] <> proofs "b" [("HELPER rfl", 0)])
         (fmap Just . retrievalIn (Just ([bumpLemma, bumpLemma {lmName = "P.bump_succ", lmStatement = "theorem P.bump_succ (n : Nat) : P.bump (n + 1) = n + 2 :="}], []))) $ \r -> do
           let j = reportJson [] (rReport r)
               gs = goalsJson j
@@ -277,7 +254,7 @@ spec = do
   describe "an interrupted run" $
     it "saves what was merged before Ctrl-C to the library, logged, then ends with the interrupt" $
       interrupted (\case GoalClosed _ "a" _ -> True; _ -> False) goals
-        (Map.fromList [(("a", "*"), [("HELPER exact P.bump_eq 0", 0)]), (("b", "*"), [("ok", 60000)])])
+        (proofs "a" [("HELPER exact P.bump_eq 0", 0)] <> proofs "b" [("ok", 12000)])
         (fmap Just . retrievalIn (Just ([bumpLemma], []))) $ \(r, es, root) -> do
           either (\e -> fromException e == Just UserInterrupt) (const False) r `shouldBe` True
           [(l, n) | LibrarySaved _ l n <- es] `shouldBe` [(1, 0)]
@@ -287,23 +264,34 @@ spec = do
   describe "SIGTERM's exception" $ do
     let terminated r = either (\e -> fromException e == Just Terminated) (const False) r
     it "is asynchronous: a retrieval under way rethrows it and the harvest runs" $ do
-      t0 <- getPOSIXTime
-      -- a library whose corpus never finishes: the retrieval runs until its cut-off
-      let slowLib root = Just <$> retrievalIn (Just (cycle [bumpLemma], [])) root
-      interruptedBy (toException Terminated) Nothing (Left 300) one (Map.fromList [(("t", "*"), [("ok", 0)])]) slowLib $ \(r, es, _) -> do
+      -- a library whose corpus never finishes: the retrieval runs until its
+      -- cut-off; reading past the corpus's first lemma fills @ready@, so the
+      -- exception is thrown while the retrieval is under way
+      let slowLib ready root = do
+            rest <- unsafeInterleaveIO (tryPutMVar ready () >> pure (cycle [bumpLemma]))
+            Just <$> retrievalIn (Just (bumpLemma : rest, [])) root
+      ready <- newEmptyMVar
+      done <- timeout 5000000 $ interruptedBy (toException Terminated) Nothing ready (const False) one (proofs "t" [("ok", 0)]) slowLib $ \(r, es, _) -> do
         terminated r `shouldBe` True
         [() | Launched {} <- es] `shouldBe` []
         [(l, n) | LibrarySaved _ l n <- es] `shouldBe` [(0, 0)]
-      t1 <- getPOSIXTime
-      realToFrac (t1 - t0) `shouldSatisfy` (< (5 :: Double))
+      done `shouldBe` Just ()
     it "is asynchronous: the Auto pre-pass under way rethrows it and the harvest runs" $ do
       calls <- newIORef []
-      let ae = AutoEnv auto {acSeconds = 30} (fakeLsp calls fake0 {fDelay = \m -> if m == "attempts" then 5000 else 0}) Nothing
-      interruptedBy (toException Terminated) (Just ae) (Left 300) one (Map.fromList [(("t", "*"), [("ok", 0)])])
-        (fmap Just . retrievalIn (Just ([bumpLemma], []))) $ \(r, es, _) -> do
+      ready <- newEmptyMVar
+      stuck <- newEmptyMVar
+      -- the pre-pass's first call fills @ready@ and waits there
+      let lsp = fakeLsp calls fake0
+          ae = AutoEnv auto {acSeconds = 30} lsp {lspAttempts = \_ _ _ -> putMVar ready () >> takeMVar stuck >> pure (Right [])} Nothing
+      interruptedBy (toException Terminated) (Just ae) ready (const False) one (proofs "t" [("ok", 0)])
+        (const (fmap Just . retrievalIn (Just ([bumpLemma], [])))) $ \(r, es, _) -> do
           terminated r `shouldBe` True
           [() | Launched {} <- es] `shouldBe` []
           [(l, n) | LibrarySaved _ l n <- es] `shouldBe` [(0, 0)]
+      -- @stuck@ is held until here, so the waiting call is never taken for
+      -- a deadlock before the exception reaches it
+      _ <- tryPutMVar stuck ()
+      pure ()
 
   describe "helperStatements, ambiguous" $
     it "treats more than one suffix match as none" $ do
@@ -312,7 +300,7 @@ spec = do
 
   describe "a read-only library" $
     it "offers from the library and saves nothing to it" $
-      search cfg0 Nothing fake0 fakeLean one (Map.fromList [(("t", "*"), [("HELPER exact P.bump_eq 2", 0)])])
+      search cfg0 Nothing fake0 fakeLean one (proofs "t" [("HELPER exact P.bump_eq 2", 0)])
         (\root -> Just . (\e -> e {reHarvest = False}) <$> retrievalIn (Just ([bumpLemma], [])) root) $ \r -> do
           [ls | LibraryOffered _ _ ls _ _ <- rEvents r] `shouldBe` [["P.bump_eq"]]
           [() | LibrarySaved {} <- rEvents r] `shouldBe` []
@@ -351,7 +339,7 @@ spec = do
 
   describe "with retrieval and the library off" $
     it "the events and report.json are today's" $
-      search cfg0 Nothing fake0 fakeLean goals (Map.fromList [(("a", "*"), [("ok", 0)]), (("b", "*"), [("BAD", 0), ("ok", 0)])])
+      search cfg0 Nothing fake0 fakeLean goals (proofs "a" [("ok", 0)] <> proofs "b" [("BAD", 0), ("ok", 0)])
         (const (pure Nothing)) $ \r -> do
           filter isRetrievalEvent (rEvents r) `shouldBe` []
           map briefText (rSpecs r) `shouldBe` ["", "", ""]

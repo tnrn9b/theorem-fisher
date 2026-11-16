@@ -1,27 +1,17 @@
 module Fisher.Search.SchedulerPolicySpec (spec) where
 
-import Control.Concurrent (threadDelay)
 import Data.Aeson (Value (..), object, (.=))
-import qualified Data.ByteString as BS
-import Data.IORef
+import Data.IORef (newIORef)
 import qualified Data.Map.Strict as Map
-import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
-import qualified Data.Text.Encoding as TE
-import Data.Time.Clock.POSIX (getPOSIXTime)
-import System.FilePath ((</>))
-import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
 
 import Fisher.Learn.Policy (GoalPolicy (..))
 import Fisher.Search.Auto
-import Fisher.Search.Check (AxiomPolicy (..), standardAxioms)
-import Fisher.Search.FakeLean (fakeLean)
 import Fisher.Search.FakeLsp
-import Fisher.Search.Lean
-import Fisher.Search.Orchestrate (realOrchestrator)
 import Fisher.Search.Scheduler
+import Fisher.Search.SimHarness
 
 file :: Text
 file = T.unlines
@@ -30,33 +20,22 @@ file = T.unlines
   , "theorem b : B := by", "  sorry", ""
   , "theorem c : C := by", "  sorry" ]
 
--- | Attempts per (goal, backend): the proof to write and a delay in ms;
--- past the script an attempt writes @sorry@.
-type Script = Map.Map (Text, Text) (Text, Int)
-
-search :: SearchConfig -> Maybe AutoConfig -> Fake -> Script -> IO (SearchReport, [Event])
-search cfg ac f script = withSystemTempDirectory "policy" $ \root -> do
-  BS.writeFile (root </> "F.lean") (TE.encodeUtf8 file)
-  events <- newIORef []
+-- | A search of the three goals; every attempt on a goal and backend the
+-- entries name writes its proof after its virtual seconds, any other
+-- writes @sorry@ at once.
+search :: SearchConfig -> Maybe AutoConfig -> Fake -> [ScriptEntry] -> IO (SearchReport, [Event])
+search cfg ac f es = do
   calls <- newIORef []
-  let run sp = do
-        let (proof, delay) = fromMaybe ("sorry", 0) (Map.lookup (asGoal sp, asBackend sp) script)
-        threadDelay (delay * 1000)
-        let ls = T.splitOn "\n" (asStart sp)
-            d = fromMaybe (error "no goal") (findDecl (asGoal sp) (declarations (asStart sp)))
-            out = T.intercalate "\n" (take (dStmtEnd d + 1) ls <> ["  " <> proof] <> drop (dEnd d) ls)
-        pure (plainResult (Just out) Nothing "")
-  orch <- realOrchestrator run (realToFrac <$> getPOSIXTime) (\e -> modifyIORef events (e :)) (\_ -> pure Nothing)
-  let env = SearchEnv
-        { seOrch = orch, seLean = fakeLean, sePolicy = AxiomPolicy standardAxioms False, seRoot = root, seRel = "F.lean"
-        , seBaseChanged = \_ -> pure ()
-        , seAuto = fmap (\c -> AutoEnv c (fakeLsp calls f) Nothing) ac, seRetrieval = Nothing }
-  r <- runSearch cfg env file
-  es <- reverse <$> readIORef events
-  either (fail . T.unpack) (\rep -> pure (rep, es)) r
+  let se = (simEnv file) {simAuto = fmap (\c -> AutoEnv c (fakeLsp calls f) Nothing) ac}
+  (rep, evs, _) <- simSearchEnv se cfg (script es)
+  pure (rep, evs)
+
+-- | Every attempt on this goal and backend writes this proof in these seconds.
+on :: Text -> Text -> Text -> Double -> [ScriptEntry]
+on g b proof secs = always g b secs (proofAttempt proof)
 
 cfg0 :: SearchConfig
-cfg0 = defaultSearchConfig {scBackends = ["claude-code", "fisher"], scSlots = 4, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = True}
+cfg0 = defaultSearchConfig {scBackends = ["claude-code", "fisher"], scSlots = 4, scMaxAttempts = 3, scBudget = 6000, scParallelPerGoal = True}
 
 gp :: GoalPolicy
 gp = GoalPolicy
@@ -67,8 +46,8 @@ withPolicy :: [(Text, GoalPolicy)] -> SearchConfig -> SearchConfig
 withPolicy ps c = c {scGoalPolicy = Map.fromList ps}
 
 -- | Every goal closes on its first attempt, whatever the backend.
-allOk :: Script
-allOk = Map.fromList [((g, b), ("ok", 5)) | g <- ["a", "b", "c"], b <- ["claude-code", "fisher"]]
+allOk :: [ScriptEntry]
+allOk = concat [on g b "ok" 1 | g <- ["a", "b", "c"], b <- ["claude-code", "fisher"]]
 
 firstLaunch :: Text -> [Event] -> Maybe Text
 firstLaunch g es = case [b | Launched _ _ g' b <- es, g' == g] of
@@ -90,15 +69,15 @@ spec = describe "the scheduler with a per-goal policy" $ do
     firstLaunch "b" es `shouldBe` Just "claude-code"
 
   it "logs the backends knob once for the goal whose order differs, with its evidence" $ do
-    let script = Map.fromList ([(("a", b), ("BAD", 5)) | b <- ["claude-code", "fisher"]] <> [((g, "claude-code"), ("ok", 5)) | g <- ["b", "c"]])
-    (_, es) <- search (withPolicy [("a", gp {gpBackends = ["fisher", "claude-code"]}), ("b", gp {gpBackends = ["claude-code", "fisher"]})] cfg0 {scSlots = 1}) Nothing fake0 script
+    let entries = concat ([on "a" b "BAD" 1 | b <- ["claude-code", "fisher"]] <> [on g "claude-code" "ok" 1 | g <- ["b", "c"]])
+    (_, es) <- search (withPolicy [("a", gp {gpBackends = ["fisher", "claude-code"]}), ("b", gp {gpBackends = ["claude-code", "fisher"]})] cfg0 {scSlots = 1}) Nothing fake0 entries
     [b | Launched _ _ "a" b <- es] `shouldBe` ["fisher", "claude-code", "fisher"]
     policies es `shouldBe` [("a", "backends", "claude-code,fisher", "fisher,claude-code", False)]
     [ev | PolicyApplied _ _ _ _ _ ev _ <- es] `shouldBe` [object ["fisher" .= object ["attempts" .= (10 :: Int)]]]
 
   it "explores: the goal's first attempt runs on the second arm, later ones by the normal rule" $ do
-    let script = Map.fromList ([(("a", b), ("BAD", 5)) | b <- ["claude-code", "fisher"]] <> [((g, b), ("ok", 5)) | g <- ["b", "c"], b <- ["claude-code", "fisher"]])
-    (_, es) <- search (withPolicy [("a", gp {gpBackends = ["fisher", "claude-code"], gpExplore = True})] cfg0 {scSlots = 1, scMaxAttempts = 2}) Nothing fake0 script
+    let entries = concat ([on "a" b "BAD" 1 | b <- ["claude-code", "fisher"]] <> [on g b "ok" 1 | g <- ["b", "c"], b <- ["claude-code", "fisher"]])
+    (_, es) <- search (withPolicy [("a", gp {gpBackends = ["fisher", "claude-code"], gpExplore = True})] cfg0 {scSlots = 1, scMaxAttempts = 2}) Nothing fake0 entries
     [b | Launched _ _ "a" b <- es] `shouldBe` ["claude-code", "fisher"]
     [(g, k, x) | (g, k, _, _, x) <- policies es] `shouldBe` [("a", "backends", True)]
 
@@ -140,18 +119,18 @@ spec = describe "the scheduler with a per-goal policy" $ do
   it "logs a learned attempt budget once per goal, the configured one as the default" $ do
     let c = withPolicy [("a", gp {gpAttemptSecs = Just 600}), ("b", gp {gpAttemptSecs = Just 1200}), ("c", gp {gpAttemptSecs = Just 1500})]
               cfg0 {scSlots = 1, scAttemptSecs = Just 1200}
-        script = Map.fromList ([(("a", b), ("BAD", 5)) | b <- ["claude-code", "fisher"]] <> [((g, b), ("ok", 5)) | g <- ["b", "c"], b <- ["claude-code", "fisher"]])
-    (_, es) <- search c Nothing fake0 script
+        entries = concat ([on "a" b "BAD" 1 | b <- ["claude-code", "fisher"]] <> [on g b "ok" 1 | g <- ["b", "c"], b <- ["claude-code", "fisher"]])
+    (_, es) <- search c Nothing fake0 entries
     length [() | Launched _ _ "a" _ <- es] `shouldBe` 3
     policies es `shouldBe` [("a", "attempt_secs", "1200", "600", False)]
     -- with no configured budget known, nothing is logged
-    (_, es2) <- search c {scAttemptSecs = Nothing} Nothing fake0 script
+    (_, es2) <- search c {scAttemptSecs = Nothing} Nothing fake0 entries
     policies es2 `shouldBe` []
 
   it "climbs the policy's tier order on later attempts" $ do
     let c = withPolicy [("a", gp {gpTiers = ["m2", "m1"]})] cfg0 {scTiers = ["m1", "m2"], scSlots = 1, scBackends = ["fisher"], scMaxAttempts = 2}
-        script = Map.fromList [(("a", "fisher"), ("BAD", 5))] <> Map.fromList [((g, "fisher"), ("ok", 5)) | g <- ["b", "c"]]
-    (_, es) <- search c Nothing fake0 script
+        entries = on "a" "fisher" "BAD" 1 <> concat [on g "fisher" "ok" 1 | g <- ["b", "c"]]
+    (_, es) <- search c Nothing fake0 entries
     [m | TierChosen _ _ "a" _ m <- es] `shouldBe` ["m2", "m1"]
     length [() | (_, "tiers", _, _, _) <- policies es] `shouldBe` 1
 

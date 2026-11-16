@@ -1,31 +1,23 @@
 module Fisher.Search.SchedulerStopSpec (spec) where
 
-import Control.Concurrent (threadDelay)
 import Data.Aeson (Value (..), object, (.=))
 import qualified Data.Aeson.KeyMap as KM
-import qualified Data.ByteString as BS
 import Data.IORef
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
-import qualified Data.Text.Encoding as TE
-import Data.Time.Clock.POSIX (getPOSIXTime)
-import System.FilePath ((</>))
-import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
 
 import Fisher.Role (partText)
 import Fisher.Search.Auto
-import Fisher.Search.Check (AxiomPolicy (..), standardAxioms)
 import Fisher.Search.Child (ChildStats (..))
 import Fisher.Search.Controller (ModelFailure (..), Stop (..), StopReason (..), cap2000)
-import Fisher.Search.FakeLean (fakeLean)
 import Fisher.Search.FakeLsp
-import Fisher.Search.Lean
-import Fisher.Search.Orchestrate (realOrchestrator)
+import Fisher.Search.Orchestrate (AttemptKey (..), Script (..), SimTrace (..), emptyScript)
 import Fisher.Search.Report (eventJson, reportJson)
 import Fisher.Search.Scheduler
+import Fisher.Search.SimHarness
 
 one :: Text
 one = T.unlines ["import Mathlib", "", "theorem t : T := by", "  sorry"]
@@ -47,62 +39,60 @@ data Step = Step
   -- ^ the child's own cost figure
   , sFailure :: Maybe ModelFailure
   , sThrow :: Bool
-  , sDelay :: Int
-  -- ^ ms the attempt runs
+  , sSecs :: Double
+  -- ^ virtual seconds the attempt runs
   }
 
 step :: Text -> Step
-step p = Step p Nothing Nothing Nothing Nothing Nothing False 5
+step p = Step p Nothing Nothing Nothing Nothing Nothing False 1
 
--- | Steps per goal, taken in launch order; past the end an attempt writes
--- @BAD@.
-type Script = Map.Map Text [Step]
+-- | A step's result from the attempt's start.
+stepResult :: Step -> AttemptSpec -> Either Text AttemptResult
+stepResult s sp
+  | sThrow s = Left "user error (boom)"
+  | otherwise =
+      let stats = (\c -> ChildStats (Just 1) 1 (Just 3) Nothing Nothing (Just c) Nothing Map.empty) <$> sCost s
+       in Right (plainResult (Just (spliceProof (sProof s) sp)) stats "exit 1")
+            { arStop = sStop s, arLastMessage = sMessage s, arDollars = sDollars s, arFailure = sFailure s }
+
+-- | A goal's steps in launch order, each on its backend.
+stepsOn :: Text -> [(Text, Step)] -> [ScriptEntry]
+stepsOn g xs = inOrder g [(b, sSecs s, stepResult s) | (b, s) <- xs]
+
+-- | A goal's steps in launch order on the one backend @x@.
+steps :: Text -> [Step] -> [ScriptEntry]
+steps g = stepsOn g . map ((,) "x")
+
+-- | The script: past its entries an attempt writes @BAD@ at once.
+scriptOf :: [ScriptEntry] -> Script
+scriptOf es = emptyScript {scAttempts = es, scDefault = Just (stepResult (step "exact BAD") {sSecs = 0})}
 
 data Run = Run
   { rReport :: SearchReport
   , rEvents :: [Event]
   , rSpecs :: [AttemptSpec]
+  , rTrace :: SimTrace
   }
 
-search :: SearchConfig -> Maybe AutoConfig -> Text -> Script -> IO Run
-search = searchPriced (\_ -> pure Nothing)
+search :: SearchConfig -> Maybe AutoConfig -> Text -> [ScriptEntry] -> IO Run
+search cfg ac file = searchScript Nothing cfg ac file . scriptOf
 
--- | 'search' with a price for cancelled attempts ('oPrice').
-searchPriced :: (AttemptSpec -> IO (Maybe Double)) -> SearchConfig -> Maybe AutoConfig -> Text -> Script -> IO Run
-searchPriced price cfg ac file script0 = withSystemTempDirectory "stops" $ \root -> do
-  BS.writeFile (root </> "F.lean") (TE.encodeUtf8 file)
-  events <- newIORef []
-  specs <- newIORef []
+-- | 'search' with a price for cancelled attempts ('oPrice') in place of
+-- the script's.
+searchPriced :: (AttemptSpec -> IO (Maybe Double)) -> SearchConfig -> Maybe AutoConfig -> Text -> [ScriptEntry] -> IO Run
+searchPriced price cfg ac file = searchScript (Just price) cfg ac file . scriptOf
+
+searchScript :: Maybe (AttemptSpec -> IO (Maybe Double)) -> SearchConfig -> Maybe AutoConfig -> Text -> Script -> IO Run
+searchScript price cfg ac file sc = do
   calls <- newIORef []
-  script <- newIORef script0
-  let pop g = atomicModifyIORef' script $ \m -> case Map.findWithDefault [] g m of
-        x : xs -> (Map.insert g xs m, x)
-        [] -> (m, step "exact BAD")
-      run sp = do
-        atomicModifyIORef' specs (\ss -> (ss <> [sp], ()))
-        s <- pop (asGoal sp)
-        threadDelay (sDelay s * 1000)
-        if sThrow s then ioError (userError "boom") else do
-          let ls = T.splitOn "\n" (asStart sp)
-              d = fromMaybe (error "no goal") (findDecl (asGoal sp) (declarations (asStart sp)))
-              out = T.intercalate "\n" (take (dStmtEnd d + 1) ls <> ["  " <> sProof s] <> drop (dEnd d) ls)
-              stats = (\c -> ChildStats (Just 1) 1 (Just 3) Nothing Nothing (Just c) Nothing Map.empty) <$> sCost s
-          pure (plainResult (Just out) stats "exit 1")
-            { arStop = sStop s, arLastMessage = sMessage s, arDollars = sDollars s, arFailure = sFailure s }
-  orch <- realOrchestrator run (realToFrac <$> getPOSIXTime) (\e -> modifyIORef events (e :)) price
-  let env = SearchEnv
-        { seOrch = orch, seLean = fakeLean, sePolicy = AxiomPolicy standardAxioms False, seRoot = root, seRel = "F.lean"
-        , seBaseChanged = \_ -> pure ()
-        , seAuto = fmap (\c -> AutoEnv c (fakeLsp calls fake0) Nothing) ac, seRetrieval = Nothing }
-  r <- runSearch cfg env file
-  es <- reverse <$> readIORef events
-  ss <- readIORef specs
-  either (fail . T.unpack) (\rep -> pure (Run rep es ss)) r
+  let se = (simEnv file) {simAuto = fmap (\c -> AutoEnv c (fakeLsp calls fake0) Nothing) ac, simPrice = price}
+  (rep, es, tr) <- simSearchEnv se cfg sc
+  pure (Run rep es (stSpawned tr) tr)
 
 -- | One backend, one slot, three attempts, two tiers, the controller on.
 cfgS :: SearchConfig
 cfgS = defaultSearchConfig
-  { scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = False
+  { scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 6000, scParallelPerGoal = False
   , scTiers = ["example/model-a", "example/model-b"], scControl = True }
 
 auto :: AutoConfig
@@ -147,8 +137,8 @@ spec = describe "stopped attempts and the stall note" $ do
     let long = T.replicate 2100 "x" <> "END"
         stopped = (step "intro x\n  exact BAD") {sStop = Just stop8, sMessage = Just long}
         plain = step "intro x\n  exact BAD"
-    r <- search cfgS (Just auto) one (Map.fromList [("t", [stopped, step "exact BAD", step "exact BAD"])])
-    p <- search cfgS (Just auto) one (Map.fromList [("t", [plain, step "exact BAD", step "exact BAD"])])
+    r <- search cfgS (Just auto) one (steps "t" [stopped, step "exact BAD", step "exact BAD"])
+    p <- search cfgS (Just auto) one (steps "t" [plain, step "exact BAD", step "exact BAD"])
     [(i, g, why, n, d) | AttemptStopped _ i g why n d <- rEvents r] `shouldBe` [(1, "t", "turns", 8, 0.42)]
     [() | AttemptStopped {} <- rEvents p] `shouldBe` []
     -- Repair exactly as for the rejected attempt
@@ -177,7 +167,7 @@ spec = describe "stopped attempts and the stall note" $ do
     gsStall (goalOf "t" r) `shouldBe` Nothing
 
   it "the prover's errors in the note are the verification's" $ do
-    r <- search cfgS Nothing one (Map.fromList [("t", [(step "exact BAD") {sStop = Just stop8}])])
+    r <- search cfgS Nothing one (steps "t" [(step "exact BAD") {sStop = Just stop8}])
     case (srAttempts (rReport r), rSpecs r) of
       (a1 : _, _ : second : _) -> do
         let why = fromMaybe (error "not rejected") (T.stripPrefix "rejected: " (arOutcome a1))
@@ -185,7 +175,7 @@ spec = describe "stopped attempts and the stall note" $ do
       _ -> expectationFailure "too few attempts"
 
   it "a stopped attempt whose file closes the goal closes it, with no note" $ do
-    r <- search cfgS Nothing three (Map.fromList [("a", [(step "ok") {sStop = Just stop8, sMessage = Just "done"}])])
+    r <- search cfgS Nothing three (steps "a" [(step "ok") {sStop = Just stop8, sMessage = Just "done"}])
     gsStatus (goalOf "a" r) `shouldBe` Closed
     gsStall (goalOf "a" r) `shouldBe` Nothing
     [i | AttemptStopped _ i _ _ _ _ <- rEvents r] `shouldBe` [1]
@@ -193,8 +183,8 @@ spec = describe "stopped attempts and the stall note" $ do
     [briefText s | s <- rSpecs r] `shouldSatisfy` all (not . T.isInfixOf "stopped after")
 
   it "records model, tier, stop and dollars (the run's, else the child's)" $ do
-    r <- search cfgS Nothing one (Map.fromList
-      [("t", [(step "exact BAD") {sStop = Just stop8, sDollars = Just 0.42, sCost = Just 9}, (step "exact BAD") {sCost = Just 0.3}, step "ok"])])
+    r <- search cfgS Nothing one
+      (steps "t" [(step "exact BAD") {sStop = Just stop8, sDollars = Just 0.42, sCost = Just 9}, (step "exact BAD") {sCost = Just 0.3}, step "ok"])
     let recs = srAttempts (rReport r)
     map arModel recs `shouldBe` map Just ["example/model-a", "example/model-b", "example/model-b"]
     map arTierOf recs `shouldBe` [Just 0, Just 1, Just 1]
@@ -208,8 +198,8 @@ spec = describe "stopped attempts and the stall note" $ do
     asked <- newIORef ([] :: [Int])
     let price sp = modifyIORef' asked (asId sp :) >> pure (Just 0.25)
         cfg = cfgS {scBackends = ["x", "y"], scSlots = 2, scParallelPerGoal = True}
-        script = Map.fromList [("t", [(step "exact BAD") {sDelay = 5000}, (step "ok") {sDelay = 50}])]
-    r <- searchPriced price cfg Nothing one script
+        entries = stepsOn "t" [("x", (step "exact BAD") {sSecs = 1000}), ("y", (step "ok") {sSecs = 10})]
+    r <- searchPriced price cfg Nothing one entries
     readIORef asked `shouldReturn` [1]
     [(arOutcome a, arCost a) | a <- srAttempts (rReport r), arId a == 1] `shouldBe` [("cancelled: the goal closed", Just 0.25)]
     [(i, d) | AttemptCancelled _ i _ d <- rEvents r] `shouldBe` [(1, Just 0.25)]
@@ -220,35 +210,35 @@ spec = describe "stopped attempts and the stall note" $ do
     [KM.lookup "dollars" o | e@AttemptCancelled {} <- rEvents r, Object o <- [eventJson e]] `shouldBe` [Just (Number 0.25)]
     -- the controller off: the price is not asked, and the event has no dollars
     writeIORef asked []
-    r2 <- searchPriced price cfg {scTiers = [], scControl = False} Nothing one script
+    r2 <- searchPriced price cfg {scTiers = [], scControl = False} Nothing one entries
     readIORef asked `shouldReturn` []
     [d | AttemptCancelled _ _ _ d <- rEvents r2] `shouldBe` [Nothing]
 
   it "prices the attempts cancelled at the budget, each logged with its dollars" $ do
     let price sp = pure (if asId sp == 1 then Just 0.4 else Nothing)
-    r <- searchPriced price cfgS {scBudget = 0.3} Nothing one (Map.fromList [("t", [(step "exact BAD") {sDelay = 5000}])])
+    r <- searchPriced price cfgS {scBudget = 60} Nothing one (steps "t" [(step "exact BAD") {sSecs = 1000}])
     [(arOutcome a, arCost a) | a <- srAttempts (rReport r)] `shouldBe` [("cancelled: budget spent", Just 0.4)]
     [(i, d) | AttemptCancelled _ i _ d <- rEvents r] `shouldBe` [(1, Just 0.4)]
 
   it "a price that throws is no dollars" $ do
     let cfg = cfgS {scBackends = ["x", "y"], scSlots = 2, scParallelPerGoal = True}
     r <- searchPriced (\_ -> ioError (userError "no ledger")) cfg Nothing one
-           (Map.fromList [("t", [(step "exact BAD") {sDelay = 5000}, (step "ok") {sDelay = 50}])])
+           (stepsOn "t" [("x", (step "exact BAD") {sSecs = 1000}), ("y", (step "ok") {sSecs = 10})])
     [arCost a | a <- srAttempts (rReport r), arId a == 1] `shouldBe` [Nothing]
 
   it "feeds no exception to the tier's health" $ do
     -- two rate limits on tier 0, an exception, then a third rate limit:
     -- the exception says nothing about the model, so the tier is skipped
     let rl = (step "exact BAD") {sFailure = Just RateLimited}
-    r <- search cfgS Nothing three (Map.fromList
-      [("a", [rl, rl, (step "exact BAD") {sThrow = True}, step "ok"]), ("b", [rl, step "ok"]), ("c", [step "ok"])])
+    r <- search cfgS Nothing three
+      (steps "a" [rl, rl, (step "exact BAD") {sThrow = True}, step "ok"] <> steps "b" [rl, step "ok"] <> steps "c" [step "ok"])
     take 4 [(asGoal s, asTier s) | s <- rSpecs r] `shouldBe` [("a", Just 0), ("a", Just 0), ("a", Just 0), ("b", Just 0)]
     take 3 (map arOutcome (srAttempts (rReport r))) `shouldBe` ["model error: rate limited", "model error: rate limited", "error: user error (boom)"]
     [m | TierSkipped _ m _ <- rEvents r] `shouldBe` ["example/model-a"]
 
   it "keeps the note past an attempt that ends in a model error, for the next real attempt only" $ do
-    r <- search cfgS Nothing one (Map.fromList
-      [("t", [(step "exact BAD") {sStop = Just stop8}, (step "exact BAD") {sFailure = Just RateLimited}, step "exact BAD", step "exact BAD"])])
+    r <- search cfgS Nothing one
+      (steps "t" [(step "exact BAD") {sStop = Just stop8}, (step "exact BAD") {sFailure = Just RateLimited}, step "exact BAD", step "exact BAD"])
     take 2 (drop 1 (map arOutcome (srAttempts (rReport r)))) `shouldSatisfy` (\os -> take 1 os == ["model error: rate limited"])
     case map briefText (rSpecs r) of
       [_, b2, b3, b4] -> do
@@ -257,6 +247,30 @@ spec = describe "stopped attempts and the stall note" $ do
         b4 `shouldNotSatisfy` T.isInfixOf "stopped after"
       bs -> expectationFailure ("attempts: " <> show (length bs))
     gsStall (goalOf "t" r) `shouldBe` Nothing
+
+  it "cancels both attempts in flight when the budget runs out, prices both and logs it" $ do
+    let cfg = cfgS {scBackends = ["x", "y"], scSlots = 2, scParallelPerGoal = True, scBudget = 10}
+        es = stepsOn "t" [("x", (step "exact BAD") {sSecs = 12}), ("y", (step "ok") {sSecs = 15})]
+    r <- searchScript Nothing cfg Nothing one
+           emptyScript {scAttempts = es, scPrices = [(AttemptKey "t" "x" 0, 0.4), (AttemptKey "t" "y" 0, 0.7)]}
+    [(i, b) | Launched _ i _ b <- rEvents r] `shouldBe` [(1, "x"), (2, "y")]
+    [(t, i, d) | AttemptCancelled t i _ d <- rEvents r] `shouldBe` [(10, 2, Just 0.7), (10, 1, Just 0.4)]
+    [t | BudgetSpent t <- rEvents r] `shouldBe` [10]
+    [(arId a, arOutcome a, arCost a) | a <- srAttempts (rReport r)]
+      `shouldBe` [(2, "cancelled: budget spent", Just 0.7), (1, "cancelled: budget spent", Just 0.4)]
+    (srBudgetSpent (rReport r), srElapsed (rReport r)) `shouldBe` (True, 10)
+    length (stCancelled (rTrace r)) `shouldBe` 2
+    [() | Finished {} <- rEvents r] `shouldBe` []
+
+  it "cancels the other attempt on a goal one closes, logged with its price" $ do
+    let cfg = cfgS {scBackends = ["x", "y"], scSlots = 2, scParallelPerGoal = True}
+        es = stepsOn "t" [("x", (step "ok") {sSecs = 2}), ("y", (step "exact BAD") {sSecs = 9})]
+    r <- searchScript Nothing cfg Nothing one emptyScript {scAttempts = es, scPrices = [(AttemptKey "t" "y" 0, 0.25)]}
+    gsStatus (goalOf "t" r) `shouldBe` Closed
+    [(t, i, g, d) | AttemptCancelled t i g d <- rEvents r] `shouldBe` [(2, 2, "t", Just 0.25)]
+    [(arOutcome a, arCost a) | a <- srAttempts (rReport r), arId a == 2] `shouldBe` [("cancelled: the goal closed", Just 0.25)]
+    [i | Finished _ i _ _ _ _ _ <- rEvents r] `shouldBe` [1]
+    stClock (rTrace r) `shouldBe` 2
 
 -- | An attempt's brief as the text the backend is handed.
 briefText :: AttemptSpec -> Text

@@ -1,6 +1,5 @@
 module Fisher.Search.SchedulerAutoSpec (spec) where
 
-import Control.Concurrent (threadDelay)
 import Data.Aeson (Value (..), toJSON)
 import qualified Data.Aeson.Key as K
 import qualified Data.Aeson.KeyMap as KM
@@ -8,26 +7,24 @@ import qualified Data.ByteString as BS
 import Data.Char (isDigit)
 import Data.IORef
 import Data.List (sort)
-import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
-import Data.Time.Clock.POSIX (getPOSIXTime)
 import System.FilePath ((</>))
-import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
 
 import Fisher.Role (partText)
 import Fisher.Search.Auto
-import Fisher.Search.Check (AxiomPolicy (..), LeanRun (..), standardAxioms)
+import Fisher.Search.Check (LeanRun (..))
 import Fisher.Search.Disprove (Disproof (..), DisproveSource (..), SmtEnv (..), certifyTactics)
 import Fisher.Search.FakeLean (fakeLean)
 import Fisher.Search.FakeLsp
 import Fisher.Search.Lean
-import Fisher.Search.Orchestrate (realOrchestrator)
+import Fisher.Search.Orchestrate (Script (..), SimTrace (..))
 import Fisher.Search.Report
 import Fisher.Search.Scheduler
+import Fisher.Search.SimHarness
 import Fisher.Search.Splice (applySmtImport, smtKept)
 import Fisher.Smt (Model (..), SmtResult (..), Solver (..), Sort (..))
 import qualified Fisher.Smt as Smt
@@ -43,10 +40,6 @@ three = T.unlines
 one :: Text
 one = T.unlines ["import Mathlib", "", "theorem t : T := by", "  sorry"]
 
--- | Proofs per (goal, backend), taken in order; @*@ for any backend. A
--- proof is written under the statement; the delay is in ms.
-type Script = Map.Map (Text, Text) [(Text, Int)]
-
 data Run = Run
   { rReport :: SearchReport
   , rEvents :: [Event]
@@ -54,44 +47,53 @@ data Run = Run
   , rCalls :: [Text]
   }
 
-search :: SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> Script -> IO Run
-search = searchSmt Nothing
+-- | A goal's attempts in launch order, each with its backend, the proof
+-- it writes under the statement and its virtual seconds.
+proofsOn :: Text -> [(Text, Text, Double)] -> [ScriptEntry]
+proofsOn g xs = inOrder g [(b, secs, proofAttempt p) | (b, p, secs) <- xs]
+
+-- | A goal's attempts in launch order on one backend.
+proofs :: Text -> Text -> [(Text, Double)] -> [ScriptEntry]
+proofs g b xs = proofsOn g [(b, p, secs) | (p, secs) <- xs]
+
+-- | A goal's first attempt, on whichever of these backends it launches.
+firstOn :: [Text] -> Text -> Text -> Double -> [ScriptEntry]
+firstOn bs g p secs = [attempt g b secs (proofAttempt p) | b <- bs]
+
+-- | 'firstOn' the backends of 'cfg0'.
+first0 :: Text -> Text -> Double -> [ScriptEntry]
+first0 = firstOn ["claude-code", "fisher"]
+
+-- | One slot over 'cfg0''s backends, every goal failing twice (first
+-- with this proof) and then closing: the goals take turns, each moving
+-- to the backend it has not tried, then back to the less used one.
+roundRobin :: Text -> [ScriptEntry]
+roundRobin bad1 =
+  proofsOn "a" [("claude-code", bad1, 1), ("fisher", "BAD", 1), ("claude-code", "ok", 1)]
+    <> proofsOn "b" [("fisher", bad1, 1), ("claude-code", "BAD", 1), ("fisher", "ok", 1)]
+    <> proofsOn "c" [("claude-code", bad1, 1), ("fisher", "BAD", 1), ("claude-code", "ok", 1)]
+
+-- | A search; unscripted attempts write @sorry@ at once.
+search :: SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> [ScriptEntry] -> IO Run
+search cfg ac f lean file = searchScript Nothing cfg ac f lean file . script
 
 -- | 'search' with Disprove's SMT source on the given solver stand-in.
-searchSmt :: Maybe SmtEnv -> SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> Script -> IO Run
-searchSmt smt cfg ac f lean file script0 = withSystemTempDirectory "search" $ \root -> do
-  BS.writeFile (root </> "F.lean") (TE.encodeUtf8 file)
-  events <- newIORef []
-  specs <- newIORef []
+searchSmt :: Maybe SmtEnv -> SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> [ScriptEntry] -> IO Run
+searchSmt smt cfg ac f lean file = searchScript smt cfg ac f lean file . script
+
+searchScript :: Maybe SmtEnv -> SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> Script -> IO Run
+searchScript smt cfg ac f lean file sc = do
   calls <- newIORef []
-  script <- newIORef script0
-  let pop g b = atomicModifyIORef' script $ \m ->
-        case [(k, x, xs) | k <- [(g, b), (g, "*")], x : xs <- [Map.findWithDefault [] k m]] of
-          ((k, x, xs) : _) -> (Map.insert k xs m, x)
-          [] -> (m, ("sorry", 0))
-      run sp = do
-        atomicModifyIORef' specs (\ss -> (ss <> [sp], ()))
-        (proof, delay) <- pop (asGoal sp) (asBackend sp)
-        threadDelay (delay * 1000)
-        let ls = T.splitOn "\n" (asStart sp)
-            d = fromMaybe (error "no goal") (findDecl (asGoal sp) (declarations (asStart sp)))
-            out = T.intercalate "\n" (take (dStmtEnd d + 1) ls <> ["  " <> proof] <> drop (dEnd d) ls)
-        pure (plainResult (Just out) Nothing "")
-  orch <- realOrchestrator run (realToFrac <$> getPOSIXTime) (\e -> modifyIORef events (e :)) (\_ -> pure Nothing)
-  let env = SearchEnv orch lean (AxiomPolicy standardAxioms False) root "F.lean"
-              (\_ -> pure ())
-              (fmap (\c -> AutoEnv c (fakeLsp calls f) smt) ac) Nothing
-  r <- runSearch cfg env file
-  es <- reverse <$> readIORef events
-  ss <- readIORef specs
+  let se = (simEnv file) {simLean = lean, simAuto = fmap (\c -> AutoEnv c (fakeLsp calls f) smt) ac}
+  (rep, es, tr) <- simSearchEnv se cfg sc
   cs <- readIORef calls
-  either (fail . T.unpack) (\rep -> pure (Run rep es ss cs)) r
+  pure (Run rep es (stSpawned tr) cs)
 
 auto :: AutoConfig
 auto = defaultAutoConfig {acTactics = ["rfl", "simp_all"]}
 
 cfg0 :: SearchConfig
-cfg0 = defaultSearchConfig {scBackends = ["claude-code", "fisher"], scSlots = 4, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = True}
+cfg0 = defaultSearchConfig {scBackends = ["claude-code", "fisher"], scSlots = 4, scMaxAttempts = 3, scBudget = 6000, scParallelPerGoal = True}
 
 goalOf :: Text -> SearchReport -> GoalState
 goalOf g rep = fromMaybe (error "no goal") (lookup g (srGoals rep))
@@ -136,8 +138,7 @@ spec :: Spec
 spec = describe "the automation pre-pass in flat search" $ do
   it "with auto off, runs today's search: no new events, today's report fields" $ do
     r <- search cfg0 {scSlots = 1} Nothing fake0 fakeLean three
-      (Map.fromList [ (("a", "claude-code"), [("BAD", 5)]), (("a", "fisher"), [("ok", 5)])
-                    , (("b", "*"), [("ok", 5)]), (("c", "*"), [("ok", 5)]) ])
+      (proofsOn "a" [("claude-code", "BAD", 1), ("fisher", "ok", 1)] <> first0 "b" "ok" 1 <> first0 "c" "ok" 1)
     lookup "a" [(g, gsStatus s) | (g, s) <- srGoals (rReport r)] `shouldBe` Just Closed
     [b | Launched _ _ "a" b <- rEvents r] `shouldBe` ["claude-code", "fisher"]
     filter isAutoEvent (rEvents r) `shouldBe` []
@@ -148,8 +149,9 @@ spec = describe "the automation pre-pass in flat search" $ do
     map keysOf (goalsJson j) `shouldBe` replicate 3 (sort ["goal", "status", "attempts", "by_attempt", "by_backend", "closed_at_s"])
 
   it "closes a goal Auto closes without a model, merging the filled proof" $ do
+    -- b and c each run on both backends at once; the first launched writes ok
     r <- search cfg0 (Just auto) fake0 {fClose = \g _ -> if g == "a" then Just Nothing else Nothing} fakeLean three
-      (Map.fromList [((g, "*"), [("ok", 5)]) | g <- ["b", "c"]])
+      (proofsOn "b" [("claude-code", "ok", 1)] <> proofsOn "c" [("fisher", "ok", 1)])
     [g | Launched _ _ g _ <- rEvents r] `shouldSatisfy` notElem "a"
     [(g, s) | AutoClosed _ g s _ <- rEvents r] `shouldBe` [("a", "set_option maxHeartbeats 200000 in rfl")]
     sort [g | AutoMissed _ g _ <- rEvents r] `shouldBe` ["b", "c"]
@@ -161,7 +163,7 @@ spec = describe "the automation pre-pass in flat search" $ do
 
   it "sends a goal whose Auto candidate the kernel rejects to a model, logging no miss" $ do
     r <- search cfg0 {scSlots = 1} (Just auto) fake0 {fClose = \g _ -> if g == "a" then Just (Just "exact BAD") else Nothing} fakeLean three
-      (Map.fromList [((g, "*"), [("ok", 5)]) | g <- ["a", "b", "c"]])
+      (concat [first0 g "ok" 1 | g <- ["a", "b", "c"]])
     [g | AutoClosed _ g _ _ <- rEvents r] `shouldBe` []
     [g | AutoMissed _ g _ <- rEvents r] `shouldSatisfy` notElem "a"
     [g | Launched _ _ g _ <- rEvents r] `shouldSatisfy` elem "a"
@@ -172,15 +174,15 @@ spec = describe "the automation pre-pass in flat search" $ do
 
   it "merges nothing for a goal Auto misses and logs the miss" $ do
     r <- search cfg0 {scSlots = 1} (Just auto) fake0 fakeLean three
-      (Map.fromList [((g, "*"), [("ok", 5)]) | g <- ["a", "b", "c"]])
+      (concat [first0 g "ok" 1 | g <- ["a", "b", "c"]])
     [g | AutoMissed _ g _ <- rEvents r] `shouldBe` ["a", "b", "c"]
     map (length . holesOf "a" . asStart) (take 1 (specsFor "a" r)) `shouldBe` [1]
     map (gsClosedBy . snd) (srGoals (rReport r)) `shouldBe` replicate 3 (Just "model")
 
   it "repairs a failed attempt into the next attempt's start, brief and all" $ do
     r <- search cfg0 {scSlots = 2, scParallelPerGoal = False} (Just auto) fake0 fakeLean three
-      (Map.fromList [ (("a", "*"), [("skip\n  ok", 300)]), (("c", "*"), [("ok", 400)])
-                    , (("b", "*"), [("intro x\n  exact BAD", 10), ("ok", 5)]) ])
+      (proofsOn "a" [("claude-code", "skip\n  ok", 60)] <> proofsOn "c" [("claude-code", "ok", 80)]
+         <> proofsOn "b" [("fisher", "intro x\n  exact BAD", 2), ("claude-code", "ok", 1)])
     [(i, g, b, a', c') | Repaired _ i g b a' c' <- rEvents r] `shouldBe` [(2, "b", 1, 1, 0)]
     -- a repaired attempt that did not close is recorded once, with why it failed
     [arOutcome a | a <- srAttempts (rReport r), arId a == 2] `shouldBe` ["rejected: does not compile: _fisher_search_F.lean:6:2: error: BAD"]
@@ -202,8 +204,8 @@ spec = describe "the automation pre-pass in flat search" $ do
   it "keeps the partial proof with the fewest holes" $ do
     let two = "intro x\n  exact BAD\n  exact BAD"
         threeH = "intro x\n  exact BAD\n  exact BAD\n  exact BAD"
-    r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 5, scBudget = 30, scParallelPerGoal = False}) (Just auto {acDisprove = False}) fake0 fakeLean one
-      (Map.fromList [(("t", "*"), [(two, 5), (threeH, 5), ("intro x\n  exact BAD", 5), ("ok", 5)])])
+    r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 5, scBudget = 6000, scParallelPerGoal = False}) (Just auto {acDisprove = False}) fake0 fakeLean one
+      (proofs "t" "x" [(two, 1), (threeH, 1), ("intro x\n  exact BAD", 1), ("ok", 1)])
     [(i, a') | Repaired _ i _ _ a' _ <- rEvents r] `shouldBe` [(1, 2), (2, 3), (3, 1)]
     map (length . holesOf "t" . asStart) (specsFor "t" r) `shouldBe` [1, 2, 2, 1]
     let gs = goalOf "t" (rReport r)
@@ -212,8 +214,8 @@ spec = describe "the automation pre-pass in flat search" $ do
     srRepairs (rReport r) `shouldBe` 3
 
   it "closes a goal at once when Auto fills every hole Repair left" $ do
-    r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = False}) (Just auto) fake0 {fClose = \_ p -> if "intro x" `T.isInfixOf` p then Just Nothing else Nothing} fakeLean one
-      (Map.fromList [(("t", "*"), [("intro x\n  exact BAD", 5)])])
+    r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 6000, scParallelPerGoal = False}) (Just auto) fake0 {fClose = \_ p -> if "intro x" `T.isInfixOf` p then Just Nothing else Nothing} fakeLean one
+      (proofs "t" "x" [("intro x\n  exact BAD", 1)])
     [(i, b, a', c') | Repaired _ i _ b a' c' <- rEvents r] `shouldBe` [(1, 1, 0, 1)]
     length (specsFor "t" r) `shouldBe` 1
     gsStatus (goalOf "t" (rReport r)) `shouldBe` Closed
@@ -224,9 +226,9 @@ spec = describe "the automation pre-pass in flat search" $ do
     [o | Finished _ 1 _ _ o _ _ <- rEvents r] `shouldBe` ["closed by repair"]
 
   it "does not keep a zero-hole repair the kernel rejects as a start" $ do
-    r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = False}) (Just auto {acDisprove = False})
+    r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 6000, scParallelPerGoal = False}) (Just auto {acDisprove = False})
       fake0 {fClose = \_ p -> if "intro x" `T.isInfixOf` p then Just (Just "exact BAD") else Nothing} fakeLean one
-      (Map.fromList [(("t", "*"), [("intro x\n  exact BAD", 5), ("ok", 5)])])
+      (proofs "t" "x" [("intro x\n  exact BAD", 1), ("ok", 1)])
     [(i, a') | Repaired _ i _ _ a' _ <- rEvents r] `shouldBe` [(1, 0)]
     gsPartial (goalOf "t" (rReport r)) `shouldBe` Nothing
     case specsFor "t" r of
@@ -237,9 +239,10 @@ spec = describe "the automation pre-pass in flat search" $ do
     gsClosedBy (goalOf "t" (rReport r)) `shouldBe` Just "model"
 
   it "runs a goal's pre-pass just before its first launch, so a slot fills after one pre-pass, not three" $ do
-    r <- search cfg0 {scSlots = 2, scParallelPerGoal = False} (Just auto {acTactics = ["rfl"], acDisprove = False})
-      fake0 {fDelay = \m -> if m == "attempts" then 300 else 0} fakeLean three
-      (Map.fromList [((g, "*"), [("ok", 1500)]) | g <- ["a", "b", "c"]])
+    -- each pre-pass (and each wait) takes 60 s, each attempt 300 s
+    r <- searchScript Nothing cfg0 {scSlots = 2, scParallelPerGoal = False} (Just auto {acTactics = ["rfl"], acDisprove = False})
+      fake0 fakeLean three
+      (script (concat [first0 g "ok" 300 | g <- ["a", "b", "c"]])) {scStepCost = 60}
     let es = rEvents r
         before = takeWhile (not . isLaunch) es
     [g | AutoMissed _ g _ <- before] `shouldBe` ["a"]
@@ -251,39 +254,44 @@ spec = describe "the automation pre-pass in flat search" $ do
     srClosed (rReport r) `shouldBe` 3
 
   it "logs a pre-pass call cut off at its cap as an auto timeout" $ do
-    r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 1, scBudget = 30, scParallelPerGoal = False}) (Just auto {acSeconds = 0.3, acDisprove = False})
+    r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 1, scBudget = 6000, scParallelPerGoal = False}) (Just auto {acSeconds = 0.3, acDisprove = False})
       fake0 {fDelay = \m -> if m == "attempts" then 2000 else 0} fakeLean one
-      (Map.fromList [(("t", "*"), [("ok", 5)])])
+      (proofs "t" "x" [("ok", 1)])
     [(g, step) | AutoTimeout _ g step <- rEvents r] `shouldBe` [("t", "auto")]
     [g | AutoMissed _ g _ <- rEvents r] `shouldBe` ["t"]
 
   it "logs a repair cut off at its wall cap as a repair timeout" $ do
-    r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 2, scBudget = 30, scParallelPerGoal = False}) (Just auto {acRepairSeconds = 0.3, acDisprove = False})
+    r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 2, scBudget = 6000, scParallelPerGoal = False}) (Just auto {acRepairSeconds = 0.3, acDisprove = False})
       fake0 {fDelay = \m -> if m == "diagnostics" then 2000 else 0} fakeLean one
-      (Map.fromList [(("t", "*"), [("intro x\n  exact BAD", 5), ("ok", 5)])])
+      (proofs "t" "x" [("intro x\n  exact BAD", 1), ("ok", 1)])
     [(g, step) | AutoTimeout _ g step <- rEvents r] `shouldBe` [("t", "repair")]
     [() | Repaired {} <- rEvents r] `shouldBe` []
     gsStatus (goalOf "t" (rReport r)) `shouldBe` Closed
 
   it "stops the pre-pass at the budget and launches nothing" $ do
-    r <- search cfg0 {scBudget = 1} (Just auto) fake0 {fDelay = \m -> if m == "attempts" then 5000 else 0} fakeLean three
-      (Map.fromList [((g, "*"), [("ok", 5)]) | g <- ["a", "b", "c"]])
+    -- a's pre-pass would take 1000 s; the budget is 200
+    r <- searchScript Nothing cfg0 {scBudget = 200} (Just auto) fake0 fakeLean three
+      (script (concat [first0 g "ok" 1 | g <- ["a", "b", "c"]])) {scCaps = [("auto", 1000)]}
     [() | Launched {} <- rEvents r] `shouldBe` []
     [() | BudgetSpent _ <- rEvents r] `shouldBe` [()]
     srBudgetSpent (rReport r) `shouldBe` True
-    length (filter ("attempts" `T.isPrefixOf`) (rCalls r)) `shouldBe` 1
-    srElapsed (rReport r) `shouldSatisfy` (< 2.5)
+    -- one pre-pass started, cut at the budget (the simulator does not run
+    -- a capped step, so the server is asked nothing)
+    [g | AutoMissed _ g _ <- rEvents r] `shouldBe` ["a"]
+    rCalls r `shouldBe` []
+    srElapsed (rReport r) `shouldBe` 200
 
   it "cuts a slow repair off at the budget and launches nothing after it" $ do
-    r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 1, scParallelPerGoal = False}) (Just auto) fake0 {fDelay = \m -> if m == "diagnostics" then 5000 else 0} fakeLean one
-      (Map.fromList [(("t", "*"), [("intro x\n  exact BAD", 5), ("ok", 5)])])
+    -- the repair would take 1000 s; the budget is 200
+    r <- searchScript Nothing (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 200, scParallelPerGoal = False}) (Just auto) fake0 fakeLean one
+      (script (proofs "t" "x" [("intro x\n  exact BAD", 1), ("ok", 1)])) {scCaps = [("repair", 1000)]}
     [() | Launched {} <- rEvents r] `shouldBe` [()]
     [() | BudgetSpent _ <- rEvents r] `shouldBe` [()]
-    srElapsed (rReport r) `shouldSatisfy` (< 2.5)
+    srElapsed (rReport r) `shouldBe` 200
 
   it "disproves a goal after its second failure and cancels what still runs on it" $ do
-    r <- search (defaultSearchConfig {scBackends = ["x", "y", "z"], scSlots = 3, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = True}) (Just auto) fake0 {fSuspects = ["t"]} fakeLean one
-      (Map.fromList [(("t", "x"), [("BAD", 10)]), (("t", "y"), [("BAD", 60)]), (("t", "z"), [("ok", 5000)])])
+    r <- search (defaultSearchConfig {scBackends = ["x", "y", "z"], scSlots = 3, scMaxAttempts = 3, scBudget = 6000, scParallelPerGoal = True}) (Just auto) fake0 {fSuspects = ["t"]} fakeLean one
+      (proofs "t" "x" [("BAD", 2)] <> proofs "t" "y" [("BAD", 12)] <> proofs "t" "z" [("ok", 1000)])
     let gs = goalOf "t" (rReport r)
     gsStatus gs `shouldBe` Disproved
     gsDisproof gs `shouldBe` Just (DFalse "decide")
@@ -292,12 +300,12 @@ spec = describe "the automation pre-pass in flat search" $ do
     [(arBackend a, arOutcome a) | a <- srAttempts (rReport r), "cancelled" `T.isPrefixOf` arOutcome a]
       `shouldBe` [("z", "cancelled: the goal was disproved")]
     length (filter ("plausible" `T.isPrefixOf`) (rCalls r)) `shouldBe` 1
-    srElapsed (rReport r) `shouldSatisfy` (< 4)
+    srElapsed (rReport r) `shouldBe` 12
     statusName Disproved `shouldBe` "disproved"
 
   it "passes a counterexample it cannot certify to the next brief and goes on" $ do
-    r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 4, scBudget = 30, scParallelPerGoal = False}) (Just auto) fake0 {fSuspects = ["t"]} noCertify one
-      (Map.fromList [(("t", "*"), [("BAD", 5), ("BAD", 5), ("ok", 5)])])
+    r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 4, scBudget = 6000, scParallelPerGoal = False}) (Just auto) fake0 {fSuspects = ["t"]} noCertify one
+      (proofs "t" "x" [("BAD", 1), ("BAD", 1), ("ok", 1)])
     [(g, k, x) | GoalDisproved _ g k x _ _ <- rEvents r] `shouldBe` [("t", "suspect", "x := 0")]
     map (T.isInfixOf "x := 0" . briefText) (specsFor "t" r) `shouldBe` [False, False, True]
     let gs = goalOf "t" (rReport r)
@@ -308,9 +316,9 @@ spec = describe "the automation pre-pass in flat search" $ do
   it "the early step runs smt before the first attempt and the late step skips it" $ do
     solved <- newIORef (0 :: Int)
     let smt = SmtEnv (Z3 "/nonexistent/z3") 5 "smt_show" (\_ _ _ -> modifyIORef solved (+ 1) >> pure Unsat)
-    r <- searchSmt (Just smt) (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = False})
+    r <- searchSmt (Just smt) (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 6000, scParallelPerGoal = False})
            (Just auto) fake0 {fQuery = const (Just "(assert false)")} fakeLean one
-           (Map.fromList [(("t", "*"), [("BAD", 5), ("BAD", 5), ("ok", 5)])])
+           (proofs "t" "x" [("BAD", 1), ("BAD", 1), ("ok", 1)])
     let tags = [ x | e <- rEvents r, x <- case e of
                    Launched {} -> ["launched"]
                    DisproveRan _ g s res -> [g <> " " <> s <> " " <> res]
@@ -332,9 +340,9 @@ spec = describe "the automation pre-pass in flat search" $ do
   it "a model the witness certifies disproves the goal before any attempt" $ do
     let smt = SmtEnv (Z3 "/nonexistent/z3") 5 "smt_show" (\_ _ _ -> pure (Sat (Model [("x", SInt, Smt.VInt 1)] [])))
         file = T.unlines ["import Mathlib", "", "theorem t : \8704 x : Int, x = 0 := by", "  sorry"]
-    r <- searchSmt (Just smt) (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = False})
+    r <- searchSmt (Just smt) (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 6000, scParallelPerGoal = False})
            (Just auto) fake0 {fQuery = const (Just "(declare-const x Int)\n(assert (not (= x 0)))")} fakeLean file
-           (Map.fromList [(("t", "*"), [("ok", 5)])])
+           (proofs "t" "x" [("ok", 1)])
     [() | Launched {} <- rEvents r] `shouldBe` []
     let w = "push_neg; refine \10216(1 : Int), ?_\10217; first | decide | norm_num | omega | simp_all"
     [(g, k, x, s, wt) | GoalDisproved _ g k x s wt <- rEvents r] `shouldBe` [("t", "false", w, "smt", Just "x := 1")]
@@ -342,9 +350,9 @@ spec = describe "the automation pre-pass in flat search" $ do
 
   it "a model that does not certify goes into the first brief as the solver's" $ do
     let smt = SmtEnv (Z3 "/nonexistent/z3") 5 "smt_show" (\_ _ _ -> pure (Sat (Model [("x", SInt, Smt.VInt 1)] [])))
-    r <- searchSmt (Just smt) (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = False})
+    r <- searchSmt (Just smt) (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 6000, scParallelPerGoal = False})
            (Just auto) fake0 {fQuery = const (Just "(assert true)")} noCertify one
-           (Map.fromList [(("t", "*"), [("ok", 5)])])
+           (proofs "t" "x" [("ok", 1)])
     [(k, x, s) | GoalDisproved _ _ k x s _ <- rEvents r] `shouldBe` [("suspect", "x := 1", "smt")]
     map briefText (specsFor "t" r) `shouldSatisfy` all (T.isInfixOf (partText (suspectBrief ViaSmt "x := 1")))
 
@@ -358,9 +366,9 @@ spec = describe "the automation pre-pass in flat search" $ do
         probesWith m = do
           ref <- newIORef (0 :: Int)
           let smt = SmtEnv (Z3 "/nonexistent/z3") 5 "smt_show" (\_ _ _ -> pure (Sat m))
-          r <- searchSmt (Just smt) (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = False})
+          r <- searchSmt (Just smt) (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 6000, scParallelPerGoal = False})
                  (Just auto) fake0 {fQuery = const (Just "(assert true)")} (counting ref) file
-                 (Map.fromList [(("t", "*"), [("ok", 5)])])
+                 (proofs "t" "x" [("ok", 1)])
           gsStatus (goalOf "t" (rReport r)) `shouldBe` Closed
           readIORef ref
     -- a model with a function has no witness: no probe at all
@@ -383,9 +391,9 @@ spec = describe "the automation pre-pass in flat search" $ do
         smt = SmtEnv (Z3 "/nonexistent/z3") 5 "smt_show" (\_ _ _ -> pure (Sat (Model [("x", SInt, Smt.VInt 1)] ["f"])))
         runWith passing = do
           ref <- newIORef []
-          r <- searchSmt (Just smt) (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = False})
+          r <- searchSmt (Just smt) (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 6000, scParallelPerGoal = False})
                  (Just auto) fake0 {fQuery = const (Just "(assert true)")} (counting ref passing) file
-                 (Map.fromList [(("t", "*"), [("BAD", 5), ("BAD", 5), ("ok", 5)])])
+                 (proofs "t" "x" [("BAD", 1), ("BAD", 1), ("ok", 1)])
           (,) r <$> readIORef ref
         tacticOf l = T.strip (snd (T.breakOnEnd " in " l))
         mt = "x := 1\nf := (a function)"
@@ -404,10 +412,28 @@ spec = describe "the automation pre-pass in flat search" $ do
     [(k, x, s, w) | GoalDisproved _ _ k x s w <- rEvents r1] `shouldBe` [("suspect", mt, "smt", Nothing), ("false", "decide", "smt", Nothing)]
     length [() | Launched {} <- rEvents r1] `shouldBe` 2
 
-  it "no env: unchanged behaviour" $ do
-    r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 30, scParallelPerGoal = False})
+  it "launches the attempt after an early disprove step cut at its cap" $ do
+    solved <- newIORef (0 :: Int)
+    let smt = SmtEnv (Z3 "/nonexistent/z3") 5 "smt_show" (\_ _ _ -> modifyIORef solved (+ 1) >> pure Unsat)
+    r <- searchScript (Just smt) (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 6000, scParallelPerGoal = False})
            (Just auto) fake0 {fQuery = const (Just "(assert false)")} fakeLean one
-           (Map.fromList [(("t", "*"), [("BAD", 5), ("BAD", 5), ("ok", 5)])])
+           (script (proofs "t" "x" [("ok", 1)])) {scCaps = [("disprove", 3)]}
+    -- the step took its 3 s and never ran: no solver call, no verdict
+    [(t, g) | Launched t _ g _ <- rEvents r] `shouldBe` [(3, "t")]
+    [() | DisproveRan {} <- rEvents r] `shouldBe` []
+    filter ("smt_show" `T.isPrefixOf`) (rCalls r) `shouldBe` []
+    readIORef solved `shouldReturn` 0
+    let gs = goalOf "t" (rReport r)
+    (gsStatus gs, gsSmtTried gs, gsDisproof gs) `shouldBe` (Closed, True, Nothing)
+    -- a step cut at the cap 'oCapped' enforces is a miss, logged as no
+    -- timeout (only an Lsp call cut at its own cap logs one)
+    [s | AutoTimeout _ _ s <- rEvents r] `shouldBe` []
+    srElapsed (rReport r) `shouldBe` 4
+
+  it "no env: unchanged behaviour" $ do
+    r <- search (defaultSearchConfig {scBackends = ["x"], scSlots = 1, scMaxAttempts = 3, scBudget = 6000, scParallelPerGoal = False})
+           (Just auto) fake0 {fQuery = const (Just "(assert false)")} fakeLean one
+           (proofs "t" "x" [("BAD", 1), ("BAD", 1), ("ok", 1)])
     [(s, res) | DisproveRan _ _ s res <- rEvents r] `shouldBe` [("plausible", "none")]
     filter ("smt_show" `T.isPrefixOf`) (rCalls r) `shouldBe` []
     gsSmtTried (goalOf "t" (rReport r)) `shouldBe` False
@@ -416,8 +442,8 @@ spec = describe "the automation pre-pass in flat search" $ do
     let marked = insertImportSmt one
         closeT = fake0 {fClose = \g _ -> if g == "t" then Just Nothing else Nothing}
     T.lines marked `shouldBe` ["import Mathlib", importSmtLine, "", "theorem t : T := by", "  sorry"]
-    rS <- search cfg0 (Just auto {acTactics = ["smt"]}) closeT fakeLean marked Map.empty
-    rO <- search cfg0 (Just auto {acTactics = ["omega"]}) closeT fakeLean marked Map.empty
+    rS <- search cfg0 (Just auto {acTactics = ["smt"]}) closeT fakeLean marked []
+    rO <- search cfg0 (Just auto {acTactics = ["omega"]}) closeT fakeLean marked []
     let baseS = srBase (rReport rS)
         baseO = srBase (rReport rO)
     [s | AutoClosed _ _ s _ <- rEvents rS] `shouldBe` ["set_option maxHeartbeats 200000 in smt"]
@@ -443,7 +469,7 @@ spec = describe "the automation pre-pass in flat search" $ do
     smtKept marked (with "  exact h\n\ntheorem h : T := by\n  smt") `shouldBe` True
   it "turns auto off once when the server fails at the pre-pass, and searches as today" $ do
     r <- search cfg0 {scSlots = 1} (Just auto) fake0 {fDown = const True} fakeLean three
-      (Map.fromList [((g, "*"), [("BAD", 5), ("BAD", 5), ("ok", 5)]) | g <- ["a", "b", "c"]])
+      (roundRobin "BAD")
     [() | AutoOff {} <- rEvents r] `shouldBe` [()]
     -- the failed call, then the server closed at once
     rCalls r `shouldBe` ["attempts a", "close"]
@@ -454,7 +480,7 @@ spec = describe "the automation pre-pass in flat search" $ do
 
   it "turns auto off once when the server fails mid-run" $ do
     r <- search cfg0 {scSlots = 1} (Just auto) fake0 {fDown = (== "diagnostics"), fSuspects = ["a"]} fakeLean three
-      (Map.fromList [((g, "*"), [("intro x\n  exact BAD", 5), ("BAD", 5), ("ok", 5)]) | g <- ["a", "b", "c"]])
+      (roundRobin "intro x\n  exact BAD")
     [() | AutoOff {} <- rEvents r] `shouldBe` [()]
     -- after the failed repair nothing reaches the server: no plausible
     length (filter (== "diagnostics") (rCalls r)) `shouldBe` 1
