@@ -24,10 +24,18 @@ file = T.unlines
   ]
 
 -- | A search of the three goals; every attempt on a goal and backend the
--- entries name writes its proof after its virtual seconds, any other
--- writes @sorry@ at once.
+-- entries name writes its proof after its virtual seconds, and every
+-- attempt launched must be named ('allNamed').
 search :: SearchConfig -> [ScriptEntry] -> IO (SearchReport, [Event])
-search cfg es = (\(rep, evs, _) -> (rep, evs)) <$> simSearch file cfg (script es)
+search cfg es = do
+  (rep, evs, tr) <- simSearch file cfg (script es)
+  allNamed tr
+  pure (rep, evs)
+
+-- | 'search' for a scenario that leaves some attempts to the default,
+-- which writes @sorry@ at once.
+searchPast :: SearchConfig -> [ScriptEntry] -> IO (SearchReport, [Event])
+searchPast cfg es = (\(rep, evs, _) -> (rep, evs)) <$> simSearch file cfg (script es)
 
 -- | Every attempt on this goal and backend writes this proof in these seconds.
 on :: T.Text -> T.Text -> T.Text -> Double -> [ScriptEntry]
@@ -42,7 +50,7 @@ cfg0 = defaultSearchConfig {scBackends = ["claude-code", "fisher"], scSlots = 4,
 spec :: Spec
 spec = describe "the swarm's scheduler" $ do
   it "closes every goal and merges the proofs into one base" $ do
-    (rep, _) <- search cfg0 {scParallelPerGoal = False}
+    (rep, _) <- searchPast cfg0 {scParallelPerGoal = False}
       (concat [on g "claude-code" ("exact " <> g <> "_ok") 2 | g <- ["a", "b", "c"]])
     status rep `shouldBe` [("a", Closed), ("b", Closed), ("c", Closed)]
     srClosed rep `shouldBe` 3
@@ -54,7 +62,7 @@ spec = describe "the swarm's scheduler" $ do
     srClosed rep `shouldBe` 3
     [(g, b) | Launched _ _ g b <- es] `shouldBe` [("a", "claude-code"), ("b", "fisher"), ("c", "claude-code")]
   it "retries a failed goal on the backend that has not tried it" $ do
-    (rep, es) <- search cfg0 {scSlots = 1}
+    (rep, es) <- searchPast cfg0 {scSlots = 1}
       (on "a" "claude-code" "BAD" 1 <> on "a" "fisher" "ok" 1 <> on "b" "claude-code" "ok" 1 <> on "c" "claude-code" "ok" 1)
     lookup "a" (status rep) `shouldBe` Just Closed
     [b | Launched _ _ "a" b <- es] `shouldBe` ["claude-code", "fisher"]
@@ -70,7 +78,7 @@ spec = describe "the swarm's scheduler" $ do
     [g | AttemptCancelled _ _ g _ <- es] `shouldSatisfy` elem "a"
     srElapsed rep `shouldBe` 1
   it "gives up after the attempts allowed" $ do
-    (rep, es) <- search cfg0 {scSlots = 2, scMaxAttempts = 2, scParallelPerGoal = False}
+    (rep, es) <- searchPast cfg0 {scSlots = 2, scMaxAttempts = 2, scParallelPerGoal = False}
       (concat ([on g b "BAD" 1 | g <- ["a"], b <- ["claude-code", "fisher"]] <> [on g "claude-code" "ok" 1 | g <- ["b", "c"]]))
     lookup "a" (status rep) `shouldBe` Just GaveUp
     length [() | Launched _ _ "a" _ <- es] `shouldBe` 2
@@ -98,14 +106,16 @@ spec = describe "the swarm's scheduler" $ do
     [t | BudgetSpent t <- cutEvs] `shouldBe` [4.9]
   it "never delivers a cancelled attempt, though its script entry finishes later" $ do
     -- a closes at 1 and cancels its second attempt, due at 3; b and c
-    -- run to 5, and their second attempts are cancelled then
+    -- run to 5, and their second attempts are cancelled then, c's first:
+    -- of attempts due together the first listed (the newest) is delivered
     let es = on "a" "claude-code" "ok" 1 <> on "a" "fisher" "ok" 3 <> on "b" "fisher" "ok" 5 <> on "c" "claude-code" "ok" 5
                <> on "b" "claude-code" "ok" 10 <> on "c" "fisher" "ok" 10
     (rep, evs, tr) <- simSearch file cfg0 (script es)
+    allNamed tr
     [(t, i, g, b) | Launched t i g b <- evs]
       `shouldBe` [(0, 1, "a", "claude-code"), (0, 2, "b", "fisher"), (0, 3, "c", "claude-code"), (0, 4, "a", "fisher"), (1, 5, "b", "claude-code"), (1, 6, "c", "fisher")]
-    [(t, i, g) | AttemptCancelled t i g _ <- evs] `shouldBe` [(1, 4, "a"), (5, 5, "b"), (5, 6, "c")]
+    [(t, i, g) | AttemptCancelled t i g _ <- evs] `shouldBe` [(1, 4, "a"), (5, 6, "c"), (5, 5, "b")]
     length (stCancelled tr) `shouldBe` 3
-    [i | Finished _ i _ _ _ _ _ <- evs] `shouldBe` [1, 2, 3]
+    [i | Finished _ i _ _ _ _ _ <- evs] `shouldBe` [1, 3, 2]
     stClock tr `shouldBe` 5
     srClosed rep `shouldBe` 3

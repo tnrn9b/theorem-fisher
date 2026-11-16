@@ -73,19 +73,30 @@ roundRobin bad1 =
     <> proofsOn "b" [("fisher", bad1, 1), ("claude-code", "BAD", 1), ("fisher", "ok", 1)]
     <> proofsOn "c" [("claude-code", bad1, 1), ("fisher", "BAD", 1), ("claude-code", "ok", 1)]
 
--- | A search; unscripted attempts write @sorry@ at once.
+-- | A search; every attempt launched must be named ('allNamed').
 search :: SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> [ScriptEntry] -> IO Run
 search cfg ac f lean file = searchScript Nothing cfg ac f lean file . script
+
+-- | 'search' for a scenario that leaves some attempts to the default,
+-- which writes @sorry@ at once.
+searchPast :: SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> [ScriptEntry] -> IO Run
+searchPast cfg ac f lean file = runScript False Nothing cfg ac f lean file . script
 
 -- | 'search' with Disprove's SMT source on the given solver stand-in.
 searchSmt :: Maybe SmtEnv -> SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> [ScriptEntry] -> IO Run
 searchSmt smt cfg ac f lean file = searchScript smt cfg ac f lean file . script
 
 searchScript :: Maybe SmtEnv -> SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> Script -> IO Run
-searchScript smt cfg ac f lean file sc = do
+searchScript = runScript True
+
+-- | A search of this script; with True every attempt launched must be
+-- named ('allNamed').
+runScript :: Bool -> Maybe SmtEnv -> SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> Script -> IO Run
+runScript named smt cfg ac f lean file sc = do
   calls <- newIORef []
   let se = (simEnv file) {simLean = lean, simAuto = fmap (\c -> AutoEnv c (fakeLsp calls f) smt) ac}
   (rep, es, tr) <- simSearchEnv se cfg sc
+  if named then allNamed tr else pure ()
   cs <- readIORef calls
   pure (Run rep es (stSpawned tr) cs)
 
@@ -150,7 +161,7 @@ spec = describe "the automation pre-pass in flat search" $ do
 
   it "closes a goal Auto closes without a model, merging the filled proof" $ do
     -- b and c each run on both backends at once; the first launched writes ok
-    r <- search cfg0 (Just auto) fake0 {fClose = \g _ -> if g == "a" then Just Nothing else Nothing} fakeLean three
+    r <- searchPast cfg0 (Just auto) fake0 {fClose = \g _ -> if g == "a" then Just Nothing else Nothing} fakeLean three
       (proofsOn "b" [("claude-code", "ok", 1)] <> proofsOn "c" [("fisher", "ok", 1)])
     [g | Launched _ _ g _ <- rEvents r] `shouldSatisfy` notElem "a"
     [(g, s) | AutoClosed _ g s _ <- rEvents r] `shouldBe` [("a", "set_option maxHeartbeats 200000 in rfl")]

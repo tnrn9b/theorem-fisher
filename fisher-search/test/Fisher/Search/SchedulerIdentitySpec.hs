@@ -8,7 +8,6 @@ import Control.Concurrent (threadDelay)
 import Control.Exception (ErrorCall (..), throwIO)
 import qualified Data.ByteString as BS
 import Data.IORef
-import Data.List (find)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -46,20 +45,17 @@ cfg = defaultSearchConfig {scBackends = ["x", "y"], scSlots = 2, scMaxAttempts =
 msPerSec :: Double
 msPerSec = 50
 
--- | The script as a real run function: each attempt sleeps its seconds
--- scaled to milliseconds, then returns the script's result (or throws its
--- text).
+-- | The script as a real run function, read as the simulator reads it
+-- ('scriptEntry'): each attempt sleeps its seconds scaled to
+-- milliseconds, then returns the script's result (or throws its text).
 realRun :: Script -> IO (AttemptSpec -> IO AttemptResult)
 realRun sc = do
   counts <- newIORef (Map.empty :: Map.Map (Text, Text) Int)
   pure $ \sp -> do
-    i <- atomicModifyIORef' counts (\m -> let n = Map.findWithDefault 0 (asGoal sp, asBackend sp) m in (Map.insert (asGoal sp, asBackend sp) (n + 1) m, n))
-    let k = AttemptKey (asGoal sp) (asBackend sp) i
-    (secs, f) <- case find (\(k', _, _) -> k' == k) (scAttempts sc) of
-      Just (_, d, g) -> pure (d, g)
-      Nothing -> maybe (throwIO (ErrorCall ("no script entry for " <> show k))) (\g -> pure (0, g)) (scDefault sc)
-    threadDelay (round (secs * msPerSec * 1000))
-    either (throwIO . ErrorCall . T.unpack) pure (f sp)
+    found <- atomicModifyIORef' counts (\m -> either (\e -> (m, Left e)) (\(hit, m') -> (m', Right hit)) (scriptEntry sc m sp))
+    hit <- either (throwIO . ErrorCall . T.unpack) pure found
+    threadDelay (round (sdSecs hit * msPerSec * 1000))
+    either (throwIO . ErrorCall . T.unpack) pure (sdResult hit sp)
 
 -- | The same search on the real orchestrator, its budget scaled as the
 -- sleeps are: the events, oldest first.

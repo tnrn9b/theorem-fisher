@@ -75,8 +75,9 @@ spec = describe "simOrchestrator" $ do
       {scAttempts = [(key "a" "x" 0, 3, done "first"), (key "b" "y" 0, 3, done "second")]}
     ra <- oSpawn o (attempt 1 "a" "x")
     rb <- oSpawn o (attempt 2 "b" "y")
-    outcome <$> oAwaitAny o 10 [rb, ra] `shouldReturn` Just (ra, Right "first")
+    -- list order, as the real side delivers, not spawn order
     outcome <$> oAwaitAny o 10 [rb, ra] `shouldReturn` Just (rb, Right "second")
+    outcome <$> oAwaitAny o 10 [rb, ra] `shouldReturn` Just (ra, Right "first")
     oNow o `shouldReturn` 3
     -- both are delivered, so nothing is left to wait for
     outcome <$> oAwaitAny o 10 [rb, ra] `shouldReturn` Nothing
@@ -149,7 +150,7 @@ spec = describe "simOrchestrator" $ do
     outcome <$> oAwaitAny o 10 [r] `shouldReturn` Just (r, Right "once")
 
   it "scDefault covers an unscripted attempt" $ do
-    (o, _) <- simOrchestrator emptyScript
+    (o, trace) <- simOrchestrator emptyScript
       { scAttempts = [(key "a" "x" 0, 2, done "scripted")]
       , scDefault = Just (\s -> Right (plainResult Nothing Nothing (asGoal s <> "/" <> asBackend s)))
       }
@@ -160,6 +161,8 @@ spec = describe "simOrchestrator" $ do
     oNow o `shouldReturn` 0
     outcome <$> oAwaitAny o 10 [r1] `shouldReturn` Just (r1, Right "scripted")
     oNow o `shouldReturn` 2
+    -- the trace names the attempt that fell to the default
+    stDefaulted <$> trace `shouldReturn` [attempt 2 "a" "x"]
 
   it "prices come from the script" $ do
     (o, _) <- simOrchestrator emptyScript
@@ -188,6 +191,7 @@ spec = describe "simOrchestrator" $ do
     oLog o (BudgetSpent 4)
     t <- trace
     stSpawned t `shouldBe` [s1, s2, s3]
+    stDefaulted t `shouldBe` []
     stCancelled t `shouldBe` [r3, r2]
     stEvents t `shouldBe` [Launched 0 1 "a" "x", BudgetSpent 4]
     stClock t `shouldBe` 4

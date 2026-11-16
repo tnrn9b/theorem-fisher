@@ -49,13 +49,22 @@ resultsOn g xs = inOrder g [(b, secs, resultOf p f) | (b, (p, f, secs)) <- xs]
 resultOf :: Text -> Maybe ModelFailure -> AttemptSpec -> Either Text AttemptResult
 resultOf p failure sp = Right (plainResult (Just (spliceProof p sp)) Nothing "exit 1") {arFailure = failure}
 
+-- | A search; every attempt launched must be named ('allNamed').
 search :: SearchConfig -> Maybe AutoConfig -> Fake -> Text -> [ScriptEntry] -> IO Run
 search = searchF (const Nothing)
 
--- | 'search' with a model failure by attempt, ahead of the script's. Past
--- its entries an attempt writes @BAD@ at once.
+-- | 'search' with a model failure by attempt, ahead of the script's.
 searchF :: (AttemptSpec -> Maybe ModelFailure) -> SearchConfig -> Maybe AutoConfig -> Fake -> Text -> [ScriptEntry] -> IO Run
-searchF failOf cfg ac f file es = do
+searchF = searchWith True
+
+-- | 'search' for a scenario that runs past its entries, where an attempt
+-- writes @BAD@ at once.
+searchPast :: SearchConfig -> Maybe AutoConfig -> Fake -> Text -> [ScriptEntry] -> IO Run
+searchPast = searchWith False (const Nothing)
+
+-- | 'searchF'; with True every attempt launched must be named.
+searchWith :: Bool -> (AttemptSpec -> Maybe ModelFailure) -> SearchConfig -> Maybe AutoConfig -> Fake -> Text -> [ScriptEntry] -> IO Run
+searchWith named failOf cfg ac f file es = do
   calls <- newIORef []
   let se = (simEnv file) {simAuto = fmap (\c -> AutoEnv c (fakeLsp calls f) Nothing) ac}
       failing g sp = fmap (\r -> r {arFailure = failOf sp <|> arFailure r}) (g sp)
@@ -63,6 +72,7 @@ searchF failOf cfg ac f file es = do
         { scAttempts = [(k, secs, failing g) | (k, secs, g) <- es]
         , scDefault = Just (failing (resultOf "exact BAD" Nothing)) }
   (rep, evs, tr) <- simSearchEnv se cfg sc
+  if named then allNamed tr else pure ()
   pure (Run rep evs (stSpawned tr))
 
 tiers :: [Text]
@@ -96,7 +106,7 @@ keysOf = \case
 spec :: Spec
 spec = describe "model tiers and model failures in flat search" $ do
   it "steps a failing goal up the tiers by its counted attempts" $ do
-    r <- search cfgT Nothing fake0 one []
+    r <- searchPast cfgT Nothing fake0 one []
     models r `shouldBe` map Just ["example/model-a", "example/model-b", "example/model-b"]
     map asTier (rSpecs r) `shouldBe` [Just 0, Just 1, Just 1]
     [(i, g, k, m) | TierChosen _ i g k m <- rEvents r]
@@ -111,7 +121,7 @@ spec = describe "model tiers and model failures in flat search" $ do
     statusOf "t" r `shouldBe` Closed
 
   it "skips an unavailable tier, records a model error, and does not count the attempt" $ do
-    r <- search cfgT Nothing fake0 one (results "t" [("exact BAD", Just Unavailable, 1)])
+    r <- searchPast cfgT Nothing fake0 one (results "t" [("exact BAD", Just Unavailable, 1)])
     [(m, why) | TierSkipped _ m why <- rEvents r] `shouldBe` [("example/model-a", "unavailable model")]
     take 1 (map arOutcome (srAttempts (rReport r))) `shouldBe` ["model error: unavailable model"]
     models r `shouldBe` map Just ["example/model-a", "example/model-b", "example/model-b", "example/model-b"]
@@ -128,7 +138,7 @@ spec = describe "model tiers and model failures in flat search" $ do
 
   it "skips a tier after three rate limits in a row" $ do
     let rl = ("exact BAD", Just RateLimited, 1)
-    r <- search cfgT Nothing fake0 one (results "t" [rl, rl, rl])
+    r <- searchPast cfgT Nothing fake0 one (results "t" [rl, rl, rl])
     take 4 (models r) `shouldBe` map Just ["example/model-a", "example/model-a", "example/model-a", "example/model-b"]
     [(m, why) | TierSkipped _ m why <- rEvents r] `shouldBe` [("example/model-a", "rate limited")]
     length (triedOf "t" r) `shouldBe` 3
@@ -164,7 +174,7 @@ spec = describe "model tiers and model failures in flat search" $ do
     length (rSpecs r) `shouldBe` 2
 
   it "gives parallel attempts on one goal the goal's current tier" $ do
-    r <- search cfgT {scBackends = ["x", "y"], scSlots = 2, scParallelPerGoal = True} Nothing fake0 one
+    r <- searchPast cfgT {scBackends = ["x", "y"], scSlots = 2, scParallelPerGoal = True} Nothing fake0 one
       (resultsOn "t" [("x", ("exact BAD", Nothing, 20)), ("y", ("exact BAD", Nothing, 20))])
     take 2 (models r) `shouldBe` map Just ["example/model-a", "example/model-a"]
     drop 2 (models r) `shouldBe` [Just "example/model-b"]
@@ -175,7 +185,7 @@ spec = describe "model tiers and model failures in flat search" $ do
     -- no tier, no tier event, and no tier skipped for fisher
     let cfg = cfgT {scBackends = ["claude-code", "fisher"], scUntiered = ["claude-code"]}
         cc sp = if asBackend sp == "claude-code" then Just Unavailable else Nothing
-    r <- searchF cc cfg Nothing fake0 one []
+    r <- searchWith False cc cfg Nothing fake0 one []
     let byBackend b = [sp | sp <- rSpecs r, asBackend sp == b]
     map asBackend (rSpecs r) `shouldSatisfy` elem "claude-code"
     [(asModel sp, asTier sp) | sp <- byBackend "claude-code"] `shouldSatisfy` all (== (Nothing, Nothing))

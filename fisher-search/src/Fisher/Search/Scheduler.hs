@@ -885,7 +885,10 @@ runSearch cfg env base0 = do
                   case r of
                     Nothing -> budgetOut
                     Just (a, res) -> do
-                      let (spec, started) = head [(sp, st0) | (a', sp, st0) <- stRunning s, a' == a]
+                      -- oAwaitAny delivers only what it was given, all running
+                      let (spec, started) = case [(sp, st0) | (a', sp, st0) <- stRunning s, a' == a] of
+                            x : _ -> x
+                            [] -> error ("runSearch: delivered an attempt not running: " <> show a)
                       dropRunning (asId spec)
                       handle spec started res
                       loop

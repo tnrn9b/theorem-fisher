@@ -74,8 +74,14 @@ data Run = Run
   , rTrace :: SimTrace
   }
 
+-- | A search; every attempt launched must be named ('allNamed').
 search :: SearchConfig -> Maybe AutoConfig -> Text -> [ScriptEntry] -> IO Run
 search cfg ac file = searchScript Nothing cfg ac file . scriptOf
+
+-- | 'search' for a scenario that leaves some attempts to the default,
+-- which writes @BAD@ at once.
+searchPast :: SearchConfig -> Maybe AutoConfig -> Text -> [ScriptEntry] -> IO Run
+searchPast cfg ac file = runScript False Nothing cfg ac file . scriptOf
 
 -- | 'search' with a price for cancelled attempts ('oPrice') in place of
 -- the script's.
@@ -83,10 +89,16 @@ searchPriced :: (AttemptSpec -> IO (Maybe Double)) -> SearchConfig -> Maybe Auto
 searchPriced price cfg ac file = searchScript (Just price) cfg ac file . scriptOf
 
 searchScript :: Maybe (AttemptSpec -> IO (Maybe Double)) -> SearchConfig -> Maybe AutoConfig -> Text -> Script -> IO Run
-searchScript price cfg ac file sc = do
+searchScript = runScript True
+
+-- | A search of this script; with True every attempt launched must be
+-- named ('allNamed').
+runScript :: Bool -> Maybe (AttemptSpec -> IO (Maybe Double)) -> SearchConfig -> Maybe AutoConfig -> Text -> Script -> IO Run
+runScript named price cfg ac file sc = do
   calls <- newIORef []
   let se = (simEnv file) {simAuto = fmap (\c -> AutoEnv c (fakeLsp calls fake0) Nothing) ac, simPrice = price}
   (rep, es, tr) <- simSearchEnv se cfg sc
+  if named then allNamed tr else pure ()
   pure (Run rep es (stSpawned tr) tr)
 
 -- | One backend, one slot, three attempts, two tiers, the controller on.
@@ -167,7 +179,7 @@ spec = describe "stopped attempts and the stall note" $ do
     gsStall (goalOf "t" r) `shouldBe` Nothing
 
   it "the prover's errors in the note are the verification's" $ do
-    r <- search cfgS Nothing one (steps "t" [(step "exact BAD") {sStop = Just stop8}])
+    r <- searchPast cfgS Nothing one (steps "t" [(step "exact BAD") {sStop = Just stop8}])
     case (srAttempts (rReport r), rSpecs r) of
       (a1 : _, _ : second : _) -> do
         let why = fromMaybe (error "not rejected") (T.stripPrefix "rejected: " (arOutcome a1))
@@ -175,7 +187,7 @@ spec = describe "stopped attempts and the stall note" $ do
       _ -> expectationFailure "too few attempts"
 
   it "a stopped attempt whose file closes the goal closes it, with no note" $ do
-    r <- search cfgS Nothing three (steps "a" [(step "ok") {sStop = Just stop8, sMessage = Just "done"}])
+    r <- searchPast cfgS Nothing three (steps "a" [(step "ok") {sStop = Just stop8, sMessage = Just "done"}])
     gsStatus (goalOf "a" r) `shouldBe` Closed
     gsStall (goalOf "a" r) `shouldBe` Nothing
     [i | AttemptStopped _ i _ _ _ _ <- rEvents r] `shouldBe` [1]

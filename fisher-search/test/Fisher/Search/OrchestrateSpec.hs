@@ -87,6 +87,23 @@ spec = describe "realOrchestrator" $ do
     threadDelay 300000
     readIORef finished `shouldReturn` []
 
+  it "zero seconds delivers an attempt already finished" $ do
+    (o, finished) <- orchestrator
+    fast <- oSpawn o (attempt 1 "fast")
+    threadDelay 100000
+    readIORef finished `shouldReturn` ["fast"]
+    note <$> oAwaitAny o 0 [fast] `shouldReturn` Just (fast, Right "fast")
+    -- delivered, so it is gone
+    note <$> oAwaitAny o 0 [fast] `shouldReturn` Nothing
+
+  it "attempts already finished are delivered in list order" $ do
+    (o, _) <- orchestrator
+    a <- oSpawn o (attempt 1 "fast")
+    b <- oSpawn o (attempt 2 "fast")
+    threadDelay 100000
+    fmap fst <$> oAwaitAny o 0 [b, a] `shouldReturn` Just b
+    fmap fst <$> oAwaitAny o 0 [b, a] `shouldReturn` Just a
+
   it "await on no attempts returns at once" $ do
     (o, _) <- orchestrator
     (got, secs) <- timed (oAwaitAny o 100 [])

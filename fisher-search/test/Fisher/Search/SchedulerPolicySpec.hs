@@ -21,13 +21,14 @@ file = T.unlines
   , "theorem c : C := by", "  sorry" ]
 
 -- | A search of the three goals; every attempt on a goal and backend the
--- entries name writes its proof after its virtual seconds, any other
--- writes @sorry@ at once.
+-- entries name writes its proof after its virtual seconds, and every
+-- attempt launched must be named ('allNamed').
 search :: SearchConfig -> Maybe AutoConfig -> Fake -> [ScriptEntry] -> IO (SearchReport, [Event])
 search cfg ac f es = do
   calls <- newIORef []
   let se = (simEnv file) {simAuto = fmap (\c -> AutoEnv c (fakeLsp calls f) Nothing) ac}
-  (rep, evs, _) <- simSearchEnv se cfg (script es)
+  (rep, evs, tr) <- simSearchEnv se cfg (script es)
+  allNamed tr
   pure (rep, evs)
 
 -- | Every attempt on this goal and backend writes this proof in these seconds.

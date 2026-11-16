@@ -69,12 +69,12 @@ proofs :: Text -> [(Text, Double)] -> [ScriptEntry]
 proofs g xs = inOrder g [("x", secs, helperAttempt p) | (p, secs) <- xs]
 
 -- | A search in a fresh project; @check@ runs on the result inside the
--- project's directory. Unscripted attempts write @sorry@ at once.
+-- project's directory. Every attempt launched must be named ('allNamed').
 search :: SearchConfig -> Maybe AutoConfig -> Fake -> LeanRun -> Text -> [ScriptEntry] -> (FilePath -> IO (Maybe RetrievalEnv)) -> (Run -> IO a) -> IO a
 search cfg ac f lean file es mkRet check = do
   calls <- newIORef []
   let se = (simEnv file) {simSetup = project, simLean = lean, simAuto = fmap (\c -> AutoEnv c (fakeLsp calls f) Nothing) ac, simRetrieval = mkRet}
-  simSearchIn se cfg (script es) $ \root (rep, evs, tr) -> check (Run rep evs (stSpawned tr) root)
+  simSearchIn se cfg (script es) $ \root (rep, evs, tr) -> allNamed tr >> check (Run rep evs (stSpawned tr) root)
 
 -- | A search interrupted (Ctrl-C's exception thrown to its thread) once an
 -- event is logged that satisfies the predicate: what it ended with, its

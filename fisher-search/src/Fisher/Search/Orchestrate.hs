@@ -16,11 +16,13 @@ module Fisher.Search.Orchestrate
   , AttemptKey (..)
   , Script (..)
   , emptyScript
+  , Scripted (..)
+  , scriptEntry
   , SimTrace (..)
   , simOrchestrator
   ) where
 
-import Control.Concurrent.Async (Async, asyncWithUnmask, cancel, waitAnyCatch)
+import Control.Concurrent.Async (Async, asyncWithUnmask, cancel, poll, waitAnyCatch)
 import Control.Exception (ErrorCall (..), SomeException, mask_, throwIO, toException)
 import Data.IORef
 import Data.List (find, minimumBy)
@@ -44,13 +46,10 @@ data Orchestrator = Orchestrator
   , oAwaitAny :: Double -> [Running] -> IO (Maybe (Running, Either SomeException AttemptResult))
   -- ^ the first of these to finish, with its result or its exception;
   -- Nothing when the given seconds pass first, and Nothing at once when
-  -- none of them is still in flight. An attempt delivered is gone: it is
-  -- never delivered again. The two interpreters differ in two places the
-  -- Scheduler never reaches: on a tie the real one delivers in list
-  -- order (newest first, as the Scheduler lists them) and the simulator
-  -- delivers the one spawned first; and with zero seconds the real one
-  -- returns Nothing (@timeout 0@) while the simulator delivers an attempt
-  -- already due.
+  -- none of them is still in flight. Of attempts finished together, the
+  -- one first in the list is delivered, and an attempt already finished
+  -- is delivered even with zero seconds. An attempt delivered is gone: it
+  -- is never delivered again.
   , oCancel :: Running -> IO ()
   -- ^ stop an attempt, so it is never delivered; cancelling one already
   -- delivered, or unknown, is a no-op
@@ -66,7 +65,8 @@ data Orchestrator = Orchestrator
   }
 
 -- | The real one, from the run function, the clock, the log and the
--- price: each attempt runs on its own thread, waiting is 'waitAnyCatch'
+-- price: each attempt runs on its own thread, waiting polls the handles
+-- in list order for one already finished and otherwise is 'waitAnyCatch'
 -- under a 'timeout', and a capped step is a 'timeout' rounded as
 -- @autoStep@ rounds it (so an asynchronous exception other than the
 -- timeout's own goes through it). Cancelling an attempt unknown or
@@ -92,18 +92,25 @@ realOrchestrator run now logE price = do
       awaitAny secs rs = do
         m <- readIORef handles
         let live = [(r, a) | r@(Running n) <- rs, Just a <- [Map.lookup n m]]
+            deliver r@(Running n) res = do
+              atomicModifyIORef' handles (\m' -> (Map.delete n m', ()))
+              pure (Just (r, res))
+            -- the first in list order already finished, so that zero
+            -- seconds still delivers it
+            firstDone [] = pure Nothing
+            firstDone ((r, a) : more) = poll a >>= maybe (firstDone more) (pure . Just . (,) r)
         if null live
           then pure Nothing
-          else do
-            got <- timeout (max 0 (ceiling (secs * 1000000))) (waitAnyCatch (map snd live))
-            case got of
-              Nothing -> pure Nothing
-              Just (a, res) -> case find ((== a) . snd) live of
-                -- waitAnyCatch returns one of the handles it was given
-                Nothing -> error "realOrchestrator: waitAnyCatch returned a handle it was not given"
-                Just (r@(Running n), _) -> do
-                  atomicModifyIORef' handles (\m' -> (Map.delete n m', ()))
-                  pure (Just (r, res))
+          else firstDone live >>= \case
+            Just (r, res) -> deliver r res
+            Nothing -> do
+              got <- timeout (max 0 (ceiling (secs * 1000000))) (waitAnyCatch (map snd live))
+              case got of
+                Nothing -> pure Nothing
+                Just (a, res) -> case find ((== a) . snd) live of
+                  -- waitAnyCatch returns one of the handles it was given
+                  Nothing -> error "realOrchestrator: waitAnyCatch returned a handle it was not given"
+                  Just (r, _) -> deliver r res
       cancelOne (Running n) = Map.lookup n <$> readIORef handles >>= mapM_ (\a -> do
         cancel a
         atomicModifyIORef' handles (\m -> (Map.delete n m, ())))
@@ -139,6 +146,33 @@ data Script = Script
   -- that delivers an attempt, after the delivery
   }
 
+-- | Where a spawned attempt falls in a script.
+data Scripted = Scripted
+  { sdKey :: AttemptKey
+  , sdSecs :: Double
+  -- ^ its virtual seconds (0 for the default)
+  , sdResult :: AttemptSpec -> Either Text AttemptResult
+  , sdDefaulted :: Bool
+  -- ^ no entry names it, so 'scDefault' gives its result
+  }
+
+-- | The script's answer for an attempt spawned now, given how many were
+-- spawned before on each goal and backend: its key (the count is its
+-- index), the first entry with that key or else 'scDefault', and the
+-- counts with this spawn added. Left names the key of an attempt neither
+-- scripted nor covered by a default.
+scriptEntry :: Script -> Map.Map (Text, Text) Int -> AttemptSpec -> Either Text (Scripted, Map.Map (Text, Text) Int)
+scriptEntry sc counts sp =
+  let pair = (asGoal sp, asBackend sp)
+      i = Map.findWithDefault 0 pair counts
+      k = AttemptKey (asGoal sp) (asBackend sp) i
+      counts' = Map.insert pair (i + 1) counts
+   in case find (\(k', _, _) -> k' == k) (scAttempts sc) of
+        Just (_, d, f) -> Right (Scripted k d f False, counts')
+        Nothing -> case scDefault sc of
+          Just f -> Right (Scripted k 0 f True, counts')
+          Nothing -> Left ("no script entry for " <> T.pack (show k))
+
 -- | No attempts, no default, no caps, no prices, and steps that take no
 -- time.
 emptyScript :: Script
@@ -148,6 +182,9 @@ emptyScript = Script {scAttempts = [], scDefault = Nothing, scCaps = [], scPrice
 -- clock.
 data SimTrace = SimTrace
   { stSpawned :: [AttemptSpec]
+  , stDefaulted :: [AttemptSpec]
+  -- ^ the spawned attempts no entry named, whose result came from
+  -- 'scDefault'
   , stCancelled :: [Running]
   , stEvents :: [Event]
   , stClock :: Double
@@ -160,6 +197,9 @@ data Sim = Sim
   , smNext :: Int
   , smKeys :: [(AttemptSpec, AttemptKey)]
   -- ^ every spawned spec with its key, newest first
+  , smCounts :: Map.Map (Text, Text) Int
+  -- ^ how many were spawned on each goal and backend
+  , smDefaulted :: [AttemptSpec]
   , smDue :: Map.Map Int (Double, Either Text AttemptResult)
   -- ^ the attempts in flight: when each finishes and its result
   , smCancelled :: [Running]
@@ -174,39 +214,40 @@ data Sim = Sim
 -- once and leaves the clock alone. An attempt neither scripted nor covered by
 -- 'scDefault', or a price the script does not list, throws an 'ErrorCall'
 -- naming its key. Awaiting delivers the earliest due of the given
--- attempts, the one spawned first among those due together; a cancelled
+-- attempts, the one first in the list among those due together, as the
+-- real one does; a cancelled
 -- attempt is never delivered and its exception never thrown. Cancelling
 -- an attempt already delivered, or unknown, is a no-op and is not
 -- recorded.
 simOrchestrator :: Script -> IO (Orchestrator, IO SimTrace)
 simOrchestrator script = do
-  ref <- newIORef Sim {smClock = 0, smNext = 0, smKeys = [], smDue = Map.empty, smCancelled = [], smEvents = []}
-  let keyOf s sp = AttemptKey (asGoal sp) (asBackend sp)
-        (length [() | (_, k) <- smKeys s, akGoal k == asGoal sp, akBackend k == asBackend sp])
+  ref <- newIORef Sim
+    { smClock = 0, smNext = 0, smKeys = [], smCounts = Map.empty, smDefaulted = []
+    , smDue = Map.empty, smCancelled = [], smEvents = [] }
+  let keyOf s sp = AttemptKey (asGoal sp) (asBackend sp) (Map.findWithDefault 0 (asGoal sp, asBackend sp) (smCounts s))
       spawn sp = do
         s <- readIORef ref
-        let k = keyOf s sp
-        (secs, res) <- case find (\(k', _, _) -> k' == k) (scAttempts script) of
-          Just (_, d, f) -> pure (d, f sp)
-          Nothing -> case scDefault script of
-            Just f -> pure (0, f sp)
-            Nothing -> throwIO (ErrorCall ("simOrchestrator: no script entry for " <> show k))
+        (hit, counts) <- either (throwIO . ErrorCall . ("simOrchestrator: " <>) . T.unpack) pure
+          (scriptEntry script (smCounts s) sp)
         let n = smNext s
         writeIORef ref s
           { smNext = n + 1
-          , smKeys = (sp, k) : smKeys s
-          , smDue = Map.insert n (smClock s + secs, res) (smDue s)
+          , smKeys = (sp, sdKey hit) : smKeys s
+          , smCounts = counts
+          , smDefaulted = if sdDefaulted hit then sp : smDefaulted s else smDefaulted s
+          , smDue = Map.insert n (smClock s + sdSecs hit, sdResult hit sp) (smDue s)
           }
         pure (Running n)
       awaitAny secs rs = do
         s <- readIORef ref
         let now = smClock s
             deadline = now + max 0 secs
-            live = [(due, n, res) | Running n <- rs, Just (due, res) <- [Map.lookup n (smDue s)]]
+            live = [(due, pos, n, res) | (pos, Running n) <- zip [0 :: Int ..] rs, Just (due, res) <- [Map.lookup n (smDue s)]]
         case live of
           [] -> pure Nothing
           _ -> do
-            let (due, n, res) = minimumBy (comparing (\(d, i, _) -> (d, i))) live
+            -- the earliest due, and of those due together the first listed
+            let (due, _, n, res) = minimumBy (comparing (\(d, pos, _, _) -> (d, pos))) live
             if due <= deadline
               then do
                 writeIORef ref s {smClock = max now due + scStepCost script, smDue = Map.delete n (smDue s)}
@@ -237,6 +278,7 @@ simOrchestrator script = do
         s <- readIORef ref
         pure SimTrace
           { stSpawned = reverse [sp | (sp, _) <- smKeys s]
+          , stDefaulted = reverse (smDefaulted s)
           , stCancelled = reverse (smCancelled s)
           , stEvents = reverse (smEvents s)
           , stClock = smClock s

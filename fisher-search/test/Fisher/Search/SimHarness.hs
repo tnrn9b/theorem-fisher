@@ -17,6 +17,7 @@ module Fisher.Search.SimHarness
   , proofAttempt
   , spliceProof
   , sorryAttempt
+  , allNamed
   ) where
 
 import qualified Data.ByteString as BS
@@ -26,6 +27,7 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import System.FilePath ((</>))
 import System.IO.Temp (withSystemTempDirectory)
+import Test.Hspec (Expectation, shouldBe)
 
 import Fisher.Search.Check (AxiomPolicy (..), LeanRun, standardAxioms)
 import Fisher.Search.FakeLean (fakeLean)
@@ -116,10 +118,11 @@ attempt g b = attemptN g b 0
 attemptN :: Text -> Text -> Int -> Double -> (AttemptSpec -> Either Text AttemptResult) -> ScriptEntry
 attemptN g b i secs f = (AttemptKey g b i, secs, f)
 
--- | Every attempt on this goal and backend alike. Only indices 0 to 9
--- are scripted: an eleventh attempt on the pair falls to the default.
+-- | Every attempt on this goal and backend alike. Only indices 0 to 99
+-- are scripted: a hundred and first attempt on the pair falls to the
+-- default.
 always :: Text -> Text -> Double -> (AttemptSpec -> Either Text AttemptResult) -> [ScriptEntry]
-always g b secs f = [attemptN g b i secs f | i <- [0 .. 9]]
+always g b secs f = [attemptN g b i secs f | i <- [0 .. 99]]
 
 -- | A goal's attempts in launch order, each with its backend; the index
 -- of each is counted per backend.
@@ -138,6 +141,12 @@ spliceProof proof sp =
 -- | An attempt that writes this proof.
 proofAttempt :: Text -> AttemptSpec -> Either Text AttemptResult
 proofAttempt proof sp = Right (plainResult (Just (spliceProof proof sp)) Nothing "")
+
+-- | No attempt fell to the script's default: for a scenario whose script
+-- names every attempt it expects, so a default cannot hide a wrong guess
+-- about which goal or backend runs.
+allNamed :: SimTrace -> Expectation
+allNamed tr = stDefaulted tr `shouldBe` []
 
 -- | An attempt that gives up, writing @sorry@.
 sorryAttempt :: AttemptSpec -> Either Text AttemptResult

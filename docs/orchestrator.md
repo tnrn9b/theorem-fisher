@@ -53,8 +53,10 @@ inline. Each attempt runs on its own thread: `oSpawn` forks under `mask_`
 with `asyncWithUnmask`, so the fork and the recording of its handle are one
 step and no asynchronous exception can leave a thread nobody can cancel,
 while the attempt itself runs unmasked. The handles live in an
-`IORef (Map Int (Async AttemptResult))`. `oAwaitAny` is `waitAnyCatch`
-under `System.Timeout.timeout`; `oCancel` is `cancel` and forgets the
+`IORef (Map Int (Async AttemptResult))`. `oAwaitAny` first polls the
+handles in list order and delivers the first already finished, so zero
+seconds still delivers it; otherwise it is `waitAnyCatch` (which also
+takes the first in list order) under `System.Timeout.timeout`; `oCancel` is `cancel` and forgets the
 handle, so a cancelled attempt is never delivered; `oCapped` is `timeout`
 with the rounding `max 1 (ceiling (secs * 1000000))`. `oNow`, `oLog` and
 `oPrice` are the functions it was given.
@@ -74,9 +76,20 @@ data Script = Script
   }
 data AttemptKey = AttemptKey { akGoal :: Text, akBackend :: Text, akIndex :: Int }
 data SimTrace = SimTrace
-  { stSpawned :: [AttemptSpec], stCancelled :: [Running], stEvents :: [Event], stClock :: Double }
+  { stSpawned :: [AttemptSpec], stDefaulted :: [AttemptSpec]
+  , stCancelled :: [Running], stEvents :: [Event], stClock :: Double }
 emptyScript :: Script
+scriptEntry :: Script -> Map (Text, Text) Int -> AttemptSpec -> Either Text (Scripted, Map (Text, Text) Int)
 ```
+
+`stDefaulted` lists, oldest first, the spawned attempts no entry named, whose
+result came from `scDefault`. A scenario whose script names every attempt it
+expects asserts it is empty, so a default cannot hide a wrong guess about
+which goal or backend runs. `scriptEntry` is how a script is read: from the
+counts of earlier spawns per goal and backend it gives the attempt's key,
+its entry (or the default, marked as such) and the counts with this spawn
+added; Left names an attempt neither scripted nor defaulted. The identity
+spec's real run function reads the script through it too.
 
 Each entry of `scAttempts` names an attempt, says how many virtual seconds
 it takes, and gives a function from the attempt's spec to its result or to
@@ -94,13 +107,13 @@ The simulator's rules, in the order they come up:
 | Call | Behaviour |
 |---|---|
 | `oSpawn` | Looks up the entry for the attempt's key and marks it due at now plus its seconds. |
-| `oAwaitAny secs rs` | With none of `rs` in flight, returns Nothing at once and leaves the clock alone. Otherwise the deadline is now plus `secs` (never less than now), and it takes the earliest due of `rs` (the one spawned first among those due together). If it is due at or before the deadline, the clock moves to its due time plus `scStepCost` and it is delivered; otherwise the clock moves to the deadline and the result is Nothing. |
+| `oAwaitAny secs rs` | With none of `rs` in flight, returns Nothing at once and leaves the clock alone. Otherwise the deadline is now plus `secs` (never less than now), and it takes the earliest due of `rs` (the one first in `rs` among those due together). If it is due at or before the deadline, the clock moves to its due time plus `scStepCost` and it is delivered; otherwise the clock moves to the deadline and the result is Nothing. |
 | `oCancel` | Removes the attempt from the due list and records it in `stCancelled`. The attempt is never delivered, even though its entry would have finished. |
 | `oCapped name secs act` | When `name` is in `scCaps`, the clock moves by the listed seconds (or `secs` clamped at 0, whichever is less) and the result is Nothing without running `act`. Otherwise the clock moves by `scStepCost` and `act` runs. |
 | `oPrice` | Looks the attempt's key up in `scPrices`. |
 | `oLog` | Appends to the trace. |
 
-The simulator differs from the real side in two places, and the Scheduler reaches neither: on a tie the real side delivers in list order (newest first, as the Scheduler lists them) while the simulator delivers the attempt spawned first, and with zero seconds the real side returns Nothing (`timeout 0`) while the simulator delivers an attempt already due.
+Both sides keep one rule for an await: of attempts finished together, the one first in `rs` is delivered (the Scheduler lists the newest first), and an attempt already finished is delivered even with zero seconds.
 
 ## SearchEnv and runToEnd
 
@@ -147,7 +160,8 @@ entries.
 | `simSearch file cfg script` | Runs the search to its end and returns the report, the events (oldest first) and the `SimTrace`. |
 | `script entries` | A `Script` of these entries in which an unscripted attempt writes `sorry` at once. |
 | `attempt g b secs f` | The first attempt on goal `g` and backend `b`: it takes `secs` and `f` gives its result. `attemptN` adds the index. |
-| `always g b secs f` | The same entry for every attempt on that goal and backend. |
+| `always g b secs f` | The same entry for every attempt on that goal and backend (indices 0 to 99). |
+| `allNamed trace` | Expects `stDefaulted` empty: every attempt launched was named by an entry. The specs' search helpers assert it; a scenario that leaves attempts to the default uses the form without the check (`searchPast`). |
 | `inOrder g [(b, secs, f)]` | A goal's attempts in launch order; the index is counted per backend. |
 | `proofAttempt proof` | An attempt that writes this proof under the goal's statement. `sorryAttempt` writes `sorry`. |
 
@@ -158,7 +172,10 @@ helper `search` are the spec's own.
 
 ```haskell
 search :: SearchConfig -> [ScriptEntry] -> IO (SearchReport, [Event])
-search cfg es = (\(rep, evs, _) -> (rep, evs)) <$> simSearch file cfg (script es)
+search cfg es = do
+  (rep, evs, tr) <- simSearch file cfg (script es)
+  allNamed tr
+  pure (rep, evs)
 
 on :: T.Text -> T.Text -> T.Text -> Double -> [ScriptEntry]
 on g b proof secs = always g b secs (proofAttempt proof)
