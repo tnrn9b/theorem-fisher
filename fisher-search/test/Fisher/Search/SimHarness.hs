@@ -25,6 +25,7 @@ module Fisher.Search.SimHarness
   , realRun
   , scaled
   , realSearch
+  , searchOn
   , zeroTimes
   ) where
 
@@ -215,11 +216,17 @@ scaled c = c {scBudget = scBudget c * msPerSec / 1000}
 -- wrapper), its attempts following the script ('realRun') and its budget
 -- scaled ('scaled'): the events, oldest first.
 realSearch :: (AttemptOrchestrator -> IO AttemptOrchestrator) -> Text -> SearchConfig -> Script AttemptSpec AttemptResult -> IO [Event]
-realSearch wrap file cfg sc = withSystemTempDirectory "real" $ \root -> do
+realSearch wrap file cfg sc = do
+  run <- realRun sc
+  searchOn (\logE -> wrap =<< realOrchestrator run (realToFrac <$> getPOSIXTime) logE (\_ -> pure Nothing)) file cfg
+
+-- | The search of this file, its budget scaled ('scaled'), on the
+-- orchestrator built from the run log: the events, oldest first.
+searchOn :: ((Event -> IO ()) -> IO AttemptOrchestrator) -> Text -> SearchConfig -> IO [Event]
+searchOn mk file cfg = withSystemTempDirectory "real" $ \root -> do
   BS.writeFile (root </> "F.lean") (TE.encodeUtf8 file)
   events <- newIORef []
-  run <- realRun sc
-  orch <- wrap =<< realOrchestrator run (realToFrac <$> getPOSIXTime) (\e -> atomicModifyIORef' events (\es -> (e : es, ()))) (\_ -> pure Nothing)
+  orch <- mk (\e -> atomicModifyIORef' events (\es -> (e : es, ())))
   let env = SearchEnv
         { seOrch = orch, seLean = fakeLean, sePolicy = AxiomPolicy standardAxioms False, seRoot = root, seRel = "F.lean"
         , seBaseChanged = \_ -> pure ()

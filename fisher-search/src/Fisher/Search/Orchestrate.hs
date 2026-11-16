@@ -14,11 +14,12 @@
 -- result. It never sleeps and never forks, so an ordering rule can be
 -- tested deterministically, and its 'SimTrace' records what was done.
 --
--- 'recordOrchestrator' wraps any orchestrator and records what it did as
--- a 'Recording', which 'recordingScript' turns into a 'Script' that
--- replays the run through the simulator. The flat search's recording
--- ('AttemptScript') has JSON instances, so a run can be written to a
--- file and replayed later.
+-- 'recordOrchestrator' wraps any orchestrator and records its answers,
+-- in call order, as a tape ('Recording'); 'replayOrchestrator' plays the
+-- tape back, so a replay gives the run's events exactly and fails loudly
+-- ('ReplayDiverged') when it asks for anything else. The flat search's
+-- tape ('AttemptScript') has JSON instances, so a run can be written to
+-- a file and replayed later.
 module Fisher.Search.Orchestrate
   ( Running
   , Orchestrator (..)
@@ -33,21 +34,21 @@ module Fisher.Search.Orchestrate
   , scriptEntry
   , SimTrace (..)
   , simOrchestrator
-  , Seconds (..)
+  , Step (..)
   , Recording (..)
   , AttemptScript
   , recordOrchestrator
-  , recordingScript
+  , ReplayDiverged (..)
+  , replayOrchestrator
   ) where
 
 import Control.Concurrent.Async (Async, asyncWithUnmask, cancel, poll, waitAnyCatch)
-import Control.Exception (ErrorCall (..), SomeAsyncException, SomeException, displayException, fromException, mask_, throwIO, toException, try)
-import Control.Monad (forM_, when)
-import Data.Aeson (FromJSON (..), ToJSON (..), Value (..))
+import Control.Exception (ErrorCall (..), Exception, SomeAsyncException, SomeException, displayException, fromException, mask_, throwIO, toException, try)
+import Data.Aeson (FromJSON, ToJSON)
 import Data.IORef
 import Data.List (find, minimumBy)
 import qualified Data.Map.Strict as Map
-import Data.Maybe (fromMaybe, isNothing)
+import Data.Maybe (isNothing)
 import Data.Ord (comparing)
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -373,139 +374,241 @@ simOrchestrator keyFn script = do
         }
   pure (orch, trace)
 
--- | Seconds in a recording; infinite for a job never delivered, written
--- in JSON as the string @never@ (JSON has no infinite number).
-newtype Seconds = Seconds Double
-  deriving (Eq, Ord, Show)
-
-instance ToJSON Seconds where
-  toJSON (Seconds d)
-    | isInfinite d && d > 0 = String "never"
-    | otherwise = toJSON d
-
-instance FromJSON Seconds where
-  parseJSON (String "never") = pure (Seconds (1 / 0))
-  parseJSON v = Seconds <$> parseJSON v
-
--- | What 'recordOrchestrator' saw, each list oldest first: per spawned
--- job its key, the seconds from its spawn to its delivery (infinite for
--- one cancelled or never delivered) and its result (or the exception's
--- text); the named steps whose cap hit, each with the seconds it was
--- given; the prices given.
-data Recording spec res = Recording
-  { rcEntries :: [(AttemptKey, Seconds, Either Text res)]
-  , rcCaps :: [(Text, Double)]
-  , rcPrices :: [(AttemptKey, Double)]
-  }
+-- | One answer of an orchestrator, in a 'Recording'.
+data Step res
+  = Now Double
+  -- ^ the clock read
+  | Spawned AttemptKey
+  -- ^ a job spawned, with its key
+  | Delivered AttemptKey Double (Either Text res)
+  -- ^ an await delivered this job: the clock after it, and the result
+  -- (an exception as its text)
+  | AwaitTimedOut Double
+  -- ^ an await delivered nothing: the clock after it
+  | Cancelled AttemptKey
+  | Capped Text Double Bool
+  -- ^ a capped step: its name, its seconds, whether the cap hit
+  | Priced AttemptKey (Maybe Double)
+  -- ^ a price asked for, and the answer
   deriving (Eq, Show, Generic)
 
--- | Generic, with the field names as they are: tuples are arrays and a
--- result is @{"Left": text}@ or @{"Right": result}@. The spec is not
--- written: on replay the Scheduler builds the specs again.
+-- | Generic: an object with the constructor's name under @tag@ and its
+-- fields under @contents@.
+instance ToJSON res => ToJSON (Step res)
+
+instance FromJSON res => FromJSON (Step res)
+
+-- | An orchestrator's answers in call order: what 'recordOrchestrator'
+-- saw and what 'replayOrchestrator' plays. The spec is not recorded: on
+-- replay the Scheduler builds the specs again, and each spawn's key is
+-- checked against the tape.
+newtype Recording spec res = Recording { rcSteps :: [Step res] }
+  deriving (Eq, Show, Generic)
+
+-- | Generic: @{"rcSteps": [...]}@.
 instance ToJSON res => ToJSON (Recording spec res)
 
 instance FromJSON res => FromJSON (Recording spec res)
 
--- | The flat search's recording, the file @--record@ writes.
+-- | The flat search's tape, the file @--record@ writes.
 type AttemptScript = Recording AttemptSpec AttemptResult
 
--- | The recorder's state; its lists are newest first.
-data Rec spec res = Rec
+-- | The recorder's state.
+data Rec res = Rec
   { rkCounts :: Map.Map (Text, Text) Int
-  , rkSpawns :: [(Running, spec, AttemptKey, Double)]
-  -- ^ every spawn with its key and the clock at spawn
-  , rkDone :: Map.Map Running (Seconds, Either Text res)
-  -- ^ the jobs delivered or cancelled
-  , rkCaps :: [(Text, Double)]
-  , rkPrices :: [(AttemptKey, Double)]
+  , rkKeys :: Map.Map Running AttemptKey
+  -- ^ every spawned job's key
+  , rkNext :: Int
+  , rkSteps :: Map.Map Int (Step res)
+  -- ^ the steps by position; a capped step's position is taken when it
+  -- starts, so the calls made inside it come after it
   }
 
--- | A wrapper over an orchestrator (a real one, in use) that records what
--- it did, given the key function, and a reader of the recording so far.
--- Every field is the wrapped one's; besides, a spawn records the job's
--- key (counted as 'scriptEntry' counts) and the clock; an await that
--- delivers a job records the seconds since its spawn and its result (an
--- exception as its text); a cancel of a job not yet delivered records it
--- as never delivered, with the text @cancelled@; a capped step whose cap
--- hit records its name and the seconds it was given (a step that ran is
--- not recorded); a price given records it under the key of the spec's
--- latest spawn, found by equality. A job still in flight when the
--- recording is read is never delivered, with the text @in flight@.
+-- | The key of a job not spawned (by this orchestrator).
+unknownKey :: AttemptKey
+unknownKey = AttemptKey "" "" (-1)
+
+-- | The key a price is asked under: the latest spawn with the spec's
+-- goal and backend (index 0 when there was none).
+priceKey :: (spec -> (Text, Text)) -> Map.Map (Text, Text) Int -> spec -> AttemptKey
+priceKey keyFn counts sp =
+  let pair@(g, b) = keyFn sp
+   in AttemptKey g b (max 0 (Map.findWithDefault 0 pair counts - 1))
+
+-- | A wrapper over an orchestrator (a real one, in use) that records its
+-- answers as a tape, given the key function, and a reader of the tape so
+-- far. Every field is the wrapped one's, and each call appends its step
+-- once the wrapped call returns: the clock read ('Now'); a spawn's key,
+-- counted as 'scriptEntry' counts ('Spawned'); an await's job and result
+-- (an exception as its text) or its timing out, each with the wrapped
+-- clock read after it ('Delivered', 'AwaitTimedOut'); a cancel
+-- ('Cancelled'); a capped step's name, seconds and whether its cap hit
+-- ('Capped'; its place is taken when it starts, so the calls made
+-- inside it follow it, and a step that throws leaves no step); a price
+-- and its answer, under the key of the latest spawn with the spec's goal
+-- and backend ('Priced'). The log is not recorded.
 recordOrchestrator
   :: forall spec res
-   . Eq spec
-  => (spec -> (Text, Text))
+   . (spec -> (Text, Text))
   -> Orchestrator spec res
   -> IO (Orchestrator spec res, IO (Recording spec res))
 recordOrchestrator keyFn o = do
-  ref <- newIORef Rec {rkCounts = Map.empty, rkSpawns = [], rkDone = Map.empty, rkCaps = [], rkPrices = []}
-  let never = Seconds (1 / 0)
+  ref <- newIORef Rec {rkCounts = Map.empty, rkKeys = Map.empty, rkNext = 0, rkSteps = Map.empty}
+  let slot = atomicModifyIORef' ref (\s -> (s {rkNext = rkNext s + 1}, rkNext s))
+      put n st = atomicModifyIORef' ref (\s -> (s {rkSteps = Map.insert n st (rkSteps s)}, ()))
+      append st = slot >>= \n -> put n st
+      keyOf r = Map.findWithDefault unknownKey r . rkKeys <$> readIORef ref
+      now = do
+        t <- oNow o
+        append (Now t)
+        pure t
       spawn sp = do
-        t0 <- oNow o
         r <- oSpawn o sp
-        atomicModifyIORef' ref $ \s ->
+        k <- atomicModifyIORef' ref $ \s ->
           let (k, counts) = spawnKey keyFn (rkCounts s) sp
-           in (s {rkCounts = counts, rkSpawns = (r, sp, k, t0) : rkSpawns s}, ())
+           in (s {rkCounts = counts, rkKeys = Map.insert r k (rkKeys s)}, k)
+        append (Spawned k)
         pure r
       awaitAny secs rs = do
         got <- oAwaitAny o secs rs
-        forM_ got $ \(r, res) -> do
-          t1 <- oNow o
-          let res' = either (Left . T.pack . displayException) Right res
-          atomicModifyIORef' ref $ \s -> case [t0 | (r', _, _, t0) <- rkSpawns s, r' == r] of
-            t0 : _ -> (s {rkDone = Map.insert r (Seconds (t1 - t0), res') (rkDone s)}, ())
-            [] -> (s, ())
+        t <- oNow o
+        case got of
+          Nothing -> append (AwaitTimedOut t)
+          Just (r, res) -> do
+            k <- keyOf r
+            append (Delivered k t (either (Left . T.pack . displayException) Right res))
         pure got
       cancelOne r = do
         oCancel o r
-        -- one delivered or already cancelled keeps its entry
-        atomicModifyIORef' ref $ \s ->
-          if any (\(r', _, _, _) -> r' == r) (rkSpawns s)
-            then (s {rkDone = Map.insertWith (\_ old -> old) r (never, Left "cancelled") (rkDone s)}, ())
-            else (s, ())
+        keyOf r >>= append . Cancelled
       capped :: Text -> Double -> IO a -> IO (Maybe a)
       capped name secs act = do
+        n <- slot
         got <- oCapped o name secs act
-        when (isNothing got) $ atomicModifyIORef' ref (\s -> (s {rkCaps = (name, secs) : rkCaps s}, ()))
+        put n (Capped name secs (isNothing got))
         pure got
       priceOf sp = do
-        got <- oPrice o sp
-        forM_ got $ \d -> atomicModifyIORef' ref $ \s ->
-          let k = case [k' | (_, sp', k', _) <- rkSpawns s, sp' == sp] of
-                k' : _ -> k'
-                [] -> fst (spawnKey keyFn (rkCounts s) sp)
-           in (s {rkPrices = (k, d) : rkPrices s}, ())
-        pure got
-      recording = do
-        s <- readIORef ref
-        pure Recording
-          { rcEntries =
-              [ (k, secs, res)
-              | (r, _, k, _) <- reverse (rkSpawns s)
-              , let (secs, res) = fromMaybe (never, Left "in flight") (Map.lookup r (rkDone s)) ]
-          , rcCaps = reverse (rkCaps s)
-          , rcPrices = reverse (rkPrices s)
-          }
+        d <- oPrice o sp
+        k <- priceKey keyFn . rkCounts <$> readIORef ref <*> pure sp
+        append (Priced k d)
+        pure d
       orch = Orchestrator
         { oSpawn = spawn
         , oAwaitAny = awaitAny
         , oCancel = cancelOne
-        , oNow = oNow o
+        , oNow = now
         , oLog = oLog o
         , oCapped = capped
         , oPrice = priceOf
         }
-  pure (orch, recording)
+  pure (orch, Recording . Map.elems . rkSteps <$> readIORef ref)
 
--- | The script that replays a recording through 'simOrchestrator': each
--- entry's constant result after its seconds (one never delivered is never
--- due, so it is cancelled on replay as it was in the run), the caps and
--- prices as recorded, no default and no step cost.
-recordingScript :: Recording spec res -> Script spec res
-recordingScript rc = Script
-  { scAttempts = [(k, secs, Scripted (const (pure res))) | (k, Seconds secs, res) <- rcEntries rc]
-  , scDefault = Nothing
-  , scCaps = rcCaps rc
-  , scPrices = rcPrices rc
-  , scStepCost = 0
+-- | A replay asked for something other than the tape's next step: the
+-- step's position (from 0), the step expected and the call made.
+data ReplayDiverged = ReplayDiverged { rdPosition :: Int, rdExpected :: Text, rdActual :: Text }
+  deriving (Eq, Show)
+
+instance Exception ReplayDiverged
+
+-- | A step in one line, without its result.
+describeStep :: Step res -> Text
+describeStep = \case
+  Now t -> "now " <> tshow t
+  Spawned k -> "spawn " <> showKey k
+  Delivered k t _ -> "await delivering " <> showKey k <> " at " <> tshow t
+  AwaitTimedOut t -> "await timing out at " <> tshow t
+  Cancelled k -> "cancel " <> showKey k
+  Capped name secs hit -> "capped " <> name <> " " <> tshow secs <> (if hit then " (hit)" else " (ran)")
+  Priced k _ -> "price " <> showKey k
+
+showKey :: AttemptKey -> Text
+showKey (AttemptKey g b i) = g <> "/" <> b <> "/" <> tshow i
+
+tshow :: Show a => a -> Text
+tshow = T.pack . show
+
+-- | The replayer's state.
+data Replay res = Replay
+  { rpTape :: [Step res]
+  , rpPos :: Int
+  , rpCounts :: Map.Map (Text, Text) Int
+  , rpNext :: Int
+  , rpByKey :: Map.Map AttemptKey Running
+  , rpKeys :: Map.Map Running AttemptKey
   }
+
+-- | An orchestrator that plays a tape, given the key function and the
+-- run log, and the number of steps it has consumed. Each call takes the
+-- tape's next step and answers from it: the clock ('Now'); a fresh job
+-- for a spawn whose key (counted as 'scriptEntry' counts) is the step's
+-- ('Spawned'); for an await, the job with the step's key, which must be
+-- among those awaited, with its result (a Left as an 'ErrorCall' of its
+-- text), or Nothing ('Delivered', 'AwaitTimedOut'); a cancel of the job
+-- with the step's key ('Cancelled'); a capped step with the step's name,
+-- Nothing without running the action when the cap hit and otherwise the
+-- action's result ('Capped'); a price asked under the step's key, its
+-- answer ('Priced'). Any other call, or a call past the tape's end,
+-- throws 'ReplayDiverged'. The log is the given function.
+replayOrchestrator
+  :: forall spec res
+   . (spec -> (Text, Text))
+  -> (Event -> IO ())
+  -> Recording spec res
+  -> IO (Orchestrator spec res, IO Int)
+replayOrchestrator keyFn logE rc = do
+  ref <- newIORef Replay
+    { rpTape = rcSteps rc, rpPos = 0, rpCounts = Map.empty, rpNext = 0, rpByKey = Map.empty, rpKeys = Map.empty }
+  let -- the next step, consumed; the call's description and the step's
+      -- answer, Nothing when the step is not the call's
+      next :: Text -> (Step res -> Replay res -> Maybe (Replay res, IO a)) -> IO a
+      next call answer = do
+        got <- atomicModifyIORef' ref $ \s -> case rpTape s of
+          [] -> (s, Left (ReplayDiverged (rpPos s) "the end of the tape" call))
+          st : rest -> case answer st s {rpTape = rest, rpPos = rpPos s + 1} of
+            Just (s', act) -> (s', Right act)
+            Nothing -> (s, Left (ReplayDiverged (rpPos s) (describeStep st) call))
+        either throwIO id got
+      keyOf s r = Map.findWithDefault unknownKey r (rpKeys s)
+      now = next "now" $ \st s -> case st of
+        Now t -> Just (s, pure t)
+        _ -> Nothing
+      spawn sp =
+        let call s = "spawn " <> showKey (fst (spawnKey keyFn (rpCounts s) sp))
+         in readIORef ref >>= \s0 -> next (call s0) $ \st s -> case st of
+              Spawned k
+                | (k', counts) <- spawnKey keyFn (rpCounts s) sp, k' == k ->
+                    let r = Running (rpNext s)
+                     in Just (s {rpCounts = counts, rpNext = rpNext s + 1, rpByKey = Map.insert k r (rpByKey s), rpKeys = Map.insert r k (rpKeys s)}, pure r)
+              _ -> Nothing
+      awaitAny _ rs = readIORef ref >>= \s0 ->
+        next ("await " <> T.intercalate ", " (map (showKey . keyOf s0) rs)) $ \st s -> case st of
+          Delivered k _ res
+            | Just r <- Map.lookup k (rpByKey s), r `elem` rs ->
+                Just (s, pure (Just (r, either (Left . toException . ErrorCall . T.unpack) Right res)))
+          AwaitTimedOut _ -> Just (s, pure Nothing)
+          _ -> Nothing
+      cancelOne r = readIORef ref >>= \s0 ->
+        next ("cancel " <> showKey (keyOf s0 r)) $ \st s -> case st of
+          Cancelled k | k == keyOf s r -> Just (s, pure ())
+          _ -> Nothing
+      capped :: Text -> Double -> IO a -> IO (Maybe a)
+      capped name secs act = do
+        hit <- next ("capped " <> name <> " " <> tshow secs) $ \st s -> case st of
+          Capped name' _ h | name' == name -> Just (s, pure h)
+          _ -> Nothing
+        if hit then pure Nothing else Just <$> act
+      priceOf sp = readIORef ref >>= \s0 ->
+        let k0 = priceKey keyFn (rpCounts s0) sp
+         in next ("price " <> showKey k0) $ \st s -> case st of
+              Priced k d | k == priceKey keyFn (rpCounts s) sp -> Just (s, pure d)
+              _ -> Nothing
+      orch = Orchestrator
+        { oSpawn = spawn
+        , oAwaitAny = awaitAny
+        , oCancel = cancelOne
+        , oNow = now
+        , oLog = logE
+        , oCapped = capped
+        , oPrice = priceOf
+        }
+  pure (orch, rpPos <$> readIORef ref)

@@ -1,7 +1,8 @@
--- | 'recordOrchestrator': a run on real threads recorded and replayed
--- through the simulator ('recordingScript') gives the same events, a
--- cap that hit is a cap on replay, a price is given back, and the flat
--- search's recording ('AttemptScript') round-trips through JSON.
+-- | 'recordOrchestrator' and 'replayOrchestrator': a run on real threads
+-- recorded as a tape and played back gives the same events exactly; a
+-- cap replays as it went, a price as it was answered; a replay asked for
+-- anything else throws 'ReplayDiverged'; the flat search's tape
+-- ('AttemptScript') round-trips through JSON.
 module Fisher.Search.RecordSpec (spec) where
 
 import Control.Concurrent (threadDelay)
@@ -31,8 +32,38 @@ quick price = realOrchestrator (\_ -> pure (plainResult Nothing Nothing "")) (pu
 recorded :: AttemptOrchestrator -> IO (AttemptOrchestrator, IO AttemptScript)
 recorded = recordOrchestrator attemptKey
 
-never :: Seconds
-never = Seconds (1 / 0)
+-- | The replaying orchestrator, its log dropped.
+replayed :: AttemptScript -> IO (AttemptOrchestrator, IO Int)
+replayed = replayOrchestrator attemptKey (\_ -> pure ())
+
+-- | The identity scenario on real threads, recorded: its events and tape.
+recordIdentity :: IO ([Event], AttemptScript)
+recordIdentity = do
+  recRef <- newIORef Nothing
+  let wrap o = do
+        (o', rd) <- recorded o
+        writeIORef recRef (Just rd)
+        pure o'
+  evs <- realSearch wrap identityFile identityConfig (emptyScript {scAttempts = identityEntries})
+  rc <- readIORef recRef >>= maybe (fail "the wrapper was not used") id
+  pure (evs, rc)
+
+-- | The identity search replayed from a tape: its events and the steps
+-- consumed.
+replayIdentity :: AttemptScript -> IO ([Event], Int)
+replayIdentity rc = do
+  countRef <- newIORef (pure 0)
+  evs <- searchOn (\logE -> do
+    (o, n) <- replayOrchestrator attemptKey logE rc
+    writeIORef countRef n
+    pure o) identityFile identityConfig
+  n <- join' countRef
+  pure (evs, n)
+  where
+    join' r = readIORef r >>= id
+
+diverged :: Selector ReplayDiverged
+diverged = const True
 
 stats :: ChildStats
 stats = ChildStats
@@ -40,65 +71,66 @@ stats = ChildStats
   , csCostUsd = Just 0.25, csResult = Just "done", csTools = Map.fromList [("Edit", 3), ("Read", 4)] }
 
 spec :: Spec
-spec = describe "recordOrchestrator" $ do
-  it "records a real run that replays through the simulator to the same events" $ do
-    recRef <- newIORef Nothing
-    let wrap o = do
-          (o', rd) <- recorded o
-          writeIORef recRef (Just rd)
-          pure o'
-    realEvs <- realSearch wrap identityFile identityConfig (emptyScript {scAttempts = identityEntries})
-    rc <- readIORef recRef >>= maybe (fail "the wrapper was not used") id
-    -- three attempts in spawn order; the last cut by the budget
-    [k | (k, _, _) <- rcEntries rc] `shouldBe` [AttemptKey "a" "x" 0, AttemptKey "b" "y" 0, AttemptKey "b" "x" 0]
-    [(k, r) | (k, s, r) <- rcEntries rc, s == never] `shouldBe` [(AttemptKey "b" "x" 0, Left "cancelled")]
-    [s | (_, Seconds s, _) <- rcEntries rc, not (isInfinite s)] `shouldSatisfy` all (> 0)
-    -- the replay runs in the recording's (real) seconds, so with the
-    -- real run's budget
-    (_, simEvs, tr) <- simSearch identityFile (scaled identityConfig) (recordingScript rc)
-    map zeroTimes simEvs `shouldBe` map zeroTimes realEvs
-    stCancelled tr `shouldSatisfy` (not . null)
-    allNamed tr
+spec = describe "recordOrchestrator and replayOrchestrator" $ do
+  it "a real run's tape replays to the same events, times included" $ do
+    (realEvs, rc) <- recordIdentity
+    [k | Spawned k <- rcSteps rc] `shouldBe` [AttemptKey "a" "x" 0, AttemptKey "b" "y" 0, AttemptKey "b" "x" 0]
+    [k | Cancelled k <- rcSteps rc] `shouldBe` [AttemptKey "b" "x" 0]
+    (evs, n) <- replayIdentity rc
+    evs `shouldBe` realEvs
+    n `shouldBe` length (rcSteps rc)
 
-  it "records a cap that hit, which is a cap on replay; a step that ran is not recorded" $ do
+  it "a replay asked for a call the tape does not have throws" $ do
+    (_, rc) <- recordIdentity
+    -- a's attempt fails on the tape now, so the replay retries a where
+    -- the run went on with b
+    let failA = \case
+          Delivered k t _ | k == AttemptKey "a" "x" 0 -> Delivered k t (Left "boom")
+          st -> st
+    replayIdentity (Recording (map failA (rcSteps rc))) `shouldThrow` diverged
+    (o, n) <- replayed (Recording [Now 1])
+    oSpawn o (attemptOn 1 "a" "x") `shouldThrow` diverged
+    n `shouldReturn` 0
+    oNow o `shouldReturn` 1
+    oNow o `shouldThrow` diverged
+
+  it "a cap that hit replays without running the step; one that ran runs again" $ do
     (o, rd) <- quick Nothing >>= recorded
     oCapped o "auto" 0.05 (threadDelay 1000000) `shouldReturn` Nothing
     oCapped o "repair" 5 (pure (3 :: Int)) `shouldReturn` Just 3
     rc <- rd
-    rcCaps rc `shouldBe` [("auto", 0.05)]
-    (s, trace) <- simOrchestrator attemptKey (recordingScript rc)
-    oCapped s "auto" 0.05 (pure ()) `shouldReturn` Nothing
-    oCapped s "repair" 5 (pure (3 :: Int)) `shouldReturn` Just 3
-    stClock <$> trace `shouldReturn` 0.05
+    rcSteps rc `shouldBe` [Capped "auto" 0.05 True, Capped "repair" 5 False]
+    (s, n) <- replayed rc
+    ran <- newIORef False
+    oCapped s "auto" 0.05 (writeIORef ran True) `shouldReturn` Nothing
+    readIORef ran `shouldReturn` False
+    oCapped s "repair" 5 (writeIORef ran True >> pure (3 :: Int)) `shouldReturn` Just 3
+    readIORef ran `shouldReturn` True
+    n `shouldReturn` 2
 
-  it "records a price given, which is given back on replay" $ do
-    (o, rd) <- quick (Just 0.75) >>= recorded
+  it "a price answered Nothing replays as Nothing" $ do
+    (o, rd) <- quick Nothing >>= recorded
     let sp = attemptOn 1 "a" "x"
     r <- oSpawn o sp
     oCancel o r
-    oPrice o sp `shouldReturn` Just 0.75
+    oPrice o sp `shouldReturn` Nothing
     rc <- rd
-    rcPrices rc `shouldBe` [(AttemptKey "a" "x" 0, 0.75)]
-    rcEntries rc `shouldBe` [(AttemptKey "a" "x" 0, never, Left "cancelled")]
-    (s, _) <- simOrchestrator attemptKey (recordingScript rc)
+    rcSteps rc `shouldBe` [Spawned (AttemptKey "a" "x" 0), Cancelled (AttemptKey "a" "x" 0), Priced (AttemptKey "a" "x" 0) Nothing]
+    (s, n) <- replayed rc
     r' <- oSpawn s sp
-    oPrice s sp `shouldReturn` Just 0.75
-    -- never due, so never delivered
-    fmap fst <$> oAwaitAny s 100 [r'] `shouldReturn` Nothing
+    oCancel s r'
+    oPrice s sp `shouldReturn` Nothing
+    n `shouldReturn` 3
 
-  it "an attempt script round-trips through JSON" $ do
+  it "a tape round-trips through JSON" $ do
     let full = (plainResult (Just "theorem a : A := by\n  simp") (Just stats) "closed")
           { arStop = Just (Stop StallDollars 3 1.5), arDollars = Just 0.5, arLastMessage = Just "stuck" }
         failed = (plainResult Nothing Nothing "") {arFailure = Just RateLimited, arStop = Just (Stop StallTurns 8 0)}
+        a = AttemptKey "a" "x" 0
+        b = AttemptKey "b" "y" 0
         rc = Recording
-          { rcEntries =
-              [ (AttemptKey "a" "x" 0, Seconds 2.5, Right full)
-              , (AttemptKey "a" "y" 0, Seconds 0.25, Right failed)
-              , (AttemptKey "b" "x" 0, Seconds 1, Left "boom")
-              , (AttemptKey "b" "x" 1, never, Left "cancelled") ]
-          , rcCaps = [("auto", 4)]
-          , rcPrices = [(AttemptKey "b" "x" 1, 0.125)] } :: AttemptScript
+          [ Now 0.5, Spawned a, Spawned b, Delivered a 2.5 (Right full), Delivered b 3 (Right failed)
+          , AwaitTimedOut 4, Delivered b 4.25 (Left "boom"), Cancelled b, Capped "auto" 4 True, Capped "repair" 2 False
+          , Priced a (Just 0.125), Priced b Nothing ] :: AttemptScript
     decode (encode rc) `shouldBe` Just rc
-    encode never `shouldBe` "\"never\""
-    encode (Seconds 2.5) `shouldBe` "2.5"
     decode "{\"akGoal\":\"a\",\"akBackend\":\"x\",\"akIndex\":2}" `shouldBe` Just (AttemptKey "a" "x" 2)
