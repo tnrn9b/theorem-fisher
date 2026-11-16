@@ -35,6 +35,7 @@ module Fisher.Search.Orchestrate
 
 import Control.Concurrent.Async (Async, asyncWithUnmask, cancel, poll, waitAnyCatch)
 import Control.Exception (ErrorCall (..), SomeAsyncException, SomeException, fromException, mask_, throwIO, toException, try)
+import Data.Aeson (FromJSON, ToJSON)
 import Data.IORef
 import Data.List (find, minimumBy)
 import qualified Data.Map.Strict as Map
@@ -143,10 +144,14 @@ realOrchestrator run now logE price = do
 
 -- | Names a spawned job in a 'Script': the two halves of its key (for an
 -- attempt, its goal and its backend) and how many jobs with that key were
--- spawned before it (the first is 0). Its JSON instances are in
--- "Fisher.Search.Tape".
+-- spawned before it (the first is 0).
 data AttemptKey = AttemptKey { akGoal :: Text, akBackend :: Text, akIndex :: Int }
   deriving (Eq, Ord, Show, Generic)
+
+-- | Generic, with the field names as they are (a tape holds keys).
+instance ToJSON AttemptKey
+
+instance FromJSON AttemptKey
 
 -- | The key function for attempts: an attempt's goal and backend.
 attemptKey :: AttemptSpec -> (Text, Text)

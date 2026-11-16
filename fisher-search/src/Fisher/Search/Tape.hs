@@ -1,8 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
--- The JSON instances of 'AttemptKey' live here, beside the tape that holds
--- it, so that "Fisher.Search.Orchestrate" needs no aeson.
-{-# OPTIONS_GHC -Wno-orphans #-}
 
 -- | The tape of a run: 'recordOrchestrator' wraps any orchestrator and
 -- records its answers, and every event logged through it, in call order
@@ -34,11 +31,6 @@ import System.Timeout (timeout)
 
 import Fisher.Search.Attempt
 import Fisher.Search.Orchestrate (AttemptKey (..), Orchestrator (..), Running (..), spawnKey)
-
--- | Generic, with the field names as they are.
-instance ToJSON AttemptKey
-
-instance FromJSON AttemptKey
 
 -- | One answer of an orchestrator, or one event logged through it, in a
 -- 'Recording'.

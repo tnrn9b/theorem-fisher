@@ -434,7 +434,8 @@ same for the graph search.
 The recorder and the replayer are in `Fisher.Search.Tape` (fisher-search),
 which imports `AttemptKey`, `attemptKey` and `spawnKey` from
 `Fisher.Search.Orchestrate`; `Orchestrate` itself keeps the record and its two
-interpreters and has no aeson. A recording is a tape: the orchestrator's
+interpreters, with `AttemptKey`'s JSON instances beside the type (its
+only aeson import). A recording is a tape: the orchestrator's
 answers, and the events logged through it, in call order. It is not a script
 for the simulator. A real run has time of its own outside its awaits (Lean
 checks, steps that run without a cap), so measuring each job's seconds since
@@ -530,7 +531,8 @@ The flat search's tape has JSON instances, so a run can be written to a file.
 fields under `contents`. `Recording` is `{"rcVersion": 1, "rcSteps": [...]}`;
 its decoder refuses a tape whose `rcVersion` is not `tapeVersion` (1), with a
 message naming the version found, and one without `rcVersion`. `AttemptKey`
-is an object with its field names (its instances are in `Tape`), an `Either`
+is an object with its field names (its instances are beside it in
+`Orchestrate`), an `Either`
 is `{"Left": ...}` or `{"Right": ...}`, and `AttemptResult`, `ChildStats`,
 `Stop`, `StopReason`, `ModelFailure` and the scheduler's `Event` have generic
 instances in their own modules, field names as they are. An example of a few
