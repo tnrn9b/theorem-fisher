@@ -138,11 +138,13 @@ test-suite fisher-search-test
       Fisher.Search.SplitSpec
       Fisher.Search.StreamSpec
       Fisher.Search.WhiteboardSpec
+      Fisher.Test.FakeLean
       Paths_fisher_search
   autogen-modules:
       Paths_fisher_search
   hs-source-dirs:
       test
+      test-shared
   default-extensions:
       OverloadedStrings
       LambdaCase

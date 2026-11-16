@@ -46,17 +46,17 @@ import Fisher.Runlog (Capture (..), GoalRow (..), NewRun (..), RunEnd (..), RunK
 import Fisher.Runlog.Stream (StreamEvent (..))
 import Fisher.Search.Report (eventJson, eventLine)
 import Fisher.Search.Attempt (AttemptSpec (..), plainResult)
-import Fisher.Search.Check (AxiomPolicy (..), LeanRun (..), standardAxioms)
+import Fisher.Search.Check (AxiomPolicy (..), standardAxioms)
 import qualified Fisher.Search.Lean as L
 import Fisher.Search.Orchestrate (Orchestrator (..), attemptKey, realOrchestrator)
 import Fisher.Search.Tape (Recording (..), ReplayDiverged (..), Step (..), replayOrchestrator, tapeVersion)
 import Fisher.Search.Scheduler (SearchEnv (..))
-import qualified Data.Set as Set
 import Data.IORef (atomicModifyIORef')
 import qualified Data.ByteString.Lazy as BL
 import Fisher.Search.Scheduler (AttemptRecord (..), Event (..), GoalState (..), GoalStatus (..), SearchConfig (..), SearchReport (..), plainRecord)
 import Fisher.Search.Shape (renderShape, shapeOf)
 import Fisher.TestUtil (oldName)
+import Fisher.Test.FakeLean (fakeLean, fakeLeanWith)
 import Fisher.Learn.Policy (Defaults (..), GoalPolicy (..), Policy (..), policyPath, readPolicy)
 import Fisher.Learn.Stats (Cell (..), Knob (..), Level (..), Stats (..))
 import qualified Fisher.Runlog as R
@@ -1138,35 +1138,6 @@ snapshotDir top = go ""
         let p = if null rel then n else rel </> n
         isDir <- doesDirectoryExist (top </> p)
         if isDir then go p else (\b -> [(p, b)]) <$> BS.readFile (top </> p)) names
-
--- | A Lean stand-in (fisher-search's test one): a proof containing BAD
--- does not compile, an open goal warns, a proof naming an open goal
--- depends on sorryAx, every name's type is its statement.
-fakeLean :: LeanRun
-fakeLean = fakeLeanWith (const False)
-
--- | 'fakeLean' where a closed declaration the predicate names does not
--- compile either.
-fakeLeanWith :: (Decl -> Bool) -> LeanRun
-fakeLeanWith refused = LeanRun $ \root rel -> do
-  t <- TE.decodeUtf8 <$> BS.readFile (root </> rel)
-  let body = fst (T.breakOn "\n\n#print axioms" t)
-      ds = L.declarations body
-      opens = Set.fromList (map dName (filter L.isOpen ds))
-      queried = [T.strip (T.drop (T.length "#print axioms ") l) | l <- T.lines t, "#print axioms " `T.isPrefixOf` l]
-      errs = [rel <> ":" <> show (dStart d + 1) <> ":2: error: BAD" | d <- ds, "BAD" `T.isInfixOf` dProof d || (refused d && not (L.isOpen d))]
-      warns = [rel <> ":" <> show (dStart d + 1) <> ":8: warning: declaration uses `sorry`" | d <- ds, L.isOpen d]
-      uses dirty d = any (\o -> o /= dName d && o `Set.member` dirty) (T.words (dProof d))
-      grow dirty =
-        let next = Set.union dirty (Set.fromList [dName d | d <- ds, uses dirty d])
-        in if next == dirty then dirty else grow next
-      sorryDeps = grow opens
-      info n = case L.findDecl n ds of
-        Nothing -> []
-        Just d ->
-          [ "'" <> n <> "' depends on axioms: [" <> (if dName d `Set.member` sorryDeps then "sorryAx" else "propext") <> "]"
-          , n <> " : " <> L.statementHead d ]
-  pure (if null errs then 0 else 1, T.unlines (map T.pack (errs <> warns) <> concatMap info queried))
 
 -- | @--record@ and @--replay@: the flags and their refusals, the tape's
 -- reader, and a flat search recorded on a real orchestrator over a fake

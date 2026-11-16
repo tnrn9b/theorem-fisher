@@ -37,7 +37,10 @@ library:
 tests:
   fisher-search-test:
     main:        Spec.hs
-    source-dirs: test
+    # test-shared: the test helpers fisher-cli's tests use too
+    source-dirs:
+    - test
+    - test-shared
     build-tools: hspec-discover
     ghc-options: -threaded
     dependencies:

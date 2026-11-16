@@ -18,7 +18,7 @@ import System.FilePath ((</>))
 
 import Fisher.Search.Auto
 import Fisher.Search.Check (LeanRun (..))
-import Fisher.Search.FakeLean (fakeLean)
+import Fisher.Test.FakeLean (fakeLean)
 import Fisher.Search.Lean
 
 -- | How the fake language server behaves.

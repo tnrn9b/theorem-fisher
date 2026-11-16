@@ -198,11 +198,13 @@ test-suite fisher-cli-test
       Fisher.SubcommandsSpec
       Fisher.TestUtil
       Fisher.UiHooksCliSpec
+      Fisher.Test.FakeLean
       Paths_fisher_cli
   autogen-modules:
       Paths_fisher_cli
   hs-source-dirs:
       test
+      ../fisher-search/test-shared
   default-extensions:
       OverloadedStrings
       LambdaCase

@@ -12,7 +12,7 @@ import Test.Hspec
 import Data.Maybe (fromMaybe)
 import Fisher.Search.Check (AxiomPolicy (..), LeanRun (..), standardAxioms)
 import Fisher.Search.Lean (declarations, dStart, findDecl)
-import Fisher.Search.FakeLean (fakeLean)
+import Fisher.Test.FakeLean (fakeLean)
 import Fisher.Search.Sketch
 
 base :: Text

@@ -44,7 +44,7 @@ import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec (Expectation, shouldBe)
 
 import Fisher.Search.Check (AxiomPolicy (..), LeanRun, standardAxioms)
-import Fisher.Search.FakeLean (fakeLean)
+import Fisher.Test.FakeLean (fakeLean)
 import Fisher.Search.Lean
 import Fisher.Search.Orchestrate
 import Fisher.Search.Retrieval (RetrievalEnv)

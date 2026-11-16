@@ -63,7 +63,7 @@ import Fisher.Search.Auto (Lsp (..))
 import Fisher.Search.Check (AxiomPolicy (..), LeanRun (..), standardAxioms)
 import Fisher.Search.Child (ChildStats (..))
 import Fisher.Search.Controller (ModelFailure, Stop)
-import Fisher.Search.FakeLean (fakeLeanBy)
+import Fisher.Test.FakeLean (fakeLeanBy)
 import Fisher.Search.Graph
 import Fisher.Search.GraphRun
 import Fisher.Search.Lean

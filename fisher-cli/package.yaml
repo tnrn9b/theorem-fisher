@@ -68,7 +68,10 @@ executables:
 tests:
   fisher-cli-test:
     main:        Spec.hs
-    source-dirs: test
+    # fisher-search's test-shared: the test helpers both suites use
+    source-dirs:
+    - test
+    - ../fisher-search/test-shared
     build-tools: hspec-discover
     # ProverChatSpec runs MCP servers as children: a timed-out wait on one
     # needs the threaded RTS, as the fisher executable has

@@ -18,7 +18,7 @@ import Fisher.Role (partText)
 import Fisher.Search.Auto
 import Fisher.Search.Check (LeanRun (..))
 import Fisher.Search.Disprove (Disproof (..), DisproveSource (..), SmtEnv (..), certifyTactics)
-import Fisher.Search.FakeLean (fakeLean)
+import Fisher.Test.FakeLean (fakeLean)
 import Fisher.Search.FakeLsp
 import Fisher.Search.Lean
 import Fisher.Search.Orchestrate (Script (..), SimTrace (..))

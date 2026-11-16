@@ -23,7 +23,7 @@ import Test.Hspec
 import Fisher.Role (partText, static)
 import Fisher.Search.Auto
 import Fisher.Search.Check (LeanRun)
-import Fisher.Search.FakeLean (fakeLean)
+import Fisher.Test.FakeLean (fakeLean)
 import Fisher.Search.FakeLsp
 import Fisher.Search.Index
 import Fisher.Search.Lean
