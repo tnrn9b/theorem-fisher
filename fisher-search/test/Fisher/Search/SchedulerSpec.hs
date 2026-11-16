@@ -15,6 +15,7 @@ import Test.Hspec
 import Fisher.Search.Check (AxiomPolicy (..), standardAxioms)
 import Fisher.Search.FakeLean (fakeLean)
 import Fisher.Search.Lean
+import Fisher.Search.Orchestrate (realOrchestrator)
 import Fisher.Search.Scheduler
 
 file :: T.Text
@@ -47,10 +48,11 @@ search :: SearchConfig -> Script -> IO (SearchReport, [Event])
 search cfg script = withSystemTempDirectory "search" $ \root -> do
   BS.writeFile (root </> "F.lean") (TE.encodeUtf8 file)
   events <- newIORef []
+  orch <- realOrchestrator (fakeRun script) (realToFrac <$> getPOSIXTime) (\e -> modifyIORef events (e :)) (\_ -> pure Nothing)
   let env = SearchEnv
-        { seRun = fakeRun script, seLean = fakeLean, sePolicy = AxiomPolicy standardAxioms False, seRoot = root, seRel = "F.lean"
-        , seNow = realToFrac <$> getPOSIXTime, seLog = \e -> modifyIORef events (e :), seBaseChanged = \_ -> pure ()
-        , seAuto = Nothing, seRetrieval = Nothing, sePrice = \_ -> pure Nothing }
+        { seOrch = orch, seLean = fakeLean, sePolicy = AxiomPolicy standardAxioms False, seRoot = root, seRel = "F.lean"
+        , seBaseChanged = \_ -> pure ()
+        , seAuto = Nothing, seRetrieval = Nothing }
   r <- runSearch cfg env file
   es <- reverse <$> readIORef events
   either (fail . T.unpack) (\rep -> pure (rep, es)) r

@@ -34,6 +34,7 @@ import Fisher.Search.Lean (declarations, findDecl)
 import Fisher.Search.Check (AxiomPolicy (..), lakeLeanRun, standardAxioms)
 import Fisher.Search.Disprove (Disproof (..))
 import Fisher.Search.Report (eventLine)
+import Fisher.Search.Orchestrate (realOrchestrator)
 import Fisher.Search.Scheduler
 
 cloneLean :: FilePath -> FilePath
@@ -119,10 +120,11 @@ searchIn :: FilePath -> T.Text -> AutoConfig -> (AttemptSpec -> IO AttemptResult
 searchIn d file ac run = do
   lsp <- openLsp 600 d "A.lean" >>= either (fail . ("the server did not start: " <>) . T.unpack) pure
   events <- newIORef []
-  let env = SearchEnv run (lakeLeanRun 600) (AxiomPolicy standardAxioms False) d "A.lean"
-              (realToFrac <$> getPOSIXTime)
-              (\e -> TIO.putStrLn ("      " <> eventLine e) >> modifyIORef events (e :))
-              (\_ -> pure ()) (Just (AutoEnv ac lsp Nothing)) Nothing (\_ -> pure Nothing)
+  orch <- realOrchestrator run (realToFrac <$> getPOSIXTime)
+            (\e -> TIO.putStrLn ("      " <> eventLine e) >> modifyIORef events (e :))
+            (\_ -> pure Nothing)
+  let env = SearchEnv orch (lakeLeanRun 600) (AxiomPolicy standardAxioms False) d "A.lean"
+              (\_ -> pure ()) (Just (AutoEnv ac lsp Nothing)) Nothing
       cfg = defaultSearchConfig {scBackends = ["scripted", "scripted2"], scSlots = 1, scMaxAttempts = 2, scBudget = 1500, scParallelPerGoal = False}
   r <- timeout 1700000000 (runSearch cfg env file) `finally` lspClose lsp
   es <- reverse <$> readIORef events

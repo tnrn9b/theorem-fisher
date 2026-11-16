@@ -32,6 +32,7 @@ import Fisher.Search.Library
 import Fisher.Search.Report
 import Fisher.Search.RetrievalFixture
 import Fisher.Search.Retrieval
+import Fisher.Search.Orchestrate (realOrchestrator)
 import Fisher.Search.Scheduler
 
 goals :: Text
@@ -78,9 +79,10 @@ search cfg ac f lean file script0 mkRet check = withSystemTempDirectory "search"
               Nothing -> ([], proof0)
             out = T.intercalate "\n" (take (dStart d) ls <> helper <> take (dStmtEnd d + 1 - dStart d) (drop (dStart d) ls) <> ["  " <> proof] <> drop (dEnd d) ls)
         pure (plainResult (Just out) Nothing "")
-      env = SearchEnv run lean (AxiomPolicy standardAxioms False) root "F.lean"
-              (realToFrac <$> getPOSIXTime) (\e -> modifyIORef events (e :)) (\_ -> pure ())
-              (fmap (\c -> AutoEnv c (fakeLsp calls f) Nothing) ac) ret (\_ -> pure Nothing)
+  orch <- realOrchestrator run (realToFrac <$> getPOSIXTime) (\e -> modifyIORef events (e :)) (\_ -> pure Nothing)
+  let env = SearchEnv orch lean (AxiomPolicy standardAxioms False) root "F.lean"
+              (\_ -> pure ())
+              (fmap (\c -> AutoEnv c (fakeLsp calls f) Nothing) ac) ret
   r <- runSearch cfg env file
   es <- reverse <$> readIORef events
   ss <- readIORef specs
@@ -113,8 +115,9 @@ interruptedBy ex ae when_ file script0 mkRet check = withSystemTempDirectory "se
               Nothing -> ([], proof0)
             out = T.intercalate "\n" (take (dStart d) ls <> helper <> take (dStmtEnd d + 1 - dStart d) (drop (dStart d) ls) <> ["  " <> proof] <> drop (dEnd d) ls)
         pure (plainResult (Just out) Nothing "")
-      env = SearchEnv run fakeLean (AxiomPolicy standardAxioms False) root "F.lean"
-              (realToFrac <$> getPOSIXTime) (\e -> atomicModifyIORef' events (\es -> (e : es, ()))) (\_ -> pure ()) ae ret (\_ -> pure Nothing)
+  orch <- realOrchestrator run (realToFrac <$> getPOSIXTime) (\e -> atomicModifyIORef' events (\es -> (e : es, ()))) (\_ -> pure Nothing)
+  let env = SearchEnv orch fakeLean (AxiomPolicy standardAxioms False) root "F.lean"
+              (\_ -> pure ()) ae ret
   a <- async (runSearch cfg0 env file)
   let waitFor n = do
         es <- readIORef events

@@ -26,6 +26,7 @@ import Fisher.Search.FakeLean (fakeLean)
 import Fisher.Search.FakeLsp
 import Fisher.Search.Lean
 import Fisher.Search.Report
+import Fisher.Search.Orchestrate (realOrchestrator)
 import Fisher.Search.Scheduler
 import Fisher.Search.Splice (applySmtImport, smtKept)
 import Fisher.Smt (Model (..), SmtResult (..), Solver (..), Sort (..))
@@ -76,9 +77,10 @@ searchSmt smt cfg ac f lean file script0 = withSystemTempDirectory "search" $ \r
             d = fromMaybe (error "no goal") (findDecl (asGoal sp) (declarations (asStart sp)))
             out = T.intercalate "\n" (take (dStmtEnd d + 1) ls <> ["  " <> proof] <> drop (dEnd d) ls)
         pure (plainResult (Just out) Nothing "")
-      env = SearchEnv run lean (AxiomPolicy standardAxioms False) root "F.lean"
-              (realToFrac <$> getPOSIXTime) (\e -> modifyIORef events (e :)) (\_ -> pure ())
-              (fmap (\c -> AutoEnv c (fakeLsp calls f) smt) ac) Nothing (\_ -> pure Nothing)
+  orch <- realOrchestrator run (realToFrac <$> getPOSIXTime) (\e -> modifyIORef events (e :)) (\_ -> pure Nothing)
+  let env = SearchEnv orch lean (AxiomPolicy standardAxioms False) root "F.lean"
+              (\_ -> pure ())
+              (fmap (\c -> AutoEnv c (fakeLsp calls f) smt) ac) Nothing
   r <- runSearch cfg env file
   es <- reverse <$> readIORef events
   ss <- readIORef specs

@@ -59,6 +59,7 @@ import Fisher.Search.FakeLean (fakeLeanBy)
 import Fisher.Search.Graph
 import Fisher.Search.GraphRun
 import Fisher.Search.Lean
+import Fisher.Search.Orchestrate (realOrchestrator)
 import Fisher.Search.Library (Library, loadLibrary)
 import Fisher.Search.Retrieval (RetrievalEnv (..))
 import Fisher.Search.Scheduler
@@ -151,7 +152,7 @@ runGAuto = runGRet (\_ -> pure Nothing)
 runGRet :: (FilePath -> IO (Maybe RetrievalEnv)) -> LeanRun -> Maybe (IORef [Text] -> AutoEnv) -> GraphConfig -> Text -> [(Text, [Run])] -> [Reply] -> IO Out
 runGRet = runGPriced (\_ -> pure Nothing)
 
--- | 'runGRet' with a price for cancelled workers ('sePrice').
+-- | 'runGRet' with a price for cancelled workers ('oPrice').
 runGPriced :: (AttemptSpec -> IO (Maybe Double)) -> (FilePath -> IO (Maybe RetrievalEnv)) -> LeanRun -> Maybe (IORef [Text] -> AutoEnv) -> GraphConfig -> Text -> [(Text, [Run])] -> [Reply] -> IO Out
 runGPriced price mkRet leanRun mkAuto gcfg file runs0 replies0 = withSystemTempDirectory "graph" $ \root -> do
   BS.writeFile (root </> "F.lean") (TE.encodeUtf8 file)
@@ -212,8 +213,9 @@ runGPriced price mkRet leanRun mkAuto gcfg file runs0 replies0 = withSystemTempD
           Nothing -> pure (Left (AskFailed "nothing scripted"))
           Just (Reply _ _ (Left (AskFailed "THROW")) _) -> ioError (userError "the connection broke")
           Just (Reply _ _ out delay) -> threadDelay (delay * 1000) >> pure out
-      senv = SearchEnv seRunF lean (AxiomPolicy standardAxioms False) root "F.lean"
-               (readIORef clock) (\_ -> pure ()) (\_ -> pure ()) (fmap (\mk -> watched (mk trace)) mkAuto) ret price
+  orch <- realOrchestrator seRunF (readIORef clock) (\_ -> pure ()) price
+  let senv = SearchEnv orch lean (AxiomPolicy standardAxioms False) root "F.lean"
+               (\_ -> pure ()) (fmap (\mk -> watched (mk trace)) mkAuto) ret
       genv = GraphEnv senv ask (\e -> atomicModifyIORef' events (\es -> (e : es, ()))) (\_ _ -> pure ())
   r <- timeout 20000000 (runGraph gcfg genv file)
   rep <- case r of
@@ -251,8 +253,9 @@ runGInterrupted stopAt mkRet gcfg file runs0 replies0 = withSystemTempDirectory 
         pure $ case pick of
           Just (Reply _ _ out _) -> out
           Nothing -> Left (AskFailed "nothing scripted")
-      senv = SearchEnv seRunF keyLean (AxiomPolicy standardAxioms False) root "F.lean"
-               (pure 0) (\_ -> pure ()) (\_ -> pure ()) Nothing ret (\_ -> pure Nothing)
+  orch <- realOrchestrator seRunF (pure 0) (\_ -> pure ()) (\_ -> pure Nothing)
+  let senv = SearchEnv orch keyLean (AxiomPolicy standardAxioms False) root "F.lean"
+               (\_ -> pure ()) Nothing ret
       genv = GraphEnv senv ask (\e -> atomicModifyIORef' events (\es -> (e : es, ()))) (\_ _ -> pure ())
   a <- async (runGraph gcfg genv file)
   let waitFor n = do

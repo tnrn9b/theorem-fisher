@@ -25,6 +25,7 @@ import Fisher.Search.FakeLean (fakeLean)
 import Fisher.Search.FakeLsp
 import Fisher.Search.Lean
 import Fisher.Search.Report
+import Fisher.Search.Orchestrate (realOrchestrator)
 import Fisher.Search.Scheduler
 
 one :: Text
@@ -69,10 +70,11 @@ searchF failOf cfg ac f file script0 = withSystemTempDirectory "tiers" $ \root -
             d = fromMaybe (error "no goal") (findDecl (asGoal sp) (declarations (asStart sp)))
             out = T.intercalate "\n" (take (dStmtEnd d + 1) ls <> ["  " <> proof] <> drop (dEnd d) ls)
         pure (plainResult (Just out) Nothing "exit 1") {arFailure = failOf sp <|> failure}
-      env = SearchEnv
-        { seRun = run, seLean = fakeLean, sePolicy = AxiomPolicy standardAxioms False, seRoot = root, seRel = "F.lean"
-        , seNow = realToFrac <$> getPOSIXTime, seLog = \e -> modifyIORef events (e :), seBaseChanged = \_ -> pure ()
-        , seAuto = fmap (\c -> AutoEnv c (fakeLsp calls f) Nothing) ac, seRetrieval = Nothing, sePrice = \_ -> pure Nothing }
+  orch <- realOrchestrator run (realToFrac <$> getPOSIXTime) (\e -> modifyIORef events (e :)) (\_ -> pure Nothing)
+  let env = SearchEnv
+        { seOrch = orch, seLean = fakeLean, sePolicy = AxiomPolicy standardAxioms False, seRoot = root, seRel = "F.lean"
+        , seBaseChanged = \_ -> pure ()
+        , seAuto = fmap (\c -> AutoEnv c (fakeLsp calls f) Nothing) ac, seRetrieval = Nothing }
   r <- runSearch cfg env file
   es <- reverse <$> readIORef events
   ss <- readIORef specs

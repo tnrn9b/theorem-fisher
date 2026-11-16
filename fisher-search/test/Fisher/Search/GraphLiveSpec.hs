@@ -20,6 +20,7 @@ import Test.Hspec
 import Fisher.Search.Check (AxiomPolicy (..), lakeLeanRun, standardAxioms)
 import Fisher.Search.Child (ChildStats (..))
 import Fisher.Search.GraphRun
+import Fisher.Search.Orchestrate (realOrchestrator)
 import Fisher.Search.Scheduler
 import Fisher.Search.Scripted (accept, planWith, withProof)
 
@@ -53,8 +54,9 @@ spec = describe "runGraph on a Lean project" $ do
               , 0 )
             Verifier -> Right (accept, 0)
             Worker -> Left (AskFailed "no model")
-          senv = SearchEnv run (lakeLeanRun 600) (AxiomPolicy standardAxioms False) root "GraphProj.lean"
-                   (pure 0) (\_ -> pure ()) (\_ -> pure ()) Nothing Nothing (\_ -> pure Nothing)
+      orch <- realOrchestrator run (pure 0) (\_ -> pure ()) (\_ -> pure Nothing)
+      let senv = SearchEnv orch (lakeLeanRun 600) (AxiomPolicy standardAxioms False) root "GraphProj.lean"
+                   (\_ -> pure ()) Nothing Nothing
           genv = GraphEnv senv ask (\_ -> pure ()) (\_ _ -> pure ())
       r <- timeout 900000000 (runGraph defaultGraphConfig genv file)
       case r of

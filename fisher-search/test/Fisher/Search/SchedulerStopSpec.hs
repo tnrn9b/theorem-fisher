@@ -24,6 +24,7 @@ import Fisher.Search.FakeLean (fakeLean)
 import Fisher.Search.FakeLsp
 import Fisher.Search.Lean
 import Fisher.Search.Report (eventJson, reportJson)
+import Fisher.Search.Orchestrate (realOrchestrator)
 import Fisher.Search.Scheduler
 
 one :: Text
@@ -66,7 +67,7 @@ data Run = Run
 search :: SearchConfig -> Maybe AutoConfig -> Text -> Script -> IO Run
 search = searchPriced (\_ -> pure Nothing)
 
--- | 'search' with a price for cancelled attempts ('sePrice').
+-- | 'search' with a price for cancelled attempts ('oPrice').
 searchPriced :: (AttemptSpec -> IO (Maybe Double)) -> SearchConfig -> Maybe AutoConfig -> Text -> Script -> IO Run
 searchPriced price cfg ac file script0 = withSystemTempDirectory "stops" $ \root -> do
   BS.writeFile (root </> "F.lean") (TE.encodeUtf8 file)
@@ -88,10 +89,11 @@ searchPriced price cfg ac file script0 = withSystemTempDirectory "stops" $ \root
               stats = (\c -> ChildStats (Just 1) 1 (Just 3) Nothing Nothing (Just c) Nothing Map.empty) <$> sCost s
           pure (plainResult (Just out) stats "exit 1")
             { arStop = sStop s, arLastMessage = sMessage s, arDollars = sDollars s, arFailure = sFailure s }
-      env = SearchEnv
-        { seRun = run, seLean = fakeLean, sePolicy = AxiomPolicy standardAxioms False, seRoot = root, seRel = "F.lean"
-        , seNow = realToFrac <$> getPOSIXTime, seLog = \e -> modifyIORef events (e :), seBaseChanged = \_ -> pure ()
-        , seAuto = fmap (\c -> AutoEnv c (fakeLsp calls fake0) Nothing) ac, seRetrieval = Nothing, sePrice = price }
+  orch <- realOrchestrator run (realToFrac <$> getPOSIXTime) (\e -> modifyIORef events (e :)) (price)
+  let env = SearchEnv
+        { seOrch = orch, seLean = fakeLean, sePolicy = AxiomPolicy standardAxioms False, seRoot = root, seRel = "F.lean"
+        , seBaseChanged = \_ -> pure ()
+        , seAuto = fmap (\c -> AutoEnv c (fakeLsp calls fake0) Nothing) ac, seRetrieval = Nothing }
   r <- runSearch cfg env file
   es <- reverse <$> readIORef events
   ss <- readIORef specs

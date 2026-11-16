@@ -69,10 +69,10 @@ module Fisher.Search.Scheduler
   , goalTactics
   , runSearch
   , runSingle
+  , runToEnd
   ) where
 
-import Control.Concurrent.Async (Async, async, cancel, waitAnyCatch)
-import Control.Exception (SomeAsyncException, SomeException, displayException, fromException, throwIO, try)
+import Control.Exception (SomeAsyncException, SomeException, displayException, fromException, onException, throwIO, try)
 import Control.Monad (forM_, join, void, when)
 import Data.Aeson (Value (..))
 import qualified Data.Aeson.Key as K
@@ -87,7 +87,6 @@ import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as T
 import Numeric (showFFloat)
-import System.Timeout (timeout)
 
 import Fisher.Learn.Policy (GoalPolicy (..))
 import Fisher.Role (PromptPart, static, toPrompt, tool, worker)
@@ -100,6 +99,7 @@ import Fisher.Search.Controller (Health, Stop (..), cap2000, emptyHealth, modelF
 import Fisher.Search.Disprove (Disproof (..), DisproveInfo (..), DisproveSource (..), SmtEnv, disprove, disproveAfterSuspect, disproveWitnessOnly, sourceName)
 import Fisher.Search.Headless (nativeBackend)
 import Fisher.Search.Lean
+import Fisher.Search.Orchestrate (Orchestrator (..), Running)
 import qualified Fisher.Search.Repair as R
 import Fisher.Search.Retrieval
 import Fisher.Search.Splice (Spliced (..), splice)
@@ -179,24 +179,22 @@ tierIn ord h k = (ord !!) <$> case [p | p <- [start .. n - 1], ok p] of
     ok p = not (skipped h (ord !! p))
 
 data SearchEnv = SearchEnv
-  { seRun :: AttemptSpec -> IO AttemptResult
-  -- ^ runs one attempt to the end; cancelling its thread must stop it
+  { seOrch :: Orchestrator
+  -- ^ the effects: an attempt spawned runs to the end and cancelling it
+  -- must stop it; the clock; the run log; the automation's capped steps;
+  -- and a cancelled attempt's dollars (fisher search: its ledger rows),
+  -- asked only with the controller on, once the attempt is cancelled
   , seLean :: LeanRun
   , sePolicy :: AxiomPolicy
   , seRoot :: FilePath
   -- ^ the project the checks compile in
   , seRel :: FilePath
-  , seNow :: IO Double
-  , seLog :: Event -> IO ()
   , seBaseChanged :: Text -> IO ()
   , seAuto :: Maybe AutoEnv
   -- ^ the automation pre-pass, Repair and Disprove; Nothing is the search
   -- without them
   , seRetrieval :: Maybe RetrievalEnv
   -- ^ facts and the library; Nothing is the search without them
-  , sePrice :: AttemptSpec -> IO (Maybe Double)
-  -- ^ a cancelled attempt's dollars (fisher search: its ledger rows), asked
-  -- only with the controller on, once the attempt is cancelled
   }
 
 -- | What the automation needs: its settings, Lean's language server and,
@@ -326,7 +324,7 @@ data St = St
   , stBase :: Text
   , stNext :: Int
   , stUsage :: Map.Map Text Int
-  , stRunning :: [(Async AttemptResult, AttemptSpec, Double)]
+  , stRunning :: [(Running, AttemptSpec, Double)]
   , stRecords :: [AttemptRecord]
   , stFromPartial :: [Int]
   -- ^ attempts that started from a repaired partial proof
@@ -425,10 +423,11 @@ trackRan = maybe True snd . atOff
 -- is spent, or the server just failed (which turns it off, once, closing
 -- the 'Lsp' and calling @off@ with why). The step gets the per-hole cap
 -- cut to the budget left and is stopped there as a whole: 'Missed' when
--- it runs out. Its Lsp calls @timedOut@ when a call is cut off at its
--- cap. The track records a completed step and the server's failure.
-autoStep :: IORef (Maybe AutoEnv) -> IORef AutoTrack -> IO Double -> (Text -> IO ()) -> IO () -> (AutoEnv -> IO (Either AutoFail a)) -> IO (Maybe (Either AutoFail a))
-autoStep ref track budgetLeft off timedOut act = readIORef ref >>= \case
+-- it runs out (the orchestrator's 'oCapped', under the step's name). Its
+-- Lsp calls @timedOut@ when a call is cut off at its cap. The track
+-- records a completed step and the server's failure.
+autoStep :: Orchestrator -> Text -> IORef (Maybe AutoEnv) -> IORef AutoTrack -> IO Double -> (Text -> IO ()) -> IO () -> (AutoEnv -> IO (Either AutoFail a)) -> IO (Maybe (Either AutoFail a))
+autoStep orch step ref track budgetLeft off timedOut act = readIORef ref >>= \case
   Nothing -> pure Nothing
   Just ae -> do
     left <- budgetLeft
@@ -436,7 +435,7 @@ autoStep ref track budgetLeft off timedOut act = readIORef ref >>= \case
       then pure Nothing
       else do
         let ac = aeConfig ae
-        r <- timeout (max 1 (ceiling (left * 1000000)))
+        r <- oCapped orch step left
                (act ae {aeConfig = ac {acSeconds = min (acSeconds ac) left}, aeLsp = (aeLsp ae) {lspTimedOut = timedOut}})
         case r of
           Nothing -> pure (Just (Left Missed))
@@ -483,11 +482,12 @@ keptPartial g start rp old
 runSearch :: SearchConfig -> SearchEnv -> Text -> IO (Either Text SearchReport)
 runSearch cfg env base0 = do
   let order = map dName (openGoals base0)
+      orch = seOrch env
   types0 <- goalTypes (seLean env) (seRoot env) (seRel env) base0 order
   case types0 of
     Left e -> pure (Left e)
     Right types -> do
-      t0 <- seNow env
+      t0 <- oNow orch
       let fresh = GoalState
             { gsStatus = Open, gsTried = [], gsRunning = [], gsBy = Nothing, gsAt = Nothing, gsClosedBy = Nothing
             , gsPartial = Nothing, gsDisproof = Nothing, gsDisproveTried = False, gsSmtTried = False, gsDisproofSource = Nothing, gsDisproofWitness = Nothing, gsStall = Nothing, gsTiers = [] }
@@ -510,11 +510,11 @@ runSearch cfg env base0 = do
           Just re -> saveRun re (seRel env) base0 (stBase s0) [] >>= \case
             Nothing -> pure (0, 0)
             Just r -> do
-              t <- subtract t0 <$> seNow env
+              t <- subtract t0 <$> oNow orch
               case r of
-                Left why -> seLog env (LibraryProblem t why) >> pure (0, 0)
-                Right (l, n) -> seLog env (LibrarySaved t l n) >> pure (l, n)
-      let elapsed = subtract t0 <$> seNow env
+                Left why -> oLog orch (LibraryProblem t why) >> pure (0, 0)
+                Right (l, n) -> oLog orch (LibrarySaved t l n) >> pure (l, n)
+      let elapsed = subtract t0 <$> oNow orch
           modifyGoal g f = modifyIORef' ref (\s -> s {stGoals = Map.adjust f g (stGoals s)})
           goalNow g = (Map.! g) . stGoals <$> readIORef ref
           typeOf g = fromMaybe "" (Map.lookup g types)
@@ -525,8 +525,8 @@ runSearch cfg env base0 = do
           -- and is stopped there as a whole: 'Missed' when it runs out.
           -- @step@ and @g@ name it in a timeout's event.
           withAuto :: Text -> Text -> (AutoEnv -> IO (Either AutoFail a)) -> IO (Maybe (Either AutoFail a))
-          withAuto step g = autoStep autoRef track budgetLeft (\why -> elapsed >>= \t -> seLog env (AutoOff t why))
-                              (elapsed >>= \t -> seLog env (AutoTimeout t g step))
+          withAuto step g = autoStep orch step autoRef track budgetLeft (\why -> elapsed >>= \t -> oLog orch (AutoOff t why))
+                              (elapsed >>= \t -> oLog orch (AutoTimeout t g step))
           -- the start and brief of a goal's next attempt: the goal's
           -- retrieval, a repaired partial proof spliced into the current
           -- base when it goes in cleanly (the goal's declaration replaced
@@ -557,8 +557,8 @@ runSearch cfg env base0 = do
                   rt <- get q
                   modifyIORef' ref (\x -> x {stRetrieved = Map.insert g rt (stRetrieved x)})
                   t <- elapsed
-                  mapM_ (\re -> when (isJust (reFacts re)) (seLog env (Facts t g (rtFacts rt) (rtFactsChars rt) (rtCutOff rt)))) (seRetrieval env)
-                  mapM_ (\re -> when (isJust (reLibrary re)) (seLog env (LibraryOffered t g (rtOffered rt) (rtNotes rt) (rtCutOff rt)))) (seRetrieval env)
+                  mapM_ (\re -> when (isJust (reFacts re)) (oLog orch (Facts t g (rtFacts rt) (rtFactsChars rt) (rtCutOff rt)))) (seRetrieval env)
+                  mapM_ (\re -> when (isJust (reLibrary re)) (oLog orch (LibraryOffered t g (rtOffered rt) (rtNotes rt) (rtCutOff rt)))) (seRetrieval env)
                   pure (rtBrief rt)
           -- a goal's pre-pass runs just before its first launch; with the
           -- budget spent nothing is launched
@@ -589,7 +589,7 @@ runSearch cfg env base0 = do
                           spec = AttemptSpec
                             { asId = stNext s1, asGoal = g, asBackend = b, asStart = start, asBrief = brief
                             , asModel = fmap (scTiers cfg !!) i, asTier = i }
-                      a <- async (seRun env spec)
+                      a <- oSpawn orch spec
                       writeIORef ref s1
                         { stNext = stNext s1 + 1
                         , stUsage = Map.insertWith (+) b 1 (stUsage s1)
@@ -599,12 +599,12 @@ runSearch cfg env base0 = do
                         , stFromPartial = [asId spec | partial] <> stFromPartial s1
                         , stLastTier = maybe id (Map.insert g) i (stLastTier s1)
                         , stStallUsed = maybe id (Map.insert (asId spec)) (gsStall (stGoals s1 Map.! g)) (stStallUsed s1) }
-                      seLog env (Launched t (asId spec) g b)
+                      oLog orch (Launched t (asId spec) g b)
                       logPolicy g "backends" (scBackends cfg) (goalBackends cfg g) explores
                       forM_ (learnedBudget g) $ \(dflt, secs) ->
                         logPolicy g "attempt_secs" [T.pack (show dflt)] [T.pack (show secs)] (const False)
                       forM_ ((,) <$> i <*> asModel spec) $ \(k, m) -> do
-                        seLog env (TierChosen t (asId spec) g k m)
+                        oLog orch (TierChosen t (asId spec) g k m)
                         -- exploration is a choice of backend, never of tier
                         logPolicy g "tiers" (scTiers cfg) (map (scTiers cfg !!) (goalTiers cfg g)) (const False)
                         -- any change of a goal's tier is an escalation,
@@ -613,7 +613,7 @@ runSearch cfg env base0 = do
                         forM_ (Map.lookup g (stLastTier s1)) $ \k0 ->
                           when (k0 /= k) $ do
                             modifyIORef' ref (\x -> x {stEscalations = stEscalations x + 1})
-                            seLog env (Escalated t g k0 k)
+                            oLog orch (Escalated t g k0 k)
                       launchAll
           -- Nothing with no tiers; Just Nothing with every tier skipped.
           -- A goal with a tier policy climbs its own order.
@@ -634,7 +634,7 @@ runSearch cfg env base0 = do
             when (scPolicyLogged cfg && applied /= dflt && not (Set.member (g, knob) (stPolicyLogged s))) $ do
               modifyIORef' ref (\x -> x {stPolicyLogged = Set.insert (g, knob) (stPolicyLogged x)})
               t <- elapsed
-              seLog env (PolicyApplied t g knob (T.intercalate "," dflt) (T.intercalate "," applied) (evidenceOf g knob) (explore g))
+              oLog orch (PolicyApplied t g knob (T.intercalate "," dflt) (T.intercalate "," applied) (evidenceOf g knob) (explore g))
           -- the policy's evidence for a knob: its part of the goal's
           -- evidence, else all of it
           evidenceOf g knob = case gpEvidence <$> Map.lookup g (scGoalPolicy cfg) of
@@ -658,14 +658,14 @@ runSearch cfg env base0 = do
             writeIORef ref s {stHealth = h}
             when newly $ do
               t <- elapsed
-              seLog env (TierSkipped t (scTiers cfg !! i) (maybe "" modelFailureText failure))
+              oLog orch (TierSkipped t (scTiers cfg !! i) (maybe "" modelFailureText failure))
               s' <- readIORef ref
               when (allSkipped s') $
                 forM_ [g | (g, gs) <- Map.toList (stGoals s'), gsStatus gs == Open, null (gsRunning gs)] giveUp
           giveUp g = do
             modifyGoal g (\x -> x {gsStatus = GaveUp})
             t <- elapsed
-            seLog env (GoalGaveUp t g)
+            oLog orch (GoalGaveUp t g)
           record spec started outcome stats = record' spec started outcome stats Nothing
           record' spec started outcome stats ar = do
             t <- elapsed
@@ -677,7 +677,7 @@ runSearch cfg env base0 = do
             let rec = (recordOf spec started t outcome stats)
                   {arStopped = ar >>= arStop, arCost = (ar >>= arDollars) <|> (stats >>= csCostUsd)}
             modifyIORef' ref (\s -> s {stRecords = rec : stRecords s})
-            seLog env (Finished t (asId spec) (asGoal spec) (asBackend spec) outcome stats (if scControl cfg then ar >>= arDollars else Nothing))
+            oLog orch (Finished t (asId spec) (asGoal spec) (asBackend spec) outcome stats (if scControl cfg then ar >>= arDollars else Nothing))
           recordOf spec started t outcome stats = (plainRecord (asId spec) (asGoal spec) (asBackend spec) outcome started t stats)
             {arModel = asModel spec, arTierOf = asTier spec}
           dropRunning aid = modifyIORef' ref $ \s ->
@@ -687,12 +687,12 @@ runSearch cfg env base0 = do
           cancelOthers why g = do
             s <- readIORef ref
             forM_ [r | r@(_, sp, _) <- stRunning s, asGoal sp == g] $ \(a, sp, started) -> do
-              cancel a
+              oCancel orch a
               dropRunning (asId sp)
               d <- priceOf sp
               t <- elapsed
               modifyIORef' ref (\s' -> s' {stRecords = (recordOf sp started t ("cancelled: " <> why) Nothing) {arCost = d} : stRecords s'})
-              seLog env (AttemptCancelled t (asId sp) g d)
+              oLog orch (AttemptCancelled t (asId sp) g d)
           merge merged = do
             modifyIORef' ref (\s -> s {stBase = merged})
             seBaseChanged env merged
@@ -705,7 +705,7 @@ runSearch cfg env base0 = do
             t <- elapsed
             forM_ closedNow $ \g -> do
               modifyGoal g (\gs -> gs {gsStatus = Closed, gsAt = Just t})
-              seLog env (GoalClosed t g (maybe 0 fst (gsBy ((stGoals s) Map.! g))))
+              oLog orch (GoalClosed t g (maybe 0 fst (gsBy ((stGoals s) Map.! g))))
             when (not (null closedNow)) recheckWaiting
           -- an attempt's proof the kernel kept (closed, or waiting on open goals)
           -- (after the merge, as today: the merge and its seBaseChanged
@@ -718,7 +718,7 @@ runSearch cfg env base0 = do
             modifyGoal g (\x -> x { gsStatus = if closed then Closed else Waiting, gsBy = Just (asId spec, asBackend spec)
                                   , gsAt = if closed then Just t else Nothing
                                   , gsTried = gsTried x <> [asBackend spec], gsClosedBy = Just by })
-            seLog env ((if closed then GoalClosed else GoalWaiting) t g (asId spec))
+            oLog orch ((if closed then GoalClosed else GoalWaiting) t g (asId spec))
             cancelOthers "the goal closed" g
             when closed recheckWaiting
           -- Repair on a failed attempt's file: True when the repair (with
@@ -732,7 +732,7 @@ runSearch cfg env base0 = do
             case r of
               Just (Right (Just rp)) -> do
                 t <- elapsed
-                seLog env (Repaired t (asId spec) g (R.rpHolesBefore rp) (R.rpHolesAfter rp) (R.rpAutoClosed rp))
+                oLog orch (Repaired t (asId spec) g (R.rpHolesBefore rp) (R.rpHolesAfter rp) (R.rpAutoClosed rp))
                 modifyIORef' ref (\s -> s {stRepairs = stRepairs s + 1})
                 modifyGoal g (\x -> x {gsPartial = keptPartial g (asStart spec) rp (gsPartial x)})
                 -- with no hole left the repaired file is never a start: it is
@@ -793,16 +793,16 @@ runSearch cfg env base0 = do
             t <- elapsed
             case r of
               Just (Right (d, src, info)) -> do
-                forM_ (diSteps info) $ \(s, res) -> seLog env (DisproveRan t g (sourceName s) res)
+                forM_ (diSteps info) $ \(s, res) -> oLog orch (DisproveRan t g (sourceName s) res)
                 let srcName = maybe "" sourceName src
                 case d of
                   DFalse tac -> do
                     modifyGoal g (\x -> x {gsStatus = Disproved, gsDisproof = Just d, gsDisproofSource = src, gsDisproofWitness = diWitness info})
-                    seLog env (GoalDisproved t g "false" tac srcName (diWitness info))
+                    oLog orch (GoalDisproved t g "false" tac srcName (diWitness info))
                     cancelOthers "the goal was disproved" g
                   DSuspect c -> do
                     modifyGoal g (\x -> x {gsDisproof = Just d, gsDisproofSource = src, gsDisproofWitness = Nothing})
-                    seLog env (GoalDisproved t g "suspect" c srcName Nothing)
+                    oLog orch (GoalDisproved t g "suspect" c srcName Nothing)
                   DUnknown -> modifyGoal g $ \x -> case gsDisproof x of
                     Just (DSuspect _) -> x
                     _ -> x {gsDisproof = Just DUnknown}
@@ -837,10 +837,10 @@ runSearch cfg env base0 = do
                     merge merged
                     t3 <- elapsed
                     modifyGoal g (\x -> x {gsStatus = Closed, gsAt = Just t3, gsClosedBy = Just "auto"})
-                    seLog env (AutoClosed t3 g (T.intercalate "; " snips) (t3 - t1))
+                    oLog orch (AutoClosed t3 g (T.intercalate "; " snips) (t3 - t1))
                     recheckWaiting
                   _ -> pure ()
-              Just (Left _) -> seLog env (AutoMissed t2 g (t2 - t1))
+              Just (Left _) -> oLog orch (AutoMissed t2 g (t2 - t1))
               Nothing -> pure ()
           finish spent = do
             saved <- harvestOnce
@@ -881,7 +881,7 @@ runSearch cfg env base0 = do
                   forM_ [g | (g, gs) <- Map.toList (stGoals s), gsStatus gs == Open, length (gsTried gs) < scMaxAttempts cfg] giveUp
                 finish False
               else do
-                  r <- timeout (ceiling (left * 1000000)) (waitAnyCatch [a | (a, _, _) <- stRunning s])
+                  r <- oAwaitAny orch left [a | (a, _, _) <- stRunning s]
                   case r of
                     Nothing -> budgetOut
                     Just (a, res) -> do
@@ -893,13 +893,13 @@ runSearch cfg env base0 = do
             s <- readIORef ref
             t <- elapsed
             forM_ (stRunning s) $ \(a, sp, started) -> do
-              cancel a
+              oCancel orch a
               d <- priceOf sp
               modifyIORef' ref (\s' -> s' {stRecords = (recordOf sp started t "cancelled: budget spent" Nothing) {arCost = d} : stRecords s'})
               -- with the controller on, each one is logged with its dollars
-              when (scControl cfg) $ seLog env (AttemptCancelled t (asId sp) (asGoal sp) d)
+              when (scControl cfg) $ oLog orch (AttemptCancelled t (asId sp) (asGoal sp) d)
             modifyIORef' ref (\s' -> s' {stRunning = []})
-            seLog env (BudgetSpent t)
+            oLog orch (BudgetSpent t)
             finish True
           handle :: AttemptSpec -> Double -> Either SomeException AttemptResult -> IO ()
           -- the result judged, then fed to its tier's health (after its
@@ -934,7 +934,7 @@ runSearch cfg env base0 = do
             -- judged as any other's
             forM_ (mar >>= \ar -> arStop ar) $ \st -> do
               t <- elapsed
-              seLog env (AttemptStopped t (asId spec) g (stopReasonText (stReason st)) (stTurns st) (stDollars st))
+              oLog orch (AttemptStopped t (asId spec) g (stopReasonText (stReason st)) (stTurns st) (stDollars st))
             case res of
               _ | gsStatus gs `elem` [Closed, Waiting, Disproved] ->
                     record' spec started "discarded: the goal was decided meanwhile" (either (const Nothing) arStats res) mar
@@ -969,16 +969,16 @@ runSearch cfg env base0 = do
                       record' spec started note (arStats ar) mar
                       settle spec v t
           -- on an exception: the harvest, then the attempts stopped
-          stopRunning = readIORef ref >>= mapM_ (\(a, _, _) -> cancel a) . stRunning
+          stopRunning = readIORef ref >>= mapM_ (\(a, _, _) -> oCancel orch a) . stRunning
       harvestOnException (void harvestOnce) stopRunning loop
 
--- | A cancelled attempt's dollars ('sePrice') with the controller on (the
+-- | A cancelled attempt's dollars ('oPrice') with the controller on (the
 -- Bool); else, or when the price fails, none. An asynchronous exception
 -- is rethrown.
 priceCancelled :: Bool -> SearchEnv -> AttemptSpec -> IO (Maybe Double)
 priceCancelled control env sp
   | not control = pure Nothing
-  | otherwise = try (sePrice env sp) >>= \case
+  | otherwise = try (oPrice (seOrch env) sp) >>= \case
       Left e | Just (_ :: SomeAsyncException) <- fromException e -> throwIO e
       Left (_ :: SomeException) -> pure Nothing
       Right d -> pure d
@@ -990,16 +990,17 @@ priceCancelled control env sp
 runSingle :: SearchEnv -> Text -> Text -> IO (Either Text SearchReport)
 runSingle env backend base0 = do
   let order = map dName (openGoals base0)
+      orch = seOrch env
   types0 <- goalTypes (seLean env) (seRoot env) (seRel env) base0 order
   case types0 of
     Left e -> pure (Left e)
     Right types -> do
-      t0 <- seNow env
+      t0 <- oNow orch
       let spec = AttemptSpec {asId = 1, asGoal = "*", asBackend = backend, asStart = base0, asBrief = mempty, asModel = Nothing, asTier = Nothing}
-      seLog env (Launched 0 1 "*" backend)
-      ar <- seRun env spec
-      t1 <- subtract t0 <$> seNow env
-      seLog env (Finished t1 1 "*" backend (arNote ar) (arStats ar) Nothing)
+      oLog orch (Launched 0 1 "*" backend)
+      ar <- runToEnd orch spec
+      t1 <- subtract t0 <$> oNow orch
+      oLog orch (Finished t1 1 "*" backend (arNote ar) (arStats ar) Nothing)
       let fresh = GoalState
             { gsStatus = Open, gsTried = [backend], gsRunning = [], gsBy = Nothing, gsAt = Nothing, gsClosedBy = Nothing
             , gsPartial = Nothing, gsDisproof = Nothing, gsDisproveTried = False, gsSmtTried = False, gsDisproofSource = Nothing, gsDisproofWitness = Nothing, gsStall = Nothing, gsTiers = [] }
@@ -1021,6 +1022,17 @@ runSingle env backend base0 = do
       vs <- recheck (seLean env) (sePolicy env) (seRoot env) (seRel env) base types waiting
       let states = [ (g, if (g, C.Closed) `elem` vs then s {gsStatus = Closed} else s) | (g, s) <- reverse states0 ]
           closed = length [() | (_, s) <- states, gsStatus s == Closed]
-      forM_ [g | (g, s) <- states, gsStatus s == Closed] $ \g -> seLog env (GoalClosed t1 g 1)
+      forM_ [g | (g, s) <- states, gsStatus s == Closed] $ \g -> oLog orch (GoalClosed t1 g 1)
       seBaseChanged env base
       pure . Right $ SearchReport states [plainRecord 1 "*" backend (arNote ar) 0 t1 (arStats ar)] t1 closed False base False 0 False Nothing Nothing False 0
+
+-- | One attempt spawned and waited for to the end: its result, or its
+-- exception rethrown. An exception while waiting (the caller cancelled)
+-- cancels the attempt.
+runToEnd :: Orchestrator -> AttemptSpec -> IO AttemptResult
+runToEnd orch spec = do
+  r <- oSpawn orch spec
+  let wait = oAwaitAny orch 86400 [r] >>= \case
+        Nothing -> wait
+        Just (_, res) -> either throwIO pure res
+  wait `onException` oCancel orch r

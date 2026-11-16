@@ -76,12 +76,13 @@ import Fisher.Search.Graph
 import Fisher.Search.GraphJobs
 import Fisher.Search.Headless (nativeBackend)
 import Fisher.Search.Lean
+import Fisher.Search.Orchestrate (Orchestrator (..))
 import qualified Fisher.Search.Repair as R
 import Fisher.Search.Retrieval
 import Fisher.Search.Review (SplitVerdict (..))
 import Fisher.Search.Scheduler
   ( AttemptRecord (..), plainRecord, AttemptResult (..), AttemptSpec (..), AutoEnv (..), AutoTrack (..), Event (..), SearchEnv (..)
-  , autoStep, keptPartial, noAutoTrack, partialStart, priceCancelled, stallNote, trackRan )
+  , autoStep, keptPartial, noAutoTrack, partialStart, priceCancelled, runToEnd, stallNote, trackRan )
 import Fisher.Search.Sketch
 import Fisher.Search.Split (Message)
 import Fisher.Search.Verify
@@ -162,7 +163,7 @@ data GraphEvent
 
 data GraphEnv = GraphEnv
   { geSearch :: SearchEnv
-  -- ^ its seLog is not used
+  -- ^ its orchestrator's log is not used
   , geAsk :: Role -> [Message] -> IO (Either AskError (Text, Double))
   , geLogG :: GraphEvent -> IO ()
   , geSave :: Graph -> [(NodeId, Text)] -> IO ()
@@ -292,7 +293,7 @@ runGraph cfg env base0 = do
     Left e -> pure (Left e)
     Right types -> do
       lock <- newMVar ()
-      t0 <- seNow se
+      t0 <- oNow (seOrch se)
       let g0 = foldl' (\g n -> snd (addRoot n (typeKey n (Map.findWithDefault "" n types)) g)) emptyGraph order
       ref <- newIORef St
         { stGraph = g0, stBase = base0, stTypes = types, stWaiting = IS.empty, stRunning = [], stFailures = IM.empty
@@ -320,7 +321,7 @@ runGraph cfg env base0 = do
 -- * Small helpers
 
 elapsed :: Ctx -> IO Double
-elapsed c = subtract (cT0 c) <$> seNow (geSearch (cEnv c))
+elapsed c = subtract (cT0 c) <$> oNow (seOrch (geSearch (cEnv c)))
 
 logG :: Ctx -> (Double -> GraphEvent) -> IO ()
 logG c f = elapsed c >>= geLogG (cEnv c) . f
@@ -582,7 +583,7 @@ startWorker c n = do
   modify c (\s' -> s' { stNext = stNext s' + 1, stGraph = recordAction n (stGraph s'), stStall = IM.delete n (stStall s')
                       , stLastTier = maybe id (IM.insert n) tier (stLastTier s')
                       , stStallUsed = maybe id (IM.insert (asId spec)) (IM.lookup n (stStall s)) (stStallUsed s') })
-  startJob c n (KWorker spec t) (OutWorker <$> seRun (geSearch (cEnv c)) spec)
+  startJob c n (KWorker spec t) (OutWorker <$> runToEnd (seOrch (geSearch (cEnv c))) spec)
   logG c (\t' -> AttemptLaunched t' (asId spec) n)
   forM_ ((,) <$> tier <*> asModel spec) $ \(k, m) -> do
     logG c (\t' -> NodeTierChosen t' (asId spec) n k m)
@@ -1080,7 +1081,7 @@ withAuto c step n act k = readIORef (cAuto c) >>= \case
   Nothing -> pure Nothing
   Just _ -> locked (cCk c) $ do
     let budgetLeft = (gcBudget (cCfg c) -) <$> elapsed c
-    r <- autoStep (cAuto c) (cTrack c) budgetLeft (\why -> logG c (`GraphAutoOff` why))
+    r <- autoStep (seOrch (geSearch (cEnv c))) step (cAuto c) (cTrack c) budgetLeft (\why -> logG c (`GraphAutoOff` why))
            (logG c (\t -> NodeAutoTimeout t n step)) act
     traverse (traverse k) r
 

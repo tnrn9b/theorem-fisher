@@ -245,6 +245,7 @@ import Fisher.Search.Graph (Graph (..), Node (..), NodeId)
 import Fisher.Search.GraphRun (AskError (..), GraphConfig (..), GraphEnv (..), GraphEvent (..), GraphReport (..), plannerModel, runGraph)
 import Fisher.Search.Headless
 import Fisher.Search.Lean (Decl (..), declarations, openGoals)
+import Fisher.Search.Orchestrate (Orchestrator (..), realOrchestrator)
 import Fisher.Search.Report
 import Fisher.Search.Scheduler hiding (GoalStatus (..))
 import qualified Fisher.Search.Scheduler as S
@@ -1193,10 +1194,11 @@ runMain ra0 file0 = do
           priceOf spec = Map.lookup (asId spec) <$> readIORef ledgerOf >>= \case
             Just (tag, since) -> ledgerDollars (mFisherHome m </> "state.db") tag since
             Nothing -> pure Nothing
-          env0 = SearchEnv runAttempt (lakeLeanRun 900) pol baseWs rel (realToFrac <$> getPOSIXTime) logE
-                   (\t -> BS.writeFile (runDir </> "base.lean") (TE.encodeUtf8 t) >> BS.writeFile (baseWs </> rel) (TE.encodeUtf8 t))
-                   Nothing Nothing priceOf
           cfg = (searchConfigFor ra casc) {scGoalPolicy = goalPolicy}
+      orch <- realOrchestrator runAttempt (realToFrac <$> getPOSIXTime) logE priceOf
+      let env0 = SearchEnv orch (lakeLeanRun 900) pol baseWs rel
+                   (\t -> BS.writeFile (runDir </> "base.lean") (TE.encodeUtf8 t) >> BS.writeFile (baseWs </> rel) (TE.encodeUtf8 t))
+                   Nothing Nothing
       TIO.putStrLn ("search " <> T.pack rel <> " in " <> T.pack root <> ": " <> T.pack (show (length (openGoals original)))
                     <> " open goals; run directory " <> T.pack runDir <> (if raGraph ra then " (lemma graph)" else ""))
       -- the automation's language server, in the check workspace (its trials
@@ -1236,8 +1238,8 @@ swarmMain :: RunArgs -> FilePath -> FilePath -> FilePath -> FilePath -> Handle -
           -> [Event] -> ((Bool, Maybe T.Text) -> [Pair]) -> A.Value -> T.Text -> [(T.Text, T.Text)] -> Finish -> IO A.Value
           -> (T.Text -> (T.Text, [Pair])) -> IO ()
 swarmMain ra file root rel runDir eventsH env0 cfg offAtStart startEvents autoExtra learnV original stmts finish mineAfter smtOut = do
-  mapM_ (seLog env0 . AutoOff 0) offAtStart
-  mapM_ (seLog env0) startEvents
+  mapM_ (oLog (seOrch env0) . AutoOff 0) offAtStart
+  mapM_ (oLog (seOrch env0)) startEvents
   r <- case raSingle ra of
     Just b -> runSingle env0 b original
     Nothing -> runSearch cfg env0 original

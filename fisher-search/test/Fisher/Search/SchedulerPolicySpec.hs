@@ -20,6 +20,7 @@ import Fisher.Search.Check (AxiomPolicy (..), standardAxioms)
 import Fisher.Search.FakeLean (fakeLean)
 import Fisher.Search.FakeLsp
 import Fisher.Search.Lean
+import Fisher.Search.Orchestrate (realOrchestrator)
 import Fisher.Search.Scheduler
 
 file :: Text
@@ -45,10 +46,11 @@ search cfg ac f script = withSystemTempDirectory "policy" $ \root -> do
             d = fromMaybe (error "no goal") (findDecl (asGoal sp) (declarations (asStart sp)))
             out = T.intercalate "\n" (take (dStmtEnd d + 1) ls <> ["  " <> proof] <> drop (dEnd d) ls)
         pure (plainResult (Just out) Nothing "")
-      env = SearchEnv
-        { seRun = run, seLean = fakeLean, sePolicy = AxiomPolicy standardAxioms False, seRoot = root, seRel = "F.lean"
-        , seNow = realToFrac <$> getPOSIXTime, seLog = \e -> modifyIORef events (e :), seBaseChanged = \_ -> pure ()
-        , seAuto = fmap (\c -> AutoEnv c (fakeLsp calls f) Nothing) ac, seRetrieval = Nothing, sePrice = \_ -> pure Nothing }
+  orch <- realOrchestrator run (realToFrac <$> getPOSIXTime) (\e -> modifyIORef events (e :)) (\_ -> pure Nothing)
+  let env = SearchEnv
+        { seOrch = orch, seLean = fakeLean, sePolicy = AxiomPolicy standardAxioms False, seRoot = root, seRel = "F.lean"
+        , seBaseChanged = \_ -> pure ()
+        , seAuto = fmap (\c -> AutoEnv c (fakeLsp calls f) Nothing) ac, seRetrieval = Nothing }
   r <- runSearch cfg env file
   es <- reverse <$> readIORef events
   either (fail . T.unpack) (\rep -> pure (rep, es)) r
