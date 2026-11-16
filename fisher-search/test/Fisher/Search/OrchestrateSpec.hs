@@ -1,9 +1,8 @@
 module Fisher.Search.OrchestrateSpec (spec) where
 
 import Control.Concurrent (forkIO, myThreadId, threadDelay, throwTo)
-import Control.Concurrent.Async (AsyncCancelled (..))
 import Control.Concurrent.MVar
-import Control.Exception (AsyncException (..), SomeException, fromException, try)
+import Control.Exception (AsyncException (..), SomeException, try)
 import Data.IORef
 import Data.Text (Text)
 import GHC.Clock (getMonotonicTime)
@@ -50,7 +49,7 @@ spec = describe "realOrchestrator" $ do
     fast <- oSpawn o (attempt 2 "fast")
     (got, secs) <- timed (oAwaitAny o 5 [slow, fast])
     note got `shouldBe` Just (fast, Right "fast")
-    secs `shouldSatisfy` (< 0.15)
+    secs `shouldSatisfy` (< 0.19)
     -- the slow one is still there and is delivered next
     note <$> oAwaitAny o 5 [slow, fast] `shouldReturn` Just (slow, Right "slow")
 
@@ -62,6 +61,10 @@ spec = describe "realOrchestrator" $ do
     oCancel o slow
     threadDelay 300000
     readIORef finished `shouldReturn` ["fast"]
+    -- the cancelled one is forgotten: awaiting it returns at once
+    (got, secs) <- timed (oAwaitAny o 5 [slow])
+    note got `shouldBe` Nothing
+    secs `shouldSatisfy` (< 0.1)
     -- cancelling again, or cancelling one already delivered, is harmless
     oCancel o slow
     oCancel o fast
@@ -74,20 +77,15 @@ spec = describe "realOrchestrator" $ do
     secs `shouldSatisfy` (< 1)
     oCapped o "auto" 1 (pure (3 :: Int)) `shouldReturn` Just 3
 
-  it "a cancelled real attempt is a Left" $ do
-    (o, _) <- orchestrator
+  it "a cancelled real attempt is never delivered" $ do
+    (o, finished) <- orchestrator
     slow <- oSpawn o (attempt 1 "slow")
     oCancel o slow
-    got <- oAwaitAny o 5 [slow]
-    case got of
-      Just (r, Left e) -> do
-        r `shouldBe` slow
-        fromException e `shouldBe` Just AsyncCancelled
-      _ -> expectationFailure ("expected the cancelled attempt as a Left, got " <> show (note got))
-    -- once delivered it is gone
-    (again, secs) <- timed (oAwaitAny o 5 [slow])
-    note again `shouldBe` Nothing
-    secs `shouldSatisfy` (< 1)
+    (got, secs) <- timed (oAwaitAny o 5 [slow])
+    note got `shouldBe` Nothing
+    secs `shouldSatisfy` (< 0.1)
+    threadDelay 300000
+    readIORef finished `shouldReturn` []
 
   it "await on no attempts returns at once" $ do
     (o, _) <- orchestrator

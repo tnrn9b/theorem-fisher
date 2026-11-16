@@ -57,8 +57,8 @@ data Orchestrator = Orchestrator
 -- under a 'timeout', and a capped step is a 'timeout' rounded as
 -- @autoStep@ rounds it (so an asynchronous exception other than the
 -- timeout's own goes through it). Cancelling an attempt unknown or
--- already finished is a no-op; a cancelled attempt still awaited is
--- delivered as a Left.
+-- already delivered is a no-op; a cancelled attempt is forgotten, so it
+-- is never delivered.
 realOrchestrator
   :: (AttemptSpec -> IO AttemptResult)
   -> IO Double
@@ -87,7 +87,9 @@ realOrchestrator run now logE price = do
                 Just (r@(Running n), _) -> do
                   atomicModifyIORef' handles (\m' -> (Map.delete n m', ()))
                   pure (Just (r, res))
-      cancelOne (Running n) = Map.lookup n <$> readIORef handles >>= mapM_ cancel
+      cancelOne (Running n) = Map.lookup n <$> readIORef handles >>= mapM_ (\a -> do
+        cancel a
+        atomicModifyIORef' handles (\m -> (Map.delete n m, ())))
   pure Orchestrator
     { oSpawn = spawn
     , oAwaitAny = awaitAny
@@ -152,7 +154,9 @@ data Sim = Sim
 -- 'scDefault', or a price the script does not list, throws an 'ErrorCall'
 -- naming its key. Awaiting delivers the earliest due of the given
 -- attempts, the one spawned first among those due together; a cancelled
--- attempt is never delivered and its exception never thrown.
+-- attempt is never delivered and its exception never thrown. Cancelling
+-- an attempt already delivered, or unknown, is a no-op and is not
+-- recorded.
 simOrchestrator :: Script -> IO (Orchestrator, IO SimTrace)
 simOrchestrator script = do
   ref <- newIORef Sim {smClock = 0, smNext = 0, smKeys = [], smDue = Map.empty, smCancelled = [], smEvents = []}
@@ -189,8 +193,10 @@ simOrchestrator script = do
               else do
                 writeIORef ref s {smClock = now + secs}
                 pure Nothing
-      cancelOne r@(Running n) =
-        modifyIORef' ref (\s -> s {smDue = Map.delete n (smDue s), smCancelled = r : smCancelled s})
+      cancelOne r@(Running n) = modifyIORef' ref $ \s ->
+        if Map.member n (smDue s)
+          then s {smDue = Map.delete n (smDue s), smCancelled = r : smCancelled s}
+          else s
       capped :: Text -> Double -> IO a -> IO (Maybe a)
       capped name secs act = case lookup name (scCaps script) of
         Just c -> do

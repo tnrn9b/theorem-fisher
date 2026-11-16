@@ -82,6 +82,13 @@ spec = describe "simOrchestrator" $ do
     oNow o `shouldReturn` 5
     stCancelled <$> trace `shouldReturn` [r1]
 
+  it "cancelling an attempt after it was delivered is not recorded" $ do
+    (o, trace) <- simOrchestrator emptyScript {scAttempts = [(key "a" "x" 0, 2, done "ok")]}
+    r <- oSpawn o (attempt 1 "a" "x")
+    outcome <$> oAwaitAny o 10 [r] `shouldReturn` Just (r, Right "ok")
+    oCancel o r
+    stCancelled <$> trace `shouldReturn` []
+
   it "a cancelled attempt that would have thrown" $ do
     (o, _) <- simOrchestrator emptyScript
       {scAttempts = [(key "a" "x" 0, 1, boom "boom"), (key "b" "x" 0, 2, boom "bang")]}
