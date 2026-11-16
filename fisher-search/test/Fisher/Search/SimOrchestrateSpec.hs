@@ -246,5 +246,24 @@ spec = describe "simOrchestrator" $ do
     oNow o `shouldReturn` 3
 
   it "a Run entry's asynchronous exception is rethrown at spawn" $ do
-    (o, _) <- sim emptyScript {scAttempts = [(key "a" "x" 0, 3, Run (\_ -> throwIO ThreadKilled))]}
+    (o, trace) <- sim emptyScript
+      {scAttempts = [(key "a" "x" 0, 3, Run (\_ -> throwIO ThreadKilled)), (key "a" "x" 1, 20, done "later")]}
     oSpawn o (attempt 1 "a" "x") `shouldThrow` (== ThreadKilled)
+    -- the job counts as spawned (the next on its key is index 1) and is
+    -- not cancelled
+    r <- oSpawn o (attempt 2 "a" "x")
+    t <- trace
+    stSpawned t `shouldBe` [attempt 1 "a" "x", attempt 2 "a" "x"]
+    stCancelled t `shouldBe` []
+    -- nothing is due for it: past its 3 seconds the await delivers nothing
+    -- and stops at the deadline (its handle never reached the caller, so
+    -- the await is over the later job)
+    outcome <$> oAwaitAny o 5 [r] `shouldReturn` Nothing
+    oNow o `shouldReturn` 5
+
+  it "a Scripted function that throws is a Left delivered at its time" $ do
+    (o, _) <- sim emptyScript {scAttempts = [(key "a" "x" 0, 2, Scripted (\_ -> ioError (userError "bang")))]}
+    r <- oSpawn o (attempt 1 "a" "x")
+    outcome <$> oAwaitAny o 1 [r] `shouldReturn` Nothing
+    outcome <$> oAwaitAny o 10 [r] `shouldReturn` Just (r, Left "user error (bang)")
+    oNow o `shouldReturn` 2

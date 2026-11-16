@@ -149,7 +149,9 @@ attemptKey sp = (asGoal sp, asBackend sp)
 data Entry spec res
   = Scripted (spec -> IO (Either Text res))
   -- ^ the result (or an exception's text) from the spec, computed at
-  -- spawn; IO so a harness can record what was spawned
+  -- spawn; IO so a harness can record what was spawned. The job's result
+  -- is a Left from a Left here or from a synchronous exception the
+  -- function throws; an asynchronous one is rethrown from 'oSpawn'
   | Run (spec -> IO res)
   -- ^ run this action at spawn, on the caller's thread, and deliver its
   -- result (or its exception) after the entry's seconds
@@ -246,9 +248,9 @@ data Sim spec res = Sim
 -- 'ErrorCall' naming its key. A 'Scripted' entry's function and a 'Run'
 -- entry's action run at spawn, on the caller's thread, after the spawn is
 -- recorded; the job is due at the clock at spawn plus the entry's
--- seconds. A 'Run' action's exception is the job's result (a Left);
--- an asynchronous one is rethrown from 'oSpawn', and that job is never
--- delivered. Awaiting delivers, as the real one does, the first in the
+-- seconds. A synchronous exception from either is the job's result (a
+-- Left); an asynchronous one is rethrown from 'oSpawn', and that job,
+-- recorded as spawned, is never delivered. Awaiting delivers, as the real one does, the first in the
 -- list of the given jobs already due (at or before now), and otherwise
 -- the earliest due, the first in the list among those due together; a
 -- cancelled job is never delivered and its exception never thrown.
@@ -276,11 +278,15 @@ simOrchestrator keyFn script = do
           , smCounts = counts
           , smDefaulted = if sdDefaulted hit then sp : smDefaulted s else smDefaulted s
           }
+        -- a synchronous exception is the job's result; an asynchronous
+        -- one is rethrown
+        let caught :: IO a -> IO (Either SomeException a)
+            caught act = try @SomeException act >>= \case
+              Left e | Just (_ :: SomeAsyncException) <- fromException e -> throwIO e
+              r -> pure r
         res <- case sdEntry hit of
-          Scripted f -> either (Left . toException . ErrorCall . T.unpack) Right <$> f sp
-          Run f -> try @SomeException (f sp) >>= \case
-            Left e | Just (_ :: SomeAsyncException) <- fromException e -> throwIO e
-            r -> pure r
+          Scripted f -> (>>= either (Left . toException . ErrorCall . T.unpack) Right) <$> caught (f sp)
+          Run f -> caught (f sp)
         modifyIORef' ref (\s' -> s' {smDue = Map.insert n (due, res) (smDue s')})
         pure (Running n)
       awaitAny secs rs = do
