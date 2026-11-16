@@ -9,6 +9,9 @@ They do not make every mistake impossible: a deliberate relabelling, such
 as `static . saidText` on what a model said, or a fake `RoleCtx` whose
 `rcAsk` returns text no model said, compiles, and is a review error.
 
+The companion page for what the search itself may do (threads, time, the
+run log) is [orchestrator.md](orchestrator.md).
+
 Two layers. `Fisher.Role` (fisher-core) says who spoke and where a piece of
 prompt text came from. `Fisher.Role.Agent` (fisher-search) is the monad a
 model-call job runs in, so that a job can do only what its role may do.
