@@ -30,21 +30,21 @@ file = T.unlines
   , "theorem a : A := by", "  sorry", ""
   , "theorem b : B := by", "  sorry" ]
 
--- | Two goals, three attempts of 1, 3 and 60 seconds: a closes at 1, b's
--- first attempt fails at 3, its second (on the other backend) is cut by
--- the budget at 10.
+-- | Two goals, three attempts of 2, 4 and 60 seconds: a closes at 2, b's
+-- first attempt fails at 4, its second (on the other backend) is cut by
+-- the budget at 8. Every two events are at least 2 s (100 ms real) apart.
 entries :: [ScriptEntry]
 entries =
-  [ attempt "a" "x" 1 (proofAttempt "ok")
-  , attempt "b" "y" 3 (proofAttempt "exact BAD")
+  [ attempt "a" "x" 2 (proofAttempt "ok")
+  , attempt "b" "y" 4 (proofAttempt "exact BAD")
   , attempt "b" "x" 60 (proofAttempt "ok") ]
 
 cfg :: SearchConfig
-cfg = defaultSearchConfig {scBackends = ["x", "y"], scSlots = 2, scMaxAttempts = 3, scBudget = 10, scParallelPerGoal = False}
+cfg = defaultSearchConfig {scBackends = ["x", "y"], scSlots = 2, scMaxAttempts = 3, scBudget = 8, scParallelPerGoal = False}
 
 -- | Real milliseconds per virtual second.
 msPerSec :: Double
-msPerSec = 20
+msPerSec = 50
 
 -- | The script as a real run function: each attempt sleeps its seconds
 -- scaled to milliseconds, then returns the script's result (or throws its
@@ -114,7 +114,7 @@ spec = describe "the simulator against the real orchestrator" $
     realEvs <- realEvents sc
     map zeroTimes realEvs `shouldBe` map zeroTimes simEvs
     -- the scenario is the one meant: a closes, b fails, then the budget
-    [(t, i, g, b) | Launched t i g b <- simEvs] `shouldBe` [(0, 1, "a", "x"), (0, 2, "b", "y"), (3, 3, "b", "x")]
-    [(t, g) | GoalClosed t g _ <- simEvs] `shouldBe` [(1, "a")]
-    [t | BudgetSpent t <- simEvs] `shouldBe` [10]
-    stClock tr `shouldBe` 10
+    [(t, i, g, b) | Launched t i g b <- simEvs] `shouldBe` [(0, 1, "a", "x"), (0, 2, "b", "y"), (4, 3, "b", "x")]
+    [(t, g) | GoalClosed t g _ <- simEvs] `shouldBe` [(2, "a")]
+    [t | BudgetSpent t <- simEvs] `shouldBe` [8]
+    stClock tr `shouldBe` 8

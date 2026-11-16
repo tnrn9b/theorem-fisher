@@ -116,7 +116,8 @@ attempt g b = attemptN g b 0
 attemptN :: Text -> Text -> Int -> Double -> (AttemptSpec -> Either Text AttemptResult) -> ScriptEntry
 attemptN g b i secs f = (AttemptKey g b i, secs, f)
 
--- | Every attempt on this goal and backend (the first ten) alike.
+-- | Every attempt on this goal and backend alike. Only indices 0 to 9
+-- are scripted: an eleventh attempt on the pair falls to the default.
 always :: Text -> Text -> Double -> (AttemptSpec -> Either Text AttemptResult) -> [ScriptEntry]
 always g b secs f = [attemptN g b i secs f | i <- [0 .. 9]]
 
