@@ -17,6 +17,7 @@ import Fisher.Search.Check (LeanRun)
 import Fisher.Search.FakeLsp
 import Fisher.Search.Graph
 import Fisher.Search.GraphHarness
+import Fisher.Search.GraphReal (realFor)
 import Fisher.Search.GraphRun
 import Fisher.Search.Lean
 import Fisher.Search.Orchestrate (AttemptKey (..))
@@ -103,9 +104,14 @@ spec = describe "the automation in graph mode" $ do
     length (filter ("worker" `T.isPrefixOf`) (oTrace o)) `shouldBe` 1
 
   it "keeps the server and the checker apart: Auto takes the checker lock" $ do
-    -- r2's planner takes 0.15 s
+    -- On real threads (the simulator runs every job on the loop's thread,
+    -- where nothing can overlap): r2's planner sleeps 0.15 s on its job's
+    -- thread, then probes its sketch with Lean under the checker lock,
+    -- while the loop runs Auto on r1's lemma l, whose server calls take
+    -- 0.3 s each. Were Auto not to take the lock, that probe would run
+    -- during a server call and oOverlaps would be 1 or more.
     let slow = (closes ["l", "m"]) {fDelay = \m -> if m == "attempts" then 300 else 0}
-    o <- runGTimed [(AttemptKey "r2" "plan" 0, 0.15)] (\_ -> pure Nothing) (\_ -> pure Nothing) keyLean
+    o <- runGOn (realFor 1000) [(AttemptKey "r2" "plan" 0, 0.15)] (\_ -> pure Nothing) (\_ -> pure Nothing) keyLean
            (Just (\tr -> AutoEnv auto (fakeLsp tr slow) Nothing)) cfg twoRoots
       [("r1", [bad]), ("r2", [bad])]
       [ sayTo Planner (toNode "r1") (plan [("l", "P")] "theorem r1 : A" "exact use l")

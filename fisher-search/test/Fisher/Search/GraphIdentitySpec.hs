@@ -4,20 +4,13 @@
 -- threads; its sleeps total well under a second.
 module Fisher.Search.GraphIdentitySpec (spec) where
 
-import Control.Concurrent (threadDelay)
-import Control.Exception (ErrorCall (..), throwIO)
-import Data.IORef
-import qualified Data.Map.Strict as Map
 import Data.Text (Text)
-import qualified Data.Text as T
-import Data.Time.Clock.POSIX (getPOSIXTime)
 import Test.Hspec
 
 import Fisher.Search.Scheduler (Event (..))
 import Fisher.Search.GraphHarness
+import Fisher.Search.GraphReal (realFor)
 import Fisher.Search.GraphRun
-import Fisher.Search.Orchestrate (Entry (Scripted), ScriptHit (..), realOrchestrator, scriptEntry)
-import qualified Fisher.Search.Orchestrate as O
 import Fisher.Search.Scripted (accept, plan)
 
 -- | Two roots: r1's worker fails at 2 s, its split into l is accepted at
@@ -36,22 +29,6 @@ gcfg = cfg {gcBudget = 8}
 -- | Real milliseconds per virtual second.
 msPerSec :: Double
 msPerSec = 50
-
--- | The real orchestrator over the script, read as the simulator reads it
--- ('scriptEntry' over 'jobKey'): each job sleeps its seconds scaled to
--- milliseconds, then gives the script's result (or throws its text). The
--- clock is the wall clock.
-realFor :: OrchFor
-realFor sc _ = do
-  counts <- newIORef (Map.empty :: Map.Map (Text, Text) Int)
-  let run job = do
-        found <- atomicModifyIORef' counts (\m -> either (\e -> (m, Left e)) (\(hit, m') -> (m', Right hit)) (scriptEntry jobKey sc m job))
-        hit <- either (throwIO . ErrorCall . T.unpack) pure found
-        threadDelay (round (sdSecs hit * msPerSec * 1000))
-        case sdEntry hit of
-          Scripted f -> f job >>= either (throwIO . ErrorCall . T.unpack) pure
-          O.Run f -> f job
-  realOrchestrator run (realToFrac <$> getPOSIXTime) (\_ -> pure ()) (\_ -> pure Nothing)
 
 -- | A graph event with every time in it set to 0.
 zeroG :: GraphEvent -> GraphEvent
@@ -96,7 +73,9 @@ spec :: Spec
 spec = describe "the graph search on the simulator against the real orchestrator" $
   it "gives the same events, times aside, for the same script" $ do
     sim <- runG gcfg twoRoots runs replies
-    real <- runGBy realFor gcfg {gcBudget = gcBudget gcfg * msPerSec / 1000} twoRoots runs replies
+    -- a real worker cancelled in its sleep records no bookkeeping (see
+    -- realFor), so only the events are compared
+    real <- runGBy (realFor msPerSec) gcfg {gcBudget = gcBudget gcfg * msPerSec / 1000} twoRoots runs replies
     map zeroG (oEvents real) `shouldBe` map zeroG (oEvents sim)
     -- the scenario is the one meant: a split accepted, a worker cancelled at the budget
     let evs = oEvents sim

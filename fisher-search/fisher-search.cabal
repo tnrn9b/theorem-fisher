@@ -105,6 +105,7 @@ test-suite fisher-search-test
       Fisher.Search.GraphIdentitySpec
       Fisher.Search.GraphJobsSpec
       Fisher.Search.GraphLiveSpec
+      Fisher.Search.GraphReal
       Fisher.Search.GraphRetrievalSpec
       Fisher.Search.GraphRunSpec
       Fisher.Search.GraphSpec

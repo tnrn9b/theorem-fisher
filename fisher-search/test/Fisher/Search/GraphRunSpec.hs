@@ -281,8 +281,10 @@ runGraphSpec = describe "runGraph" $ do
     [arOutcome a | a <- grAttempts (oRep o), arGoal a == "r2"] `shouldBe` ["cancelled: credit"]
 
   it "13: stops at the time budget and cancels what runs" $ do
+    -- r1 fails at 50 s, the budget: it is applied, then the run stops
+    -- with r2 (60 s) still running
     o <- runG cfg {gcBudget = 50} twoRoots
-      [("r1", [bad {rClock = 100}]), ("r2", [ok {rClock = 60}])]
+      [("r1", [bad {rClock = 50}]), ("r2", [ok {rClock = 60}])]
       []
     grStopped (oRep o) `shouldBe` Just "time"
     [arOutcome a | a <- grAttempts (oRep o), arGoal a == "r2"] `shouldSatisfy` all (T.isPrefixOf "cancelled")
@@ -489,7 +491,8 @@ controllerSpec = describe "the controller in graph mode" $ do
 
   it "a worker cancelled at the time budget is priced (controller on), counted as worker dollars" $ do
     let price sp = pure (if asGoal sp == "r2" then Just 0.35 else Nothing)
-        runs = [("r1", [bad {rClock = 100}]), ("r2", [ok {rClock = 60}])]
+        -- r1 fails at 50 s, the budget; r2 (60 s) is cancelled
+        runs = [("r1", [bad {rClock = 50}]), ("r2", [ok {rClock = 60}])]
     o <- runGPriced price (\_ -> pure Nothing) keyLean Nothing tiered {gcBudget = 50} twoRoots runs []
     grStopped (oRep o) `shouldBe` Just "time"
     [(arOutcome a, arCost a) | a <- grAttempts (oRep o), arGoal a == "r2"] `shouldBe` [("cancelled: time", Just 0.35)]

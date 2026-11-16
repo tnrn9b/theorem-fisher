@@ -92,7 +92,9 @@ spec = describe "retrieval in the lemma graph" $ do
   it "saves the proved lemmas when the run is interrupted, then ends with the interrupt" $ do
     let two = root1 <> T.unlines ["", "theorem r2 : P.bump 1 = 2 := by", "  sorry"]
         mk root = project root two >> Just <$> retrievalIn (Just ([bumpLemma], [earlierNote])) root
-    (r, es, lib) <- runGInterrupted (\case NodeProved {} -> True; _ -> False) mk cfg two
+    -- stopped once r1 (node 1) is proved, after l1: the state the old
+    -- harness's poll of the events found
+    (r, es, lib) <- runGInterrupted (\case NodeProved _ 1 -> True; _ -> False) mk cfg two
       [("r1", [bad {rFinal = Just "NOTE: simp loops on bump"}]), ("l1", [ok]), ("r2", [ok {rClock = 60}, ok {rClock = 60}])]
       [say Planner (plan [("l1", "P.bump 0 = 0 + 1")] "theorem r1 : P.bump 0 = 1" "exact l1"), say Verifier accept]
     either (\e -> fromException e == Just UserInterrupt) (const False) r `shouldBe` True

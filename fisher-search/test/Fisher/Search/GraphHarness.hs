@@ -27,6 +27,7 @@ module Fisher.Search.GraphHarness
   , runGPriced
   , runGTimed
   , runGBy
+  , runGOn
   , runGInterrupted
   , splitOf
   , declsNamed
