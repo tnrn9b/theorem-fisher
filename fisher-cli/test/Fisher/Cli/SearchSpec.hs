@@ -1200,7 +1200,9 @@ recordSpec = describe "--record and --replay" $ do
         r <- try (replayMainWith (ReplayIO fakeLean (A.object []) (\t -> modifyIORef' out (t :))) (ok (flags <> ["--replay", tape])) (root </> "F.lean") tape)
         ls <- reverse <$> readIORef out
         pure (r :: Either ExitCode (), ls)
-      -- with HOME and TMPDIR private, restored afterwards
+      -- with HOME and TMPDIR private, restored afterwards; they are
+      -- process-wide, which is safe while the suite runs its examples
+      -- sequentially (hspec's default here)
       private d act = do
         let home = d </> "home"
             tmpd = d </> "tmp"
@@ -1230,6 +1232,17 @@ recordSpec = describe "--record and --replay" $ do
     refused ["F.lean", "--replay", "t", "--record", "u"] "--record"
     refused ["F.lean", "--record", "t", "--graph"] "--graph"
     raRecord (ok ["F.lean", "--record", "t", "--apply", "--out", "o"]) `shouldBe` Just "t"
+
+  it "a --record path that cannot be written is refused before the run; a failed final write is a warning" $
+    withSystemTempDirectory "fisher-record-path" $ \d -> do
+      bad <- checkRecordPath (Just (d </> "missing" </> "tape.json"))
+      either id (const "") bad `shouldSatisfy` T.isPrefixOf "--record: cannot write"
+      checkRecordPath (Just (d </> "tape.json")) `shouldReturn` Right ()
+      doesFileExist (d </> "tape.json") `shouldReturn` True
+      checkRecordPath Nothing `shouldReturn` Right ()
+      o <- realOrchestrator (\_ -> pure (plainResult Nothing Nothing "")) (pure 0) (\_ -> pure ()) (\_ -> pure Nothing)
+      (_, writeTape) <- recordingTo (Just (d </> "missing" </> "tape.json")) o
+      writeTape `shouldReturn` ()
 
   it "replaying: a tape left unconsumed, and a divergence, are errors" $ do
     replaying (\_ -> pure ()) (Recording [Now 1]) (\_ -> pure ())

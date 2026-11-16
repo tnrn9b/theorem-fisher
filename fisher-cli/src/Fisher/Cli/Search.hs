@@ -82,7 +82,8 @@
 --
 -- @--record FILE@ (not with @--graph@) writes the flat search's tape, the
 -- attempt orchestrator's answers in call order ('recordOrchestrator'), to
--- FILE as JSON once the search returns. @--replay FILE@ plays such a tape
+-- FILE as JSON once the search returns its report (FILE is checked
+-- writable before the run starts). @--replay FILE@ plays such a tape
 -- back ('replayOrchestrator') under the same flags: the model side comes
 -- from the tape and Lean still checks every proof. A replay prints the
 -- events and the report as a run does, with the tape's path where a run
@@ -113,6 +114,7 @@ module Fisher.Cli.Search
   , goalTable
     -- * Recording and replay
   , recordingTo
+  , checkRecordPath
   , readRecording
   , replaying
   , swarmSearch
@@ -314,7 +316,11 @@ searchMain = \case
       Right ra
         | raPrintFacts ra -> printFactsMain ra f
         | Just tape <- raReplay ra -> exitOnTerminated (replayMain ra f tape)
-        | otherwise -> exitOnTerminated (runMain ra f)
+        | otherwise -> do
+            -- a --record path that cannot be written is refused before
+            -- anything runs
+            checkRecordPath (raRecord ra) >>= either (\e -> hPutStrLn stderr (T.unpack e) >> exitWith (ExitFailure 2)) pure
+            exitOnTerminated (runMain ra f)
     _ -> runUsage
 
 checkMain :: [String] -> IO ()
@@ -1264,12 +1270,12 @@ swarmMain :: RunArgs -> FilePath -> FilePath -> FilePath -> FilePath -> Handle -
           -> (T.Text -> (T.Text, [Pair])) -> IO () -> IO ()
 swarmMain ra file root rel runDir eventsH env0 cfg offAtStart startEvents autoExtra learnV original stmts finish mineAfter smtOut writeTape = do
   r <- swarmSearch ra env0 cfg offAtStart startEvents original
-  -- the search returned: its tape, with --record
-  writeTape
   hClose eventsH
   case r of
     Left e -> finish [] [] "failed" Nothing >> hPutStrLn stderr ("(>_<) " <> T.unpack e) >> exitWith (ExitFailure 1)
     Right rep -> do
+      -- the search returned its report: its tape, with --record
+      writeTape
       finish (srAttempts rep) (goalRows stmts rep) (searchOutcome rep)
         (knownSum (map arCost (srAttempts rep)))
       let (written, smtPairs) = smtOut (srBase rep)
@@ -1341,13 +1347,31 @@ serverOff = either (\e -> Just ("the Lean server did not start: " <> e)) (const 
 
 -- | @--record FILE@: the attempts' orchestrator wrapped to tape its
 -- answers ('recordOrchestrator'), and the action that writes the tape to
--- FILE as JSON, run once the search returns (an interrupted run writes
--- nothing). Without the flag, the orchestrator as it is and no write.
+-- FILE as JSON, run once the search returns its report (an interrupted
+-- or failed run writes nothing). A write that fails is a warning on
+-- stderr, so the run still finishes. Without the flag, the orchestrator
+-- as it is and no write.
 recordingTo :: Maybe FilePath -> AttemptOrchestrator -> IO (AttemptOrchestrator, IO ())
 recordingTo Nothing o = pure (o, pure ())
 recordingTo (Just path) o = do
   (o', tape) <- recordOrchestrator attemptKey o
-  pure (o', tape >>= BL8.writeFile path . encodePretty)
+  let write = do
+        r <- try @SomeException (tape >>= BL8.writeFile path . encodePretty)
+        case r of
+          Right () -> pure ()
+          Left e
+            | Just (_ :: SomeAsyncException) <- fromException e -> throwIO e
+            | otherwise -> hPutStrLn stderr ("fisher: --record: the tape was not written to " <> path <> ": " <> displayException e)
+  pure (o', write)
+
+-- | @--record FILE@ checked before the run: FILE opened for writing (left
+-- empty until the tape is written) and closed. Left with the message when
+-- it cannot be.
+checkRecordPath :: Maybe FilePath -> IO (Either T.Text ())
+checkRecordPath Nothing = pure (Right ())
+checkRecordPath (Just path) = do
+  r <- try @IOException (withFile path WriteMode (\_ -> pure ()))
+  pure (either (\e -> Left ("--record: cannot write " <> T.pack path <> ": " <> T.pack (displayException e))) Right r)
 
 -- | The tape @--replay FILE@ plays, or why it cannot be read.
 readRecording :: FilePath -> IO (Either T.Text AttemptScript)

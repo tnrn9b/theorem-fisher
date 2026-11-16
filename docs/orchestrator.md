@@ -238,10 +238,13 @@ to 0, so the simulator's events cannot drift from the real ones unnoticed.
 ## Recording and replaying a search
 
 `fisher search FILE --record TAPE` wraps the attempts' real orchestrator
-with `recordOrchestrator attemptKey` and, once the search returns, writes
-its tape (the orchestrator's answers in call order, an `AttemptScript`) to
-TAPE as JSON. The run is otherwise a normal run: run directory, run log,
-ledger, lessons and policy as before. An interrupted run writes no tape.
+with `recordOrchestrator attemptKey` and, once the search returns its
+report, writes its tape (the orchestrator's answers in call order, an
+`AttemptScript`) to TAPE as JSON. The run is otherwise a normal run: run
+directory, run log, ledger, lessons and policy as before. TAPE is opened
+for writing before the run starts, and a path that cannot be written is
+refused then; an interrupted or failed run writes no tape, and a final
+write that fails is a warning on stderr while the run still finishes.
 The flag is refused with `--graph`, whose jobs carry values that are never
 built from a file.
 
@@ -259,7 +262,11 @@ something the tape does not hold (`ReplayDiverged`), and a search that
 leaves steps of the tape unconsumed each end the replay with a message
 on stderr and exit code 1. The replay runs no learned policy, so a tape
 recorded with one replays only when the policy left the run's choices as
-the defaults; record with `--no-learn` to replay reliably.
+the defaults; record with `--no-learn` to replay reliably. A replay's
+retrieval reads the library as it is now, which the recorded run may have
+added to (the briefs and the retrieval events can differ, the tape's keys
+do not), and the `LedgerUnread` events the run's watcher logged outside
+the orchestrator are not replayed.
 
 ## What is not here
 
