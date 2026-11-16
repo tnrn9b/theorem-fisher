@@ -117,4 +117,11 @@ data Event
   | PolicyApplied Double Text Text Text Text Value Bool
   -- ^ time, goal, knob, the configured default, the value applied, the
   -- evidence, whether the attempt is exploration (the learned policy)
-  deriving (Eq, Show)
+  deriving (Eq, Show, Generic)
+
+-- | Generic: an object with the constructor's name under @tag@ and its
+-- fields under @contents@ (a recorded run's tape holds the events a
+-- capped step logged).
+instance ToJSON Event
+
+instance FromJSON Event

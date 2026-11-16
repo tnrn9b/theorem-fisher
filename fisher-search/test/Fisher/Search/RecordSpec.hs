@@ -129,6 +129,24 @@ spec = describe "recordOrchestrator and replayOrchestrator" $ do
     oNow s `shouldReturn` 4
     n `shouldReturn` 3
 
+  it "a cap that hit replays the events its step logged" $ do
+    (o, rd) <- quick Nothing >>= recorded
+    oLog o (BudgetSpent 0)
+    oCapped o "auto" 0.05 (oLog o (AutoTimeout 1 "g" "auto") >> threadDelay 1000000) `shouldReturn` Nothing
+    oCapped o "repair" 5 (oLog o (Repaired 2 1 "g" 2 1 1)) `shouldReturn` Just ()
+    rc <- rd
+    -- logging outside a capped step, or inside one that ran, is not taped
+    rcSteps rc `shouldBe` [Capped "auto" 0.05 True, Logged (AutoTimeout 1 "g" "auto"), Capped "repair" 5 False]
+    logged <- newIORef []
+    (s, n) <- replayOrchestrator attemptKey (\e -> modifyIORef' logged (e :)) rc
+    ran <- newIORef False
+    oCapped s "auto" 0.05 (writeIORef ran True) `shouldReturn` Nothing
+    readIORef ran `shouldReturn` False
+    readIORef logged `shouldReturn` [AutoTimeout 1 "g" "auto"]
+    oCapped s "repair" 5 (oLog s (Repaired 2 1 "g" 2 1 1)) `shouldReturn` Just ()
+    reverse <$> readIORef logged `shouldReturn` [AutoTimeout 1 "g" "auto", Repaired 2 1 "g" 2 1 1]
+    n `shouldReturn` 3
+
   it "a price answered Nothing replays as Nothing" $ do
     (o, rd) <- quick Nothing >>= recorded
     let sp = attemptOn 1 "a" "x"
@@ -152,6 +170,7 @@ spec = describe "recordOrchestrator and replayOrchestrator" $ do
         rc = Recording
           [ Now 0.5, Spawned a, Spawned b, Delivered 8 a 2.5 (Right full), Delivered 5.5 b 3 (Right failed)
           , AwaitTimedOut 1 4, Delivered 4 b 4.25 (Left "boom"), Cancelled b, Capped "auto" 4 True, Capped "repair" 2 False
-          , Priced a (Just 0.125), Priced b Nothing ] :: AttemptScript
+          , Priced a (Just 0.125), Priced b Nothing, Logged (AutoTimeout 1 "g" "auto")
+          , Logged (Finished 3 2 "b" "y" "failed" (Just stats) (Just 0.5)) ] :: AttemptScript
     decode (encode rc) `shouldBe` Just rc
     decode "{\"akGoal\":\"a\",\"akBackend\":\"x\",\"akIndex\":2}" `shouldBe` Just (AttemptKey "a" "x" 2)

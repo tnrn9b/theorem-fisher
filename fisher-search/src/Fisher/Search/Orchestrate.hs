@@ -43,12 +43,13 @@ module Fisher.Search.Orchestrate
   ) where
 
 import Control.Concurrent.Async (Async, asyncWithUnmask, cancel, poll, waitAnyCatch)
-import Control.Exception (ErrorCall (..), Exception, SomeAsyncException, SomeException, displayException, fromException, mask_, throwIO, toException, try)
+import Control.Exception (ErrorCall (..), Exception, SomeAsyncException, SomeException, displayException, fromException, mask_, onException, throwIO, toException, try)
+import Control.Monad (forM_)
 import Data.Aeson (FromJSON, ToJSON)
 import Data.IORef
 import Data.List (find, minimumBy)
 import qualified Data.Map.Strict as Map
-import Data.Maybe (isNothing)
+import Data.Maybe (fromMaybe, isNothing)
 import Data.Ord (comparing)
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -392,6 +393,9 @@ data Step res
   -- ^ a capped step: its name, its seconds, whether the cap hit
   | Priced AttemptKey (Maybe Double)
   -- ^ a price asked for, and the answer
+  | Logged Event
+  -- ^ an event a capped step logged before its cap hit (it follows the
+  -- 'Capped' step); no other logging is recorded
   deriving (Eq, Show, Generic)
 
 -- | Generic: an object with the constructor's name under @tag@ and its
@@ -424,6 +428,9 @@ data Rec res = Rec
   , rkSteps :: Map.Map Int (Step res)
   -- ^ the steps by position; a capped step's position is taken when it
   -- starts, so the calls made inside it come after it
+  , rkLogged :: Maybe [Event]
+  -- ^ while a capped step runs, the events logged inside it, newest
+  -- first
   }
 
 -- | The key of a job not spawned (by this orchestrator).
@@ -457,7 +464,7 @@ recordOrchestrator
   -> Orchestrator spec res
   -> IO (Orchestrator spec res, IO (Recording spec res))
 recordOrchestrator keyFn o = do
-  ref <- newIORef Rec {rkCounts = Map.empty, rkKeys = Map.empty, rkNext = 0, rkSteps = Map.empty}
+  ref <- newIORef Rec {rkCounts = Map.empty, rkKeys = Map.empty, rkNext = 0, rkSteps = Map.empty, rkLogged = Nothing}
   let slot = atomicModifyIORef' ref (\s -> (s {rkNext = rkNext s + 1}, rkNext s))
       put n st = atomicModifyIORef' ref (\s -> (s {rkSteps = Map.insert n st (rkSteps s)}, ()))
       append st = slot >>= \n -> put n st
@@ -488,12 +495,19 @@ recordOrchestrator keyFn o = do
       capped :: Text -> Double -> IO a -> IO (Maybe a)
       capped name secs act = do
         n <- slot
-        got <- oCapped o name secs act
+        outer <- atomicModifyIORef' ref (\s -> (s {rkLogged = Just []}, rkLogged s))
+        -- the events logged inside go to the enclosing capped step too
+        let restore s = s {rkLogged = (\evs -> (fromMaybe [] (rkLogged s) <> evs)) <$> outer}
+        got <- oCapped o name secs act `onException` atomicModifyIORef' ref (\s -> (restore s, ()))
         -- a hit cap's action is skipped on replay, so the steps it took
-        -- (the loop waits on it, so they are all after its slot) go
+        -- (the loop waits on it, so they are all after its slot) go, and
+        -- the events it logged follow the step, to be logged on replay
         atomicModifyIORef' ref $ \s ->
-          let kept = if isNothing got then Map.filterWithKey (\i _ -> i < n) (rkSteps s) else rkSteps s
-           in (s {rkSteps = Map.insert n (Capped name secs (isNothing got)) kept, rkNext = if isNothing got then n + 1 else rkNext s}, ())
+          let hit = isNothing got
+              logged = if hit then map Logged (reverse (fromMaybe [] (rkLogged s))) else []
+              kept = if hit then Map.filterWithKey (\i _ -> i < n) (rkSteps s) else rkSteps s
+              steps = Map.union kept (Map.fromList (zip [n ..] (Capped name secs hit : logged)))
+           in (restore s {rkSteps = steps, rkNext = if hit then n + 1 + length logged else rkNext s}, ())
         pure got
       priceOf sp = do
         d <- oPrice o sp
@@ -505,7 +519,9 @@ recordOrchestrator keyFn o = do
         , oAwaitAny = awaitAny
         , oCancel = cancelOne
         , oNow = now
-        , oLog = oLog o
+        , oLog = \e -> do
+            oLog o e
+            atomicModifyIORef' ref (\s -> (s {rkLogged = (e :) <$> rkLogged s}, ()))
         , oCapped = capped
         , oPrice = priceOf
         }
@@ -528,6 +544,7 @@ describeStep = \case
   Cancelled k -> "cancel " <> showKey k
   Capped name secs hit -> "capped " <> name <> " " <> tshow secs <> (if hit then " (hit)" else " (ran)")
   Priced k _ -> "price " <> showKey k
+  Logged _ -> "a logged event"
 
 showKey :: AttemptKey -> Text
 showKey (AttemptKey g b i) = g <> "/" <> b <> "/" <> tshow i
@@ -610,7 +627,17 @@ replayOrchestrator keyFn logE rc = do
         hit <- next ("capped " <> name <> " " <> tshow secs) $ \st s -> case st of
           Capped name' secs' h | name' == name, near secs secs' -> Just (s, pure h)
           _ -> Nothing
-        if hit then pure Nothing else Just <$> act
+        if hit
+          then do
+            -- the events the step logged before its cap hit
+            let logged = do
+                  ev <- atomicModifyIORef' ref $ \s -> case rpTape s of
+                    Logged e : rest -> (s {rpTape = rest, rpPos = rpPos s + 1}, Just e)
+                    _ -> (s, Nothing)
+                  forM_ ev (\e -> logE e >> logged)
+            logged
+            pure Nothing
+          else Just <$> act
       priceOf sp = readIORef ref >>= \s0 ->
         let k0 = priceKey keyFn (rpCounts s0) sp
          in next ("price " <> showKey k0) $ \st s -> case st of
