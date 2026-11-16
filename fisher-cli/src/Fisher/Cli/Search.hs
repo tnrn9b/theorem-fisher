@@ -880,10 +880,12 @@ learnLine :: A.Value -> T.Text
 learnLine = \case
   A.Object o
     | Just (A.Bool True) <- KM.lookup "enabled" o ->
-        "learn: policy " <> str "policy_file" o <> " (" <> num "shapes" o <> " shapes, " <> num "changes" o <> " changes)"
-    | otherwise -> "learn: off (" <> str "reason" o <> ")"
+        "learn: policy " <> str "policy_file" o <> " (" <> num "shapes" o <> " shapes, " <> num "changes" o <> " changes)" <> replayed o
+    | otherwise -> "learn: off (" <> str "reason" o <> ")" <> replayed o
   _ -> "learn: off"
   where
+    -- a replay's learn line is the run's, marked
+    replayed o = if KM.lookup "replayed" o == Just (A.Bool True) then ", replayed" else ""
     str k o = case KM.lookup k o of
       Just (A.String t) -> t
       _ -> ""
@@ -1245,7 +1247,7 @@ runMain ra0 file0 = do
           cfg = (searchConfigFor ra casc) {scGoalPolicy = goalPolicy}
       orch0 <- realOrchestrator runAttempt (realToFrac <$> getPOSIXTime) logE priceOf
       -- --record: the attempts' orchestrator taped (never with --graph)
-      (orch, writeTape) <- recordingTo (raRecord ra) orch0
+      (orch, writeTape) <- recordingTo (raRecord ra) (goalPolicy, learnV) orch0
       let env0 = SearchEnv orch (lakeLeanRun 900) pol baseWs rel
                    (\t -> BS.writeFile (runDir </> "base.lean") (TE.encodeUtf8 t) >> BS.writeFile (baseWs </> rel) (TE.encodeUtf8 t))
                    Nothing Nothing
@@ -1356,16 +1358,18 @@ serverOff = either (\e -> Just ("the Lean server did not start: " <> e)) (const 
 -- answers ('recordOrchestrator'), and the action that writes the tape to
 -- FILE as JSON, run once the search returns its report (an interrupted
 -- or failed run writes nothing, and a file already at FILE stays as it
--- was). The tape goes to a temporary file in FILE's directory, renamed
--- over FILE once whole. A write that fails is a warning on stderr, so the
--- run still finishes. Without the flag, the orchestrator as it is and no
--- write.
-recordingTo :: Maybe FilePath -> AttemptOrchestrator -> IO (AttemptOrchestrator, IO ())
-recordingTo Nothing o = pure (o, pure ())
-recordingTo (Just path) o = do
+-- was). The tape carries the learned policy the run applied and the
+-- @learn@ value its learn line was printed from, as given, so a replay
+-- runs the same policy. The tape goes to a temporary file in FILE's
+-- directory, renamed over FILE once whole. A write that fails is a
+-- warning on stderr, so the run still finishes. Without the flag, the
+-- orchestrator as it is and no write.
+recordingTo :: Maybe FilePath -> (Map.Map T.Text GoalPolicy, A.Value) -> AttemptOrchestrator -> IO (AttemptOrchestrator, IO ())
+recordingTo Nothing _ o = pure (o, pure ())
+recordingTo (Just path) (policy, learn) o = do
   (o', tape) <- recordOrchestrator attemptKey o
   let write = do
-        r <- try @SomeException (tape >>= replaceFile path . encodePretty)
+        r <- try @SomeException (tape >>= \rc -> replaceFile path (encodePretty rc {rcPolicy = policy, rcLearn = learn}))
         case r of
           Right () -> pure ()
           Left e
@@ -1423,9 +1427,12 @@ replaying logE tape k = do
         then Right a
         else Left ("the replay did not consume the whole recording (" <> T.pack (show n) <> " of " <> T.pack (show total) <> " steps)")
 
--- | A replay's @learn@: it runs no policy (it computes and writes none).
-replayLearn :: RunArgs -> A.Value
-replayLearn ra = object ["enabled" .= False, "reason" .= (if raLearn ra then "a replay runs no policy" else "--no-learn" :: T.Text)]
+-- | A replay's @learn@: the run's, from the tape, marked @replayed@; for
+-- a tape without it (written before tapes carried the policy), off.
+replayLearn :: RunArgs -> AttemptScript -> A.Value
+replayLearn ra tape = case rcLearn tape of
+  A.Object o -> A.Object (KM.insert "replayed" (A.Bool True) o)
+  _ -> object ["enabled" .= False, "reason" .= (if raLearn ra then "no policy in the recording" else "--no-learn" :: T.Text)]
 
 -- | What a replay runs on besides its flags: the checks' Lean, the config
 -- and the console's printer.
@@ -1461,9 +1468,10 @@ replayMain ra file tape = do
 -- temporary directory, which the harvest saves into) on the replaying
 -- orchestrator, its base workspace in that temporary directory, removed
 -- at the end with the copy; the learn
--- line, the header (the tape's path where a run names its run
--- directory), the events and the report printed as a run prints them.
--- No run directory, run log, ledger, lessons, policy or @--apply@. A
+-- line (the run's, marked replayed), the header (the tape's path where a
+-- run names its run directory), the events and the report printed as a
+-- run prints them. The learned policy is the tape's. No run directory,
+-- run log, ledger, lessons, policy file or @--apply@. A
 -- divergence, a tape left unconsumed or a failed search: the message on
 -- stderr, exit code 1.
 replayMainWith :: ReplayIO -> RunArgs -> FilePath -> FilePath -> IO ()
@@ -1483,14 +1491,15 @@ replayMainWith rio ra0 file0 tapePath = do
   let ra = ssArgs smt
       original = ssBase smt
       casc = cascadeFor ra (searchTiersConfig cfg)
-      scfg = searchConfigFor ra casc
+      -- the policy the run applied, from the tape (computes and writes none)
+      scfg = (searchConfigFor ra casc) {scGoalPolicy = rcPolicy tape}
       usesNative = "native_decide" `T.isInfixOf` original
       pol = AxiomPolicy (Set.union standardAxioms (Set.fromList (raAllow ra))) (raNative ra || usesNative)
   tmp <- getTemporaryDirectory
   bracket (mkdtemp (tmp </> "fisher-replay-")) (\d -> void (try @SomeException (removeDirectoryRecursive d))) $ \dir -> do
     let baseWs = dir </> "base"
     makeWorkspace root baseWs rel original
-    say (learnLine (replayLearn ra))
+    say (learnLine (replayLearn ra tape))
     say (searchHeader rel root (length (openGoals original)) at False)
     started <- startServer say ra (ssSmt smt) baseWs rel
     -- the retrieval over a copy of the library in the temporary

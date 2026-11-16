@@ -12,6 +12,7 @@
 module Fisher.Search.Tape
   ( Step (..)
   , Recording (..)
+  , tapeOf
   , tapeVersion
   , AttemptScript
   , recordOrchestrator
@@ -20,7 +21,7 @@ module Fisher.Search.Tape
   ) where
 
 import Control.Exception (ErrorCall (..), Exception, SomeAsyncException, SomeException, displayException, fromException, throwIO, toException, try, uninterruptibleMask_)
-import Data.Aeson (FromJSON (..), ToJSON, withObject, (.:))
+import Data.Aeson (FromJSON (..), ToJSON (..), Value (..), object, withObject, (.!=), (.:), (.:?), (.=))
 import Data.IORef
 import qualified Data.Map.Strict as Map
 import Data.Maybe (isNothing)
@@ -29,6 +30,7 @@ import qualified Data.Text as T
 import GHC.Generics (Generic)
 import System.Timeout (timeout)
 
+import Fisher.Learn.Policy (GoalPolicy (..))
 import Fisher.Search.Attempt
 import Fisher.Search.Orchestrate (AttemptKey (..), Orchestrator (..), Running (..), spawnKey)
 
@@ -69,27 +71,59 @@ instance FromJSON res => FromJSON (Step res)
 
 -- | An orchestrator's answers and logged events in call order: what
 -- 'recordOrchestrator' saw and what 'replayOrchestrator' plays, with the
--- tape format's version ('tapeVersion'). The spec is not recorded: on
--- replay the Scheduler builds the specs again, and each spawn's key is
--- checked against the tape.
-data Recording spec res = Recording { rcVersion :: Int, rcSteps :: [Step res] }
+-- tape format's version ('tapeVersion'), the learned policy the run
+-- applied (each goal's, exploration included; empty for none) and the
+-- @learn@ value the run printed its learn line from ('Null' for none).
+-- The recorder cannot know the policy, so the caller sets the last two
+-- before writing the tape, and a replay runs that policy. The spec is
+-- not recorded: on replay the Scheduler builds the specs again, and each
+-- spawn's key is checked against the tape.
+data Recording spec res = Recording
+  { rcVersion :: Int
+  , rcSteps :: [Step res]
+  , rcPolicy :: Map.Map Text GoalPolicy
+  , rcLearn :: Value
+  }
   deriving (Eq, Show, Generic)
+
+-- | A tape of these steps, of this build's version, with no policy.
+tapeOf :: [Step res] -> Recording spec res
+tapeOf steps = Recording tapeVersion steps Map.empty Null
 
 -- | The version of the tape format this build writes and reads.
 tapeVersion :: Int
 tapeVersion = 1
 
--- | Generic: @{"rcVersion": 1, "rcSteps": [...]}@.
-instance ToJSON res => ToJSON (Recording spec res)
+-- | @{"rcVersion": 1, "rcSteps": [...], "rcPolicy": {goal: {"policy":
+-- ..., "explore": bool}}, "rcLearn": ...}@: a goal's policy as the
+-- policy file writes it, and its exploration beside it (the policy
+-- file does not hold it).
+instance ToJSON res => ToJSON (Recording spec res) where
+  toJSON rc = object
+    [ "rcVersion" .= rcVersion rc
+    , "rcSteps" .= rcSteps rc
+    , "rcPolicy" .= Map.map (\gp -> object ["policy" .= gp, "explore" .= gpExplore gp]) (rcPolicy rc)
+    , "rcLearn" .= rcLearn rc ]
 
 -- | A tape of another version (or of none) does not decode; the message
--- names the version found.
+-- names the version found. A tape without @rcPolicy@ or @rcLearn@ (one
+-- written before they were) has no policy: an empty map and 'Null'.
 instance FromJSON res => FromJSON (Recording spec res) where
   parseJSON = withObject "Recording" $ \o -> do
     v <- o .: "rcVersion"
     if v /= tapeVersion
       then fail ("a tape of version " <> show v <> ", where this build reads version " <> show tapeVersion)
-      else Recording v <$> o .: "rcSteps"
+      else do
+        steps <- o .: "rcSteps"
+        entries <- o .:? "rcPolicy" .!= (Map.empty :: Map.Map Text Value)
+        policy <- traverse goalEntry entries
+        learn <- o .:? "rcLearn" .!= Null
+        pure (Recording v steps policy learn)
+    where
+      goalEntry = withObject "a goal's policy" $ \e -> do
+        gp <- e .: "policy"
+        explore <- e .:? "explore" .!= False
+        pure gp {gpExplore = explore}
 
 -- | The flat search's tape, the file @--record@ writes.
 type AttemptScript = Recording AttemptSpec AttemptResult
@@ -222,7 +256,7 @@ recordOrchestrator keyFn o = do
         , oCapped = capped
         , oPrice = priceOf
         }
-  pure (orch, Recording tapeVersion . Map.elems . rkSteps <$> readIORef ref)
+  pure (orch, tapeOf . Map.elems . rkSteps <$> readIORef ref)
 
 -- | A replay asked for something other than the tape's next step: the
 -- step's position (from 0), the step expected and the call made.

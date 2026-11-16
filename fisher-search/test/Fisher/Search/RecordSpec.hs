@@ -9,7 +9,7 @@ module Fisher.Search.RecordSpec (spec) where
 
 import Control.Concurrent (threadDelay)
 import Control.Exception (ErrorCall (..), throwIO)
-import Data.Aeson (decode, eitherDecode, encode)
+import Data.Aeson (Value (..), decode, eitherDecode, encode, object, (.=))
 import Data.Either (isLeft)
 import Data.IORef
 import qualified Data.Map.Strict as Map
@@ -17,6 +17,7 @@ import Data.List (isInfixOf)
 import Data.Text (Text)
 import Test.Hspec
 
+import Fisher.Learn.Policy (GoalPolicy (..))
 import Fisher.Search.Child (ChildStats (..))
 import Fisher.Search.Controller (ModelFailure (..), Stop (..), StopReason (..))
 import Fisher.Search.Orchestrate
@@ -94,13 +95,13 @@ spec = describe "recordOrchestrator and replayOrchestrator" $ do
           Delivered secs k t _ | k == AttemptKey "a" "x" 0 -> Delivered secs k t (Left "boom")
           st -> st
     replayIdentity rc {rcSteps = map failA (rcSteps rc)} `shouldThrow` diverged
-    (o, n) <- replayed (Recording tapeVersion [Now 1])
+    (o, n) <- replayed (tapeOf [Now 1])
     oSpawn o (attemptOn 1 "a" "x") `shouldThrow` (== ReplayDiverged 0 "now 1.0" "spawn a/x/0")
     n `shouldReturn` 0
     oNow o `shouldReturn` 1
     oNow o `shouldThrow` (== ReplayDiverged 1 "the end of the tape" "now")
     -- the seconds are checked too
-    (c, _) <- replayed (Recording tapeVersion [Capped "auto" 2 True []])
+    (c, _) <- replayed (tapeOf [Capped "auto" 2 True []])
     oCapped c "auto" 3 (pure ()) `shouldThrow` (== ReplayDiverged 0 "capped auto 2.0 (hit)" "capped auto 3.0")
 
   it "a cap that hit replays without running the step; one that ran runs again" $ do
@@ -158,12 +159,12 @@ spec = describe "recordOrchestrator and replayOrchestrator" $ do
 
   it "a logged event other than the tape's throws, naming both, and is not logged" $ do
     logged <- newIORef []
-    (s, n) <- replayOrchestrator attemptKey (\e -> modifyIORef' logged (e :)) (Recording tapeVersion [Logged (BudgetSpent 0)])
+    (s, n) <- replayOrchestrator attemptKey (\e -> modifyIORef' logged (e :)) (tapeOf [Logged (BudgetSpent 0)])
     oLog s (BudgetSpent 1) `shouldThrow` (== ReplayDiverged 0 "log BudgetSpent 0.0" "log BudgetSpent 1.0")
     readIORef logged `shouldReturn` []
     n `shouldReturn` 0
     -- an event where the tape has another kind of step
-    (c, _) <- replayed (Recording tapeVersion [Now 1])
+    (c, _) <- replayed (tapeOf [Now 1])
     oLog c (BudgetSpent 0) `shouldThrow` (== ReplayDiverged 0 "now 1.0" "log BudgetSpent 0.0")
 
   it "a cap that hit after a nested cap ran carries every event logged inside it" $ do
@@ -204,7 +205,7 @@ spec = describe "recordOrchestrator and replayOrchestrator" $ do
     n `shouldReturn` 3
 
   it "a step that ran and does not end within its recorded seconds on replay throws" $ do
-    (s, _) <- replayed (Recording tapeVersion [Capped "repair" 0.05 False []])
+    (s, _) <- replayed (tapeOf [Capped "repair" 0.05 False []])
     oCapped s "repair" 0.05 (threadDelay 2000000) `shouldThrow`
       (== ReplayDiverged 0 "capped repair 5.0e-2 (ran)" "the step `repair` did not end within its recorded cap")
 
@@ -259,17 +260,22 @@ spec = describe "recordOrchestrator and replayOrchestrator" $ do
         failed = (plainResult Nothing Nothing "") {arFailure = Just RateLimited, arStop = Just (Stop StallTurns 8 0)}
         a = AttemptKey "a" "x" 0
         b = AttemptKey "b" "y" 0
-        rc = Recording tapeVersion
+        rc = tapeOf
           [ Now 0.5, Spawned a, Spawned b, Delivered 8 a 2.5 (Right full), Delivered 5.5 b 3 (Right failed)
           , AwaitTimedOut 1 4, Delivered 4 b 4.25 (Left "boom"), Cancelled b, Capped "auto" 4 True [AutoTimeout 1 "g" "auto"], Capped "repair" 2 False []
           , Priced a (Just 0.125), Priced b Nothing, Logged (AutoTimeout 1 "g" "auto")
           , Logged (Finished 3 2 "b" "y" "failed" (Just stats) (Just 0.5)) ] :: AttemptScript
     decode (encode rc) `shouldBe` Just rc
+    -- with a policy: each goal's, its exploration included, and the learn value
+    let gp = GoalPolicy ["y", "x"] ["t"] ["simp"] (Just 60) True (object ["backend" .= object []])
+        withPol = rc {rcPolicy = Map.fromList [("a", gp), ("b", gp {gpExplore = False, gpAttemptSecs = Nothing})], rcLearn = object ["enabled" .= True]}
+    decode (encode withPol) `shouldBe` Just withPol
     decode "{\"akGoal\":\"a\",\"akBackend\":\"x\",\"akIndex\":2}" `shouldBe` Just (AttemptKey "a" "x" 2)
 
   it "a tape of another version, or of none, does not decode, naming the version" $ do
     let other = eitherDecode "{\"rcVersion\":2,\"rcSteps\":[]}" :: Either String AttemptScript
     either id (const "") other `shouldSatisfy` isInfixOf "a tape of version 2"
     (eitherDecode "{\"rcSteps\":[]}" :: Either String AttemptScript) `shouldSatisfy` isLeft
-    (eitherDecode "{\"rcVersion\":1,\"rcSteps\":[]}" :: Either String AttemptScript) `shouldBe` Right (Recording 1 [])
+    -- a tape without the policy's fields has none
+    (eitherDecode "{\"rcVersion\":1,\"rcSteps\":[]}" :: Either String AttemptScript) `shouldBe` Right (Recording 1 [] Map.empty Null)
     tapeVersion `shouldBe` 1

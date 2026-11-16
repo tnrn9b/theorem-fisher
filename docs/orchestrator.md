@@ -445,7 +445,8 @@ its occurrences apart. A tape holds exactly what the search was told and what
 it logged, in the order it asked, and a replay plays it back.
 
 ```haskell
-data Recording spec res = Recording { rcVersion :: Int, rcSteps :: [Step res] }
+data Recording spec res = Recording
+  { rcVersion :: Int, rcSteps :: [Step res], rcPolicy :: Map Text GoalPolicy, rcLearn :: Value }
 data Step res
   = Now Double
   | Spawned AttemptKey
@@ -456,6 +457,7 @@ data Step res
   | Priced AttemptKey (Maybe Double)
   | Logged Event
 tapeVersion :: Int                      -- 1
+tapeOf :: [Step res] -> Recording spec res  -- this version, no policy
 type AttemptScript = Recording AttemptSpec AttemptResult
 recordOrchestrator :: (spec -> (Text, Text)) -> Orchestrator spec res -> IO (Orchestrator spec res, IO (Recording spec res))
 replayOrchestrator :: (spec -> (Text, Text)) -> (Event -> IO ()) -> Recording spec res -> IO (Orchestrator spec res, IO Int)
@@ -498,8 +500,12 @@ action (the loop waits on it, so they are all after its place), and gathers
 the events among them into its own list: each dropped `Logged` step's event,
 and each dropped hit `Capped` step's own list, in order. So a cap nested in a
 cap whose outer one hits after the inner one ran is one `Capped` step whose
-list holds the inner step's events and then the outer's. A step that throws
-leaves no step.
+list holds the inner step's events and then the outer's. A step whose action
+throws a synchronous exception (not its cap) is recorded as one that ran,
+`Capped name secs False []` at its place with the steps made inside it kept
+after it, and the exception is rethrown; on replay its action runs again and
+throws again, so a search that catches the exception and goes on replays. An
+asynchronous exception leaves no step.
 
 `replayOrchestrator keyFn logE tape` plays the tape back and returns, beside the
 orchestrator, a reader of the number of steps consumed. Each call takes the
@@ -528,9 +534,16 @@ caller compares the steps consumed with the tape's length (the CLI does).
 
 The flat search's tape has JSON instances, so a run can be written to a file.
 `Step` is generic: an object with the constructor's name under `tag` and its
-fields under `contents`. `Recording` is `{"rcVersion": 1, "rcSteps": [...]}`;
-its decoder refuses a tape whose `rcVersion` is not `tapeVersion` (1), with a
-message naming the version found, and one without `rcVersion`. `AttemptKey`
+fields under `contents`. `Recording` is `{"rcVersion": 1, "rcSteps": [...],
+"rcPolicy": {...}, "rcLearn": ...}`: `rcPolicy` maps each goal to
+`{"policy": ..., "explore": bool}`, the goal's policy as the policy file writes
+it and its exploration beside it (the policy file does not hold it), and
+`rcLearn` is the `learn` value the run printed its learn line from (`null` for
+none). The recorder cannot know the policy, so the CLI sets both before writing
+the tape. Its decoder refuses a tape whose `rcVersion` is not `tapeVersion`
+(1), with a message naming the version found, and one without `rcVersion`; a
+tape without `rcPolicy` or `rcLearn` (written before they were) decodes with
+no policy, so the version stays 1. `AttemptKey`
 is an object with its field names (its instances are beside it in
 `Orchestrate`), an `Either`
 is `{"Left": ...}` or `{"Right": ...}`, and `AttemptResult`, `ChildStats`,
@@ -564,7 +577,8 @@ spec is not recorded), so no `PromptPart` is ever built from a file.
 with `recordOrchestrator attemptKey` and, once the search returns its
 report, writes its tape (an `AttemptScript`) to TAPE as JSON. The run is
 otherwise a normal run: run directory, run log, ledger, lessons and policy as
-before. Before the run starts TAPE is opened for appending and closed, so a
+before, and the tape carries the learned policy the run applied (each goal's,
+exploration included) and its `learn` value. Before the run starts TAPE is opened for appending and closed, so a
 path that cannot be written is refused then, a missing file is created empty
 and a file already there keeps its content. An interrupted or failed run
 writes no tape (an existing TAPE survives it). The final write goes to a
@@ -579,20 +593,22 @@ a temporary copy of the library. The flag is refused with
 plays the tape back through `replayOrchestrator attemptKey`: every spawn,
 await, cancel, clock reading, cap and price comes from the tape, and every
 event the search logs is checked against it, while Lean still runs for the
-proof checks (the replay reproduces the model side only). It prints the learn
-line, the header, the events and the report as a run prints them, with
+proof checks (the replay reproduces the model side only). It runs the learned
+policy the tape carries, so a run recorded with a policy replays faithfully,
+its `PolicyApplied` events compared like any other. It prints the learn line
+(the run's, from the tape's `learn` value, marked `, replayed`; for a tape
+without one, `learn: off (no policy in the recording)`, or `(--no-learn)` with
+that flag), the header, the events and the report as a run prints them, with
 `replay of TAPE` where a run names its run directory, and writes nothing: no
 run directory (its base workspace is a temporary directory, removed at the
-end), no run log, ledger, lessons or learned policy. It refuses `--apply`,
+end), no run log, ledger, lessons or policy file. It refuses `--apply`,
 `--graph`, `--out` and `--record`. A tape that cannot be read or decoded (of
 another version, say), a search that asks for something the tape does not
 hold or logs an event other than the tape's (`ReplayDiverged`), and a search
 that leaves steps of the tape unconsumed (the consumed count is checked
 against the tape's length) each end the replay with a message on stderr and
-exit code 1. The replay runs no learned policy (the policy is not in the
-tape, and the one on disk is the one the run left, not the one it ran with),
-so a tape recorded with one replays only when the policy left the run's
-choices as the defaults; record with `--no-learn` to replay reliably. A
+exit code 1. The policy file on disk is not read (it is the one the run left,
+not the one it ran with); the tape's policy is the one the run ran with. A
 replay's retrieval reads the library as it is now, which the recorded run may
 have added to: a brief that differs is not compared, but a retrieval event
 that differs (`Facts`, `LibraryOffered`) ends the replay. The start events
@@ -616,8 +632,5 @@ graph tape compares the orchestrator's answers only.
   `PromptPart` values, which are never built from a file (the role types'
   guarantee, see [roles.md](roles.md)), so `Step Out` has no `FromJSON` and
   `fisher search --graph` takes neither `--record` nor `--replay`.
-- The learned policy in the tape. A replay runs none, so a recording made with
-  a learned policy is faithful only when the policy left the choices as they
-  were.
 - Lean or Lsp answers in a recording. A replay runs them again, and the
   events they lead to are compared with the tape's.

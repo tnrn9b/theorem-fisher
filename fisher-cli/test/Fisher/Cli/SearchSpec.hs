@@ -49,7 +49,7 @@ import Fisher.Search.Attempt (AttemptSpec (..), plainResult)
 import Fisher.Search.Check (AxiomPolicy (..), standardAxioms)
 import qualified Fisher.Search.Lean as L
 import Fisher.Search.Orchestrate (Orchestrator (..), attemptKey, realOrchestrator)
-import Fisher.Search.Tape (Recording (..), ReplayDiverged (..), Step (..), replayOrchestrator, tapeVersion)
+import Fisher.Search.Tape (Recording (..), ReplayDiverged (..), Step (..), replayOrchestrator, tapeOf)
 import Fisher.Search.Scheduler (SearchEnv (..))
 import Data.IORef (atomicModifyIORef')
 import qualified Data.ByteString.Lazy as BL
@@ -1173,7 +1173,10 @@ recordSpec = describe "--record and --replay" $ do
       -- the same with these flags; with the library or retrieval on, its
       -- retrieval built as a run builds it (over the project at proj, its
       -- run directory run)
-      recordWith fl d tape = do
+      recordWith fl = recordPolicy fl (Map.empty, A.Null)
+      -- the same with this learned policy applied and this learn value,
+      -- given to the tape as a run gives them
+      recordPolicy fl (policy, learnV) d tape = do
         let ra = ok (fl <> ["--record", tape])
             ws = d </> "rec"
         createDirectoryIfMissing True (d </> "run")
@@ -1185,8 +1188,9 @@ recordSpec = describe "--record and --replay" $ do
         clock <- newIORef (0 :: Double)
         let say t = modifyIORef' out (t :)
         o0 <- realOrchestrator fakeRun (atomicModifyIORef' clock (\t -> (t + 1, t + 1))) (say . eventLine) (\_ -> pure Nothing)
-        (o, writeTape) <- recordingTo (raRecord ra) o0
-        r <- swarmSearch ra (say . eventLine) (envOn o fakeLean ws) {seRetrieval = ret} (searchConfigFor ra (cascadeFor ra [])) Nothing retEvents source
+        (o, writeTape) <- recordingTo (raRecord ra) (policy, learnV) o0
+        r <- swarmSearch ra (say . eventLine) (envOn o fakeLean ws) {seRetrieval = ret}
+               ((searchConfigFor ra (cascadeFor ra [])) {scGoalPolicy = policy}) Nothing retEvents source
         writeTape
         rep <- either (fail . T.unpack) pure r
         mapM_ say (swarmReportLines rep "; recorded")
@@ -1238,7 +1242,7 @@ recordSpec = describe "--record and --replay" $ do
       doesFileExist (d </> "tape.json") `shouldReturn` True
       checkRecordPath Nothing `shouldReturn` Right ()
       o <- realOrchestrator (\_ -> pure (plainResult Nothing Nothing "")) (pure 0) (\_ -> pure ()) (\_ -> pure Nothing)
-      (_, writeTape) <- recordingTo (Just (d </> "missing" </> "tape.json")) o
+      (_, writeTape) <- recordingTo (Just (d </> "missing" </> "tape.json")) (Map.empty, A.Null) o
       writeTape `shouldReturn` ()
 
   it "an existing file at the --record path survives a run that fails before writing, and is replaced whole after one that writes" $
@@ -1247,7 +1251,7 @@ recordSpec = describe "--record and --replay" $ do
       BS.writeFile tape "the old tape"
       checkRecordPath (Just tape) `shouldReturn` Right ()
       o <- realOrchestrator (\_ -> pure (plainResult Nothing Nothing "")) (pure 7) (\_ -> pure ()) (\_ -> pure Nothing)
-      (o', writeTape) <- recordingTo (Just tape) o
+      (o', writeTape) <- recordingTo (Just tape) (Map.empty, A.Null) o
       -- the run reads the clock, then fails: its tape is never written
       _ <- oNow o'
       BS.readFile tape `shouldReturn` "the old tape"
@@ -1272,11 +1276,11 @@ recordSpec = describe "--record and --replay" $ do
       sort <$> listDirectory d `shouldReturn` ["other.json", "tape.json"]
 
   it "replaying: a tape left unconsumed, and a divergence, are errors" $ do
-    replaying (\_ -> pure ()) (Recording tapeVersion [Now 1]) (\_ -> pure ())
+    replaying (\_ -> pure ()) (tapeOf [Now 1]) (\_ -> pure ())
       `shouldReturn` Left "the replay did not consume the whole recording (0 of 1 steps)"
-    r <- replaying (\_ -> pure ()) (Recording tapeVersion [Now 1]) (\o -> oNow o >> oNow o)
+    r <- replaying (\_ -> pure ()) (tapeOf [Now 1]) (\o -> oNow o >> oNow o)
     either id (const "") r `shouldSatisfy` T.isPrefixOf "the replay diverged from the recording at step 1: the recording has the end of the tape"
-    replaying (\_ -> pure ()) (Recording tapeVersion [Now 1]) oNow `shouldReturn` Right 1
+    replaying (\_ -> pure ()) (tapeOf [Now 1]) oNow `shouldReturn` Right 1
 
   it "a corrupted tape is a decode error, and the replay exits with code 1" $
     withSystemTempDirectory "fisher-replay-bad" $ \d -> do
@@ -1323,6 +1327,34 @@ recordSpec = describe "--record and --replay" $ do
       -- a tape short of a step: the replay diverges, exit code 1
       BL.writeFile (d </> "short.json") (A.encode rc {rcSteps = init (rcSteps rc)})
       fst <$> replay root (d </> "short.json") `shouldReturn` Left (ExitFailure 1)
+
+  it "a search recorded with a learned policy replays it: the same policy events, the run's learn line marked replayed" $
+    withSystemTempDirectory "fisher-replay-policy" $ \d -> do
+      root <- project d
+      let tape = d </> "tape.json"
+          backends = raBackends (ok flags)
+          goalPol bs explore = GoalPolicy bs [] [] Nothing explore (A.object [])
+          -- a explores (its first attempt on the second backend); b's
+          -- backends are reversed, so its order is logged as applied
+          policy = Map.fromList [("a", goalPol backends True), ("b", goalPol (reverse backends) False)]
+          learnV = A.object ["enabled" A..= True, "policy_file" A..= ("p.json" :: Text), "shapes" A..= (1 :: Int), "changes" A..= (0 :: Int)]
+      recorded <- recordPolicy flags (policy, learnV) d tape
+      rc <- readRecording tape >>= either (fail . T.unpack) pure
+      (rcPolicy rc, rcLearn rc) `shouldBe` (policy, learnV)
+      [() | Logged (PolicyApplied {}) <- rcSteps rc] `shouldSatisfy` (not . null)
+      private d $ \_ _ -> do
+        (code, ls) <- replay root tape
+        code `shouldBe` Right ()
+        case ls of
+          learn : _ : rest -> do
+            learn `shouldBe` "learn: policy p.json (1 shapes, 0 changes), replayed"
+            -- the events, the policy's among them, and the report as recorded
+            init rest `shouldBe` init recorded
+            filter ("policy: " `T.isInfixOf`) rest `shouldSatisfy` (not . null)
+          _ -> expectationFailure ("too few lines: " <> show ls)
+      -- the same tape without its policy diverges: exit code 1
+      BL.writeFile (d </> "bare.json") (A.encode rc {rcPolicy = Map.empty, rcLearn = A.Null})
+      fst <$> replay root (d </> "bare.json") `shouldReturn` Left (ExitFailure 1)
 
   it "a search recorded with the library on replays to its end, harvesting into a copy: the library is left as it was" $
     withSystemTempDirectory "fisher-replay-lib" $ \d -> do
