@@ -19,6 +19,7 @@ import Fisher.Search.Graph
 import Fisher.Search.GraphHarness
 import Fisher.Search.GraphRun
 import Fisher.Search.Lean
+import Fisher.Search.Orchestrate (AttemptKey (..))
 import Fisher.Search.Report (graphEventJson, graphEventLine)
 import Fisher.Search.Scheduler (AttemptRecord (..), AutoEnv (..))
 import Fisher.Search.Scripted (accept, plan)
@@ -27,31 +28,31 @@ auto :: AutoConfig
 auto = defaultAutoConfig {acTactics = ["rfl", "simp_all"]}
 
 -- | A run with the automation on, the fake server behaving as given.
-runA :: LeanRun -> Fake -> GraphConfig -> Text -> [(Text, [Run])] -> [Reply] -> IO Out
+runA :: LeanRun -> Fake -> GraphConfig -> Text -> [(Text, [Run])] -> [Reply] -> IO GOut
 runA lean f = runGAuto lean (Just (\tr -> AutoEnv auto (fakeLsp tr f) Nothing))
 
 closes :: [Text] -> Fake
 closes gs = fake0 {fClose = \g _ -> if g `elem` gs then Just Nothing else Nothing}
 
-nodeId :: Out -> Text -> NodeId
+nodeId :: GOut -> Text -> NodeId
 nodeId o = nId . nodeBy o
 
-briefsOf :: Out -> Text -> [Text]
+briefsOf :: GOut -> Text -> [Text]
 briefsOf o g = [b | (x, b) <- oBriefs o, x == g]
 
-startsOf :: Out -> Text -> [Text]
+startsOf :: GOut -> Text -> [Text]
 startsOf o g = [s | (x, s) <- oStarts o, x == g]
 
 -- | The position of the first trace entry with the prefix.
-firstAt :: Out -> Text -> Maybe Int
+firstAt :: GOut -> Text -> Maybe Int
 firstAt o p = findIndex (p `T.isPrefixOf`) (oTrace o)
 
-lastAt :: Out -> Text -> Maybe Int
+lastAt :: GOut -> Text -> Maybe Int
 lastAt o p = case [i | (i, x) <- zip [0 ..] (oTrace o), p `T.isPrefixOf` x] of
   [] -> Nothing
   is -> Just (last is)
 
-board :: Out -> NodeId -> Text
+board :: GOut -> NodeId -> Text
 board o r = fromMaybe "" (lookup r (grWhiteboards (oRep o)))
 
 isAutoEvent :: GraphEvent -> Bool
@@ -102,10 +103,13 @@ spec = describe "the automation in graph mode" $ do
     length (filter ("worker" `T.isPrefixOf`) (oTrace o)) `shouldBe` 1
 
   it "keeps the server and the checker apart: Auto takes the checker lock" $ do
-    o <- runA keyLean (closes ["l", "m"]) {fDelay = \m -> if m == "attempts" then 300 else 0} cfg twoRoots
+    -- r2's planner takes 0.15 s
+    let slow = (closes ["l", "m"]) {fDelay = \m -> if m == "attempts" then 300 else 0}
+    o <- runGTimed [(AttemptKey "r2" "plan" 0, 0.15)] (\_ -> pure Nothing) (\_ -> pure Nothing) keyLean
+           (Just (\tr -> AutoEnv auto (fakeLsp tr slow) Nothing)) cfg twoRoots
       [("r1", [bad]), ("r2", [bad])]
       [ sayTo Planner (toNode "r1") (plan [("l", "P")] "theorem r1 : A" "exact use l")
-      , Reply Planner (Just (toNode "r2")) (Right (plan [("m", "Q")] "theorem r2 : B" "exact use m", 0)) 150
+      , Reply Planner (Just (toNode "r2")) (Right (plan [("m", "Q")] "theorem r2 : B" "exact use m", 0))
       , say Verifier accept, say Verifier accept ]
     oOverlaps o `shouldBe` 0
     grClosedRoots (oRep o) `shouldBe` 2
@@ -183,7 +187,7 @@ spec = describe "the automation in graph mode" $ do
 
   it "with the automation off, runs today's graph search" $ do
     o <- runGAuto keyLean Nothing cfg oneRoot
-      [("r1", [bad]), ("l1", [(w "exact done") {rDelay = 20}]), ("l2", [(w "exact done") {rDelay = 300}])]
+      [("r1", [bad]), ("l1", [(w "exact done") {rClock = 0.01}]), ("l2", [(w "exact done") {rClock = 0.03}])]
       [say Planner (plan [("l1", "P"), ("l2", "Q")] "theorem r1 : A" "exact combine l1 l2"), say Verifier accept]
     tags o `shouldBe`
       [ "launch r1", "end r1", "proposed r1", "accepted r1", "added l1", "added l2"

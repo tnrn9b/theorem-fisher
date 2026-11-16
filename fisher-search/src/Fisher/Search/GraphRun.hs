@@ -43,6 +43,7 @@ module Fisher.Search.GraphRun
   , Job (..)
   , jobKey
   , Kind (..)
+  , Out (..)
   , PlanInputs (..)
   , ReviewInputs (..)
   , FalseInputs (..)
@@ -261,6 +262,7 @@ jobKey j = (jName j, kindName (jKind j))
       KReview {} -> "review"
       KFalse {} -> "false"
 
+-- | A job's result, by its kind.
 data Out
   = OutWorker AttemptResult
   | OutPlan (Asked Plan)

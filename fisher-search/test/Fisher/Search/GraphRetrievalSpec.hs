@@ -44,7 +44,7 @@ keysOf = \case
   Object o -> sort (map K.toText (KM.keys o))
   _ -> []
 
-splitRun :: (FilePath -> IO (Maybe RetrievalEnv)) -> IO Out
+splitRun :: (FilePath -> IO (Maybe RetrievalEnv)) -> IO GOut
 splitRun mk =
   runGRet mk keyLean Nothing cfg root1
     [("r1", [bad {rFinal = Just "NOTE: simp loops on bump"}]), ("l1", [ok])]
@@ -93,7 +93,7 @@ spec = describe "retrieval in the lemma graph" $ do
     let two = root1 <> T.unlines ["", "theorem r2 : P.bump 1 = 2 := by", "  sorry"]
         mk root = project root two >> Just <$> retrievalIn (Just ([bumpLemma], [earlierNote])) root
     (r, es, lib) <- runGInterrupted (\case NodeProved {} -> True; _ -> False) mk cfg two
-      [("r1", [bad {rFinal = Just "NOTE: simp loops on bump"}]), ("l1", [ok]), ("r2", [ok {rDelay = 60000}, ok {rDelay = 60000}])]
+      [("r1", [bad {rFinal = Just "NOTE: simp loops on bump"}]), ("l1", [ok]), ("r2", [ok {rClock = 60}, ok {rClock = 60}])]
       [say Planner (plan [("l1", "P.bump 0 = 0 + 1")] "theorem r1 : P.bump 0 = 1" "exact l1"), say Verifier accept]
     either (\e -> fromException e == Just UserInterrupt) (const False) r `shouldBe` True
     [l | GraphRunEvent (LibrarySaved _ l _) <- es] `shouldBe` [1]

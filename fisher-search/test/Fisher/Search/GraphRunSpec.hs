@@ -28,6 +28,7 @@ import Fisher.Search.Graph
 import Fisher.Search.GraphHarness
 import Fisher.Search.GraphRun
 import Fisher.Search.Lean
+import Fisher.Search.Orchestrate (AttemptKey (..))
 import Fisher.Search.Report (graphEventJson, graphReportJson)
 import Fisher.Search.Scheduler
 import Fisher.Search.Scripted (accept, plan)
@@ -135,7 +136,7 @@ runGraphSpec = describe "runGraph" $ do
 
   it "2: splits a failed root into two lemmas proved in parallel, then closes it" $ do
     o <- runG cfg oneRoot
-      [("r1", [bad]), ("l1", [(w "exact done") {rDelay = 20}]), ("l2", [(w "exact done") {rDelay = 300}])]
+      [("r1", [bad]), ("l1", [(w "exact done") {rClock = 0.01}]), ("l2", [(w "exact done") {rClock = 0.03}])]
       [say Planner (plan [("l1", "P"), ("l2", "Q")] "theorem r1 : A" "exact combine l1 l2"), say Verifier accept]
     tags o `shouldBe`
       [ "launch r1", "end r1", "proposed r1", "accepted r1", "added l1", "added l2"
@@ -150,7 +151,7 @@ runGraphSpec = describe "runGraph" $ do
 
   it "3: two roots naming the same lemma key share one node, proved once" $ do
     o <- runG cfg twoRoots
-      [("r1", [bad]), ("r2", [bad {rDelay = 300}]), ("l", [ok {rDelay = 900}])]
+      [("r1", [bad]), ("r2", [bad {rClock = 0.3}]), ("l", [ok {rClock = 0.9}])]
       [ sayTo Planner (toNode "r1") (plan [("l", "P")] "theorem r1 : A" "exact use l")
       , sayTo Planner (toNode "r2") (plan [("m", "P")] "theorem r2 : B" "exact use m")
       , say Verifier accept, say Verifier accept ]
@@ -163,7 +164,7 @@ runGraphSpec = describe "runGraph" $ do
 
   it "4: a lemma already proved is reused, with no worker on it" $ do
     o <- runG cfg twoRoots
-      [("r1", [bad]), ("r2", [bad {rDelay = 600}]), ("l", [ok])]
+      [("r1", [bad]), ("r2", [bad {rClock = 0.6}]), ("l", [ok])]
       [ sayTo Planner (toNode "r1") (plan [("l", "P")] "theorem r1 : A" "exact use l")
       , sayTo Planner (toNode "r2") (plan [("m", "P")] "theorem r2 : B" "exact use m")
       , say Verifier accept, say Verifier accept ]
@@ -229,7 +230,7 @@ runGraphSpec = describe "runGraph" $ do
   it "9: the dollar cap reached by the planner's reply does not start the verifier" $ do
     o <- runG cfg {gcCapUsd = 1} oneRoot
       [("r1", [bad {rCost = 0.25}])]
-      [Reply Planner Nothing (Right (plan [("l", "P")] "theorem r1 : A" "exact use l", 2)) 0, say Verifier accept]
+      [Reply Planner Nothing (Right (plan [("l", "P")] "theorem r1 : A" "exact use l", 2)), say Verifier accept]
     map fst (oAsks o) `shouldBe` [Planner]
     grStopped (oRep o) `shouldBe` Just "dollars"
     Map.lookup Planner (grDollars (oRep o)) `shouldBe` Just 2
@@ -237,12 +238,15 @@ runGraphSpec = describe "runGraph" $ do
     count "stopped dollars" (tags o) `shouldBe` 1
 
   it "10: two roots proposing the same lemma at once end with one node" $ do
-    o <- runG cfg twoRoots
-      [("r1", [bad]), ("r2", [bad]), ("l", [ok {rDelay = 900}])]
-      [ Reply Planner (Just (toNode "r1")) (Right (plan [("l", "P")] "theorem r1 : A" "exact use l", 0)) 100
-      , Reply Planner (Just (toNode "r2")) (Right (plan [("l", "P")] "theorem r2 : B" "exact use l", 0)) 100
-      , Reply Verifier (Just "theorem r1") (Right (accept, 0)) 0
-      , Reply Verifier (Just "theorem r2") (Right (accept, 0)) 400 ]
+    -- the planners take 0.1 s each and r2's verifier 0.4 s, so both
+    -- proposals are out before either is accepted, and r1's is accepted first
+    let timed = [(AttemptKey "r1" "plan" 0, 0.1), (AttemptKey "r2" "plan" 0, 0.1), (AttemptKey "r2" "review" 0, 0.4)]
+    o <- runGTimed timed (\_ -> pure Nothing) (\_ -> pure Nothing) keyLean Nothing cfg twoRoots
+      [("r1", [bad]), ("r2", [bad]), ("l", [ok {rClock = 0.9}])]
+      [ Reply Planner (Just (toNode "r1")) (Right (plan [("l", "P")] "theorem r1 : A" "exact use l", 0))
+      , Reply Planner (Just (toNode "r2")) (Right (plan [("l", "P")] "theorem r2 : B" "exact use l", 0))
+      , Reply Verifier (Just "theorem r1") (Right (accept, 0))
+      , Reply Verifier (Just "theorem r2") (Right (accept, 0)) ]
     let ts = tags o
     precedes ts "proposed r2" "accepted r1" `shouldBe` True
     precedes ts "accepted r1" "accepted r2" `shouldBe` True
@@ -269,8 +273,8 @@ runGraphSpec = describe "runGraph" $ do
 
   it "12: no credit ends the run at once" $ do
     o <- runG cfg twoRoots
-      [("r1", [bad]), ("r2", [ok {rDelay = 60000}])]
-      [Reply Planner Nothing (Left AskNoCredit) 0]
+      [("r1", [bad]), ("r2", [ok {rClock = 60}])]
+      [Reply Planner Nothing (Left AskNoCredit)]
     grStopped (oRep o) `shouldBe` Just "credit"
     count "stopped credit" (tags o) `shouldBe` 1
     statusOf o "r2" `shouldBe` NOpen
@@ -278,7 +282,7 @@ runGraphSpec = describe "runGraph" $ do
 
   it "13: stops at the time budget and cancels what runs" $ do
     o <- runG cfg {gcBudget = 50} twoRoots
-      [("r1", [bad {rClock = 100}]), ("r2", [ok {rDelay = 60000}])]
+      [("r1", [bad {rClock = 100}]), ("r2", [ok {rClock = 60}])]
       []
     grStopped (oRep o) `shouldBe` Just "time"
     [arOutcome a | a <- grAttempts (oRep o), arGoal a == "r2"] `shouldSatisfy` all (T.isPrefixOf "cancelled")
@@ -295,7 +299,7 @@ runGraphSpec = describe "runGraph" $ do
 
   it "15: a node waiting on a goal that fails goes on to propose a split" $ do
     o <- runG cfg twoRoots
-      [("r1", [w "exact use r2"]), ("r2", [bad {rDelay = 150}]), ("k", [ok])]
+      [("r1", [w "exact use r2"]), ("r2", [bad {rClock = 0.15}]), ("k", [ok])]
       ( replicate 4 (sayTo Planner (toNode "r2") garbage)
         <> [ sayTo Planner (toNode "r1") (plan [("k", "Q")] "theorem r1 : A" "exact use k"), say Verifier accept ] )
     statusOf o "r2" `shouldBe` NFailed "nothing left to try"
@@ -308,16 +312,17 @@ runGraphSpec = describe "runGraph" $ do
   it "16: dollars of a paid call are counted when the next call throws" $ do
     o <- runG cfg {gcMaxSplits = 1} oneRoot
       [("r1", [bad])]
-      [ Reply Planner Nothing (Right (garbage, 1.5)) 0
-      , Reply Planner Nothing (Left (AskFailed "THROW")) 0 ]
+      [ Reply Planner Nothing (Right (garbage, 1.5))
+      , Reply Planner Nothing (Left (AskFailed "THROW")) ]
     Map.lookup Planner (grDollars (oRep o)) `shouldBe` Just 1.5
     count "split failed r1" (tags o) `shouldBe` 1
     statusOf o "r1" `shouldBe` NFailed "nothing left to try"
 
   it "17: a sketch accepted after the base moved is checked again and merged into the new base" $ do
-    o <- runG cfg twoRoots
-      [("r1", [bad]), ("r2", [ok {rDelay = 150}]), ("l", [ok])]
-      [ Reply Planner Nothing (Right (plan [("l", "P")] "theorem r1 : A" "exact use l", 0)) 400
+    -- r1's planner takes 0.4 s, so r2's proof (at 0.15 s) moves the base under it
+    o <- runGTimed [(AttemptKey "r1" "plan" 0, 0.4)] (\_ -> pure Nothing) (\_ -> pure Nothing) keyLean Nothing cfg twoRoots
+      [("r1", [bad]), ("r2", [ok {rClock = 0.15}]), ("l", [ok])]
+      [ Reply Planner Nothing (Right (plan [("l", "P")] "theorem r1 : A" "exact use l", 0))
       , say Verifier accept ]
     let sketchChecks = [p | p <- oProbes o, "#print axioms r1\n" `T.isInfixOf` p, "#print axioms l\n" `T.isInfixOf` p]
     length sketchChecks `shouldBe` 2
@@ -329,7 +334,7 @@ runGraphSpec = describe "runGraph" $ do
 
   it "18: a split whose lemmas are proved but whose sketch is then rejected fails, keeping its lemmas" $ do
     o <- runGWith lateLean cfg {gcMaxSplits = 1} oneRoot
-      [("r1", [bad]), ("l", [ok {rDelay = 200}])]
+      [("r1", [bad]), ("l", [ok {rClock = 0.2}])]
       [say Planner (plan [("l", "P")] "theorem r1 : A" "exact use l LATE"), say Verifier accept]
     statusOf o "l" `shouldBe` NProved
     sStatus (splitOf o "r1" 0) `shouldBe` SFailed "the sketch does not close with its lemmas proved"
@@ -338,7 +343,7 @@ runGraphSpec = describe "runGraph" $ do
 
   it "18b: a split whose sketch still waits on another plan lemma stays pending and closes with it" $ do
     o <- runG cfg oneRoot
-      [("r1", [bad]), ("a", [bad]), ("b", [ok {rDelay = 800}]), ("c", [ok]), ("d", [ok])]
+      [("r1", [bad]), ("a", [bad]), ("b", [ok {rClock = 0.8}]), ("c", [ok]), ("d", [ok])]
       [ sayTo Planner (toNode "r1") (plan [("a", "P"), ("b", "Q")] "theorem r1 : A" "exact use a b")
       , sayTo Planner (toNode "a") (plan [("c", "R"), ("d", "S")] "lemma a : P" "exact use c d b")
       , say Verifier accept, say Verifier accept ]
@@ -353,7 +358,7 @@ runGraphSpec = describe "runGraph" $ do
 
   it "19: a planner for a lemma is told which lemmas of the plan it may use" $ do
     o <- runG cfg {gcMaxSplits = 1} oneRoot
-      [("r1", [bad]), ("a", [bad]), ("b", [ok {rDelay = 300}])]
+      [("r1", [bad]), ("a", [bad]), ("b", [ok {rClock = 0.3}])]
       [ sayTo Planner (toNode "r1") (plan [("a", "P"), ("b", "Q")] "theorem r1 : A" "exact use a b")
       , sayTo Planner (toNode "a") garbage, sayTo Planner (toNode "a") garbage
       , say Verifier accept ]
@@ -413,7 +418,7 @@ field k = \case
   A.Object o -> KM.lookup (K.fromText k) o
   _ -> Nothing
 
-outcomes :: Out -> [Text]
+outcomes :: GOut -> [Text]
 outcomes o = map arOutcome (grAttempts (oRep o))
 
 stop8 :: Stop
@@ -428,7 +433,7 @@ controllerSpec = describe "the controller in graph mode" $ do
 
   it "with no tiers and the controller off, the events and report of case 2 are today's" $ do
     o <- runG cfg oneRoot
-      [("r1", [bad]), ("l1", [(w "exact done") {rDelay = 20}]), ("l2", [(w "exact done") {rDelay = 300}])]
+      [("r1", [bad]), ("l1", [(w "exact done") {rClock = 0.01}]), ("l2", [(w "exact done") {rClock = 0.03}])]
       [say Planner (plan [("l1", "P"), ("l2", "Q")] "theorem r1 : A" "exact combine l1 l2"), say Verifier accept]
     map (encodeT . graphEventJson) (oEvents o) `shouldBe` goldenEvents2
     encodeT (graphReportJson [] (oRep o)) `shouldBe` goldenReport2
@@ -484,7 +489,7 @@ controllerSpec = describe "the controller in graph mode" $ do
 
   it "a worker cancelled at the time budget is priced (controller on), counted as worker dollars" $ do
     let price sp = pure (if asGoal sp == "r2" then Just 0.35 else Nothing)
-        runs = [("r1", [bad {rClock = 100}]), ("r2", [ok {rDelay = 60000}])]
+        runs = [("r1", [bad {rClock = 100}]), ("r2", [ok {rClock = 60}])]
     o <- runGPriced price (\_ -> pure Nothing) keyLean Nothing tiered {gcBudget = 50} twoRoots runs []
     grStopped (oRep o) `shouldBe` Just "time"
     [(arOutcome a, arCost a) | a <- grAttempts (oRep o), arGoal a == "r2"] `shouldBe` [("cancelled: time", Just 0.35)]
