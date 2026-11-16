@@ -83,6 +83,26 @@ spec = describe "simOrchestrator" $ do
     outcome <$> oAwaitAny o 10 [rb, ra] `shouldReturn` Nothing
     oNow o `shouldReturn` 3
 
+  it "two attempts already past due are delivered in list order" $ do
+    (o, _) <- simOrchestrator emptyScript
+      { scAttempts = [(key "a" "x" 0, 1, done "early"), (key "b" "x" 0, 2, done "later"), (key "c" "x" 0, 9, done "c")]
+      , scCaps = [("step", 5)] }
+    ra <- oSpawn o (attempt 1 "a" "x")
+    rb <- oSpawn o (attempt 2 "b" "x")
+    -- a capped step moves the clock to 5, past both due times
+    oCapped o "step" 10 (pure ()) `shouldReturn` Nothing
+    oNow o `shouldReturn` 5
+    -- the later due comes first because it is listed first, as the real
+    -- side's poll delivers, and the clock stays
+    outcome <$> oAwaitAny o 0 [rb, ra] `shouldReturn` Just (rb, Right "later")
+    oNow o `shouldReturn` 5
+    outcome <$> oAwaitAny o 0 [rb, ra] `shouldReturn` Just (ra, Right "early")
+    oNow o `shouldReturn` 5
+    -- with none past due, the earliest to come is waited for
+    rc <- oSpawn o (attempt 3 "c" "x")
+    outcome <$> oAwaitAny o 20 [rc] `shouldReturn` Just (rc, Right "c")
+    oNow o `shouldReturn` 14
+
   it "a due attempt at deadline zero" $ do
     (o, _) <- simOrchestrator emptyScript
       {scAttempts = [(key "a" "x" 0, 0, done "now"), (key "b" "x" 0, 4, done "edge")]}

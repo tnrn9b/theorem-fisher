@@ -107,13 +107,13 @@ The simulator's rules, in the order they come up:
 | Call | Behaviour |
 |---|---|
 | `oSpawn` | Looks up the entry for the attempt's key and marks it due at now plus its seconds. |
-| `oAwaitAny secs rs` | With none of `rs` in flight, returns Nothing at once and leaves the clock alone. Otherwise the deadline is now plus `secs` (never less than now), and it takes the earliest due of `rs` (the one first in `rs` among those due together). If it is due at or before the deadline, the clock moves to its due time plus `scStepCost` and it is delivered; otherwise the clock moves to the deadline and the result is Nothing. |
+| `oAwaitAny secs rs` | With none of `rs` in flight, returns Nothing at once and leaves the clock alone. Otherwise, when some of `rs` are already due (at or before now), the first of them in `rs` is delivered and the clock moves only by `scStepCost`. When none is, the deadline is now plus `secs` (never less than now), and it takes the earliest due of `rs` (the one first in `rs` among those due together). If it is due at or before the deadline, the clock moves to its due time plus `scStepCost` and it is delivered; otherwise the clock moves to the deadline and the result is Nothing. |
 | `oCancel` | Removes the attempt from the due list and records it in `stCancelled`. The attempt is never delivered, even though its entry would have finished. |
 | `oCapped name secs act` | When `name` is in `scCaps`, the clock moves by the listed seconds (or `secs` clamped at 0, whichever is less) and the result is Nothing without running `act`. Otherwise the clock moves by `scStepCost` and `act` runs. |
 | `oPrice` | Looks the attempt's key up in `scPrices`. |
 | `oLog` | Appends to the trace. |
 
-Both sides keep one rule for an await: of attempts finished together, the one first in `rs` is delivered (the Scheduler lists the newest first), and an attempt already finished is delivered even with zero seconds.
+Both sides keep one rule for an await: an attempt already finished is delivered in list order, even with zero seconds; otherwise the first to finish, the one first in `rs` among those finishing together (the Scheduler lists the newest first).
 
 ## SearchEnv and runToEnd
 

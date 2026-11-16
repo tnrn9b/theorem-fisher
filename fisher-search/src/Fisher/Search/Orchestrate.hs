@@ -46,10 +46,10 @@ data Orchestrator = Orchestrator
   , oAwaitAny :: Double -> [Running] -> IO (Maybe (Running, Either SomeException AttemptResult))
   -- ^ the first of these to finish, with its result or its exception;
   -- Nothing when the given seconds pass first, and Nothing at once when
-  -- none of them is still in flight. Of attempts finished together, the
-  -- one first in the list is delivered, and an attempt already finished
-  -- is delivered even with zero seconds. An attempt delivered is gone: it
-  -- is never delivered again.
+  -- none of them is still in flight. An attempt already finished is
+  -- delivered in list order (even with zero seconds); otherwise the first
+  -- to finish, the one first in the list among those finishing together.
+  -- An attempt delivered is gone: it is never delivered again.
   , oCancel :: Running -> IO ()
   -- ^ stop an attempt, so it is never delivered; cancelling one already
   -- delivered, or unknown, is a no-op
@@ -213,10 +213,10 @@ data Sim = Sim
 -- any step cost; an await with none of its attempts in flight returns at
 -- once and leaves the clock alone. An attempt neither scripted nor covered by
 -- 'scDefault', or a price the script does not list, throws an 'ErrorCall'
--- naming its key. Awaiting delivers the earliest due of the given
--- attempts, the one first in the list among those due together, as the
--- real one does; a cancelled
--- attempt is never delivered and its exception never thrown. Cancelling
+-- naming its key. Awaiting delivers, as the real one does, the first in
+-- the list of the given attempts already due (at or before now), and
+-- otherwise the earliest due, the first in the list among those due
+-- together; a cancelled attempt is never delivered and its exception never thrown. Cancelling
 -- an attempt already delivered, or unknown, is a no-op and is not
 -- recorded.
 simOrchestrator :: Script -> IO (Orchestrator, IO SimTrace)
@@ -246,8 +246,11 @@ simOrchestrator script = do
         case live of
           [] -> pure Nothing
           _ -> do
+            -- the first listed already due (the real side's poll), else
             -- the earliest due, and of those due together the first listed
-            let (due, _, n, res) = minimumBy (comparing (\(d, pos, _, _) -> (d, pos))) live
+            let (due, _, n, res) = case [x | x@(d, _, _, _) <- live, d <= now] of
+                  x : _ -> x
+                  [] -> minimumBy (comparing (\(d, pos, _, _) -> (d, pos))) live
             if due <= deadline
               then do
                 writeIORef ref s {smClock = max now due + scStepCost script, smDue = Map.delete n (smDue s)}
