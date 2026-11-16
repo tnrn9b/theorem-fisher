@@ -235,12 +235,38 @@ scenario through both constructors, with each script's seconds scaled to
 real milliseconds, and compares the two event lists with their times set
 to 0, so the simulator's events cannot drift from the real ones unnoticed.
 
+## Recording and replaying a search
+
+`fisher search FILE --record TAPE` wraps the attempts' real orchestrator
+with `recordOrchestrator attemptKey` and, once the search returns, writes
+its tape (the orchestrator's answers in call order, an `AttemptScript`) to
+TAPE as JSON. The run is otherwise a normal run: run directory, run log,
+ledger, lessons and policy as before. An interrupted run writes no tape.
+The flag is refused with `--graph`, whose jobs carry values that are never
+built from a file.
+
+`fisher search FILE --replay TAPE`, with the recorded run's other flags,
+plays the tape back through `replayOrchestrator attemptKey`: every spawn,
+await, cancel, clock reading, cap and price comes from the tape, while
+Lean still runs for the proof checks (the replay reproduces the model
+side only). It prints the learn line, the header, the events and the
+report as a run prints them, with `replay of TAPE` where a run names its
+run directory, and writes nothing: no run directory (its base workspace
+is a temporary directory, removed at the end), no run log, ledger, lessons
+or learned policy. It refuses `--apply`, `--graph`, `--out` and
+`--record`. A tape that cannot be read or decoded, a search that asks for
+something the tape does not hold (`ReplayDiverged`), and a search that
+leaves steps of the tape unconsumed each end the replay with a message
+on stderr and exit code 1. The replay runs no learned policy, so a tape
+recorded with one replays only when the policy left the run's choices as
+the defaults; record with `--no-learn` to replay reliably.
+
 ## What is not here
 
 Two things are not built. The graph search (`GraphRun`) has its own context, thread pool and
 automation wrapper. Its workers' attempts (by `runToEnd`), its clock and its
 automation cap go through the record; only its own thread pool and job
 handling do not, and moving those onto the record is future work.
-Recording a real run's choices as a `Script` and replaying it is also future
-work. The record is not a type class or a transformer, and the process
+The flat search's recording and replay are above; the graph search's is
+not on the command line. The record is not a type class or a transformer, and the process
 swarm in `Fisher.Swarm` does not use it.

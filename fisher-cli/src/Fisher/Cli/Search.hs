@@ -80,6 +80,18 @@
 -- read (@fisher: learn: ignoring <path>: <why>@ on stderr; the fresh policy
 -- is still written). The report's @learn@ says which.
 --
+-- @--record FILE@ (not with @--graph@) writes the flat search's tape, the
+-- attempt orchestrator's answers in call order ('recordOrchestrator'), to
+-- FILE as JSON once the search returns. @--replay FILE@ plays such a tape
+-- back ('replayOrchestrator') under the same flags: the model side comes
+-- from the tape and Lean still checks every proof. A replay prints the
+-- events and the report as a run does, with the tape's path where a run
+-- names its run directory, and writes nothing (no run directory, run log,
+-- ledger, lessons or policy; @--apply@, @--out@, @--record@ and @--graph@
+-- are refused); its base workspace is a temporary directory, removed at
+-- the end. A replay asked for anything the tape does not hold, or one
+-- that leaves steps of it unconsumed, ends with exit code 1.
+--
 -- @fisher search check --root R --file F --goal G --agent A [--native]
 -- [--allow AXIOM]...@ splices the proof of G from file A (an attempt that
 -- started from R/F) into R/F and prints the kernel's verdict as JSON.
@@ -99,6 +111,17 @@ module Fisher.Cli.Search
   , serverWanted
   , runUsageText
   , goalTable
+    -- * Recording and replay
+  , recordingTo
+  , readRecording
+  , replaying
+  , swarmSearch
+  , swarmReportLines
+  , searchHeader
+  , replayLearn
+  , learnLine
+  , ReplayIO (..)
+  , replayMainWith
   , factsConfig
   , retrievalWanted
   , libraryDirFor
@@ -171,7 +194,7 @@ module Fisher.Cli.Search
 
 import Control.Applicative ((<|>))
 import Control.Concurrent (myThreadId, throwTo)
-import Control.Exception (SomeAsyncException, SomeException, bracket, displayException, finally, fromException, handle, onException, throwIO, try)
+import Control.Exception (IOException, SomeAsyncException, SomeException, bracket, displayException, finally, fromException, handle, onException, throwIO, try)
 import System.Posix.Temp (mkdtemp)
 import System.Posix.Process (getProcessID)
 import System.Posix.Signals (Handler (Catch), installHandler, sigTERM)
@@ -217,7 +240,7 @@ import Fisher.LLM.Auth.Sha256 (sha256Hex)
 import Fisher.LLM.Normalize (Usage (..))
 import Fisher.LLM.Sys (Sys (..))
 import Fisher.LLM.SysIO (newSysIO)
-import Fisher.Config (getPath)
+import Fisher.Config (getPath, loadConfigAt)
 import Fisher.Paths (fisherDirName, getFisherHome)
 import Fisher.Project (InitOptions (..), defaultInitOptions, initializeProject)
 import Fisher.Py.Value (PyVal (..), get)
@@ -245,7 +268,7 @@ import Fisher.Search.Graph (Graph (..), Node (..), NodeId)
 import Fisher.Search.GraphRun (AskError (..), GraphConfig (..), GraphEnv (..), GraphEvent (..), GraphReport (..), Job (..), Kind (..), plannerModel, runGraph)
 import Fisher.Search.Headless
 import Fisher.Search.Lean (Decl (..), declarations, openGoals)
-import Fisher.Search.Orchestrate (Orchestrator (..), realOrchestrator)
+import Fisher.Search.Orchestrate (AttemptOrchestrator, AttemptScript, Orchestrator (..), Recording (..), ReplayDiverged (..), attemptKey, realOrchestrator, recordOrchestrator, replayOrchestrator)
 import Fisher.Search.Report
 import Fisher.Search.Scheduler hiding (GoalStatus (..))
 import qualified Fisher.Search.Scheduler as S
@@ -290,6 +313,7 @@ searchMain = \case
       Left e -> hPutStrLn stderr (T.unpack e) >> exitWith (ExitFailure 2)
       Right ra
         | raPrintFacts ra -> printFactsMain ra f
+        | Just tape <- raReplay ra -> exitOnTerminated (replayMain ra f tape)
         | otherwise -> exitOnTerminated (runMain ra f)
     _ -> runUsage
 
@@ -392,6 +416,10 @@ data RunArgs = RunArgs
   , raSmt :: Bool
   -- ^ the @smt@ arm is available (no flag: 'smtSetup' sets it from the
   -- project and the config); False drops it from the pre-pass
+  , raRecord :: Maybe FilePath
+  -- ^ @--record FILE@: the flat search's tape is written there
+  , raReplay :: Maybe FilePath
+  -- ^ @--replay FILE@: the search plays that tape instead of running models
   }
   deriving (Eq, Show)
 
@@ -400,7 +428,7 @@ defaultRunArgs = RunArgs Nothing ["claude-code", nativeBackend] 4 7200 1200 40 3
                          False False 3 2 25 Nothing False True True True Nothing Nothing Nothing 600
                          True True (fcMax defaultFacts) (fcChars defaultFacts) Nothing False False
                          Nothing True (srTurns defaultStallRule) (fromMaybe 1.5 (srDollars defaultStallRule)) True
-                         False True True True
+                         False True True True Nothing Nothing
 
 runUsage :: IO a
 runUsage = do
@@ -414,7 +442,8 @@ runUsageText = unlines
     , "                          [--single BACKEND] [--workflow prove|autoprove] [--native-decide] [--allow AXIOM]..."
     , "                          [--out DIR] [--apply] [--model MODEL]"
     , "                          [--tiers M1,M2,...] [--no-cascade] [--stall-turns 8] [--stall-dollars 1.50]"
-    , "                          [--no-early-stop] [--no-learn]"
+    , "                          [--no-early-stop] [--no-learn] [--record FILE]"
+    , "       fisher search FILE --replay FILE [the recorded run's flags, without --apply, --out, --record or --graph]"
     , "       fisher search FILE --graph [--max-depth 3] [--max-splits 2] [--cap-usd 25] [--model MODEL]"
     , "                          [--backends fisher] [--parallel N] [--budget 2h] [--attempt-minutes 20]"
     , "                          [--max-turns 40] [--native-decide] [--allow AXIOM]... [--out DIR] [--apply]"
@@ -481,6 +510,8 @@ parseRun args a = case args of
   "--no-early-stop" : r -> parseRun r a {raEarlyStop = False}
   "--no-learn" : r -> parseRun r a {raLearn = False}
   "--no-lessons" : r -> parseRun r a {raLessons = False}
+  "--record" : v : r | not (null v) -> parseRun r a {raRecord = Just v}
+  "--replay" : v : r | not (null v) -> parseRun r a {raReplay = Just v}
   f : r | not ("--" `isPrefixOf` f), raFile a == Nothing -> parseRun r a {raFile = Just f}
   _ -> Nothing
 
@@ -968,15 +999,23 @@ knownBackends = ["claude-code", "codex", nativeBackend]
 -- | The rules for a run's flags: every backend named (@--backends@,
 -- @--single@) is one of 'knownBackends'; @--graph@ takes neither
 -- @--single@ nor @--one-per-goal@, and runs on the native backend only
--- (the backends become @["fisher"]@); its own flags need it.
+-- (the backends become @["fisher"]@); its own flags need it. @--replay@
+-- takes none of @--apply@, @--graph@, @--out@ and @--record@ (a replay
+-- writes nothing), and @--record@ does not take @--graph@.
 checkGraph :: RunArgs -> Either T.Text RunArgs
 checkGraph ra
   | b : _ <- filter (`notElem` knownBackends) (raBackends ra <> maybe [] pure (raSingle ra)) =
       Left ("unknown backend `" <> b <> "`; the backends are: " <> T.intercalate ", " knownBackends)
+  | isJust (raReplay ra), bad@(_ : _) <- replayRefused =
+      Left ("--replay does not take " <> T.intercalate ", " bad <> ": a replay writes nothing and replays the flat search only")
+  | isJust (raRecord ra) && raGraph ra = Left "--record does not take --graph: only the flat search is recorded"
   | not (raGraph ra) =
       if raGraphFlags ra then Left "--max-depth, --max-splits and --cap-usd need --graph" else Right ra
   | raSingle ra /= Nothing || not (raParallelPerGoal ra) = Left "--graph does not take --single or --one-per-goal"
   | otherwise = (\bs -> ra {raBackends = bs}) <$> graphBackends (if raBackendsGiven ra then Just (raBackends ra) else Nothing)
+  where
+    replayRefused =
+      [f | (f, True) <- [("--apply", raApply ra), ("--graph", raGraph ra), ("--out", isJust (raOut ra)), ("--record", isJust (raRecord ra))]]
 
 -- | The run directory, absolute: @--out@ (from the working directory),
 -- else @~/.cache/fisher/search/<stamp>@. Absolute because the run log
@@ -1195,34 +1234,20 @@ runMain ra0 file0 = do
             Just (tag, since) -> ledgerDollars (mFisherHome m </> "state.db") tag since
             Nothing -> pure Nothing
           cfg = (searchConfigFor ra casc) {scGoalPolicy = goalPolicy}
-      orch <- realOrchestrator runAttempt (realToFrac <$> getPOSIXTime) logE priceOf
+      orch0 <- realOrchestrator runAttempt (realToFrac <$> getPOSIXTime) logE priceOf
+      -- --record: the attempts' orchestrator taped (never with --graph)
+      (orch, writeTape) <- recordingTo (raRecord ra) orch0
       let env0 = SearchEnv orch (lakeLeanRun 900) pol baseWs rel
                    (\t -> BS.writeFile (runDir </> "base.lean") (TE.encodeUtf8 t) >> BS.writeFile (baseWs </> rel) (TE.encodeUtf8 t))
                    Nothing Nothing
-      TIO.putStrLn ("search " <> T.pack rel <> " in " <> T.pack root <> ": " <> T.pack (show (length (openGoals original)))
-                    <> " open goals; run directory " <> T.pack runDir <> (if raGraph ra then " (lemma graph)" else ""))
-      -- the automation's language server, in the check workspace (its trials
-      -- are virtual documents there; nothing is written); never for --single,
-      -- which runs no automation. Its warm-up is bounded and counts toward no
-      -- budget.
-      started <- case autoConfig ra of
-        Just ac | serverWanted ra -> do
-          TIO.putStrLn "auto: starting Lean's language server on the file (loading its imports can take a minute)"
-          hFlush stdout
-          w0 <- getPOSIXTime
-          r <- openLsp (raAutoWarmup ra) baseWs rel
-          w1 <- getPOSIXTime
-          let secs = realToFrac (w1 - w0) :: Double
-          TIO.putStrLn ("auto: the warm-up took " <> T.pack (show (round secs :: Int)) <> " s" <> either (const " and failed") (const "") r)
-          hFlush stdout
-          pure ((\l -> Just (AutoEnv ac l (ssSmt smt), secs)) <$> r)
-        _ -> pure (Right Nothing)
+      TIO.putStrLn (searchHeader rel root (length (openGoals original)) ("run directory " <> T.pack runDir) (raGraph ra))
+      started <- startServer sayOut ra (ssSmt smt) baseWs rel
       -- the index, built once for the run (not for --single, which has no briefs)
       (retrieval, retrievalEvents) <-
         if retrievalWanted ra && raSingle ra == Nothing then buildRetrieval ra root runDir else pure (Nothing, [])
       writeIORef runStart =<< (realToFrac <$> getPOSIXTime)
       let env1 = env0 {seAuto = either (const Nothing) (fmap fst) started, seRetrieval = (\re -> re {reExtra = ssFacts smt}) <$> retrieval}
-          offAtStart = either (\e -> Just ("the Lean server did not start: " <> e)) (const Nothing) started
+          offAtStart = serverOff started
           autoExtra = case autoConfig ra of
             Nothing -> const []
             Just _ -> \(ran, during) ->
@@ -1230,19 +1255,17 @@ runMain ra0 file0 = do
                 <> either (const []) (maybe [] (\(_, w) -> ["auto_warmup_s" .= (fromIntegral (round (w * 10) :: Int) / 10 :: Double)])) started
       ( if raGraph ra
           then graphMain ra casc file root rel runDir eventsH env1 offAtStart retrievalEvents autoExtra learnV original (searchLogGraphEvent slog) finish mineAfter smtOut
-          else swarmMain ra file root rel runDir eventsH env1 cfg offAtStart retrievalEvents autoExtra learnV original stmts finish mineAfter smtOut )
+          else swarmMain ra file root rel runDir eventsH env1 cfg offAtStart retrievalEvents autoExtra learnV original stmts finish mineAfter smtOut writeTape )
         `finally` mapM_ (lspClose . aeLsp) (seAuto env1)
     ) `onException` cancelled `finally` closeSearchLog slog
 
 swarmMain :: RunArgs -> FilePath -> FilePath -> FilePath -> FilePath -> Handle -> SearchEnv -> SearchConfig -> Maybe T.Text
           -> [Event] -> ((Bool, Maybe T.Text) -> [Pair]) -> A.Value -> T.Text -> [(T.Text, T.Text)] -> Finish -> IO A.Value
-          -> (T.Text -> (T.Text, [Pair])) -> IO ()
-swarmMain ra file root rel runDir eventsH env0 cfg offAtStart startEvents autoExtra learnV original stmts finish mineAfter smtOut = do
-  mapM_ (oLog (seOrch env0) . AutoOff 0) offAtStart
-  mapM_ (oLog (seOrch env0)) startEvents
-  r <- case raSingle ra of
-    Just b -> runSingle env0 b original
-    Nothing -> runSearch cfg env0 original
+          -> (T.Text -> (T.Text, [Pair])) -> IO () -> IO ()
+swarmMain ra file root rel runDir eventsH env0 cfg offAtStart startEvents autoExtra learnV original stmts finish mineAfter smtOut writeTape = do
+  r <- swarmSearch ra env0 cfg offAtStart startEvents original
+  -- the search returned: its tape, with --record
+  writeTape
   hClose eventsH
   case r of
     Left e -> finish [] [] "failed" Nothing >> hPutStrLn stderr ("(>_<) " <> T.unpack e) >> exitWith (ExitFailure 1)
@@ -1260,10 +1283,172 @@ swarmMain ra file root rel runDir eventsH env0 cfg offAtStart startEvents autoEx
             when (raApply ra) $ BS.writeFile file (TE.encodeUtf8 written))
         mineAfter
         (\lv -> BL8.writeFile (runDir </> "report.json") (encodePretty (reportJson (extra lv) rep)))
-      when (srAuto rep) $ mapM_ TIO.putStrLn (goalTable rep)
-      TIO.putStrLn $ T.pack (show (srClosed rep)) <> " of " <> T.pack (show (length (srGoals rep))) <> " goals closed in "
-        <> T.pack (show (round (srElapsed rep) :: Int)) <> " s; report " <> T.pack (runDir </> "report.json")
+      mapM_ TIO.putStrLn $ swarmReportLines rep $ "; report " <> T.pack (runDir </> "report.json")
         <> (if raApply ra then "; written to " <> T.pack file else "; merged file " <> T.pack (runDir </> "base.lean"))
+
+-- | The flat search on its env: the automation's off reason and the
+-- start's events logged, then the search (the baseline with @--single@).
+swarmSearch :: RunArgs -> SearchEnv -> SearchConfig -> Maybe T.Text -> [Event] -> T.Text -> IO (Either T.Text SearchReport)
+swarmSearch ra env cfg offAtStart startEvents original = do
+  mapM_ (oLog (seOrch env) . AutoOff 0) offAtStart
+  mapM_ (oLog (seOrch env)) startEvents
+  case raSingle ra of
+    Just b -> runSingle env b original
+    Nothing -> runSearch cfg env original
+
+-- | The flat search's report as printed: the goal table when the
+-- automation ran, then the closing line, ending with where the outputs
+-- went (the given text).
+swarmReportLines :: SearchReport -> T.Text -> [T.Text]
+swarmReportLines rep outputs =
+  (if srAuto rep then goalTable rep else [])
+    <> [ T.pack (show (srClosed rep)) <> " of " <> T.pack (show (length (srGoals rep))) <> " goals closed in "
+           <> T.pack (show (round (srElapsed rep) :: Int)) <> " s" <> outputs ]
+
+-- | The search's first line: the file, the project, the open goals and
+-- where the run is (its run directory, or the tape a replay plays).
+searchHeader :: FilePath -> FilePath -> Int -> T.Text -> Bool -> T.Text
+searchHeader rel root goals at graph =
+  "search " <> T.pack rel <> " in " <> T.pack root <> ": " <> T.pack (show goals) <> " open goals; " <> at
+    <> (if graph then " (lemma graph)" else "")
+
+-- | A line on the console, flushed.
+sayOut :: T.Text -> IO ()
+sayOut t = TIO.putStrLn t >> hFlush stdout
+
+-- | The automation's language server, in the check workspace (its trials
+-- are virtual documents there; nothing is written); never for --single,
+-- which runs no automation. Its warm-up is bounded and counts toward no
+-- budget. Its lines go to the given printer; the server and the warm-up's
+-- seconds, Nothing when none is wanted, Left when it did not start.
+startServer :: (T.Text -> IO ()) -> RunArgs -> Maybe SmtEnv -> FilePath -> FilePath -> IO (Either T.Text (Maybe (AutoEnv, Double)))
+startServer say ra smtEnv baseWs rel = case autoConfig ra of
+  Just ac | serverWanted ra -> do
+    say "auto: starting Lean's language server on the file (loading its imports can take a minute)"
+    w0 <- getPOSIXTime
+    r <- openLsp (raAutoWarmup ra) baseWs rel
+    w1 <- getPOSIXTime
+    let secs = realToFrac (w1 - w0) :: Double
+    say ("auto: the warm-up took " <> T.pack (show (round secs :: Int)) <> " s" <> either (const " and failed") (const "") r)
+    pure ((\l -> Just (AutoEnv ac l smtEnv, secs)) <$> r)
+  _ -> pure (Right Nothing)
+
+-- | Why the automation is off from the start: the server did not start.
+serverOff :: Either T.Text a -> Maybe T.Text
+serverOff = either (\e -> Just ("the Lean server did not start: " <> e)) (const Nothing)
+
+-- ------------------------------------------------------------- recording and replay
+
+-- | @--record FILE@: the attempts' orchestrator wrapped to tape its
+-- answers ('recordOrchestrator'), and the action that writes the tape to
+-- FILE as JSON, run once the search returns (an interrupted run writes
+-- nothing). Without the flag, the orchestrator as it is and no write.
+recordingTo :: Maybe FilePath -> AttemptOrchestrator -> IO (AttemptOrchestrator, IO ())
+recordingTo Nothing o = pure (o, pure ())
+recordingTo (Just path) o = do
+  (o', tape) <- recordOrchestrator attemptKey o
+  pure (o', tape >>= BL8.writeFile path . encodePretty)
+
+-- | The tape @--replay FILE@ plays, or why it cannot be read.
+readRecording :: FilePath -> IO (Either T.Text AttemptScript)
+readRecording path = do
+  r <- try @IOException (BS.readFile path)
+  pure $ case r of
+    Left e -> Left ("--replay: cannot read " <> T.pack path <> ": " <> T.pack (displayException e))
+    Right bytes -> case A.eitherDecodeStrict bytes of
+      Left e -> Left ("--replay: " <> T.pack path <> " is not a recording: " <> T.pack e)
+      Right rc -> Right rc
+
+-- | A search on the tape: the replaying orchestrator (logging with the
+-- given function) handed to the search, then the steps it consumed
+-- checked against the tape's length. Left with the message when the
+-- replay diverged from the tape or did not consume all of it.
+replaying :: (Event -> IO ()) -> AttemptScript -> (AttemptOrchestrator -> IO a) -> IO (Either T.Text a)
+replaying logE tape k = do
+  (o, consumed) <- replayOrchestrator attemptKey logE tape
+  r <- try (k o)
+  case r of
+    Left (ReplayDiverged at expected actual) ->
+      pure (Left ("the replay diverged from the recording at step " <> T.pack (show at) <> ": the recording has "
+                  <> expected <> " where the search asked for " <> actual))
+    Right a -> do
+      n <- consumed
+      let total = length (rcSteps tape)
+      pure $ if n == total
+        then Right a
+        else Left ("the replay did not consume the whole recording (" <> T.pack (show n) <> " of " <> T.pack (show total) <> " steps)")
+
+-- | A replay's @learn@: it runs no policy (it computes and writes none).
+replayLearn :: RunArgs -> A.Value
+replayLearn ra = object ["enabled" .= False, "reason" .= (if raLearn ra then "a replay runs no policy" else "--no-learn" :: T.Text)]
+
+-- | What a replay runs on besides its flags: the checks' Lean, the config
+-- and the console's printer.
+data ReplayIO = ReplayIO
+  { rpLean :: LeanRun
+  , rpConfig :: A.Value
+  , rpSay :: T.Text -> IO ()
+  }
+
+-- | @fisher search FILE --replay TAPE@ on the live Lean, config and console.
+replayMain :: RunArgs -> FilePath -> FilePath -> IO ()
+replayMain ra file tape = do
+  termToException
+  home <- getFisherHome
+  (cfg, _) <- loadConfigAt home
+  replayMainWith (ReplayIO (lakeLeanRun 900) cfg sayOut) ra file tape
+
+-- | The replay: the tape read (else its error on stderr, exit code 1),
+-- then the flat search as a run sets it up (the smt arm, the controller,
+-- the automation, read-only retrieval) on the replaying orchestrator,
+-- its base workspace a temporary directory removed at the end; the learn
+-- line, the header (the tape's path where a run names its run
+-- directory), the events and the report printed as a run prints them.
+-- No run directory, run log, ledger, lessons, policy or @--apply@. A
+-- divergence, a tape left unconsumed or a failed search: the message on
+-- stderr, exit code 1.
+replayMainWith :: ReplayIO -> RunArgs -> FilePath -> FilePath -> IO ()
+replayMainWith rio ra0 file0 tapePath = do
+  let failWith e = hPutStrLn stderr ("(>_<) " <> T.unpack e) >> exitWith (ExitFailure 1)
+      say = rpSay rio
+      cfg = rpConfig rio
+      at = "replay of " <> T.pack tapePath
+  tape <- readRecording tapePath >>= either failWith pure
+  file <- makeAbsolute file0
+  root <- lakeRoot file >>= maybe (hPutStrLn stderr ("no lakefile above " <> file) >> exitWith (ExitFailure 2)) pure
+  let rel = makeRelative root file
+  onDisk <- readUtf8 file
+  smt <- smtSetup cfg root ra0 onDisk
+  mapM_ (hPutStrLn stderr . T.unpack) (ssWarning smt)
+  mapM_ (hPutStrLn stderr . T.unpack) (ssSolverWarning smt)
+  let ra = ssArgs smt
+      original = ssBase smt
+      casc = cascadeFor ra (searchTiersConfig cfg)
+      scfg = searchConfigFor ra casc
+      usesNative = "native_decide" `T.isInfixOf` original
+      pol = AxiomPolicy (Set.union standardAxioms (Set.fromList (raAllow ra))) (raNative ra || usesNative)
+  tmp <- getTemporaryDirectory
+  bracket (mkdtemp (tmp </> "fisher-replay-")) (\d -> void (try @SomeException (removeDirectoryRecursive d))) $ \dir -> do
+    let baseWs = dir </> "base"
+    makeWorkspace root baseWs rel original
+    say (learnLine (replayLearn ra))
+    say (searchHeader rel root (length (openGoals original)) at False)
+    started <- startServer say ra (ssSmt smt) baseWs rel
+    (retrieval, retrievalEvents) <-
+      if retrievalWanted ra && raSingle ra == Nothing
+        then getFisherHome >>= \home -> buildRetrievalAt True home ra root dir
+        else pure (Nothing, [])
+    let auto = either (const Nothing) (fmap fst) started
+        env o = SearchEnv
+          { seOrch = o, seLean = rpLean rio, sePolicy = pol, seRoot = baseWs, seRel = rel
+          , seBaseChanged = \t -> BS.writeFile (baseWs </> rel) (TE.encodeUtf8 t)
+          , seAuto = auto, seRetrieval = (\re -> re {reExtra = ssFacts smt}) <$> retrieval }
+    r <- replaying (say . eventLine) tape (\o -> swarmSearch ra (env o) scfg (serverOff started) retrievalEvents original)
+           `finally` mapM_ (lspClose . aeLsp) auto
+    case r of
+      Left e -> failWith e
+      Right (Left e) -> failWith e
+      Right (Right rep) -> mapM_ say (swarmReportLines rep ("; " <> at))
 
 -- | The lemma-graph run: the planner and verifier on the native agent's
 -- provider, the graph and whiteboards saved after every job, its events
